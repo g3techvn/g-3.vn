@@ -1,0 +1,28 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#F9FAFB"/>
+  
+  <!-- Main Camera Body -->
+  <rect x="90" y="120" width="80" height="60" rx="6" fill="#1F2937"/>
+  <rect x="95" y="125" width="70" height="50" rx="4" fill="#111827"/>
+  
+  <!-- 4K Lens -->
+  <rect x="180" y="120" width="50" height="60" rx="6" fill="#334155"/>
+  <circle cx="205" cy="150" r="20" fill="#1F2937" stroke="#475569" stroke-width="2"/>
+  <circle cx="205" cy="150" r="12" fill="#111827" stroke="#334155" stroke-width="1"/>
+  <circle cx="205" cy="150" r="5" fill="#000000"/>
+  
+  <!-- Screen Module -->
+  <rect x="90" y="190" width="80" height="40" rx="4" fill="#334155"/>
+  <rect x="95" y="195" width="70" height="30" rx="3" fill="#1F2937"/>
+  
+  <!-- Protective Accessories -->
+  <rect x="65" y="110" width="180" height="130" rx="10" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4 2"/>
+  
+  <rect x="170" y="200" width="70" height="35" rx="5" fill="#9CA3AF" opacity="0.7"/>
+  <rect x="175" y="205" width="60" height="25" rx="3" fill="#6B7280" opacity="0.7"/>
+  
+  <circle cx="205" cy="215" r="3" fill="#4B5563"/>
+  <circle cx="215" cy="215" r="3" fill="#4B5563"/>
+  
+  <text x="150" y="260" font-family="Arial" font-size="10" fill="#111827" text-anchor="middle" font-weight="bold">Combo lens 4K ONE RS</text>
+</svg> 

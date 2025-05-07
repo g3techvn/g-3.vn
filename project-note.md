@@ -1,10 +1,9 @@
-# Thông tin dự án g-3.vn (Website bán nội thất bàn ghế công thái học với Next.js và Supabase)
+# Thông tin dự án g-3.vn (Website bán nội thất bàn ghế công thái học với Next.js)
 
 ## Tiếng Việt
-- **Mục tiêu:** Xây dựng website thương mại điện tử g-3.vn chuyên bán sản phẩm nội thất bàn ghế công thái học với frontend Next.js, backend Supabase.
+- **Mục tiêu:** Xây dựng website thương mại điện tử g-3.vn chuyên bán sản phẩm nội thất bàn ghế công thái học với Next.js.
 - **Công nghệ:**
   - Next.js (React, SSR/SSG/CSR)
-  - Supabase (Auth, Database, Storage)
   - Tailwind CSS (utility-first CSS framework)
   - Radix UI (bộ component UI hiện đại, accessible cho React)
   - React Query (quản lý và đồng bộ hoá dữ liệu phía client)
@@ -14,18 +13,16 @@
   - Lodash (thư viện tiện ích xử lý dữ liệu)
   - Dayjs (xử lý, format ngày giờ)
 - **Tính năng chính:**
-  - Đăng ký, đăng nhập, xác thực người dùng (Supabase Auth)
+  - Đăng ký, đăng nhập, xác thực người dùng (localStorage)
   - Quản lý sản phẩm (bàn, ghế công thái học...) với phân loại theo **danh mục**, **thương hiệu** và **tag**
   - Quản lý danh mục sản phẩm
   - Quản lý thương hiệu sản phẩm
   - Quản lý tag sản phẩm
   - Quản lý giỏ hàng, đặt hàng, theo dõi đơn hàng
   - Quản lý thông tin khách hàng
-  - Lưu trữ ảnh sản phẩm (Supabase Storage)
   - Thanh toán (có thể tích hợp Stripe/PayPal)
-  - Website không có giao diện quản trị, quản lý sản phẩm trực tiếp trên Supabase
 
-## 0. Cấu trúc dữ liệu (Supabase)
+## 0. Cấu trúc dữ liệu
 
 ### Các bảng chính:
 - **products**: Thông tin sản phẩm (id, name, description, price, image_url, category_id, brand_id, ...)
@@ -86,9 +83,9 @@ g-3.vn/
 │   ├── styles/             # File CSS, SCSS, Tailwind config
 │   ├── utils/              # Hàm tiện ích, helper
 │   ├── hooks/              # Custom React hooks
-│   ├── lib/                # Cấu hình Supabase, API clients
+│   ├── lib/                # API clients
 │   └── types/              # Định nghĩa TypeScript types/interfaces
-├── .env.local              # Biến môi trường (Supabase URL, Key...)
+├── .env.local              # Biến môi trường
 ├── next.config.js          # Cấu hình Next.js
 ├── package.json            # Thông tin package, scripts
 └── README.md               # Hướng dẫn dự án
@@ -96,7 +93,6 @@ g-3.vn/
 
 ## 2. Gợi ý các file chính
 
-- `src/lib/supabaseClient.ts`: Khởi tạo Supabase client
 - `src/features/product/`: Quản lý sản phẩm (CRUD, hiển thị, tìm kiếm, lọc theo danh mục/thương hiệu/tag)
 - `src/features/category/`: Quản lý danh mục sản phẩm
 - `src/features/brand/`: Quản lý thương hiệu sản phẩm
@@ -119,7 +115,6 @@ g-3.vn/
 - `src/pages/landing/[slug].tsx`: Landing page động cho các chiến dịch, quảng cáo
 
 ## 3. Ghi chú
-- Sử dụng Supabase cho Auth, Database (Postgres), Storage (ảnh sản phẩm)
 - Next.js cho frontend, có thể dùng SSR/SSG hoặc CSR tùy trang
 - Sử dụng Tailwind CSS để xây dựng giao diện nhanh, responsive, dễ tuỳ biến
 - Sử dụng Radix UI để xây dựng các component UI hiện đại, accessible, dễ mở rộng
@@ -130,6 +125,5 @@ g-3.vn/
 - Sử dụng Lodash để thao tác, xử lý dữ liệu phức tạp
 - Sử dụng Dayjs để xử lý, format ngày giờ
 - Có thể tích hợp thêm Stripe/PayPal cho thanh toán
-- Website không có giao diện quản trị, quản lý sản phẩm trực tiếp trên Supabase
 - Landing page nên đặt trong `src/pages/landing/` (mỗi chiến dịch một file hoặc dùng [slug].tsx cho landing page động)
 

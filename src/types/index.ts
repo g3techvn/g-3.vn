@@ -8,8 +8,12 @@ export type Product = {
   image_url: string;
   category_id: string;
   brand_id: string;
+  brand?: string;
+  rating?: number;
   created_at: string;
   updated_at: string;
+  original_price?: number;
+  discount_percentage?: number;
 };
 
 export type Category = {

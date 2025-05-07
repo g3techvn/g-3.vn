@@ -1,7 +1,12 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useSupabaseAuth } from '@/hooks/useSupabase';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+interface User {
+  id: string;
+  email: string;
+  fullName: string;
+  avatar?: string;
+  role: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -23,17 +28,55 @@ export function useAuth() {
   return context;
 }
 
+// Hàm mock để tạo và lưu thông tin người dùng vào localStorage
+const saveUser = (user: User) => {
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
+// Hàm mock để lấy thông tin người dùng từ localStorage
+const getUser = (): User | null => {
+  const userString = localStorage.getItem('user');
+  return userString ? JSON.parse(userString) : null;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, loading, error } = useSupabaseAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Kiểm tra trạng thái đăng nhập khi component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        setLoading(true);
+        const userData = getUser();
+        setUser(userData);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   // Hàm đăng nhập
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error: error ? new Error(error.message) : null };
+      // Mock xác thực - trong thực tế sẽ gọi API
+      if (email === 'demo@g-3.vn' && password === 'password') {
+        const userData: User = {
+          id: '1',
+          email: email,
+          fullName: 'Người dùng demo',
+          role: 'user'
+        };
+        saveUser(userData);
+        setUser(userData);
+        return { error: null };
+      }
+      return { error: new Error('Email hoặc mật khẩu không đúng') };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
     }
@@ -42,11 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm đăng ký
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      // Mock đăng ký - trong thực tế sẽ gọi API
+      // Trong ứng dụng thực tế, password sẽ được mã hóa và lưu trữ an toàn
+      const userData: User = {
+        id: Date.now().toString(),
         email,
-        password,
-      });
-      return { error: error ? new Error(error.message) : null };
+        fullName: 'Người dùng mới',
+        role: 'user'
+      };
+      
+      // Lưu mật khẩu vào localStorage chỉ để demo (không nên làm điều này trong thực tế)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`password_${email}`, password);
+      }
+      
+      saveUser(userData);
+      setUser(userData);
+      return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
     }
@@ -55,8 +110,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm đăng xuất
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      return { error: error ? new Error(error.message) : null };
+      localStorage.removeItem('user');
+      setUser(null);
+      return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
     }
@@ -65,8 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm reset mật khẩu
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      return { error: error ? new Error(error.message) : null };
+      // Mock reset password - trong thực tế sẽ gọi API
+      console.log(`Đã gửi email reset password đến ${email}`);
+      return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
     }

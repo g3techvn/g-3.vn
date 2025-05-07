@@ -1,6 +1,7 @@
 import React, { ButtonHTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { Primitive } from '@radix-ui/react-primitive';
 
 // Định nghĩa class variants cho button
 const buttonVariants = cva(
@@ -34,11 +35,11 @@ export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {}
 
-// Component Button
+// Component Button sử dụng Radix UI Primitive
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, ...props }, ref) => {
     return (
-      <button
+      <Primitive.button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}

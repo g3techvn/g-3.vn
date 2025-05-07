@@ -1,10 +1,16 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import StickyNavbar from '@/components/StickyNavbar';
 import Providers from './providers';
 
+const inter = Inter({ subsets: ['latin'] });
+
 export const metadata: Metadata = {
-  title: 'G-3 | Nội thất công thái học',
-  description: 'G-3 - Cửa hàng nội thất bàn ghế công thái học hàng đầu Việt Nam',
+  title: 'G3 TECH - Phụ kiện chính hãng',
+  description: 'Cung cấp phụ kiện điện thoại, action cam và thiết bị điện tử chính hãng',
 };
 
 export default function RootLayout({
@@ -14,9 +20,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="antialiased">
+      <body className={inter.className}>
         <Providers>
-          {children}
+          <div className="md:ml-[60px]">
+            <Header />
+            <main className="bg-gray-100 px-4 md:px-0">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <StickyNavbar />
         </Providers>
       </body>
     </html>

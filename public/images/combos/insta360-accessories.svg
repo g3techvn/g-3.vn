@@ -1,0 +1,40 @@
+<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="600" fill="#F3F4F6"/>
+  
+  <!-- Background Elements -->
+  <rect x="50" y="50" width="500" height="500" rx="20" fill="#F9FAFB"/>
+  
+  <!-- Tripod -->
+  <rect x="275" y="200" width="10" height="200" rx="2" fill="#6B7280"/>
+  <path d="M200 400 L360 400 L280 500 Z" fill="#9CA3AF" stroke="#6B7280" stroke-width="2"/>
+  <circle cx="280" cy="200" r="8" fill="#4B5563"/>
+  
+  <!-- Selfie Stick -->
+  <rect x="400" y="150" width="8" height="160" rx="2" fill="#6B7280"/>
+  <circle cx="404" cy="150" r="10" fill="#4B5563"/>
+  <path d="M390 310 L418 310 L404 325 Z" fill="#9CA3AF"/>
+  
+  <!-- Mount Accessory -->
+  <rect x="150" y="180" width="50" height="30" rx="5" fill="#4B5563"/>
+  <rect x="160" y="210" width="30" height="20" rx="3" fill="#6B7280"/>
+  <rect x="165" y="230" width="20" height="40" rx="2" fill="#9CA3AF"/>
+  
+  <!-- Camera Placeholder -->
+  <rect x="220" y="130" width="100" height="80" rx="10" fill="#1F2937"/>
+  <circle cx="270" cy="170" r="25" fill="#334155" stroke="#475569" stroke-width="2"/>
+  <circle cx="270" cy="170" r="15" fill="#1F2937"/>
+  
+  <!-- Underwater Case -->
+  <rect x="380" y="350" width="120" height="100" rx="10" fill="#9CA3AF" opacity="0.8"/>
+  <rect x="390" y="360" width="100" height="80" rx="8" fill="#6B7280" opacity="0.8"/>
+  <circle cx="440" cy="400" r="30" fill="#4B5563" opacity="0.8"/>
+  
+  <!-- Mounting Points -->
+  <circle cx="150" cy="280" r="15" fill="#6B7280"/>
+  <circle cx="150" cy="280" r="7" fill="#4B5563"/>
+  <circle cx="190" cy="350" r="12" fill="#6B7280"/>
+  <circle cx="190" cy="350" r="6" fill="#4B5563"/>
+  
+  <!-- Text -->
+  <text x="300" y="540" font-family="Arial" font-size="20" fill="#1F2937" text-anchor="middle" font-weight="bold">Phụ kiện Insta360</text>
+</svg> 

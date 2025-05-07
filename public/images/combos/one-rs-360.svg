@@ -1,0 +1,29 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#F9FAFB"/>
+  
+  <!-- Main Camera Body -->
+  <rect x="90" y="120" width="80" height="60" rx="6" fill="#1F2937"/>
+  <rect x="95" y="125" width="70" height="50" rx="4" fill="#111827"/>
+  
+  <!-- 360 Lens -->
+  <rect x="180" y="110" width="60" height="70" rx="6" fill="#334155"/>
+  <circle cx="195" cy="145" r="15" fill="#1F2937" stroke="#475569" stroke-width="2"/>
+  <circle cx="195" cy="145" r="8" fill="#111827" stroke="#334155" stroke-width="1"/>
+  <circle cx="225" cy="145" r="15" fill="#1F2937" stroke="#475569" stroke-width="2"/>
+  <circle cx="225" cy="145" r="8" fill="#111827" stroke="#334155" stroke-width="1"/>
+  
+  <!-- Screen Module -->
+  <rect x="90" y="190" width="80" height="40" rx="4" fill="#334155"/>
+  <rect x="95" y="195" width="70" height="30" rx="3" fill="#1F2937"/>
+  
+  <!-- Essential Accessories -->
+  <rect x="180" y="190" width="60" height="35" rx="5" fill="#9CA3AF"/>
+  <rect x="185" y="195" width="50" height="25" rx="3" fill="#6B7280"/>
+  
+  <rect x="60" y="140" width="35" height="60" rx="4" fill="#9CA3AF" opacity="0.8"/>
+  <rect x="65" y="145" width="25" height="50" rx="3" fill="#6B7280" opacity="0.8"/>
+  
+  <rect x="50" y="220" width="200" height="10" rx="5" fill="#4B5563"/>
+  
+  <text x="150" y="260" font-family="Arial" font-size="10" fill="#111827" text-anchor="middle" font-weight="bold">Combo lens 360 ONE RS</text>
+</svg> 
