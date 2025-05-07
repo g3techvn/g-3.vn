@@ -130,7 +130,7 @@ export default function ProductDetailPage() {
             {hasDiscount ? (
               <>
                 <div className="text-gray-500 line-through text-lg">
-                  {formatCurrency(product.original_price)}
+                  {formatCurrency(product.original_price || 0)}
                 </div>
                 <div className="text-red-600 font-bold text-2xl">
                   {formatCurrency(product.price)}
