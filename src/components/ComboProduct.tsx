@@ -405,7 +405,7 @@ export default function ComboProduct() {
                   <p className="text-white/90 text-xs md:text-sm max-w-md lg:max-w-lg">
                     Nâng tầm không gian làm việc với bộ sưu tập nội thất văn phòng cao cấp, thiết kế hiện đại và tiện nghi
                   </p>
-                  <Link href="/product-category/office-furniture" className="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors max-w-fit">
+                  <Link href="#" className="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors max-w-fit">
                     Khám phá ngay
                   </Link>
                 </div>

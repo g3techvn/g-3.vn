@@ -40,7 +40,7 @@ const categories: Category[] = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5zM12 9.5V4.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0zM19 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5z" />
       </svg>
     ),
-    href: '/danh-muc/ghe-cong-thai-hoc',
+    href: '#',
   },
   {
     id: 'adjustable-desk',
@@ -50,7 +50,7 @@ const categories: Category[] = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
-    href: '/danh-muc/ban-nang-ha',
+    href: '#',
   },
   {
     id: 'kids-furniture',
@@ -61,7 +61,7 @@ const categories: Category[] = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
-    href: '/danh-muc/ban-ghe-tre-em',
+    href: '#',
   },
   {
     id: 'accessories',
@@ -71,7 +71,7 @@ const categories: Category[] = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
       </svg>
     ),
-    href: '/danh-muc/phu-kien',
+    href: '#',
   },
 ];
 
