@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
 import StickyNavbar from '@/components/StickyNavbar';
+import MobileLayout from '@/components/mobile/MobileLayout';
 import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,14 +23,13 @@ export default function RootLayout({
     <html lang="vi">
       <body className={inter.className}>
         <Providers>
-          <div className="md:ml-[60px]">
+          <div className="desktop-layout">
             <Header />
-            <main className="bg-gray-100 px-4 md:px-0">
-              {children}
-            </main>
+            <StickyNavbar />
+            <main>{children}</main>
             <Footer />
           </div>
-          <StickyNavbar />
+          <MobileLayout>{children}</MobileLayout>
         </Providers>
       </body>
     </html>

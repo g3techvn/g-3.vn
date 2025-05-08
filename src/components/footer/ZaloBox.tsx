@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import Image from 'next/image';
 import { COMPANY_INFO } from '@/constants';
 
 export default function ZaloBox() {
@@ -8,7 +9,15 @@ export default function ZaloBox() {
       <a id="zalo-btn" href={COMPANY_INFO.zalo} target="_blank" rel="noopener nofollow">
         <div className="animated_zalo infinite zoomIn_zalo cmoz-alo-circle"></div>
         <div className="animated_zalo infinite pulse_zalo cmoz-alo-circle-fill"></div>
-        <span><img src="/images/zalo-2.png" alt="Contact Me on Zalo" /></span>
+        <span>
+          <Image 
+            src="/images/zalo-2.png" 
+            alt="Contact Me on Zalo" 
+            width={40}
+            height={40}
+            className="zalo-icon"
+          />
+        </span>
       </a>
     </div>
   );
@@ -46,6 +55,9 @@ const styles = `
   border-radius: 50%;
   background: #1182FC;
   position: relative;
+}
+.zalo-icon {
+  object-fit: contain;
 }
 .zoomIn_zalo {
   animation-name: zoomIn_zalo;

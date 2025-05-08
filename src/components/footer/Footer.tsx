@@ -1,12 +1,8 @@
 import * as React from 'react';
-import { FooterLink } from '../ui/FooterLink';
-import { FooterSection } from '../ui/FooterSection';
-import { LogoBadge } from '../ui/LogoBadge';
-import { VisuallyHidden } from '../ui/VisuallyHidden';
+
 import CallBox from './CallBox';
 import ZaloBox from './ZaloBox';
-import BottomNav from './BottomNav';
-import { COMPANY_INFO, SHIPPING_PROVIDERS, PAYMENT_METHODS, QUICK_LINKS, SOCIAL_LINKS, FEEDBACK_INFO } from '../../constants';
+import { COMPANY_INFO} from '../../constants';
 
 // Type declarations for environment variables
 declare global {
@@ -90,8 +86,6 @@ const products = [
   { text: "Ghế công thái học Xiaomi", href: "/ghe-cong-thai-hoc-xiaomi" },
 ];
 
-
-
 // Helper function to format phone number
 function formatPhoneNumber(phoneNumber: string | number): string {
   const cleaned = ('' + phoneNumber).replace(/\D/g, '');
@@ -107,60 +101,6 @@ function formatPhoneNumber(phoneNumber: string | number): string {
 const formattedPhoneNumber = formatPhoneNumber(COMPANY_INFO.hotline);
 
 export default function Footer() {
-  // Define menu items for BottomNav
-  const menuItems = [
-    {
-      href: '/',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      ),
-      isImage: false,
-      text: 'Trang chủ'
-    },
-    {
-      href: '/danh-muc',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      ),
-      isImage: false,
-      text: 'Danh mục'
-    },
-    {
-      href: '/khuyen-mai',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-        </svg>
-      ),
-      isImage: false,
-      text: 'Khuyến mãi'
-    },
-    {
-      href: '/lien-he',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
-      isImage: false,
-      text: 'Nhắn tin'
-    },
-    {
-      href: '/tai-khoan',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-      isImage: false,
-      text: 'Tài khoản'
-    }
-  ];
-
   return (
     <footer className="bg-white text-gray-800">
       <div className="container mx-auto py-8 md:py-12 px-4 sm:px-6 lg:px-0">
@@ -222,10 +162,10 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Thông tin</h3>
             <ul className="space-y-2 md:space-y-3">
-              {QUICK_LINKS.map((link) => (
+              {sections[1].links.map((link) => (
                 <li key={link.href}>
                   <a href={link.href} className="text-sm md:text-base hover:text-red-600 transition-colors">
-                    {link.name}
+                    {link.text}
                   </a>
                 </li>
               ))}
@@ -236,8 +176,14 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Kết nối với chúng tôi</h3>
             <div className="flex flex-wrap space-x-4 mb-6">
-              {SOCIAL_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-gray-500 hover:text-red-600">
+              {socialLinks.map((link) => (
+                <a 
+                  key={link.href} 
+                  href={link.href} 
+                  className={`text-gray-500 hover:${link.hoverColor} transition-colors`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <span className="sr-only">{link.name}</span>
                   <span className="text-sm font-medium">{link.name}</span>
                 </a>
@@ -310,7 +256,7 @@ export default function Footer() {
 
           <details className="group mb-5 border-b border-gray-100 pb-2">
             <summary className="flex justify-between items-center cursor-pointer list-none px-2 py-3 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <span className="font-semibold text-gray-900">Chính sách & Điều khoản</span>
+              <span className="font-semibold text-gray-900">Thông tin hữu ích</span>
               <span className="transition-transform duration-300 ease-in-out group-open:rotate-180">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -318,8 +264,8 @@ export default function Footer() {
               </span>
             </summary>
             <div className="mt-3 pl-4 space-y-2 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              {QUICK_LINKS.map((link) => (
-                <p key={link.href}><a href={link.href} className="text-sm hover:text-red-600 transition-colors">{link.name}</a></p>
+              {sections[1].links.map((link) => (
+                <p key={link.href}><a href={link.href} className="text-sm hover:text-red-600 transition-colors">{link.text}</a></p>
               ))}
             </div>
           </details>
@@ -333,15 +279,19 @@ export default function Footer() {
                 </svg>
               </span>
             </summary>
-            <div className="mt-3 pl-4 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              <div className="flex flex-wrap space-x-4 mb-2">
-                {SOCIAL_LINKS.map((link) => (
-                  <a key={link.href} href={link.href} className="text-gray-500 hover:text-red-600">
-                    <span className="sr-only">{link.name}</span>
-                    <span className="text-sm font-medium">{link.name}</span>
+            <div className="mt-3 pl-4 space-y-2 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
+              {socialLinks.map((link) => (
+                <p key={link.href}>
+                  <a 
+                    href={link.href} 
+                    className={`text-sm hover:${link.hoverColor} transition-colors`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {link.name}
                   </a>
-                ))}
-              </div>
+                </p>
+              ))}
             </div>
           </details>
         </div>
@@ -359,9 +309,6 @@ export default function Footer() {
         <CallBox />
         <ZaloBox />
       </div>
-
-      {/* Bottom Navigation */}
-      <BottomNav menuItems={menuItems} />
     </footer>
   );
 } 
