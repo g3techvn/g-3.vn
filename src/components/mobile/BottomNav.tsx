@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import './bottomNav.css';
 
 interface MenuItem {
@@ -97,7 +98,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                   </span>
                 </a>
               ) : (
-                <a 
+                <Link 
                   href={item.href} 
                   onClick={(e) => {
                     if (index === activeTab) {
@@ -112,7 +113,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                   <span className="title">
                     {item.text}
                   </span>
-                </a>
+                </Link>
               )}
             </li>
           ))}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
@@ -11,6 +11,21 @@ interface MobileFeatureProductProps {
 }
 
 const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, loading, error }) => {
+  const [currentSlides, setCurrentSlides] = useState<Record<string, number>>({});
+  const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Initialize currentSlides when products change
+  useEffect(() => {
+    const initialSlides: Record<string, number> = {};
+    products.forEach(product => {
+      const brand = product.brand || 'Khác';
+      if (!initialSlides[brand]) {
+        initialSlides[brand] = 0;
+      }
+    });
+    setCurrentSlides(initialSlides);
+  }, [products]);
+
   // Group products by brand
   const productsByBrand = products.reduce((acc, product) => {
     const brand = product.brand || 'Khác';
@@ -20,6 +35,21 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, l
     acc[brand].push(product);
     return acc;
   }, {} as Record<string, Product[]>);
+
+  // Sort products by price within each brand
+  Object.keys(productsByBrand).forEach(brand => {
+    productsByBrand[brand].sort((a, b) => a.price - b.price);
+  });
+
+  const handleScroll = (brand: string) => {
+    if (scrollRefs.current[brand]) {
+      const container = scrollRefs.current[brand];
+      const slideWidth = container.offsetWidth * 0.95; // 95% of container width
+      const scrollPosition = container.scrollLeft;
+      const newSlide = Math.round(scrollPosition / slideWidth);
+      setCurrentSlides(prev => ({ ...prev, [brand]: newSlide }));
+    }
+  };
 
   return (
     <section className="pt-4">
@@ -49,10 +79,40 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, l
         </div>
       ) : products.length > 0 ? (
         <div className="space-y-6">
-          {Object.entries(productsByBrand).map(([brand, brandProducts]) => (
+          {Object.entries(productsByBrand)
+            .sort(([brandA], [brandB]) => {
+              const brandALower = brandA.toLowerCase();
+              const brandBLower = brandB.toLowerCase();
+              if (brandALower.includes('gami')) return -1;
+              if (brandBLower.includes('gami')) return 1;
+              return brandALower.localeCompare(brandBLower);
+            })
+            .map(([brand, brandProducts]) => (
             <div key={brand} className="space-y-3">
-              <h2 className="text-lg font-semibold text-red-700 ml-4">Thương hiệu {brand}</h2>
-              <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4 scrollbar-hide">
+              <div className="flex items-center justify-between px-4">
+                <h2 className="text-lg font-semibold text-red-700">Thương hiệu {brand}</h2>
+                {brandProducts.length > 3 && (
+                  <div className="flex gap-1">
+                    {[0, 1].map((index) => (
+                      <div
+                        key={index}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          currentSlides[brand] === index 
+                            ? 'bg-red-500 w-4' 
+                            : 'bg-gray-300 w-2'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div 
+                ref={el => {
+                  scrollRefs.current[brand] = el;
+                }}
+                onScroll={() => handleScroll(brand)}
+                className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4 scrollbar-hide"
+              >
                 {[0, 1].map((colIdx) => (
                   <div key={colIdx} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
                     {brandProducts.slice(colIdx * 3, colIdx * 3 + 3).map((product) => (

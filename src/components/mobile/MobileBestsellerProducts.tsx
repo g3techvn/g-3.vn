@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
@@ -18,6 +18,8 @@ const MobileBestsellerProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,9 +49,31 @@ const MobileBestsellerProducts: React.FC = () => {
     return bannerImages[Math.floor(Math.random() * bannerImages.length)];
   };
 
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const slideWidth = container.offsetWidth * 0.95; // 95% of container width
+      const scrollPosition = container.scrollLeft;
+      const newSlide = Math.round(scrollPosition / slideWidth);
+      setCurrentSlide(newSlide);
+    }
+  };
+
   return (
     <section className="pt-4">
-      <h2 className="text-lg font-semibold mb-2 text-red-700 px-4">Sản phẩm bán chạy</h2>
+      <div className="flex items-center justify-between px-4 mb-2">
+        <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
+        <div className="flex gap-1">
+          {products.slice(0, 4).map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentSlide === index ? 'bg-red-500 w-4' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
           Đã xảy ra lỗi: {error}
@@ -74,50 +98,63 @@ const MobileBestsellerProducts: React.FC = () => {
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide">
-          {products.slice(0, 4).map((product) => (
-            <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
-              <div className="relative w-full aspect-video">
-                <Image
-                  src={getRandomBanner()}
-                  alt={`Banner ${product.name}`}
-                  fill
-                  className="object-cover rounded-lg"
-                  priority
-                />
-              </div>
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="flex items-center p-2">
-                  <div className="relative w-20 h-20">
-                    <Image
-                      src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
-                      alt={product.name}
-                      fill
-                      className="rounded-lg object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0 ml-2">
-                    <div className="font-medium text-sm line-clamp-2">
-                      {product.name}
+        <div className="relative">
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide"
+          >
+            {products.slice(0, 4).map((product) => (
+              <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
+                <div className="relative w-full aspect-video">
+                  <Image
+                    src={getRandomBanner()}
+                    alt={`Banner ${product.name}`}
+                    fill
+                    className="object-cover rounded-lg"
+                    priority
+                  />
+                </div>
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                  <div className="flex items-center p-2">
+                    <div className="relative w-20 h-20">
+                      <Image
+                        src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
+                        alt={product.name}
+                        fill
+                        className="rounded-lg object-cover"
+                      />
                     </div>
-                    <div className="flex items-center justify-between mt-0.5">
-                      <span className="text-xs text-red-500 font-semibold">
-                        {formatCurrency(product.price)}
-                      </span>
-                      {product.rating && (
-                        <div className="flex items-center gap-1">
-                          <StarIcon className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                          <span className="text-xs text-gray-600">
-                            {product.rating.toFixed(1)}
+                    <div className="flex-1 min-w-0 ml-2">
+                      <div className="font-medium text-sm line-clamp-2">
+                        {product.name}
+                      </div>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-red-500 font-semibold">
+                            {formatCurrency(product.price)}
                           </span>
+                          {product.original_price && product.original_price > product.price && (
+                            <span className="text-xs text-gray-500 line-through">
+                              {formatCurrency(product.original_price)}
+                            </span>
+                          )}
                         </div>
-                      )}
+                        {product.rating && (
+                          <div className="flex items-center gap-1">
+                            <StarIcon className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <span className="text-xs text-gray-600">
+                              {product.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
