@@ -18,7 +18,6 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const fetchProducts = async () => {
