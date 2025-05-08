@@ -4,10 +4,23 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { COMPANY_INFO } from '@/constants';
 
 // Định nghĩa hàm cn inline để tránh lỗi import
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+// Hàm định dạng số điện thoại
+function formatPhoneNumber(phoneNumber: string) {
+  // Xóa tất cả ký tự không phải số
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  // Định dạng: XXX XXX XXXX
+  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+  if (match) {
+    return `${match[1]} ${match[2]} ${match[3]}`;
+  }
+  return phoneNumber;
 }
 
 interface Category {
@@ -20,92 +33,45 @@ interface Category {
 
 const categories: Category[] = [
   {
-    id: 'camera-accessories',
-    name: 'PHỤ KIỆN NHIẾP ẢNH',
+    id: 'ergonomic-chair',
+    name: 'GHẾ CÔNG THÁI HỌC',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5zM12 9.5V4.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0zM19 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5z" />
       </svg>
     ),
-    href: '/category/phu-kien-nhiep-anh',
-    subCategories: [
-      { id: 'tripod', name: 'Tripod Điện Thoại - Máy ảnh', href: '/category/tripod-dien-thoai-may-anh' },
-      { id: 'phone-grip', name: 'Kẹp điện thoại', href: '/category/kep-dien-thoai' },
-      { id: 'selfie-stick', name: 'Gậy chụp hình - Remote', href: '/category/gay-chup-hinh-remote' },
-      { id: 'led-light', name: 'Đèn LED chụp hình - quay phim', href: '/category/den-led-chup-hinh-quay-phim' },
-    ],
+    href: '/danh-muc/ghe-cong-thai-hoc',
   },
   {
-    id: 'action-cam',
-    name: 'PHỤ KIỆN ACTION CAM',
+    id: 'adjustable-desk',
+    name: 'BÀN NÂNG HẠ',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
-    href: '/category/phu-kien-action-cam',
-    subCategories: [
-      { id: 'insta360', name: 'Phụ kiện insta360 X5 / X4 / X3', href: '/category/phu-kien-insta360-x5-x4-x3' },
-      { id: 'gopro', name: 'Phụ kiện GoPro 13 / 12 / 11 / 10 / 9', href: '/category/phu-kien-gopro-13-12-11-10-9' },
-      { id: 'dji', name: 'Phụ kiện DJI Osmo Action', href: '/category/phu-kien-dji-osmo-action' },
-    ],
+    href: '/danh-muc/ban-nang-ha',
   },
   {
-    id: 'phone-accessories',
-    name: 'PHỤ KIỆN ĐIỆN THOẠI',
+    id: 'kids-furniture',
+    name: 'BÀN GHẾ TRẺ EM',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
-    href: '/category/phu-kien-dien-thoai',
-    subCategories: [
-      { id: 'cases', name: 'Ốp lưng điện thoại', href: '/category/op-lung-dien-thoai' },
-      { id: 'screen-protector', name: 'Cường lực màn hình', href: '/category/cuong-luc-man-hinh' },
-      { id: 'charging', name: 'Sạc và cáp', href: '/category/sac-va-cap' },
-      { id: 'power-bank', name: 'Pin dự phòng', href: '/category/pin-du-phong' },
-    ],
+    href: '/danh-muc/ban-ghe-tre-em',
   },
   {
-    id: 'vehicle-accessories',
-    name: 'PHỤ KIỆN XE MÁY / Ô TÔ',
+    id: 'accessories',
+    name: 'PHỤ KIỆN',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
       </svg>
     ),
-    href: '/category/phu-kien-xe-may-o-to',
-  },
-  {
-    id: 'smartwatch',
-    name: 'DÂY SMART WATCH',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    href: '/category/day-smart-watch',
-  },
-  {
-    id: 'tech-gadgets',
-    name: 'ĐỒ CHƠI CÔNG NGHỆ KHÁC',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    ),
-    href: '/category/do-choi-cong-nghe-khac',
-  },
-  {
-    id: 'audio',
-    name: 'TAI NGHE / LOA BLUETOOTH',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m-2.828-9.9a9 9 0 0112.728 0" />
-      </svg>
-    ),
-    href: '/category/tai-nghe-loa-bluetooth',
+    href: '/danh-muc/phu-kien',
   },
 ];
 
@@ -266,9 +232,9 @@ export default function StickyNavbar() {
           !showText && "hidden"
         )}>
           <div className="px-2">
-            <Link 
-              href="/contact"
-              className="flex items-center justify-between text-red-600 font-medium text-sm hover:underline mb-3 border-2 border-red-600 rounded-lg p-3 shadow-sm w-full"
+            <a 
+              href={`tel:${COMPANY_INFO.hotline}`}
+              className="flex items-center justify-between text-red-600 font-medium text-sm mb-3 border-2 border-red-600 rounded-lg p-3 shadow-sm w-full"
             >
               <span className="inline-flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -276,8 +242,8 @@ export default function StickyNavbar() {
                 </svg>
                 HOTLINE
               </span>
-              <span>0983 410 222</span>
-            </Link>
+              <span>{formatPhoneNumber(COMPANY_INFO.hotline)}</span>
+            </a>
           </div>
           
           <div className="flex flex-col space-y-2 mb-2 items-center px-2">
