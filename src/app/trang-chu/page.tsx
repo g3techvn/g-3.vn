@@ -56,7 +56,7 @@ export default function Home() {
     return (
       <div className="bg-gray-50 min-h-screen">
         <MobileHomeHeader />
-        <MobileHomeTabs isHeaderVisible={isHeaderVisible} />
+        <MobileHomeTabs />
         
         {/* Section: Sản phẩm bán chạy */}
         <MobileBestsellerProducts />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHeaderVisibility } from '@/hooks/useHeaderVisibility';
 
 const tabs = [
   'Ghế công thái học',
@@ -7,16 +8,13 @@ const tabs = [
   'Phụ kiện',
 ];
 
-interface MobileHomeTabsProps {
-  isHeaderVisible: boolean;
-}
-
-const MobileHomeTabs: React.FC<MobileHomeTabsProps> = ({ isHeaderVisible }) => {
+const MobileHomeTabs: React.FC = () => {
   const [active, setActive] = useState(0);
+  const isVisible = useHeaderVisibility();
 
   return (
-    <div className={`flex overflow-x-auto border-b border-gray-200 bg-white sticky z-20 transition-all duration-300 ${
-      isHeaderVisible ? 'top-[56px]' : 'top-0'
+    <div className={`flex overflow-x-auto border-b border-gray-200 bg-white sticky z-20 transition-all duration-200 ${
+      isVisible ? 'top-[56px]' : 'top-0'
     }`}>
       {tabs.map((tab, idx) => (
         <button
