@@ -3,21 +3,7 @@ import { FooterLink } from './ui/FooterLink';
 import { FooterSection } from './ui/FooterSection';
 import { LogoBadge } from './ui/LogoBadge';
 import { VisuallyHidden } from './ui/VisuallyHidden';
-
-const SHIPPING_PROVIDERS = [
-  { name: "ViettelPost" },
-  { name: "GHTK" },
-  { name: "GHN" }
-];
-
-const PAYMENT_METHODS = [
-  { name: "Visa" },
-  { name: "MasterCard" },
-  { name: "JCB" },
-  { name: "QR Pay" },
-  { name: "Momo" },
-  { name: "ZaloPay" }
-];
+import { COMPANY_INFO, CONTACT_INFO, SHIPPING_PROVIDERS, PAYMENT_METHODS, QUICK_LINKS } from '../constants';
 
 export default function Footer() {
   return (
@@ -27,19 +13,18 @@ export default function Footer() {
       </VisuallyHidden>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <FooterSection title="G3 TECH">
+          <FooterSection title={COMPANY_INFO.name}>
             <address className="not-italic">
               <p className="text-gray-400 mb-4">
-                <strong>ĐỊA CHỈ:</strong> 199/14B đường 3 tháng 2, phường 11, quận 10, Hồ Chí Minh (đối diện nhà hát Hòa Bình)
+                <strong>ĐỊA CHỈ:</strong> {COMPANY_INFO.address}
               </p>
               <p className="text-gray-400 mb-4">
                 <strong>Thời gian làm việc:</strong><br />
-                T2-T7: 9:00 - 20-00<br />
-                CN: 9:00 - 14:00
+                {CONTACT_INFO.workingHours}
               </p>
               <p className="text-gray-400 mb-4">
-                <strong>HOTLINE:</strong> <a href="tel:0983410222" className="hover:text-white">0983 410 222</a><br />
-                <strong>Email:</strong> <a href="mailto:contact@G3 TECH.vn" className="text-gray-400 hover:text-white">contact@G3 TECH.vn</a>
+                <strong>HOTLINE:</strong> <a href={`tel:${COMPANY_INFO.hotline}`} className="hover:text-white">{COMPANY_INFO.hotline}</a><br />
+                <strong>Email:</strong> <a href={`mailto:${COMPANY_INFO.email}`} className="text-gray-400 hover:text-white">{COMPANY_INFO.email}</a>
               </p>
             </address>
           </FooterSection>
@@ -47,31 +32,13 @@ export default function Footer() {
           <nav aria-labelledby="footer-links">
             <FooterSection title="Liên kết nhanh" id="footer-links">
               <ul className="space-y-2">
-                <li>
-                  <FooterLink href="/product-category/action-cam">
-                    Phụ kiện Action Cam
-                  </FooterLink>
-                </li>
-                <li>
-                  <FooterLink href="/product-category/lenses">
-                    Ống kính – Kính lọc – Ống nhòm
-                  </FooterLink>
-                </li>
-                <li>
-                  <FooterLink href="/product-category/audio">
-                    Tai nghe / Loa Bluetooth
-                  </FooterLink>
-                </li>
-                <li>
-                  <FooterLink href="/product-category/phone-stands">
-                    Chân đế và kẹp điện thoại
-                  </FooterLink>
-                </li>
-                <li>
-                  <FooterLink href="/product-category/car-accessories">
-                    Giá đỡ trên xe – Kệ để bàn
-                  </FooterLink>
-                </li>
+                {QUICK_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <FooterLink href={link.href}>
+                      {link.name}
+                    </FooterLink>
+                  </li>
+                ))}
               </ul>
             </FooterSection>
           </nav>
@@ -106,7 +73,7 @@ export default function Footer() {
         
         <div className="border-t border-gray-700 mt-8 pt-6">
           <p className="text-center text-gray-400 text-sm">
-            © G3 TECH 2023 Chịu trách nhiệm sản phẩm và nội dung.
+            © {COMPANY_INFO.name} {new Date().getFullYear()} Chịu trách nhiệm sản phẩm và nội dung.
           </p>
         </div>
       </div>
