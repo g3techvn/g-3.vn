@@ -56,7 +56,7 @@ const MobileBestsellerProducts: React.FC = () => {
         </div>
       )}
       {loading ? (
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4">
+        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4 scrollbar-hide">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
               <div className="w-full aspect-video bg-gray-200 animate-pulse rounded-lg" />
@@ -74,7 +74,7 @@ const MobileBestsellerProducts: React.FC = () => {
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8">
+        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide">
           {products.slice(0, 4).map((product) => (
             <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
               <div className="relative w-full aspect-video">
