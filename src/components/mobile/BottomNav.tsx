@@ -37,6 +37,23 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Auto set active tab based on current URL
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const activeIndex = menuItems.findIndex(item => {
+      if (item.href === currentPath) return true;
+      // Handle root path
+      if (currentPath === '/' && item.href === '/') return true;
+      // Handle nested paths
+      if (item.href !== '/' && currentPath.startsWith(item.href)) return true;
+      return false;
+    });
+    
+    if (activeIndex !== -1) {
+      setActiveTab(activeIndex);
+    }
+  }, [menuItems]);
+
   // Kiểm tra số lượng menuItems
   useEffect(() => {
     if (menuItems.length !== 5) {

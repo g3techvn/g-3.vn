@@ -1,41 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
+import { useHeaderVisibility } from '@/hooks/useHeaderVisibility';
 
-interface MobileHomeHeaderProps {
-  onVisibilityChange: (isVisible: boolean) => void;
-}
-
-const MobileHomeHeader: React.FC<MobileHomeHeaderProps> = ({ onVisibilityChange }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          const isScrollingDown = currentScrollY > lastScrollY;
-          
-          if (isScrollingDown && currentScrollY > 0) {
-            setIsVisible(false);
-            onVisibilityChange(false);
-          } else {
-            setIsVisible(true);
-            onVisibilityChange(true);
-          }
-          
-          setLastScrollY(currentScrollY);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, onVisibilityChange]);
+const MobileHomeHeader: React.FC = () => {
+  const isVisible = useHeaderVisibility();
 
   return (
     <div 

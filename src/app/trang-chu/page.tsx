@@ -18,6 +18,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const fetchProducts = async () => {
@@ -54,7 +55,7 @@ export default function Home() {
   if (isMobile) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <MobileHomeHeader onVisibilityChange={setIsHeaderVisible} />
+        <MobileHomeHeader />
         <MobileHomeTabs isHeaderVisible={isHeaderVisible} />
         
         {/* Section: Sản phẩm bán chạy */}
