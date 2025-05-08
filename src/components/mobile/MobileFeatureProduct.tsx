@@ -22,7 +22,7 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, l
   }, {} as Record<string, Product[]>);
 
   return (
-    <section className="px-4 pt-4">
+    <section className="pt-4">
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
           Đã xảy ra lỗi: {error}
@@ -51,7 +51,7 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, l
         <div className="space-y-6">
           {Object.entries(productsByBrand).map(([brand, brandProducts]) => (
             <div key={brand} className="space-y-3">
-              <h2 className="text-lg font-semibold text-red-700">Thương hiệu {brand}</h2>
+              <h2 className="text-lg font-semibold text-red-700 ml-4">Thương hiệu {brand}</h2>
               <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4">
                 {[0, 1].map((colIdx) => (
                   <div key={colIdx} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
