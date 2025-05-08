@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import { Slot } from '@radix-ui/react-slot';
@@ -15,19 +15,45 @@ interface CarouselItem {
   backgroundColor: string;
 }
 
-interface HeroCarouselProps {
-  items: CarouselItem[];
-}
+const sampleItems: CarouselItem[] = [
+  {
+    id: 1,
+    title: "Khám phá bộ sưu tập mới",
+    subtitle: "Xu hướng thời trang 2024",
+    image: "/images/collection-1.jpg",
+    buttonText: "Xem ngay",
+    buttonLink: "/collections/new-arrivals",
+    backgroundColor: "bg-gradient-to-r from-purple-600 to-indigo-600"
+  },
+  {
+    id: 2,
+    title: "Ưu đãi đặc biệt",
+    subtitle: "Giảm giá lên đến 50%",
+    image: "/images/collection-2.jpg",
+    buttonText: "Mua sắm ngay",
+    buttonLink: "/collections/sale",
+    backgroundColor: "bg-gradient-to-r from-pink-500 to-rose-500"
+  },
+  {
+    id: 3,
+    title: "Phong cách mới",
+    subtitle: "Bộ sưu tập mùa hè",
+    image: "/images/collection-3.jpg",
+    buttonText: "Khám phá",
+    buttonLink: "/collections/summer",
+    backgroundColor: "bg-gradient-to-r from-blue-500 to-cyan-500"
+  }
+];
 
-export default function HeroCarousel({ items }: HeroCarouselProps) {
+export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === items.length - 1 ? 0 : prev + 1));
-  };
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev === sampleItems.length - 1 ? 0 : prev + 1));
+  }, []);
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? items.length - 1 : prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? sampleItems.length - 1 : prev - 1));
   };
 
   const goToSlide = (index: number) => {
@@ -46,7 +72,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
     <section className="relative overflow-hidden bg-gray-100 w-full">
       <div className="container mx-auto relative">
         <div className="relative">
-          {items.map((item, index: number) => (
+          {sampleItems.map((item, index: number) => (
             <div 
               key={item.id}
               className={`transition-opacity duration-500 ${
@@ -101,7 +127,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
         <div className="absolute bottom-4 left-0 right-0">
           <NavigationMenu.Root orientation="horizontal">
             <NavigationMenu.List className="flex justify-center gap-2">
-              {items.map((_, index: number) => (
+              {sampleItems.map((_, index: number) => (
                 <NavigationMenu.Item key={index}>
                   <Slot>
                     <button

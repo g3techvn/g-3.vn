@@ -1,7 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
-import logo from '../../../assets/logo-gamiuk.png';
-import header from '../../../assets/header-img.jpg';
 import { COMPANY_INFO } from '../../../constants';
 
 export const metadata = {

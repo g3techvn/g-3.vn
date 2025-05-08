@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
@@ -13,17 +13,69 @@ interface FeaturedProduct {
   url: string;
 }
 
-interface FeaturedProductsProps {
-  title: string;
-  products: FeaturedProduct[];
-  autoSlideInterval?: number; // Milliseconds between auto slides
-}
+// Sample data
+const sampleProducts: FeaturedProduct[] = [
+  {
+    id: 1,
+    name: "iPhone 15 Pro Max",
+    category: "Điện thoại",
+    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569",
+    url: "/products/iphone-15-pro-max"
+  },
+  {
+    id: 2,
+    name: "MacBook Pro M3",
+    category: "Laptop",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8",
+    url: "/products/macbook-pro-m3"
+  },
+  {
+    id: 3,
+    name: "iPad Pro 12.9",
+    category: "Máy tính bảng",
+    image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0",
+    url: "/products/ipad-pro"
+  },
+  {
+    id: 4,
+    name: "AirPods Pro 2",
+    category: "Phụ kiện",
+    image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434",
+    url: "/products/airpods-pro-2"
+  },
+  {
+    id: 5,
+    name: "Apple Watch Series 9",
+    category: "Đồng hồ thông minh",
+    image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9",
+    url: "/products/apple-watch-series-9"
+  },
+  {
+    id: 6,
+    name: "HomePod mini",
+    category: "Loa thông minh",
+    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1",
+    url: "/products/homepod-mini"
+  },
+  {
+    id: 7,
+    name: "Magic Keyboard",
+    category: "Phụ kiện",
+    image: "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef",
+    url: "/products/magic-keyboard"
+  },
+  {
+    id: 8,
+    name: "Apple TV 4K",
+    category: "TV Box",
+    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1",
+    url: "/products/apple-tv-4k"
+  }
+];
 
 export default function FeaturedProducts({ 
-  title, 
-  products, 
   autoSlideInterval = 5000 // Default 5 seconds
-}: FeaturedProductsProps) {
+}: { autoSlideInterval?: number }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imageError, setImageError] = useState<Record<number, boolean>>({});
   const [isPaused, setIsPaused] = useState(false);
@@ -31,12 +83,12 @@ export default function FeaturedProducts({
   const slideContainerRef = useRef<HTMLDivElement>(null);
   
   // Hiển thị 4 sản phẩm mỗi slide trên màn hình lớn, 2 trên màn hình vừa và 1 trên màn hình nhỏ
-  const totalSlides = Math.ceil(products.length / 4);
+  const totalSlides = Math.ceil(sampleProducts.length / 4);
   
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     const newSlide = (currentSlide + 1) % totalSlides;
     setCurrentSlide(newSlide);
-  };
+  }, [currentSlide, totalSlides]);
   
   const prevSlide = () => {
     const newSlide = (currentSlide - 1 + totalSlides) % totalSlides;
@@ -72,7 +124,7 @@ export default function FeaturedProducts({
   // Prepare slides for tabs
   const slides = Array.from({ length: totalSlides }).map((_, index) => ({
     id: `slide-${index}`,
-    products: products.slice(index * 4, index * 4 + 4)
+    products: sampleProducts.slice(index * 4, index * 4 + 4)
   }));
 
   // Ensure we have a valid current slide value
@@ -81,7 +133,7 @@ export default function FeaturedProducts({
   return (
     <section className="py-10 bg-gray-100 border-t border-gray-200">
       <div className="container mx-auto">
-        <h2 className="text-2xl font-bold mb-8">{title}</h2>
+        <h2 className="text-2xl font-bold mb-8">Sản phẩm nổi bật</h2>
         
         <Tabs
           value={currentTabValue}

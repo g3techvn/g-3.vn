@@ -10,18 +10,45 @@ type BlogPost = {
   excerpt?: string;
 };
 
-type BlogPostsProps = {
-  posts: BlogPost[];
-};
+const samplePosts: BlogPost[] = [
+  {
+    id: 1,
+    title: "Hướng dẫn sử dụng máy giặt Samsung hiệu quả",
+    date: "2024-03-20",
+    image: "/images/blog/washing-machine.jpg",
+    excerpt: "Khám phá các tính năng và cách sử dụng máy giặt Samsung một cách hiệu quả nhất cho gia đình bạn."
+  },
+  {
+    id: 2,
+    title: "Đánh giá tủ lạnh Panasonic Inverter",
+    date: "2024-03-18",
+    image: "/images/blog/refrigerator.jpg",
+    excerpt: "Tìm hiểu về công nghệ Inverter và hiệu suất tiết kiệm điện của tủ lạnh Panasonic."
+  },
+  {
+    id: 3,
+    title: "Cách chọn điều hòa phù hợp với không gian",
+    date: "2024-03-15",
+    image: "/images/blog/air-conditioner.jpg",
+    excerpt: "Hướng dẫn chi tiết cách tính công suất và chọn điều hòa phù hợp với diện tích phòng."
+  },
+  {
+    id: 4,
+    title: "Bảo trì và vệ sinh máy lọc nước đúng cách",
+    date: "2024-03-12",
+    image: "/images/blog/water-purifier.jpg",
+    excerpt: "Các bước bảo trì và vệ sinh máy lọc nước để đảm bảo chất lượng nước và tuổi thọ máy."
+  }
+];
 
-export default function BlogPosts({ posts }: BlogPostsProps) {
+export default function BlogPosts() {
   return (
     <section className="py-12 bg-gray-100">
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold text-center mb-10">Hướng dẫn và đánh giá</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {posts.map((post) => (
+          {samplePosts.map((post) => (
             <Link href={`/blog/${post.id}`} key={post.id} className="group">
               <Card>
                 <CardHeader>

@@ -1,3 +1,4 @@
+'use client'
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,14 +25,6 @@ interface ComboItem {
   brand?: string;
   rating?: number;
   options: ProductOption[];
-}
-
-interface ComboProductProps {
-  title: string;
-  description?: string;
-  backgroundColor?: string;
-  comboItems: ComboItem[];
-  bannerImage?: string;
 }
 
 const ProductOptionCard = ({
@@ -297,12 +290,177 @@ const ComboDetailModal = ({
   );
 };
 
-export default function ComboProduct({ 
-  title, 
-  backgroundColor = "bg-gray-100", 
-  comboItems,
-  bannerImage = "/images/banners/insta360-banner.jpg"
-}: ComboProductProps) {
+export default function ComboProduct() {
+  const comboProducts = {
+    title: "Combo Sản Phẩm",
+    description: "Khám phá các combo sản phẩm với giá tốt nhất",
+    backgroundColor: "bg-white",
+    bannerImage: "/images/banners/combo-banner.jpg",
+    comboItems: [
+      {
+        id: "combo1",
+        name: "Combo Insta360 X3 + Selfie Stick",
+        description: "Combo camera 360 độ Insta360 X3 kèm gậy selfie chính hãng",
+        image: "/images/products/combo1.jpg",
+        brand: "Insta360",
+        rating: 4.8,
+        options: [
+          {
+            id: 1,
+            name: "Combo X3 + Selfie Stick",
+            price: 9990000,
+            originalPrice: 11990000,
+            discount: 17,
+            image: "/images/products/combo1-option1.jpg",
+            isAvailable: true
+          },
+          {
+            id: 2,
+            name: "Combo X3 + Selfie Stick + Ốp lưng",
+            price: 10990000,
+            originalPrice: 12990000,
+            discount: 15,
+            image: "/images/products/combo1-option2.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo2",
+        name: "Combo Insta360 Go 3 + Ốp lưng",
+        description: "Combo camera hành động Insta360 Go 3 kèm ốp lưng bảo vệ",
+        image: "/images/products/combo2.jpg",
+        brand: "Insta360",
+        rating: 4.7,
+        options: [
+          {
+            id: 1,
+            name: "Combo Go 3 + Ốp lưng",
+            price: 7990000,
+            originalPrice: 8990000,
+            discount: 11,
+            image: "/images/products/combo2-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo3",
+        name: "Combo Insta360 RS + Ống kính",
+        description: "Combo camera modular Insta360 RS với ống kính góc rộng",
+        image: "/images/products/combo3.jpg",
+        brand: "Insta360",
+        rating: 4.9,
+        options: [
+          {
+            id: 1,
+            name: "Combo RS + Ống kính góc rộng",
+            price: 12990000,
+            originalPrice: 14990000,
+            discount: 13,
+            image: "/images/products/combo3-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo4",
+        name: "Combo Insta360 X3 + Ốp lưng",
+        description: "Combo camera 360 độ Insta360 X3 với ốp lưng bảo vệ",
+        image: "/images/products/combo4.jpg",
+        brand: "Insta360",
+        rating: 4.6,
+        options: [
+          {
+            id: 1,
+            name: "Combo X3 + Ốp lưng",
+            price: 8990000,
+            originalPrice: 9990000,
+            discount: 10,
+            image: "/images/products/combo4-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo5",
+        name: "Combo Insta360 Go 3 + Selfie Stick",
+        description: "Combo camera hành động Insta360 Go 3 với gậy selfie",
+        image: "/images/products/combo5.jpg",
+        brand: "Insta360",
+        rating: 4.5,
+        options: [
+          {
+            id: 1,
+            name: "Combo Go 3 + Selfie Stick",
+            price: 8990000,
+            originalPrice: 9990000,
+            discount: 10,
+            image: "/images/products/combo5-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo6",
+        name: "Combo Insta360 RS + Selfie Stick",
+        description: "Combo camera modular Insta360 RS với gậy selfie",
+        image: "/images/products/combo6.jpg",
+        brand: "Insta360",
+        rating: 4.7,
+        options: [
+          {
+            id: 1,
+            name: "Combo RS + Selfie Stick",
+            price: 11990000,
+            originalPrice: 13990000,
+            discount: 14,
+            image: "/images/products/combo6-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo7",
+        name: "Combo Insta360 X3 + Ống kính",
+        description: "Combo camera 360 độ Insta360 X3 với ống kính góc rộng",
+        image: "/images/products/combo7.jpg",
+        brand: "Insta360",
+        rating: 4.8,
+        options: [
+          {
+            id: 1,
+            name: "Combo X3 + Ống kính góc rộng",
+            price: 11990000,
+            originalPrice: 13990000,
+            discount: 14,
+            image: "/images/products/combo7-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      },
+      {
+        id: "combo8",
+        name: "Combo Insta360 Go 3 + Ống kính",
+        description: "Combo camera hành động Insta360 Go 3 với ống kính góc rộng",
+        image: "/images/products/combo8.jpg",
+        brand: "Insta360",
+        rating: 4.6,
+        options: [
+          {
+            id: 1,
+            name: "Combo Go 3 + Ống kính góc rộng",
+            price: 9990000,
+            originalPrice: 11990000,
+            discount: 17,
+            image: "/images/products/combo8-option1.jpg",
+            isAvailable: true
+          }
+        ]
+      }
+    ]
+  };
+
   const [selectedCombo, setSelectedCombo] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
 
@@ -311,7 +469,7 @@ export default function ComboProduct({
     const newSelections: Record<string, number> = { ...selectedOptions };
     let changed = false;
 
-    comboItems.forEach(combo => {
+    comboProducts.comboItems.forEach(combo => {
       if (selectedOptions[combo.id] === undefined) {
         const defaultOption = combo.options.find(opt => opt.isAvailable) || combo.options[0];
         if (defaultOption) {
@@ -324,7 +482,7 @@ export default function ComboProduct({
     if (changed) {
       setSelectedOptions(newSelections);
     }
-  }, [comboItems]);
+  }, [selectedOptions, comboProducts.comboItems]);
 
   const handleOptionSelect = (comboId: string, optionId: number) => {
     setSelectedOptions(prev => ({
@@ -347,14 +505,14 @@ export default function ComboProduct({
     }
   };
   
-  const activeCombo = selectedCombo ? comboItems.find(combo => combo.id === selectedCombo) : null;
+  const activeCombo = selectedCombo ? comboProducts.comboItems.find(combo => combo.id === selectedCombo) : null;
   const activeOptionId = selectedCombo ? selectedOptions[selectedCombo] : undefined;
 
   return (
-    <section className={`py-8 ${backgroundColor}`}>
+    <section className={`py-8 ${comboProducts.backgroundColor}`}>
       <div className="container mx-auto">
         <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 mb-6 inline-block uppercase">
-          {title}
+          {comboProducts.title}
         </h2>
 
         {/* Layout with banner (4 cols) left and 2 products right */}
@@ -362,8 +520,8 @@ export default function ComboProduct({
           {/* Banner - takes 4 columns */}
           <div className="col-span-6 lg:col-span-4 relative h-[250px] lg:h-[400px] rounded-lg overflow-hidden">
             <Image 
-              src={bannerImage}
-              alt={title}
+              src={comboProducts.bannerImage}
+              alt={comboProducts.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 66vw"
@@ -380,7 +538,7 @@ export default function ComboProduct({
           </div>
 
           {/* First 2 products - takes 1 column each */}
-          {comboItems.slice(0, 2).map((combo) => (
+          {comboProducts.comboItems.slice(0, 2).map((combo) => (
             <div key={combo.id} className="col-span-3 lg:col-span-1">
               <ComboCard
                 combo={combo}
@@ -393,7 +551,7 @@ export default function ComboProduct({
 
         {/* Row 2 with 6 products */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {comboItems.slice(2, 8).map((combo) => (
+          {comboProducts.comboItems.slice(2, 8).map((combo) => (
             <ComboCard
               key={combo.id}
               combo={combo}

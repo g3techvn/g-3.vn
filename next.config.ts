@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'product.hstatic.net',
-      'congthaihoc.vn'
+      'congthaihoc.vn',
+      'images.unsplash.com',
+      'picsum.photos'
     ],
   },
 };

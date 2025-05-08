@@ -1,4 +1,6 @@
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { AspectRatio } from './ui/AspectRatio';
 import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
 import { Rating } from './ui/Rating';
@@ -15,11 +17,67 @@ type Product = {
   rating?: number;
 };
 
-type NewProductsProps = {
-  products: Product[];
-};
+// Sample data
+const sampleProducts: Product[] = [
+  {
+    id: '1',
+    name: 'Áo thun nam cổ tròn basic',
+    price: 199000,
+    original_price: 299000,
+    discount_percentage: 33,
+    image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format',
+    brand: 'Basic',
+    rating: 4.5
+  },
+  {
+    id: '2',
+    name: 'Quần jean nam slim fit',
+    price: 499000,
+    original_price: 599000,
+    discount_percentage: 17,
+    image_url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&auto=format',
+    brand: 'Denim',
+    rating: 4.2
+  },
+  {
+    id: '3',
+    name: 'Giày thể thao nam',
+    price: 899000,
+    image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format',
+    brand: 'Sport',
+    rating: 4.8
+  },
+  {
+    id: '4',
+    name: 'Túi xách nữ thời trang',
+    price: 399000,
+    original_price: 499000,
+    discount_percentage: 20,
+    image_url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format',
+    brand: 'Fashion',
+    rating: 4.3
+  },
+  {
+    id: '5',
+    name: 'Đồng hồ nam dây da',
+    price: 1299000,
+    image_url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format',
+    brand: 'Luxury',
+    rating: 4.7
+  },
+  {
+    id: '6',
+    name: 'Kính mát thời trang',
+    price: 299000,
+    original_price: 399000,
+    discount_percentage: 25,
+    image_url: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=500&auto=format',
+    brand: 'Style',
+    rating: 4.4
+  }
+];
 
-export default function NewProducts({ products }: NewProductsProps) {
+export default function NewProducts() {
   return (
     <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
@@ -28,7 +86,7 @@ export default function NewProducts({ products }: NewProductsProps) {
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {products.map((product) => (
+          {sampleProducts.map((product) => (
             <Link href={`/product/${product.id}`} key={product.id} className="group h-full">
               <Card>
                 <CardHeader>
@@ -38,10 +96,13 @@ export default function NewProducts({ products }: NewProductsProps) {
                   <AspectRatio ratio={1 / 1}>
                     <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
                       {product.image_url ? (
-                        <img 
-                          src={product.image_url} 
+                        <Image
+                          src={product.image_url}
                           alt={product.name}
-                          className="object-cover w-full h-full"
+                          width={300}
+                          height={300}
+                          className="w-full h-auto object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

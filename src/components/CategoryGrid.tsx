@@ -7,11 +7,25 @@ type Category = {
   image: string;
 };
 
+// Sample categories data
+const sampleCategories: Category[] = [
+  { name: 'Điện thoại', image: '/images/categories/phone.jpg' },
+  { name: 'Laptop', image: '/images/categories/laptop.jpg' },
+  { name: 'Máy tính bảng', image: '/images/categories/tablet.jpg' },
+  { name: 'Phụ kiện', image: '/images/categories/accessories.jpg' },
+  { name: 'Đồng hồ', image: '/images/categories/watch.jpg' },
+  { name: 'Tai nghe', image: '/images/categories/headphone.jpg' },
+  { name: 'Loa', image: '/images/categories/speaker.jpg' },
+  { name: 'Camera', image: '/images/categories/camera.jpg' },
+  { name: 'Máy in', image: '/images/categories/printer.jpg' },
+  { name: 'Màn hình', image: '/images/categories/monitor.jpg' },
+];
+
 type CategoryGridProps = {
-  categories: Category[];
+  categories?: Category[];
 };
 
-export default function CategoryGrid({ categories }: CategoryGridProps) {
+export default function CategoryGrid({ categories = sampleCategories }: CategoryGridProps) {
   return (
     <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
