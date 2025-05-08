@@ -14,6 +14,7 @@ export type Product = {
   updated_at: string;
   original_price?: number;
   discount_percentage?: number;
+  slug?: string;
 };
 
 export type Category = {

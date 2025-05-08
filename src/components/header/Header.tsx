@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { COMPANY_INFO, SOCIAL_LINKS } from '../constants';
+import { COMPANY_INFO, SOCIAL_LINKS } from '../../constants';
 
 /**
  * Format phone number with spaces
@@ -149,7 +149,7 @@ const Header = () => {
       {isSticky && <div className="h-20"></div>}
       
       {/* Main Navigation Section */}
-      <div className="bg-gray-100 border-gray-200">
+      <div className="bg-gray-100 border-gray-200 hidden md:block">
         <div className="container bg-white my-2 mx-auto px-4 rounded-lg">
           <div className="flex items-center justify-between">
             {/* Categories Menu Button */}
@@ -205,15 +205,47 @@ const Header = () => {
                 </NavigationMenu.Item>
 
                 {/* Policy */}
-                <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
-                    <Link href="/chinh-sach">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      CHÍNH SÁCH
-                    </Link>
-                  </NavigationMenu.Link>
+                <NavigationMenu.Item className="relative">
+                  <NavigationMenu.Trigger className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    CHÍNH SÁCH
+                  </NavigationMenu.Trigger>
+                  <NavigationMenu.Content className="absolute left-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className="relative">
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-bao-hanh-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách bảo hành
+                        </Link>
+                      </NavigationMenu.Link>
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-doi-tra-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách đổi trả
+                        </Link>
+                      </NavigationMenu.Link>
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-bao-mat-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách bảo mật
+                        </Link>
+                      </NavigationMenu.Link>
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-thanh-toan-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách thanh toán
+                        </Link>
+                      </NavigationMenu.Link>
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-kiem-hang-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách kiểm hàng
+                        </Link>
+                      </NavigationMenu.Link>
+                      <NavigationMenu.Link asChild>
+                        <Link href="/noi-dung/chinh-sach-van-chuyen-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Chính sách vận chuyển
+                        </Link>
+                      </NavigationMenu.Link>
+                    </div>
+                  </NavigationMenu.Content>
                 </NavigationMenu.Item>
 
                 {/* Contact */}

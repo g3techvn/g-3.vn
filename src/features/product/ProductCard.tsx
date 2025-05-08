@@ -9,7 +9,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { id, name, price, image_url, original_price, discount_percentage, brand_id, brand, rating } = product;
+  const { id, name, price, image_url, original_price, discount_percentage, brand_id, brand, rating, slug } = product;
   
   const hasDiscount = original_price && original_price > price;
   const displayRating = rating || Math.floor(Math.random() * 5) + 1; // Sử dụng rating từ API hoặc tạo giá trị ngẫu nhiên
@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group relative overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
-      <Link href={`/products/${id}`} className="block">
+      <Link href={`/san-pham/${slug || id}`} className="block">
         <div className="relative aspect-square w-full overflow-hidden">
           {hasDiscount && discount_percentage && (
             <div className="absolute top-2 left-2 z-10 rounded-md bg-red-500 px-2 py-1 text-xs font-medium text-white">

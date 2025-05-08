@@ -5,6 +5,7 @@ export const COMPANY_INFO = {
   address: 'Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Q. Cầu Giấy, TP. Hà Nội.',
   website: 'https://g-3.vn',
   workingHours: '8:00 - 17:30 (Thứ 2 - Thứ 6)',
+  zalo: 'https://zalo.me/0979983355',
 } as const;
 
 export const SOCIAL_LINKS = [

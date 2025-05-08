@@ -7,7 +7,7 @@ import { formatCurrency } from '@/utils/helpers';
 import { Product } from '@/types';
 
 export default function ProductDetailPage() {
-  const { productId } = useParams();
+  const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export default function ProductDetailPage() {
     const fetchProductDetail = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/products/${productId}`);
+        const response = await fetch(`/api/products/by-slug/${slug}`);
         
         if (!response.ok) {
           throw new Error(`Lỗi HTTP ${response.status}`);
@@ -32,10 +32,10 @@ export default function ProductDetailPage() {
       }
     };
 
-    if (productId) {
+    if (slug) {
       fetchProductDetail();
     }
-  }, [productId]);
+  }, [slug]);
 
   if (loading) {
     return (

@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --clr: #8E8E93; /* Apple-style gray */
+  --active-color: #ff0000;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--font-family);
+}
+
+/* Bottom Navigation */
+.navigation {
+  position: fixed;
+  width: 100%;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.92); /* giảm độ trong suốt */
+  backdrop-filter: blur(32px);           /* glass blur effect mạnh hơn */
+  -webkit-backdrop-filter: blur(32px);   /* Safari support */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0;
+  z-index: 50;
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.08);
+  padding: 0 5px;
+  bottom: 0;
+  left: 0;
+  border-top: 1px solid rgba(200,200,200,0.25); /* subtle border for glass edge */
+}
+
+/* Hide navigation on desktop */
+@media (min-width: 768px) {
+  .navigation {
+    display: none;
+  }
+}
+
+/* Container chính */
+.navigation .nav-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 0;
+  margin: 0 auto;
+}
+
+/* Menu items container */
+.navigation .menu-items {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.navigation li {
+  position: relative;
+  list-style: none;
+  height: 70px;
+  flex: 1;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+.navigation li a {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  font-weight: 500;
+  color: var(--clr);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.navigation li a .icon {
+  position: relative;
+  display: block;
+  line-height: 65px;
+  font-size: 1.5em;
+  text-align: center;
+  color: var(--clr);
+  margin-top: 5px;
+  transition: all 0.3s ease;
+}
+
+/* Active state styles */
+.navigation li.active a {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.navigation li.active a .icon {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--active-color);
+  transform: none;
+  transition: color 0.3s ease;
+}
+
+.navigation li.active a .title {
+  color: var(--active-color);
+  font-weight: 600;
+}
+
+/* Style cho title */
+.navigation li a .title {
+  position: relative;
+  display: block;
+  font-weight: 400;
+  font-size: 0.65em;
+  letter-spacing: 0.05em;
+  color: var(--clr);
+  margin-top: 4px;
+  text-align: center;
+  transition: color 0.3s ease, font-weight 0.3s ease;
+}
+
+/* Style cho svg icon */
+.navigation li a .icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Media query cho màn hình vừa */
+@media (min-width: 481px) and (max-width: 768px) {
+  .navigation {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .navigation .nav-container {
+    max-width: 100%;
+  }
+}
+
+/* Media query cho màn hình lớn */
+@media (min-width: 769px) {
+  .navigation {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .navigation .nav-container {
+    max-width: 600px;
+  }
+}
+
+/* Phần khoét bên trong thanh điều hướng */
+.bottom-nav-cutout-left, .bottom-nav-cutout-right {
+  display: none;
+}
+
+.navigation li.active a {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.navigation li:not(.active) a .icon:hover {
+  background: rgba(142, 142, 147, 0.12); /* subtle gray background */
+  border-radius: 50%;
+  padding: 8px;
+  color: #222327;
+  transition: all 0.2s;
+} 

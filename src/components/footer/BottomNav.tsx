@@ -1,0 +1,108 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import './bottomNav.css';
+
+interface MenuItem {
+  href: string;
+  icon: React.ReactNode;
+  isImage: boolean;
+  text: string;
+  action?: () => void;
+}
+
+interface BottomNavProps {
+  menuItems: MenuItem[];
+  defaultActiveTab?: number;
+}
+
+const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }) => {
+  const [activeTab, setActiveTab] = useState(defaultActiveTab);
+  const [isMobile, setIsMobile] = useState(false);
+  const navigationRef = useRef<HTMLDivElement>(null);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Kiểm tra số lượng menuItems
+  useEffect(() => {
+    if (menuItems.length !== 5) {
+      console.warn('BottomNav được thiết kế tốt nhất cho 5 menu items. Bạn hiện đang sử dụng ' + menuItems.length + ' items.');
+    }
+  }, [menuItems]);
+
+  // If not mobile, don't render
+  if (!isMobile) {
+    return null;
+  }
+
+  // Xử lý khi click vào menu item
+  const handleItemClick = (index: number) => {
+    setActiveTab(index);
+    
+    if (menuItems[index].action) {
+      menuItems[index].action?.();
+    }
+  };
+
+  return (
+    <div className="navigation" ref={navigationRef}>
+      <div className="nav-container">
+        <ul className="menu-items">
+          {menuItems.map((item, index) => (
+            <li 
+              key={index} 
+              className={`list ${activeTab === index ? 'active' : ''}`}
+            >
+              {item.action ? (
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  handleItemClick(index);
+                }}>
+                  <span className="icon">
+                    {item.icon}
+                  </span>
+                  <span className="title">
+                    {item.text}
+                  </span>
+                </a>
+              ) : (
+                <a 
+                  href={item.href} 
+                  onClick={(e) => {
+                    if (index === activeTab) {
+                      e.preventDefault();
+                    }
+                    handleItemClick(index);
+                  }}
+                >
+                  <span className="icon">
+                    {item.icon}
+                  </span>
+                  <span className="title">
+                    {item.text}
+                  </span>
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default BottomNav; 
