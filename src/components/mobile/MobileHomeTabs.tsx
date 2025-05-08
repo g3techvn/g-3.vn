@@ -13,7 +13,7 @@ const MobileHomeTabs: React.FC = () => {
   const isVisible = useHeaderVisibility();
 
   return (
-    <div className={`flex overflow-x-auto border-b border-gray-200 bg-white sticky z-20 transition-all duration-200 ${
+    <div className={`flex overflow-x-auto border-b border-gray-200 bg-white sticky z-20 transition-all duration-200 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
       isVisible ? 'top-[56px]' : 'top-0'
     }`}>
       {tabs.map((tab, idx) => (
