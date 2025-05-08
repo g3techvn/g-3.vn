@@ -18,6 +18,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const fetchProducts = async () => {
     try {
@@ -53,8 +54,8 @@ export default function Home() {
   if (isMobile) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <MobileHomeHeader />
-        <MobileHomeTabs />
+        <MobileHomeHeader onVisibilityChange={setIsHeaderVisible} />
+        <MobileHomeTabs isHeaderVisible={isHeaderVisible} />
         
         {/* Section: Trò chơi đăng ký trước */}
         <section className="px-4 pt-4">
