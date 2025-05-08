@@ -18,29 +18,29 @@ interface CarouselItem {
 const sampleItems: CarouselItem[] = [
   {
     id: 1,
-    title: "Khám phá bộ sưu tập mới",
-    subtitle: "Xu hướng thời trang 2024",
-    image: "/images/collection-1.jpg",
-    buttonText: "Xem ngay",
-    buttonLink: "/collections/new-arrivals",
+    title: "Ghế Gaming Công Thái Học",
+    subtitle: "Tối ưu cho game thủ chuyên nghiệp",
+    image: "/images/section-1.jpeg",
+    buttonText: "Khám phá ngay",
+    buttonLink: "/collections/gaming-chairs",
     backgroundColor: "bg-gradient-to-r from-purple-600 to-indigo-600"
   },
   {
     id: 2,
     title: "Ưu đãi đặc biệt",
-    subtitle: "Giảm giá lên đến 50%",
-    image: "/images/collection-2.jpg",
-    buttonText: "Mua sắm ngay",
+    subtitle: "Giảm giá lên đến 30% cho ghế gaming",
+    image: "/images/section-2.jpeg",
+    buttonText: "Mua ngay",
     buttonLink: "/collections/sale",
     backgroundColor: "bg-gradient-to-r from-pink-500 to-rose-500"
   },
   {
     id: 3,
-    title: "Phong cách mới",
-    subtitle: "Bộ sưu tập mùa hè",
-    image: "/images/collection-3.jpg",
-    buttonText: "Khám phá",
-    buttonLink: "/collections/summer",
+    title: "Thiết kế công thái học",
+    subtitle: "Hỗ trợ tối đa cho cột sống",
+    image: "/images/section-3.jpeg",
+    buttonText: "Tìm hiểu thêm",
+    buttonLink: "/collections/ergonomic",
     backgroundColor: "bg-gradient-to-r from-blue-500 to-cyan-500"
   }
 ];
@@ -93,10 +93,13 @@ export default function HeroCarousel() {
                       </Link>
                     </div>
                     <div className="md:w-1/2 flex justify-center h-full">
-                      {/* Placeholder for image */}
                       <div className="relative w-full h-full">
-                        <div className="absolute right-0 h-full flex items-center">
-                          {/* Hình ảnh sản phẩm sẽ được thêm vào đây */}
+                        <div className="absolute right-0 h-full flex items-center p-4 pr-12">
+                          <img 
+                            src={item.image} 
+                            alt={item.title}
+                            className="h-[95%] w-auto object-contain rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
                       </div>
                     </div>

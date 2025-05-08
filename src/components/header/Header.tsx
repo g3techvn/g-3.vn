@@ -64,7 +64,7 @@ const Header = () => {
       {/* Top Header Section */}
       <div 
         className={`container mx-auto bg-white px-4 py-3 rounded-lg 
-          ${isSticky ? 'fixed top-2 left-0 md:translate-x-[30px] right-0 z-50 shadow-md px-4 md:mx-auto mx-0' : ''}`}>
+          ${isSticky ? 'fixed top-2 left-0  right-0 z-50 shadow-md px-4 md:mx-auto mx-0' : ''}`}>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
@@ -96,17 +96,19 @@ const Header = () => {
           
           {/* Hotline - Desktop Only */}
           <div className="hidden md:flex items-center">
-            <div className="mr-2">
-              <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+            <Link href={`tel:${COMPANY_INFO.hotline}`} className="flex items-center hover:text-red-600">
+              <div className="mr-2">
+                <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600">HOTLINE:</div>
-              <div className="text-lg font-bold text-black">{formatPhoneNumber(COMPANY_INFO.hotline)}</div>
-            </div>
+              <div>
+                <div className="text-sm text-gray-600">HOTLINE:</div>
+                <div className="text-lg font-bold text-black">{formatPhoneNumber(COMPANY_INFO.hotline)}</div>
+              </div>
+            </Link>
           </div>
           
           {/* User Account & Cart */}

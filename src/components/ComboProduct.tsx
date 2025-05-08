@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
 import { AspectRatio } from './ui/AspectRatio';
 import { Rating } from './ui/Rating';
+import { Product } from '@/types';
 
 interface ProductOption {
   id: number;
@@ -91,15 +92,14 @@ const ProductOptionCard = ({
   );
 };
 
-const ComboCard = ({ combo, onSelect, selectedOptionId }: { 
+const ComboCard = ({ combo, selectedOptionId }: { 
   combo: ComboItem, 
-  onSelect: (comboId: string, optionId: number) => void,
   selectedOptionId?: number 
 }) => {
   const selectedOption = combo.options.find(opt => opt.id === selectedOptionId) || combo.options[0];
   
   return (
-    <Card className="group h-full cursor-pointer" onClick={() => onSelect(combo.id, selectedOption.id)}>
+    <Card className="group h-full">
       <CardHeader>
         {selectedOption.discount && (
           <CardBadge>-{selectedOption.discount}%</CardBadge>
@@ -291,185 +291,63 @@ const ComboDetailModal = ({
 };
 
 export default function ComboProduct() {
-  const comboProducts = {
-    title: "Combo Sản Phẩm",
-    description: "Khám phá các combo sản phẩm với giá tốt nhất",
-    backgroundColor: "bg-white",
-    bannerImage: "/images/banners/combo-banner.jpg",
-    comboItems: [
-      {
-        id: "combo1",
-        name: "Combo Insta360 X3 + Selfie Stick",
-        description: "Combo camera 360 độ Insta360 X3 kèm gậy selfie chính hãng",
-        image: "/images/products/combo1.jpg",
-        brand: "Insta360",
-        rating: 4.8,
-        options: [
-          {
-            id: 1,
-            name: "Combo X3 + Selfie Stick",
-            price: 9990000,
-            originalPrice: 11990000,
-            discount: 17,
-            image: "/images/products/combo1-option1.jpg",
-            isAvailable: true
-          },
-          {
-            id: 2,
-            name: "Combo X3 + Selfie Stick + Ốp lưng",
-            price: 10990000,
-            originalPrice: 12990000,
-            discount: 15,
-            image: "/images/products/combo1-option2.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo2",
-        name: "Combo Insta360 Go 3 + Ốp lưng",
-        description: "Combo camera hành động Insta360 Go 3 kèm ốp lưng bảo vệ",
-        image: "/images/products/combo2.jpg",
-        brand: "Insta360",
-        rating: 4.7,
-        options: [
-          {
-            id: 1,
-            name: "Combo Go 3 + Ốp lưng",
-            price: 7990000,
-            originalPrice: 8990000,
-            discount: 11,
-            image: "/images/products/combo2-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo3",
-        name: "Combo Insta360 RS + Ống kính",
-        description: "Combo camera modular Insta360 RS với ống kính góc rộng",
-        image: "/images/products/combo3.jpg",
-        brand: "Insta360",
-        rating: 4.9,
-        options: [
-          {
-            id: 1,
-            name: "Combo RS + Ống kính góc rộng",
-            price: 12990000,
-            originalPrice: 14990000,
-            discount: 13,
-            image: "/images/products/combo3-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo4",
-        name: "Combo Insta360 X3 + Ốp lưng",
-        description: "Combo camera 360 độ Insta360 X3 với ốp lưng bảo vệ",
-        image: "/images/products/combo4.jpg",
-        brand: "Insta360",
-        rating: 4.6,
-        options: [
-          {
-            id: 1,
-            name: "Combo X3 + Ốp lưng",
-            price: 8990000,
-            originalPrice: 9990000,
-            discount: 10,
-            image: "/images/products/combo4-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo5",
-        name: "Combo Insta360 Go 3 + Selfie Stick",
-        description: "Combo camera hành động Insta360 Go 3 với gậy selfie",
-        image: "/images/products/combo5.jpg",
-        brand: "Insta360",
-        rating: 4.5,
-        options: [
-          {
-            id: 1,
-            name: "Combo Go 3 + Selfie Stick",
-            price: 8990000,
-            originalPrice: 9990000,
-            discount: 10,
-            image: "/images/products/combo5-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo6",
-        name: "Combo Insta360 RS + Selfie Stick",
-        description: "Combo camera modular Insta360 RS với gậy selfie",
-        image: "/images/products/combo6.jpg",
-        brand: "Insta360",
-        rating: 4.7,
-        options: [
-          {
-            id: 1,
-            name: "Combo RS + Selfie Stick",
-            price: 11990000,
-            originalPrice: 13990000,
-            discount: 14,
-            image: "/images/products/combo6-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo7",
-        name: "Combo Insta360 X3 + Ống kính",
-        description: "Combo camera 360 độ Insta360 X3 với ống kính góc rộng",
-        image: "/images/products/combo7.jpg",
-        brand: "Insta360",
-        rating: 4.8,
-        options: [
-          {
-            id: 1,
-            name: "Combo X3 + Ống kính góc rộng",
-            price: 11990000,
-            originalPrice: 13990000,
-            discount: 14,
-            image: "/images/products/combo7-option1.jpg",
-            isAvailable: true
-          }
-        ]
-      },
-      {
-        id: "combo8",
-        name: "Combo Insta360 Go 3 + Ống kính",
-        description: "Combo camera hành động Insta360 Go 3 với ống kính góc rộng",
-        image: "/images/products/combo8.jpg",
-        brand: "Insta360",
-        rating: 4.6,
-        options: [
-          {
-            id: 1,
-            name: "Combo Go 3 + Ống kính góc rộng",
-            price: 9990000,
-            originalPrice: 11990000,
-            discount: 17,
-            image: "/images/products/combo8-option1.jpg",
-            isAvailable: true
-          }
-        ]
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/products?sort=created_at:desc&limit=8');
+        
+        if (!response.ok) {
+          throw new Error(`Lỗi HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setProducts((data.products || []).slice(0, 8));
+      } catch (error: unknown) {
+        console.error('Error fetching products:', error);
+        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
+      } finally {
+        setLoading(false);
       }
-    ]
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Convert Product to ComboItem format
+  const convertToComboItem = (product: Product): ComboItem => {
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      image: product.image_url,
+      brand: product.brand,
+      rating: product.rating,
+      options: [{
+        id: 1,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.original_price,
+        discount: product.discount_percentage,
+        image: product.image_url,
+        isAvailable: true
+      }]
+    };
   };
 
-  const [selectedCombo, setSelectedCombo] = useState<string | null>(null);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
+  const comboItems = products.map(convertToComboItem);
 
   // Tự động chọn option đầu tiên cho mỗi combo
   useEffect(() => {
     const newSelections: Record<string, number> = { ...selectedOptions };
     let changed = false;
 
-    comboProducts.comboItems.forEach(combo => {
+    comboItems.forEach(combo => {
       if (selectedOptions[combo.id] === undefined) {
         const defaultOption = combo.options.find(opt => opt.isAvailable) || combo.options[0];
         if (defaultOption) {
@@ -482,93 +360,84 @@ export default function ComboProduct() {
     if (changed) {
       setSelectedOptions(newSelections);
     }
-  }, [selectedOptions, comboProducts.comboItems]);
-
-  const handleOptionSelect = (comboId: string, optionId: number) => {
-    setSelectedOptions(prev => ({
-      ...prev,
-      [comboId]: optionId
-    }));
-  };
-  
-  const handleOpenDetail = (comboId: string) => {
-    setSelectedCombo(comboId);
-  };
-  
-  const handleCloseDetail = () => {
-    setSelectedCombo(null);
-  };
-  
-  const handleSelectOptionInModal = (optionId: number) => {
-    if (selectedCombo) {
-      handleOptionSelect(selectedCombo, optionId);
-    }
-  };
-  
-  const activeCombo = selectedCombo ? comboProducts.comboItems.find(combo => combo.id === selectedCombo) : null;
-  const activeOptionId = selectedCombo ? selectedOptions[selectedCombo] : undefined;
+  }, [selectedOptions, comboItems]);
 
   return (
-    <section className={`py-8 ${comboProducts.backgroundColor}`}>
+    <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
         <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 mb-6 inline-block uppercase">
-          {comboProducts.title}
+          Combo Sản Phẩm
         </h2>
 
-        {/* Layout with banner (4 cols) left and 2 products right */}
-        <div className="grid grid-cols-6 gap-4 mb-4">
-          {/* Banner - takes 4 columns */}
-          <div className="col-span-6 lg:col-span-4 relative h-[250px] lg:h-[400px] rounded-lg overflow-hidden">
-            <Image 
-              src={comboProducts.bannerImage}
-              alt={comboProducts.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 66vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center pl-6 md:pl-12">
-              <h3 className="text-white text-lg md:text-2xl font-bold mb-1">Phụ kiện Insta360</h3>
-              <p className="text-white/90 text-xs md:text-sm max-w-md lg:max-w-lg">
-                Tận hưởng trải nghiệm quay phim 360° tuyệt vời với bộ phụ kiện chính hãng
-              </p>
-              <Link href="/product-category/insta360" className="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors max-w-fit">
-                Khám phá ngay
-              </Link>
-            </div>
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+            Đã xảy ra lỗi: {error}
           </div>
+        )}
 
-          {/* First 2 products - takes 1 column each */}
-          {comboProducts.comboItems.slice(0, 2).map((combo) => (
-            <div key={combo.id} className="col-span-3 lg:col-span-1">
-              <ComboCard
-                combo={combo}
-                onSelect={handleOpenDetail}
-                selectedOptionId={selectedOptions[combo.id]}
-              />
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square w-full rounded-lg bg-gray-200" />
+                <div className="mt-2 space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-gray-200" />
+                  <div className="h-4 w-1/2 rounded bg-gray-200" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : comboItems.length > 0 ? (
+          <>
+            {/* Layout with banner (4 cols) left and 2 products right */}
+            <div className="grid grid-cols-6 gap-4 mb-4">
+              {/* Banner - takes 4 columns */}
+              <div className="col-span-6 lg:col-span-4 relative h-[250px] lg:h-[400px] rounded-lg overflow-hidden">
+                <Image 
+                  src="/images/header-img.jpg"
+                  alt="Combo Sản Phẩm"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center pl-6 md:pl-12">
+                  <h3 className="text-white text-lg md:text-2xl font-bold mb-1">Nội Thất Văn Phòng</h3>
+                  <p className="text-white/90 text-xs md:text-sm max-w-md lg:max-w-lg">
+                    Nâng tầm không gian làm việc với bộ sưu tập nội thất văn phòng cao cấp, thiết kế hiện đại và tiện nghi
+                  </p>
+                  <Link href="/product-category/office-furniture" className="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors max-w-fit">
+                    Khám phá ngay
+                  </Link>
+                </div>
+              </div>
+
+              {/* First 2 products - takes 1 column each */}
+              {comboItems.slice(0, 2).map((combo) => (
+                <div key={combo.id} className="col-span-3 lg:col-span-1">
+                  <ComboCard
+                    combo={combo}
+                    selectedOptionId={selectedOptions[combo.id]}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Row 2 with 6 products */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {comboProducts.comboItems.slice(2, 8).map((combo) => (
-            <ComboCard
-              key={combo.id}
-              combo={combo}
-              onSelect={handleOpenDetail}
-              selectedOptionId={selectedOptions[combo.id]}
-            />
-          ))}
-        </div>
-        
-        {/* Modal */}
-        {activeCombo && activeOptionId !== undefined && (
-          <ComboDetailModal
-            combo={activeCombo}
-            selectedOptionId={activeOptionId}
-            onSelectOption={handleSelectOptionInModal}
-            onClose={handleCloseDetail}
-          />
+            {/* Row 2 with remaining products */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {comboItems.slice(2).map((combo) => (
+                <ComboCard
+                  key={combo.id}
+                  combo={combo}
+                  selectedOptionId={selectedOptions[combo.id]}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
+            <p className="text-base text-gray-600">Không tìm thấy sản phẩm nào.</p>
+            <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
+          </div>
         )}
       </div>
     </section>

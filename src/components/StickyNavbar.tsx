@@ -142,7 +142,7 @@ export default function StickyNavbar() {
       {/* Overlay khi menu mở rộng - áp dụng hiệu ứng glassmorphism */}
       <div 
         className={cn(
-          "fixed inset-0 backdrop-blur-sm bg-black/30 transition-all duration-300 z-30",
+          "fixed inset-0 backdrop-blur-sm bg-black/30 transition-all duration-300 z-[100]",
           isSticky ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setIsSticky(false)}
@@ -150,7 +150,7 @@ export default function StickyNavbar() {
       
       <div 
         className={cn(
-          "fixed left-0 top-0 z-40 bg-white shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col",
+          "fixed left-0 top-0 z-[101] bg-white shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col",
           isSticky ? "w-[250px]" : "w-[60px]"
         )}
         onMouseEnter={() => setIsSticky(true)}
@@ -158,16 +158,21 @@ export default function StickyNavbar() {
       >
         <div className="flex flex-col h-full">
           <div className={cn(
-            "bg-red-600 py-3 px-4 text-white font-medium transition-all duration-300 h-12 flex items-center justify-center",
-            isSticky ? "text-center" : "text-center overflow-hidden whitespace-nowrap"
+            "bg-white py-4 px-4 text-red-600 font-medium transition-all duration-300 h-14 flex items-center",
+            isSticky ? "px-4" : "px-0 justify-center"
           )}>
-            {showText ? (
-              <span>DANH MỤC SẢN PHẨM</span>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span className={cn(
+              "bg-red-600 rounded-full p-1 flex items-center",
+              showText && "px-3 w-full"
+            )}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            )}
+              <span className={cn(
+                "text-white text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                showText ? "opacity-100 ml-3" : "opacity-0 ml-0 w-0 overflow-hidden"
+              )}>DANH MỤC SẢN PHẨM</span>
+            </span>
           </div>
           
           <ul className="py-2 flex-1 overflow-y-auto">
@@ -234,15 +239,17 @@ export default function StickyNavbar() {
           <div className="px-2">
             <a 
               href={`tel:${COMPANY_INFO.hotline}`}
-              className="flex items-center justify-between text-red-600 font-medium text-sm mb-3 border-2 border-red-600 rounded-lg p-3 shadow-sm w-full"
+              className="flex flex-col text-red-600 font-medium text-sm mb-3 border-2 border-red-600 rounded-lg p-3 shadow-sm w-full"
             >
-              <span className="inline-flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+              <span className="inline-flex items-center justify-center mb-1">
+                <span className="bg-red-600 rounded-full p-1 mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </span>
                 HOTLINE
               </span>
-              <span>{formatPhoneNumber(COMPANY_INFO.hotline)}</span>
+              <span className="text-center text-lg font-semibold">{formatPhoneNumber(COMPANY_INFO.hotline)}</span>
             </a>
           </div>
           

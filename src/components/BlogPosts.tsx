@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardHeader, CardContent, CardBadge } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
 
@@ -13,31 +14,31 @@ type BlogPost = {
 const samplePosts: BlogPost[] = [
   {
     id: 1,
-    title: "Hướng dẫn sử dụng máy giặt Samsung hiệu quả",
+    title: "Cách chọn ghế công thái học phù hợp với văn phòng",
     date: "2024-03-20",
-    image: "/images/blog/washing-machine.jpg",
-    excerpt: "Khám phá các tính năng và cách sử dụng máy giặt Samsung một cách hiệu quả nhất cho gia đình bạn."
+    image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?q=80&w=800&auto=format&fit=crop",
+    excerpt: "Hướng dẫn chi tiết cách lựa chọn ghế công thái học phù hợp với nhu cầu làm việc và tư thế ngồi của bạn."
   },
   {
     id: 2,
-    title: "Đánh giá tủ lạnh Panasonic Inverter",
+    title: "Lợi ích của ghế công thái học đối với sức khỏe",
     date: "2024-03-18",
-    image: "/images/blog/refrigerator.jpg",
-    excerpt: "Tìm hiểu về công nghệ Inverter và hiệu suất tiết kiệm điện của tủ lạnh Panasonic."
+    image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=800&auto=format&fit=crop",
+    excerpt: "Tìm hiểu về những lợi ích tuyệt vời của ghế công thái học trong việc bảo vệ sức khỏe và tăng hiệu suất làm việc."
   },
   {
     id: 3,
-    title: "Cách chọn điều hòa phù hợp với không gian",
+    title: "Top 5 ghế công thái học tốt nhất cho dân văn phòng",
     date: "2024-03-15",
-    image: "/images/blog/air-conditioner.jpg",
-    excerpt: "Hướng dẫn chi tiết cách tính công suất và chọn điều hòa phù hợp với diện tích phòng."
+    image: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?q=80&w=800&auto=format&fit=crop",
+    excerpt: "Đánh giá chi tiết 5 mẫu ghế công thái học được ưa chuộng nhất dành cho dân văn phòng hiện nay."
   },
   {
     id: 4,
-    title: "Bảo trì và vệ sinh máy lọc nước đúng cách",
+    title: "Cách điều chỉnh ghế công thái học đúng chuẩn",
     date: "2024-03-12",
-    image: "/images/blog/water-purifier.jpg",
-    excerpt: "Các bước bảo trì và vệ sinh máy lọc nước để đảm bảo chất lượng nước và tuổi thọ máy."
+    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=800&auto=format&fit=crop",
+    excerpt: "Hướng dẫn chi tiết cách điều chỉnh các bộ phận của ghế công thái học để đạt tư thế ngồi tối ưu."
   }
 ];
 
@@ -49,16 +50,17 @@ export default function BlogPosts() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {samplePosts.map((post) => (
-            <Link href={`/blog/${post.id}`} key={post.id} className="group">
+            <div key={post.id} className="group">
               <Card>
                 <CardHeader>
-                  <AspectRatio ratio={16 / 9} className="bg-gray-200 relative">
-                    {/* Replace with actual blog post images */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-1M8 18h12M8 14h12M8 10h4" />
-                      </svg>
-                    </div>
+                  <AspectRatio ratio={1} className="bg-gray-200 relative">
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                     
                     {/* Overlay logo (small logo in top corner) */}
                     <CardBadge className="bg-white/80 text-gray-900">
@@ -83,7 +85,7 @@ export default function BlogPosts() {
                   )}
                 </CardContent>
               </Card>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
