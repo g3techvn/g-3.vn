@@ -53,7 +53,7 @@ const MobileHomeHeader: React.FC<MobileHomeHeaderProps> = ({ onVisibilityChange 
       {/* Search bar giả lập */}
       <div className="flex-1 mx-2">
         <div className="bg-gray-100 rounded-full px-4 py-2 flex items-center">
-          <span className="text-gray-500 text-sm">Tìm kiếm ứng dụng & trò chơi</span>
+          <span className="text-gray-500 text-sm">Tìm kiếm sản phẩm</span>
         </div>
       </div>
       {/* Icon */}
