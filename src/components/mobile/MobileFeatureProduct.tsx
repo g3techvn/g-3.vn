@@ -52,7 +52,7 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = ({ products, l
           {Object.entries(productsByBrand).map(([brand, brandProducts]) => (
             <div key={brand} className="space-y-3">
               <h2 className="text-lg font-semibold text-red-700">Thương hiệu {brand}</h2>
-              <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4">
+              <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4">
                 {[0, 1].map((colIdx) => (
                   <div key={colIdx} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
                     {brandProducts.slice(colIdx * 3, colIdx * 3 + 3).map((product) => (

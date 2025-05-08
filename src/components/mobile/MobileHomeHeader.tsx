@@ -1,9 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const MobileHomeHeader: React.FC = () => {
+interface MobileHomeHeaderProps {
+  onVisibilityChange: (isVisible: boolean) => void;
+}
+
+const MobileHomeHeader: React.FC<MobileHomeHeaderProps> = ({ onVisibilityChange }) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const isScrollingDown = currentScrollY > lastScrollY;
+          
+          if (isScrollingDown && currentScrollY > 0) {
+            setIsVisible(false);
+            onVisibilityChange(false);
+          } else {
+            setIsVisible(true);
+            onVisibilityChange(true);
+          }
+          
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, onVisibilityChange]);
+
   return (
-    <div className="flex items-center justify-between px-4 pt-3 pb-2 bg-white shadow-sm sticky top-0 z-30">
+    <div 
+      className={`flex items-center justify-between px-4 pt-3 pb-2 bg-white shadow-sm sticky top-0 z-30 transition-transform duration-200 ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       {/* Logo Google Play */}
       <div className="flex items-center gap-2">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">

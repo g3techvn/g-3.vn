@@ -8,11 +8,17 @@ const tabs = [
   'Sắp ra mắt',
 ];
 
-const MobileHomeTabs: React.FC = () => {
+interface MobileHomeTabsProps {
+  isHeaderVisible: boolean;
+}
+
+const MobileHomeTabs: React.FC<MobileHomeTabsProps> = ({ isHeaderVisible }) => {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="flex overflow-x-auto border-b border-gray-200 bg-white sticky top-[56px] z-20">
+    <div className={`flex overflow-x-auto border-b border-gray-200 bg-white sticky z-20 transition-all duration-300 ${
+      isHeaderVisible ? 'top-[56px]' : 'top-0'
+    }`}>
       {tabs.map((tab, idx) => (
         <button
           key={tab}
