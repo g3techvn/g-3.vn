@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
@@ -75,7 +74,7 @@ const MobileBestsellerProducts: React.FC = () => {
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4">
+        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8">
           {products.slice(0, 4).map((product) => (
             <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
               <div className="relative w-full aspect-video">

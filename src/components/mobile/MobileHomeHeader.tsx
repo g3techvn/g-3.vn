@@ -39,7 +39,7 @@ const MobileHomeHeader: React.FC<MobileHomeHeaderProps> = ({ onVisibilityChange 
 
   return (
     <div 
-      className={`flex items-center justify-between px-4 pt-3 pb-2 bg-white shadow-sm sticky top-0 z-30 transition-transform duration-200 ${
+      className={`flex items-center justify-between px-4 pt-3 pb-2 bg-white sticky top-0 z-30 transition-transform duration-200 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

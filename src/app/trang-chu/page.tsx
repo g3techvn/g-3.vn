@@ -9,7 +9,6 @@ import ComboProduct from '@/components/ComboProduct';
 import { useEffect, useState } from 'react';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileHomeTabs from '@/components/mobile/MobileHomeTabs';
-import Image from 'next/image';
 import { Product } from '@/types';
 import MobileFeatureProduct from '@/components/mobile/MobileFeatureProduct';
 import MobileBestsellerProducts from '@/components/mobile/MobileBestsellerProducts';

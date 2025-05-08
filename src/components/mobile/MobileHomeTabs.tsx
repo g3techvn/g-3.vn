@@ -21,7 +21,7 @@ const MobileHomeTabs: React.FC<MobileHomeTabsProps> = ({ isHeaderVisible }) => {
       {tabs.map((tab, idx) => (
         <button
           key={tab}
-          className={`flex-1 px-4 py-3 whitespace-nowrap text-sm font-medium transition-colors ${active === idx ? 'text-red-600 border-b-2 border-red-600 bg-red-50' : 'text-gray-700'}`}
+          className={`flex-1 px-4 py-3 whitespace-nowrap text-sm font-medium transition-colors ${active === idx ? 'text-red-600 border-b-2 border-red-600 ' : 'text-gray-700'}`}
           onClick={() => setActive(idx)}
         >
           {tab}
