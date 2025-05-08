@@ -18,7 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
       <Link href={`/products/${id}`} className="block">
-        <div className="relative h-52 w-full overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden">
           {hasDiscount && discount_percentage && (
             <div className="absolute top-2 left-2 z-10 rounded-md bg-red-500 px-2 py-1 text-xs font-medium text-white">
               -{discount_percentage}%

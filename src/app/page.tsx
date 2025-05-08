@@ -1,138 +1,94 @@
 'use client';
-import HeroCarousel from '@/components/HeroCarousel';
-import CategoryGrid from '@/components/CategoryGrid';
-import NewProducts from '@/components/NewProducts';
-import BlogPosts from '@/components/BlogPosts';
-import BrandLogos from '@/components/BrandLogos';
-import FeaturedProducts from '@/components/FeaturedProducts';
-import ProductTabsRadix from '@/components/ProductTabsRadix';
-import ComboProduct from '@/components/ComboProduct';
-import { useHomePageData } from '@/hooks/useHomeData';
 
-// Import skeleton components
-import { 
-  ProductTabsRadix2Skeleton, 
-  CategoryGridSkeleton,
-  FeaturedProductsSkeleton,
-  BlogPostsSkeleton,
-  BrandLogosSkeleton,
-  HeroCarouselSkeleton,
-  ComboProductSkeleton
-} from '@/components/skeletons';
+import { useState, useEffect } from 'react';
+import { ProductCard } from '@/features/product/ProductCard';
+import { Product } from '@/types';
+import ProductCardSkeleton from '@/components/skeletons/ProductCardSkeleton';
+// Đã comment import vì hiện tại chưa sử dụng
+// import { createBrowserClient } from '@/lib/supabase';
 
-export default function Home() {
-  // Sử dụng React Query hook để lấy tất cả dữ liệu trang chủ
-  const { 
-    categories,
-    newProducts, 
-    blogPosts,
-    carouselItems,
-    featuredProducts,
-    livestreamTabs,
-    comboItems,
-    isLoading,
-    isError
-  } = useHomePageData();
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Xử lý trạng thái lỗi
-  if (isError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-4">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Đã xảy ra lỗi</h2>
-          <p className="mb-4">Không thể tải dữ liệu trang chủ</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-          >
-            Tải lại trang
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
 
-  // Hiển thị skeleton trong khi đang tải dữ liệu
-  if (isLoading) {
-    return (
-      <main className="min-h-screen">
-        {/* Hero Carousel Skeleton */}
-        <HeroCarouselSkeleton />
+      // Đây là client component nên có thể sử dụng hoặc browser client hoặc API route
+      // Phương án 1: Sử dụng API route (bảo trì đơn giản hơn)
+      const url = '/api/products';
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Lỗi HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setProducts(data.products || []);
+      console.log(`Nhận được ${data.products?.length || 0} sản phẩm từ API`);
 
-        {/* Categories Skeleton */}
-        <CategoryGridSkeleton />
+      // Phương án 2: Sử dụng trực tiếp browser client
+      // Uncomment nếu muốn sử dụng
+      // const supabase = createBrowserClient();
+      // const { data, error } = await supabase
+      //   .from('products')
+      //   .select('*')
+      //   .order('created_at', { ascending: false });
+      // 
+      // if (error) {
+      //   throw new Error(error.message);
+      // }
+      // 
+      // setProducts(data || []);
+      // console.log(`Nhận được ${data?.length || 0} sản phẩm từ Supabase Browser Client`);
+    } catch (error: unknown) {
+      console.error('Error fetching products:', error);
+      setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        {/* Featured Products Skeleton */}
-        <FeaturedProductsSkeleton />
-        
-        {/* Combo Product Skeleton */}
-        <ComboProductSkeleton />
-        
-        {/* Product Tabs Skeleton */}
-        <ProductTabsRadix2Skeleton />
-
-        {/* Brand Logos Skeleton */}
-        <BrandLogosSkeleton />
-
-        {/* New Products Skeleton - reuse featured products skeleton */}
-        <FeaturedProductsSkeleton />
-
-        {/* Blog Posts Skeleton */}
-        <BlogPostsSkeleton />
-      </main>
-    );
-  }
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Hero Section */}
-      <HeroCarousel items={carouselItems} />
+    <div className="container mx-auto py-8">
 
-
-      {/* Category Grid */}
-
-
-      <CategoryGrid categories={categories} />
-
-
-      {/* Featured Products */}
-    
-
-      <FeaturedProducts title="Phụ kiện Action Cam nổi bật" products={featuredProducts} />
-
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
       
-      {/* Combo Product */}
-      
-      
-      <ComboProduct 
-          title="BỘ SẢN PHẨM PHỤ KIỆN INSTA360" 
-          backgroundColor="bg-gray-100"
-          bannerImage="/images/banners/insta360-banner.svg"
-          comboItems={comboItems} 
-        />
+        <div className="md:col-span-6">
+          {error && (
+            <div className="mb-8 rounded-md bg-red-50 p-4 text-red-600">
+              Đã xảy ra lỗi: {error}
+            </div>
+          )}
 
-      {/* Phụ kiện Livestream Tabs */}
-   
-      <ProductTabsRadix title="PHỤ KIỆN LIVESTREAM" tabs={livestreamTabs} />
+        
 
-
-      {/* New Products */}
-
-      <NewProducts products={newProducts} />
-
-
-      {/* Brands */}
-    
-        <BrandLogos />
-     
-
-      {/* Blog Posts */}
-      
-        <BlogPosts posts={blogPosts} />
-   
-
-      {/* Extra content for scrolling */}
-     
+          {loading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {[...Array(10)].map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
+              <p className="text-lg text-gray-600">Không tìm thấy sản phẩm nào.</p>
+              <p className="mt-2 text-sm text-gray-500">Vui lòng thử lại với bộ lọc khác.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

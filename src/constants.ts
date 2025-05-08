@@ -1,25 +1,17 @@
 export const COMPANY_INFO = {
-  name: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ G3 VIỆT NAM',
+  name: 'Công Ty Cổ phần Công nghệ G3 Việt Nam',
   hotline: '0979983355',
   email: 'info@g-3.vn',
-  address: '14-15A, Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Phường Trung Hoà, Quận Cầu Giấy, Thành phố Hà Nội, Việt Nam',
+  address: 'Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Q. Cầu Giấy, TP. Hà Nội.',
   website: 'https://g-3.vn',
-  facebook: 'https://facebook.com/g3tech',
-  linkedin: 'https://linkedin.com/company/g3tech',
-} as const;
-
-export const SOCIAL_LINKS = {
-  facebook: 'https://facebook.com/g3tech',
-  linkedin: 'https://linkedin.com/company/g3tech',
-  twitter: 'https://twitter.com/g3tech',
-} as const;
-
-export const CONTACT_INFO = {
-  phone: '0979983355',
-  email: 'info@g-3.vn',
-  address: '14-15A, Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Phường Trung Hoà, Quận Cầu Giấy, Thành phố Hà Nội, Việt Nam',
   workingHours: '8:00 - 17:30 (Thứ 2 - Thứ 6)',
 } as const;
+
+export const SOCIAL_LINKS = [
+  { name: 'Shopee', href: 'https://shopee.vn/g3tech' },
+  { name: 'Facebook', href: 'https://www.facebook.com/g3.vntech/' },
+  { name: 'Tiktok', href: 'https://www.tiktok.com/@g3tech.vn' },
+] as const;
 
 export const SHIPPING_PROVIDERS = [
   { name: "ViettelPost" },
@@ -37,9 +29,15 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export const QUICK_LINKS = [
-  { name: "Phụ kiện Action Cam", href: "/product-category/action-cam" },
-  { name: "Ống kính – Kính lọc – Ống nhòm", href: "/product-category/lenses" },
-  { name: "Tai nghe / Loa Bluetooth", href: "/product-category/audio" },
-  { name: "Chân đế và kẹp điện thoại", href: "/product-category/phone-stands" },
-  { name: "Giá đỡ trên xe – Kệ để bàn", href: "/product-category/car-accessories" }
-] as const; 
+  { name: "Chính sách bảo hành", href: "/noi-dung/chinh-sach-bao-hanh-g3" },
+  { name: "Chính sách đổi trả", href: "/noi-dung/chinh-sach-doi-tra-g3" },
+  { name: "Chính sách vận chuyển", href: "/noi-dung/chinh-sach-van-chuyen-g3" },
+  { name: "Chính sách bảo mật", href: "/noi-dung/chinh-sach-bao-mat-g3" },
+  { name: "Chính sách thanh toán", href: "/noi-dung/chinh-sach-thanh-toan-g3" },
+  { name: "Chính sách kiểm hàng", href: "/noi-dung/chinh-sach-kiem-hang-g3" },
+] as const;
+
+export const FEEDBACK_INFO = {
+  heading: "Phản hồi & khiếu nại",
+  content: "Phản hồi nóng về chất lượng sản phẩm và dịch vụ. Đội ngũ Kiểm Soát Chất Lượng của chúng tôi sẵn sàng lắng nghe quý khách.",
+} as const; 
