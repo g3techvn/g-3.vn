@@ -63,7 +63,7 @@ export default function FeaturedProducts({
         clearTimeout(timerRef.current);
       }
     };
-  }, [currentSlide, isPaused, autoSlideInterval]);
+  }, [currentSlide, isPaused, autoSlideInterval, nextSlide]);
 
   // Pause auto slide when hovering over the carousel
   const handleMouseEnter = () => setIsPaused(true);

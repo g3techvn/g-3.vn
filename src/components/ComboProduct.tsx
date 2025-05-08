@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/utils/cn';
@@ -307,7 +307,7 @@ export default function ComboProduct({
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
 
   // Tự động chọn option đầu tiên cho mỗi combo
-  React.useEffect(() => {
+  useEffect(() => {
     const newSelections: Record<string, number> = { ...selectedOptions };
     let changed = false;
 

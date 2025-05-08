@@ -40,7 +40,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentSlide]);
+  }, [nextSlide]);
 
   return (
     <section className="relative overflow-hidden bg-gray-100 w-full">

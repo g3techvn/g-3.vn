@@ -233,6 +233,10 @@ export default function ProductTabsRadix({ title, tabs }: ProductTabsProps) {
     setCurrentTab(value);
   };
 
+  const memoizedProducts = useMemo(() => {
+    // ... existing code ...
+  }, [getPage]);
+
   return (
     <section className="py-10 bg-gray-100">
       <div className="container mx-auto">
