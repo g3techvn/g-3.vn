@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
+import { useCart } from '@/context/CartContext';
 
 // Random banner images from Unsplash
 const bannerImages = [
@@ -20,6 +21,7 @@ const MobileBestsellerProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -140,14 +142,65 @@ const MobileBestsellerProducts: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        {product.rating && (
-                          <div className="flex items-center gap-1">
-                            <StarIcon className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                            <span className="text-xs text-gray-600">
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => {
+                            const ratingValue = product.rating || 0;
+                            // Use Math.floor to fully fill stars, and check for partial fill
+                            const isFilled = i < Math.floor(ratingValue);
+                            const isHalfFilled = !isFilled && i === Math.floor(ratingValue) && (ratingValue % 1) >= 0.5;
+                            
+                            return (
+                              <svg
+                                key={i}
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill={isFilled || isHalfFilled ? "#FFD700" : "none"}
+                                stroke={"#FFD700"}
+                                className="h-3 w-3 text-gray-300"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="1.5"
+                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                />
+                                {/* For partially filled stars, apply a clip path */}
+                                {isHalfFilled && (
+                                  <clipPath id={`clip-half-bestseller-${product.id}-${i}`}>
+                                    <rect x="0" y="0" width="50%" height="100%" />
+                                  </clipPath>
+                                )}
+                                {isHalfFilled && (
+                                  <path
+                                    clipPath={`url(#clip-half-bestseller-${product.id}-${i})`}
+                                    fill="#FFD700"
+                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                  />
+                                )}
+                              </svg>
+                            );
+                          })}
+                          {product.rating && (
+                            <span className="text-xs text-gray-600 ml-1">
                               {product.rating.toFixed(1)}
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <button 
+                          className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+                          aria-label="Thêm vào giỏ hàng"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>

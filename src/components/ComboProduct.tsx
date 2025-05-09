@@ -7,6 +7,7 @@ import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
 import { AspectRatio } from './ui/AspectRatio';
 import { Rating } from './ui/Rating';
 import { Product } from '@/types';
+import { useCart } from '@/context/CartContext';
 
 interface ProductOption {
   id: number;
@@ -97,6 +98,24 @@ const ComboCard = ({ combo, selectedOptionId }: {
   selectedOptionId?: number 
 }) => {
   const selectedOption = combo.options.find(opt => opt.id === selectedOptionId) || combo.options[0];
+  const { addToCart } = useCart();
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Create a cart item from the combo and selected option
+    const cartItem = {
+      id: combo.id,
+      name: combo.name,
+      price: selectedOption.price,
+      originalPrice: selectedOption.originalPrice,
+      image: combo.image,
+      quantity: 1,
+      brand: combo.brand
+    };
+    
+    addToCart(cartItem);
+  };
   
   return (
     <Card className="group h-full">
@@ -129,21 +148,32 @@ const ComboCard = ({ combo, selectedOptionId }: {
         
         <Rating value={combo.rating || 4} className="mb-2" />
         
-        <div className="flex flex-col mt-auto">
-          {selectedOption.originalPrice ? (
-            <>
-              <span className="text-gray-500 line-through text-xs">
-                {selectedOption.originalPrice.toLocaleString('vi-VN')}₫
-              </span>
+        <div className="flex items-center justify-between mt-auto">
+          <div>
+            {selectedOption.originalPrice ? (
+              <>
+                <span className="text-gray-500 line-through text-xs">
+                  {selectedOption.originalPrice.toLocaleString('vi-VN')}₫
+                </span>
+                <span className="text-red-600 font-bold text-sm block">
+                  {selectedOption.price.toLocaleString('vi-VN')}₫
+                </span>
+              </>
+            ) : (
               <span className="text-red-600 font-bold text-sm">
                 {selectedOption.price.toLocaleString('vi-VN')}₫
               </span>
-            </>
-          ) : (
-            <span className="text-red-600 font-bold text-sm">
-              {selectedOption.price.toLocaleString('vi-VN')}₫
-            </span>
-          )}
+            )}
+          </div>
+          <button 
+            className="p-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+            aria-label="Thêm vào giỏ hàng"
+            onClick={handleAddToCart}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </button>
         </div>
       </CardContent>
     </Card>
@@ -161,6 +191,8 @@ const ComboDetailModal = ({
   onSelectOption: (optionId: number) => void,
   onClose: () => void
 }) => {
+  const { addToCart } = useCart();
+  
   const calculateTotalPrice = () => {
     const option = combo.options.find(opt => opt.id === selectedOptionId);
     return option?.price || 0;
@@ -180,6 +212,26 @@ const ComboDetailModal = ({
     const savings = calculateSavings();
     if (originalPrice === 0) return 0;
     return Math.round((savings / originalPrice) * 100);
+  };
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const selectedOption = combo.options.find(opt => opt.id === selectedOptionId);
+    if (!selectedOption) return;
+    
+    // Create a cart item from the combo and selected option
+    const cartItem = {
+      id: combo.id,
+      name: combo.name,
+      price: selectedOption.price,
+      originalPrice: selectedOption.originalPrice,
+      image: combo.image,
+      quantity: 1,
+      brand: combo.brand
+    };
+    
+    addToCart(cartItem);
   };
 
   return (
@@ -274,6 +326,7 @@ const ComboDetailModal = ({
                   </Link>
                   <button
                     className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-md font-medium transition-colors flex items-center justify-center"
+                    onClick={handleAddToCart}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

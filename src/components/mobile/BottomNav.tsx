@@ -10,6 +10,7 @@ interface MenuItem {
   isImage: boolean;
   text: string;
   action?: () => void;
+  badgeCount?: number;
 }
 
 interface BottomNavProps {
@@ -92,6 +93,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                 }}>
                   <span className="icon">
                     {item.icon}
+                    {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                      <span className="badge">{item.badgeCount}</span>
+                    )}
                   </span>
                   <span className="title">
                     {item.text}
@@ -109,6 +113,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                 >
                   <span className="icon">
                     {item.icon}
+                    {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                      <span className="badge">{item.badgeCount}</span>
+                    )}
                   </span>
                   <span className="title">
                     {item.text}

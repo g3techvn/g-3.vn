@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useHeaderVisibility } from '@/hooks/useHeaderVisibility';
 import { createPortal } from 'react-dom';
+import { useCart } from '@/context/CartContext';
+import { useRouter } from 'next/navigation';
 
 const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -214,6 +216,8 @@ const MobileHomeHeader: React.FC = () => {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { openCart, totalItems } = useCart();
+  const router = useRouter();
 
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);

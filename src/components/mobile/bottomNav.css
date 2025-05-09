@@ -132,6 +132,32 @@
 .navigation li a .icon svg {
   width: 24px;
   height: 24px;
+  position: relative;
+}
+
+/* Badge styling for cart count */
+.navigation li a .icon .badge {
+  position: absolute;
+  top: -5px;
+  right: 0px; 
+  transform: translateX(50%);
+  background-color: var(--active-color);
+  color: white;
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  padding: 0 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+.navigation li.active a .icon .badge {
+  background-color: var(--active-color);
 }
 
 /* Media query cho màn hình vừa */

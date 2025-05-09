@@ -6,6 +6,8 @@ import Image from 'next/image';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { COMPANY_INFO, SOCIAL_LINKS } from '../../constants';
+import { useCart } from '../../context/CartContext';
+import ProfileDrawer from '../store/ProfileDrawer';
 
 /**
  * Format phone number with spaces
@@ -26,6 +28,16 @@ const Header = () => {
   // State management
   const [isSticky, setIsSticky] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { openCart, totalItems } = useCart();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const openProfile = () => {
+    setIsProfileOpen(true);
+  };
+
+  const closeProfile = () => {
+    setIsProfileOpen(false);
+  };
 
   /**
    * Handle categories menu click
@@ -61,6 +73,9 @@ const Header = () => {
 
   return (
     <header className="bg-gray-100 py-2">
+      {/* Profile Drawer */}
+      <ProfileDrawer isOpen={isProfileOpen} onClose={closeProfile} />
+      
       {/* Top Header Section */}
       <div 
         className={`container mx-auto bg-white px-4 py-3 rounded-lg 
@@ -113,36 +128,23 @@ const Header = () => {
           
           {/* User Account & Cart */}
           <div className="flex items-center space-x-5">
-            {/* User Account Dropdown */}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button className="text-gray-700 hover:text-red-600 focus:outline-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content className="min-w-[200px] bg-white rounded-md p-2 shadow-md">
-                <DropdownMenu.Item className="px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-md">
-                  <Link href="/account" className="flex w-full">Tài khoản của tôi</Link>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item className="px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-md">
-                  <Link href="/orders" className="flex w-full">Đơn hàng của tôi</Link>
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
-                <DropdownMenu.Item className="px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-md">
-                  <Link href="/logout" className="flex w-full">Đăng xuất</Link>
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
+            {/* User Account Button */}
+            <button 
+              onClick={openProfile} 
+              className="text-gray-700 hover:text-red-600 focus:outline-none"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
             
             {/* Shopping Cart */}
-            <Link href="/cart" className="text-gray-700 hover:text-red-600 relative">
+            <button onClick={openCart} className="text-gray-700 hover:text-red-600 relative">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-            </Link>
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{totalItems}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -155,7 +157,7 @@ const Header = () => {
         <div className="container bg-white my-2 mx-auto px-4 rounded-lg">
           <div className="flex items-center justify-between">
             {/* Categories Menu Button */}
-            <div className="relative py-3">
+            <div className="relative py-3 text-sm">
               <button 
                 onClick={handleCategoriesClick}
                 className="flex items-center space-x-2 text-gray-800 font-medium cursor-pointer hover:text-red-600"
@@ -172,7 +174,7 @@ const Header = () => {
               <NavigationMenu.List className="flex items-center space-x-1">
                 {/* Home */}
                 <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-red-600 font-medium">
+                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-red-600 text-sm font-medium">
                     <Link href="/">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -184,8 +186,8 @@ const Header = () => {
 
                 {/* Store */}
                 <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
-                    <Link href="/cua-hang">
+                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 text-sm font-medium">
+                    <Link href="#">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
@@ -196,8 +198,8 @@ const Header = () => {
 
                 {/* Guide */}
                 <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
-                    <Link href="/huong-dan">
+                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 text-sm font-medium">
+                    <Link href="#">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
@@ -208,7 +210,7 @@ const Header = () => {
 
                 {/* Policy */}
                 <NavigationMenu.Item className="relative">
-                  <NavigationMenu.Trigger className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
+                  <NavigationMenu.Trigger className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
@@ -216,32 +218,32 @@ const Header = () => {
                   </NavigationMenu.Trigger>
                   <NavigationMenu.Content className="absolute left-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                     <div className="relative">
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-bao-hanh-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách bảo hành
                         </Link>
                       </NavigationMenu.Link>
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-doi-tra-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách đổi trả
                         </Link>
                       </NavigationMenu.Link>
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-bao-mat-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách bảo mật
                         </Link>
                       </NavigationMenu.Link>
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-thanh-toan-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách thanh toán
                         </Link>
                       </NavigationMenu.Link>
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-kiem-hang-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách kiểm hàng
                         </Link>
                       </NavigationMenu.Link>
-                      <NavigationMenu.Link asChild>
+                      <NavigationMenu.Link asChild className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Link href="/noi-dung/chinh-sach-van-chuyen-g3" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chính sách vận chuyển
                         </Link>
@@ -252,7 +254,7 @@ const Header = () => {
 
                 {/* Contact */}
                 <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
+                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 text-sm font-medium">
                     <Link href="/lien-he">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -264,7 +266,7 @@ const Header = () => {
 
                 {/* About */}
                 <NavigationMenu.Item>
-                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 font-medium">
+                  <NavigationMenu.Link asChild className="flex items-center px-3 py-3 text-gray-700 hover:text-red-600 text-sm font-medium">
                     <Link href="/about">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -324,12 +326,15 @@ const Header = () => {
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
                   <DropdownMenu.Item className="px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-md">
-                    <Link href="/account" className="flex w-full items-center">
+                    <button onClick={() => {
+                      closeProfile();
+                      openProfile();
+                    }} className="flex w-full items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                       TÀI KHOẢN
-                    </Link>
+                    </button>
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>

@@ -5,6 +5,7 @@ import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
 import { Rating } from './ui/Rating';
 import { Product } from '@/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import { useCart } from '@/context/CartContext';
 
 const VISIBLE_ITEMS = 6;
 const MAX_PRODUCTS = 12;
@@ -14,6 +15,7 @@ export default function NewProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startIndex, setStartIndex] = useState(0);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -115,7 +117,7 @@ export default function NewProducts() {
                   key={product.id} 
                   className="group"
                 >
-                  <Card className="h-full">
+                  <Card className="h-full relative">
                     <CardHeader>
                       {product.discount_percentage && product.discount_percentage > 0 && (
                         <CardBadge>-{product.discount_percentage}%</CardBadge>
@@ -150,21 +152,35 @@ export default function NewProducts() {
                       
                       <Rating value={product.rating || 4} className="mb-2" />
                       
-                      <div className="flex flex-col mt-auto">
-                        {product.original_price ? (
-                          <>
-                            <span className="text-gray-500 line-through text-xs">
-                              {product.original_price.toLocaleString()}₫
-                            </span>
+                      <div className="flex items-center justify-between mt-auto">
+                        <div>
+                          {product.original_price ? (
+                            <>
+                              <span className="text-gray-500 line-through text-xs">
+                                {product.original_price.toLocaleString()}₫
+                              </span>
+                              <span className="text-red-600 font-bold text-sm block">
+                                {product.price.toLocaleString()}₫
+                              </span>
+                            </>
+                          ) : (
                             <span className="text-red-600 font-bold text-sm">
                               {product.price.toLocaleString()}₫
                             </span>
-                          </>
-                        ) : (
-                          <span className="text-red-600 font-bold text-sm">
-                            {product.price.toLocaleString()}₫
-                          </span>
-                        )}
+                          )}
+                        </div>
+                        <button 
+                          className="p-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+                          aria-label="Thêm vào giỏ hàng"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            addToCart(product);
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </button>
                       </div>
                     </CardContent>
                   </Card>

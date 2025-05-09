@@ -79,11 +79,11 @@ const socialLinks = [
 ];
 
 const products = [
-  { text: "Ghế công thái học G3 Pro", href: "/ghe-cong-thai-hoc-g3" },
-  { text: "Ghế công thái học E-Dra", href: "/ghe-cong-thai-hoc-edra" },
-  { text: "Ghế công thái học Gami", href: "/ghe-cong-thai-hoc-gami" },
-  { text: "Ghế công thái học Sihoo", href: "/ghe-cong-thai-hoc-sihoo" },
-  { text: "Ghế công thái học Xiaomi", href: "/ghe-cong-thai-hoc-xiaomi" },
+  { text: "Ghế công thái học G3 Pro", href: "/san-pham/ghe-cong-thai-hoc-g3-pro" },
+  { text: "Ghế công thái học E-Dra", href: "/san-pham/ghe-cong-thai-hoc-e-dra" },
+  { text: "Ghế công thái học Gami", href: "/san-pham/ghe-cong-thai-hoc-gami" },
+  { text: "Ghế công thái học Sihoo", href: "/san-pham/ghe-cong-thai-hoc-sihoo" },
+  { text: "Ghế công thái học Xiaomi", href: "/san-pham/ghe-cong-thai-hoc-xiaomi" },
 ];
 
 // Helper function to format phone number

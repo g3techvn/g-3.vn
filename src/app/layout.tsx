@@ -5,6 +5,7 @@ import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
 import StickyNavbar from '@/components/StickyNavbar';
 import MobileLayout from '@/components/mobile/MobileLayout';
+import CartLayout from '@/components/layout/CartLayout';
 import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -23,13 +24,15 @@ export default function RootLayout({
     <html lang="vi">
       <body className={inter.className}>
         <Providers>
-          <div className="desktop-layout">
-            <Header />
-            <StickyNavbar />
-            <main>{children}</main>
-            <Footer />
-          </div>
-          <MobileLayout>{children}</MobileLayout>
+          <CartLayout>
+            <div className="desktop-layout">
+              <Header />
+              <StickyNavbar />
+              <main>{children}</main>
+              <Footer />
+            </div>
+            <MobileLayout>{children}</MobileLayout>
+          </CartLayout>
         </Providers>
       </body>
     </html>

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createBrowserClient } from '@/lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -13,7 +15,7 @@ interface AuthContextType {
   loading: boolean;
   error: Error | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
@@ -28,79 +30,110 @@ export function useAuth() {
   return context;
 }
 
-// Hàm mock để tạo và lưu thông tin người dùng vào localStorage
-const saveUser = (user: User) => {
-  localStorage.setItem('user', JSON.stringify(user));
-};
-
-// Hàm mock để lấy thông tin người dùng từ localStorage
-const getUser = (): User | null => {
-  const userString = localStorage.getItem('user');
-  return userString ? JSON.parse(userString) : null;
+// Chuyển đổi từ Supabase User sang User của chúng ta
+const mapSupabaseUser = (supabaseUser: SupabaseUser): User => {
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    fullName: supabaseUser.user_metadata?.full_name || 'Người dùng',
+    avatar: supabaseUser.user_metadata?.avatar_url,
+    role: supabaseUser.app_metadata?.role || 'user',
+  };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const supabase = createBrowserClient();
 
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         setLoading(true);
-        const userData = getUser();
-        setUser(userData);
+        
+        // Lấy session hiện tại từ Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
     
+    // Chạy kiểm tra lần đầu
     checkAuth();
-  }, []);
+    
+    // Thiết lập listener cho thay đổi auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+    
+    // Clean up subscription khi unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   // Hàm đăng nhập
   const signIn = async (email: string, password: string) => {
     try {
-      // Mock xác thực - trong thực tế sẽ gọi API
-      if (email === 'demo@g-3.vn' && password === 'password') {
-        const userData: User = {
-          id: '1',
-          email: email,
-          fullName: 'Người dùng demo',
-          role: 'user'
-        };
-        saveUser(userData);
-        setUser(userData);
-        return { error: null };
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (signInError) {
+        return { error: new Error(signInError.message) };
       }
-      return { error: new Error('Email hoặc mật khẩu không đúng') };
+      
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user));
+      }
+      
+      return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
     }
   };
 
   // Hàm đăng ký
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      // Mock đăng ký - trong thực tế sẽ gọi API
-      // Trong ứng dụng thực tế, password sẽ được mã hóa và lưu trữ an toàn
-      const userData: User = {
-        id: Date.now().toString(),
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
-        fullName: 'Người dùng mới',
-        role: 'user'
-      };
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      });
       
-      // Lưu mật khẩu vào localStorage chỉ để demo (không nên làm điều này trong thực tế)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`password_${email}`, password);
+      if (signUpError) {
+        return { error: new Error(signUpError.message) };
       }
       
-      saveUser(userData);
-      setUser(userData);
+      // Trong Supabase, người dùng có thể cần xác nhận email trước khi hoàn tất đăng ký
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user));
+      }
+      
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
@@ -110,7 +143,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm đăng xuất
   const signOut = async () => {
     try {
-      localStorage.removeItem('user');
+      const { error: signOutError } = await supabase.auth.signOut();
+      
+      if (signOutError) {
+        return { error: new Error(signOutError.message) };
+      }
+      
       setUser(null);
       return { error: null };
     } catch (err) {
@@ -121,8 +159,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm reset mật khẩu
   const resetPassword = async (email: string) => {
     try {
-      // Mock reset password - trong thực tế sẽ gọi API
-      console.log(`Đã gửi email reset password đến ${email}`);
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (resetError) {
+        return { error: new Error(resetError.message) };
+      }
+      
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
