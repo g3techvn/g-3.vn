@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { useState } from 'react';
+import { AntdRegistry } from '@ant-design/nextjs-registry';
 
 const roboto = RobotoFlex({
   subsets: ['latin', 'vietnamese'],
@@ -28,7 +29,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <div className={`${roboto.variable} font-sans`}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          {children}
+          <AntdRegistry>{children}</AntdRegistry>
         </AuthProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}

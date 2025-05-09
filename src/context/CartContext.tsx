@@ -1,7 +1,8 @@
 'use client'
 
-import React, { createContext, useState, useContext, ReactNode } from 'react'
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react'
 import { Product } from '@/types'
+import { useAuth } from '@/features/auth/AuthProvider'
 
 export interface CartItem {
   id: string
@@ -29,9 +30,37 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
+// Key for localStorage
+const CART_STORAGE_KEY = 'g3tech_cart_items'
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { user } = useAuth()
+
+  // Load cart items from localStorage on initial mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem(CART_STORAGE_KEY)
+      if (savedCart) {
+        try {
+          const parsedCart = JSON.parse(savedCart)
+          setCartItems(parsedCart)
+        } catch (error) {
+          console.error('Error parsing cart from localStorage:', error)
+          // In case of error, clear the localStorage
+          localStorage.removeItem(CART_STORAGE_KEY)
+        }
+      }
+    }
+  }, [])
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
+    }
+  }, [cartItems])
 
   const openCart = () => setIsCartOpen(true)
   const closeCart = () => setIsCartOpen(false)

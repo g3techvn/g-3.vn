@@ -13,13 +13,30 @@ export const createServerClient = () => {
   });
 };
 
+// Singleton browser client instance
+let browserClient: ReturnType<typeof createClient> | null = null;
+
 // Tạo client cho client components (browser)
 export const createBrowserClient = () => {
+  if (typeof window !== 'undefined') {
+    // Only create the client once in the browser environment
+    if (!browserClient) {
+      browserClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          storageKey: 'supabase-auth',
+        },
+      });
+    }
+    return browserClient;
+  }
+  
+  // For SSR, create a new instance that won't be persisted
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      storageKey: 'supabase-auth',
+      persistSession: false,
+      autoRefreshToken: false,
     },
   });
 }; 
