@@ -84,7 +84,7 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="/images/logo-g3.png"
+              src="/images/logo-g3.svg"
               alt="G3 Logo"
               width={120}
               height={48}

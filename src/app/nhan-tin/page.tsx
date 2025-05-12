@@ -2,6 +2,7 @@
 
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import { Card, CardContent } from '@/components/ui/Card';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useState } from 'react';
 
 interface Message {
@@ -13,7 +14,7 @@ interface Message {
 }
 
 export default function MessagesPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -52,15 +53,9 @@ export default function MessagesPage() {
     }
   ]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
-  };
-
   const handleSocialLogin = (provider: 'google' | 'facebook') => {
     // TODO: Implement social login
     console.log(`Logging in with ${provider}`);
-    setIsLoggedIn(true);
   };
 
   return (
@@ -69,7 +64,7 @@ export default function MessagesPage() {
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-4">Nhắn tin</h1>
         
-        <div className={`space-y-4 ${!isLoggedIn ? 'blur-[2px]' : ''}`}>
+        <div className={`space-y-4 ${!user ? 'blur-[2px]' : ''}`}>
           {messages.map((message) => (
             <Card key={message.id} className={`${message.sender === 'Bạn' ? 'ml-auto' : 'mr-auto'} max-w-[80%]`}>
               <CardContent>
@@ -90,7 +85,7 @@ export default function MessagesPage() {
           ))}
         </div>
 
-        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t p-4 ${!isLoggedIn ? 'blur-[2px]' : ''}`}>
+        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t p-4 ${!user ? 'blur-[2px]' : ''}`}>
           <div className="container mx-auto max-w-2xl">
             <div className="flex gap-2">
               <input
@@ -105,7 +100,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {!isLoggedIn && (
+        {!user && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <h2 className="text-xl font-bold mb-4 text-center">Đăng nhập để chat</h2>
@@ -156,7 +151,7 @@ export default function MessagesPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form className="space-y-4">
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                     Số điện thoại

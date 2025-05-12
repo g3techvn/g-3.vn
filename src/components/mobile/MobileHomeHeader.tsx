@@ -5,6 +5,7 @@ import { useHeaderVisibility } from '@/hooks/useHeaderVisibility';
 import { createPortal } from 'react-dom';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -218,6 +219,7 @@ const MobileHomeHeader: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { openCart, totalItems } = useCart();
   const router = useRouter();
+  const { user } = useAuth();
 
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);
@@ -285,7 +287,7 @@ const MobileHomeHeader: React.FC = () => {
         {/* Logo */}
         <div className={`flex items-center gap-2 transition-all duration-300 ${isSearchVisible ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
           <Image
-            src="/images/logo-g3.png"
+            src="/images/logo-g3.svg"
             alt="G3 Logo"
             width={240}
             height={24}
@@ -341,14 +343,20 @@ const MobileHomeHeader: React.FC = () => {
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
           </button>
           <button onClick={toggleAccountModal} className="ml-1">
-            <div className="relative w-8 h-8">
-              <Image 
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" 
-                alt="avatar" 
-                fill
-                className="rounded-full object-cover" 
-              />
-            </div>
+            {user ? (
+              <div className="relative w-8 h-8">
+                <Image 
+                  src={user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
+                  alt="avatar" 
+                  fill
+                  className="rounded-full object-cover" 
+                />
+              </div>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
