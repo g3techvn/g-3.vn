@@ -54,11 +54,9 @@ const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
             </svg>
           </button>
           <div className="mx-auto">
-            <Image
-              src="/images/logo-g3.png"
+            <img
+              src="/images/logo-g3.svg"
               alt="G3 Logo"
-              width={100}
-              height={30}
               className="h-7 w-auto object-contain"
             />
           </div>
@@ -286,13 +284,10 @@ const MobileHomeHeader: React.FC = () => {
       >
         {/* Logo */}
         <div className={`flex items-center gap-2 transition-all duration-300 ${isSearchVisible ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-          <Image
+          <img
             src="/images/logo-g3.svg"
             alt="G3 Logo"
-            width={240}
-            height={24}
             className="h-6 w-auto object-contain"
-            priority
           />
         </div>
         {/* Search bar */}

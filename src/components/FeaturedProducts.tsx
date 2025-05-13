@@ -183,7 +183,11 @@ export default function FeaturedProducts({
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {slide.products.map((product) => (
-                      <div key={product.id} className="block">
+                      <Link 
+                        href={`/san-pham/${product.slug || product.id}`}
+                        key={product.id} 
+                        className="block"
+                      >
                         <div className="bg-white overflow-hidden rounded-lg shadow-md">
                           <AspectRatio.Root ratio={1}>
                             <div className="relative w-full h-full">
@@ -242,7 +246,7 @@ export default function FeaturedProducts({
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </TabsContent>

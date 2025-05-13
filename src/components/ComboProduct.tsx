@@ -467,10 +467,12 @@ export default function ComboProduct() {
               {/* First 2 products - takes 1 column each */}
               {comboItems.slice(0, 2).map((combo) => (
                 <div key={combo.id} className="col-span-3 lg:col-span-1">
-                  <ComboCard
-                    combo={combo}
-                    selectedOptionId={selectedOptions[combo.id]}
-                  />
+                  <Link href={`/san-pham/${combo.id}`}>
+                    <ComboCard
+                      combo={combo}
+                      selectedOptionId={selectedOptions[combo.id]}
+                    />
+                  </Link>
                 </div>
               ))}
             </div>
@@ -478,11 +480,12 @@ export default function ComboProduct() {
             {/* Row 2 with remaining products */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {comboItems.slice(2).map((combo) => (
-                <ComboCard
-                  key={combo.id}
-                  combo={combo}
-                  selectedOptionId={selectedOptions[combo.id]}
-                />
+                <Link key={combo.id} href={`/san-pham/${combo.id}`}>
+                  <ComboCard
+                    combo={combo}
+                    selectedOptionId={selectedOptions[combo.id]}
+                  />
+                </Link>
               ))}
             </div>
           </>
