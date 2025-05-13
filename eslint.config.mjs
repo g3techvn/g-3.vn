@@ -14,11 +14,7 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
-      "@next/next/no-img-element": "off",
-      "@next/next/no-html-link-for-pages": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/prefer-as-const": "off"
+   
     }
   }
 ];

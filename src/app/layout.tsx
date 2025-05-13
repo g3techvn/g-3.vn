@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <CartLayout>
-            <div className="desktop-layout">
+            <div className="desktop-layout bg-gray-100">
               <Header />
               <StickyNavbar />
               <main>{children}</main>

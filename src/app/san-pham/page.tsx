@@ -3,13 +3,18 @@
 import { useState, useEffect } from 'react';
 import { ProductCard } from '@/features/product/ProductCard';
 import { Product } from '@/types';
+import { SidebarFilter } from '@/components/store/sidebarfilter';
+import { Breadcrumb } from '@/components/common/Breadcrumb';
 // Đã comment import vì hiện tại chưa sử dụng
 // import { createBrowserClient } from '@/lib/supabase';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
 
   const fetchProducts = async () => {
     try {
@@ -25,8 +30,18 @@ export default function ProductsPage() {
       }
       
       const data = await response.json();
-      setProducts(data.products || []);
-      console.log(`Nhận được ${data.products?.length || 0} sản phẩm từ API`);
+      const productsData = data.products || [];
+      setProducts(productsData);
+      setFilteredProducts(productsData);
+      
+      // Extract unique brands and ensure they are strings
+      const uniqueBrands = Array.from(
+        new Set(productsData.map((p: Product) => p.brand || ''))
+      ).filter((brand): brand is string => typeof brand === 'string');
+      
+      setBrands(uniqueBrands);
+      
+      console.log(`Nhận được ${productsData.length} sản phẩm từ API`);
 
       // Phương án 2: Sử dụng trực tiếp browser client
       // Uncomment nếu muốn sử dụng
@@ -50,29 +65,89 @@ export default function ProductsPage() {
     }
   };
 
+  const handleFilterChange = (filters: {
+    priceRange: { min: number; max: number };
+    brands: string[];
+  }) => {
+    const { priceRange, brands: selectedBrands } = filters;
+    
+    const filtered = products.filter((product) => {
+      const priceInRange = product.price >= priceRange.min && product.price <= priceRange.max;
+      const brandMatch = selectedBrands.length === 0 || (product.brand && selectedBrands.includes(product.brand));
+      return priceInRange && brandMatch;
+    });
+    
+    setFilteredProducts(filtered);
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Tất cả sản phẩm</h1>
-
+    <div className="container mx-auto  py-8 ">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
-      
-        <div className="md:col-span-6">
+        {/* Sidebar Filter */}
+        <div className="md:col-span-1">
+          <SidebarFilter onFilterChange={handleFilterChange} brands={brands} />
+        </div>
+
+        {/* Products Grid */}
+        <div className="md:col-span-5">
           {error && (
             <div className="mb-8 rounded-md bg-red-50 p-4 text-red-600">
               Đã xảy ra lỗi: {error}
             </div>
           )}
 
-          <div className="mb-4 rounded-md bg-blue-50 p-2 text-blue-700">
-            Tổng số sản phẩm: {products.length}
+          <div className="bg-white rounded-lg  mb-6">
+            <div className="flex items-center justify-between">
+              <Breadcrumb
+                items={[
+                  { label: 'Trang chủ', href: '/' },
+                  { label: 'Sản phẩm' }
+                ]}
+              />
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setGridView('4')}
+                  className={`p-2 rounded-md ${
+                    gridView === '4' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                  }`}
+                  aria-label="4 sản phẩm mỗi hàng"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setGridView('5')}
+                  className={`p-2 rounded-md ${
+                    gridView === '5' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                  }`}
+                  aria-label="5 sản phẩm mỗi hàng"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setGridView('6')}
+                  className={`p-2 rounded-md ${
+                    gridView === '6' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                  }`}
+                  aria-label="6 sản phẩm mỗi hàng"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM17 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'} lg:grid-cols-${gridView}`}>
               {[...Array(10)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square w-full rounded-lg bg-gray-200" />
@@ -83,9 +158,9 @@ export default function ProductsPage() {
                 </div>
               ))}
             </div>
-          ) : products.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {products.map((product) => (
+          ) : filteredProducts.length > 0 ? (
+            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'} lg:grid-cols-${gridView}`}>
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

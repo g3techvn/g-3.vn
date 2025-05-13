@@ -7,6 +7,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import { UserOptions } from 'jspdf-autotable'
 
 // Define types for location data
 interface Ward {
@@ -33,6 +34,14 @@ interface Province {
   phone_code: number;
   codename: string;
   districts?: District[];
+}
+
+// Add jsPDF type definition
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable?: {
+    finalY: number;
+  };
+  autoTable: (options: UserOptions) => void;
 }
 
 export default function Checkout({ 
@@ -255,14 +264,14 @@ export default function Checkout({
         return;
       }
 
-      // Create new PDF document
+      // Create new PDF document with proper typing
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
         putOnlyUsedFonts: true,
         floatPrecision: 16 // For better accuracy in rendering
-      });
+      }) as jsPDFWithAutoTable;
       
       // Configure fonts
       doc.setFont("helvetica");
@@ -336,7 +345,6 @@ export default function Checkout({
         // Import the autotable plugin
         import('jspdf-autotable').then(() => {
           try {
-            // @ts-expect-error - jspdf-autotable doesn't have proper TypeScript definitions
             doc.autoTable({
               head: [tableColumn],
               body: tableRows,
@@ -362,8 +370,8 @@ export default function Checkout({
               margin: { top: 10, right: 14, bottom: 10, left: 14 }
             });
             
-            // Add total after the table
-            const finalY = (doc as any).lastAutoTable?.finalY + 10 || startYPosition + 50;
+            // Add total after the table with proper null checking
+            const finalY = (doc.lastAutoTable?.finalY ?? startYPosition) + 10;
             doc.text(`Tổng cộng: ${totalPrice.toLocaleString('vi-VN')}₫`, 195, finalY, { align: 'right' });
             
             // Save the PDF file
@@ -401,7 +409,7 @@ export default function Checkout({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
-      });
+      }) as jsPDFWithAutoTable;
       
       doc.setFont("helvetica");
       doc.setFontSize(16);

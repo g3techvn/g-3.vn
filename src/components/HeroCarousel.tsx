@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import { Slot } from '@radix-ui/react-slot';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
@@ -95,9 +96,11 @@ export default function HeroCarousel() {
                     <div className="md:w-1/2 flex justify-center h-full">
                       <div className="relative w-full h-full">
                         <div className="absolute right-0 h-full flex items-center p-4 pr-12">
-                          <img 
+                          <Image 
                             src={item.image} 
                             alt={item.title}
+                            width={800}
+                            height={475}
                             className="h-[95%] w-auto object-contain rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-300"
                           />
                         </div>
