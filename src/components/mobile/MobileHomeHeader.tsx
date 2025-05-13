@@ -54,9 +54,11 @@ const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
             </svg>
           </button>
           <div className="mx-auto">
-            <img
+            <Image
               src="/images/logo-g3.svg"
               alt="G3 Logo"
+              width={100}
+              height={28}
               className="h-7 w-auto object-contain"
             />
           </div>
@@ -251,7 +253,6 @@ const MobileHomeHeader: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Xử lý tìm kiếm ở đây
-    console.log('Searching for:', searchText);
   };
 
   return (
@@ -284,10 +285,12 @@ const MobileHomeHeader: React.FC = () => {
       >
         {/* Logo */}
         <div className={`flex items-center gap-2 transition-all duration-300 ${isSearchVisible ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-          <img
+          <Image
             src="/images/logo-g3.svg"
             alt="G3 Logo"
-            className="h-6 w-auto object-contain"
+            width={100}
+            height={28}
+            className="h-7 w-auto object-contain"
           />
         </div>
         {/* Search bar */}
