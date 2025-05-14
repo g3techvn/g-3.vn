@@ -15,7 +15,7 @@
   position: fixed;
   width: 100%;
   height: 70px;
-  background: rgba(255, 255, 255, 0.85); /* giảm độ trong suốt */
+  background: rgba(255, 255, 255, 1); /* giảm độ trong suốt */
   backdrop-filter: blur(32px);           /* glass blur effect mạnh hơn */
   -webkit-backdrop-filter: blur(32px);   /* Safari support */
   display: flex;
@@ -198,8 +198,17 @@
 
 .navigation li:not(.active) a .icon:hover {
   background: rgba(142, 142, 147, 0.12); /* subtle gray background */
-  border-radius: 50%;
-  padding: 8px;
+  border-radius: 20px; /* For pill shape, based on 40px height (24px icon + 2*8px vertical padding) */
+  padding: 8px 12px;   /* 8px top/bottom, 12px left/right to make it wider */
   color: #222327;
   transition: all 0.2s;
+}
+
+/* Circular highlight for the icon of an active item on hover */
+.navigation li.active a:hover .icon {
+  background: rgba(255, 0, 0, 0.05); /* Light red background (equivalent to bg-red-50) */
+  border-radius: 50%; /* Makes it circular */
+  padding: 8px;       /* Padding to create space for the circular background */
+  /* The icon color (var(--active-color)) is inherited from .navigation li.active a .icon */
+  transition: background 0.2s ease, padding 0.2s ease; /* Smooth transition */
 } 
