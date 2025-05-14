@@ -256,14 +256,19 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
               style={{ aspectRatio: '1/1', minHeight: 200 }}
             />
           ) : (
-            <Image
-              src={galleryItems[lightboxIndex].src}
-              alt={galleryItems[lightboxIndex].alt}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              priority
-            />
+            <>
+              <Image
+                src={galleryItems[lightboxIndex].src}
+                alt={galleryItems[lightboxIndex].alt}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+              <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                {lightboxIndex + 1}/{galleryItems.length}
+              </div>
+            </>
           )}
         </div>
         {/* Thumbnails ngang */}
@@ -316,41 +321,33 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
       </div>
 
       {/* Title sản phẩm */}
-      <div className="bg-white px-4 pt-2 pb-2">
-        <h1 className="text-lg font-medium text-gray-900">{product.name}</h1>
-      </div>
-
-      {/* THÔNG SỐ NỔI BẬT */}
-      <div className="overflow-x-auto mt-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="flex items-center gap-3 px-4 text-xs text-gray-600 flex-nowrap whitespace-nowrap min-w-[600px]">
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[70px] justify-center">
-            <span className="font-semibold text-gray-900">{rating}</span>
-            <StarIcon className="w-4 h-4 text-yellow-400 ml-0.5" />
-          </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[110px] justify-center">
-            <span className="font-semibold text-gray-900">{Math.round(ratingCount/1000)}</span>
-            <span className="text-gray-700">N</span>
-            <span className="text-gray-500">đánh giá</span>
-          </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[90px] justify-center">
-            <WrenchScrewdriverIcon className="w-4 h-4 text-gray-500" />
-            <span className="font-semibold text-gray-900">14kg</span>
-          </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[110px] justify-center">
-            <ChevronUpIcon className="w-4 h-4 text-gray-500" />
-            <span className="font-semibold text-gray-900">1m55-1m85</span>
-            <span className="text-gray-500">cao</span>
-          </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[90px] justify-center">
-            <ShieldCheckIcon className="w-4 h-4 text-gray-500" />
-            <span className="font-semibold text-gray-900">120kg</span>
-          </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1 min-w-[90px] justify-center">
-            <ArrowPathIcon className="w-4 h-4 text-gray-500" />
-            <span className="font-semibold text-gray-900">12 tháng</span>
-          </div>
+      <div className="bg-white mb-2">
+        <h1 className="text-lg font-medium text-gray-900 px-4 pt-2 pb-2">{product.name}</h1>
+        <div className="flex flex-wrap gap-2 mt-2 bg-red-50 justify-start w-full px-4 py-2">
+          <span className="text-gray-700 font-semibold px-3 py-1 text-xs">Giảm giá 30%</span>
+          <span className="text-gray-700">•</span>
+          <span className="text-gray-700 font-semibold px-3 py-1 text-xs">Giao hoả tốc HN HCM</span>
+          <span className="text-gray-700">•</span>
+          <span className="text-gray-700 font-semibold px-3 py-1 text-xs">Miễn phí vận chuyển</span>
         </div>
       </div>
+
+      {/* Tag thể loại */}
+      {tags && tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 px-4 mt-2">
+          {tags.map((tag: string, idx: number) => (
+            <span
+              key={idx}
+              className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-medium border border-red-100"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* THÔNG SỐ NỔI BẬT */}
+      {/* Removed as per the new code block */}
 
       {/* Nút mua sticky dưới cùng */}
       <div className="fixed bottom-0 left-0 right-0 z-60 bg-white border-t border-gray-200 flex gap-2 shadow-lg p-3">
@@ -400,25 +397,10 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         </button>
       </div>
 
-      {/* Đẩy phần còn lại lên trên để không bị che bởi nút mua */}
-      <div className="pb-28" />
-
-      {/* Tag thể loại */}
-      {tags && tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 px-4 mt-4">
-          {tags.map((tag: string, idx: number) => (
-            <span
-              key={idx}
-              className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-medium border border-red-100"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+      
 
       {/* Mô tả sản phẩm */}
-      <div className="prose max-w-none px-4 mt-6 pb-8">
+      <div className="prose max-w-none px-4 mt-2 pb-8">
         <h2 className="text-lg font-semibold mb-2">Mô tả sản phẩm</h2>
         <p className="text-gray-600 text-sm whitespace-pre-line">{product.description}</p>
       </div>
