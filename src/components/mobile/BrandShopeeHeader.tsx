@@ -13,22 +13,31 @@ interface BrandShopeeHeaderProps {
   rating?: number;
   onSearch?: (query: string) => void;
   products: Product[];
+  activeTab: string;
+  onTabChange: (tabName: string) => void;
 }
 
 const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
   brandName,
-  avatarUrl = '/images/logo-g3.svg',
+  avatarUrl = '/images/g3-avatar.jpg',
   coverUrl = 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop',
   followers = 16800,
   rating = 4.9,
   onSearch,
   products,
+  activeTab,
+  onTabChange,
 }) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const [isTabsSticky, setIsTabsSticky] = useState(false);
+  const [tabsPlaceholderHeight, setTabsPlaceholderHeight] = useState(0);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabsInitialOffsetTopRef = useRef(0);
 
   const totalSold = React.useMemo(() => {
     return products.reduce((sum) => sum + Math.floor(Math.random() * 100 + 1), 0);
@@ -52,6 +61,34 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const tabsElement = tabsRef.current;
+    if (!tabsElement) return;
+
+    tabsInitialOffsetTopRef.current = tabsElement.getBoundingClientRect().top + window.scrollY;
+    setTabsPlaceholderHeight(tabsElement.offsetHeight);
+
+    const handleScroll = () => {
+      // Ensure tabsRef.current is still valid within the handler
+      if (!tabsRef.current) return; 
+      
+      const scrollY = window.scrollY;
+      if (scrollY >= tabsInitialOffsetTopRef.current) {
+        setIsTabsSticky(true);
+      } else {
+        setIsTabsSticky(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Initial check in case the page loads already scrolled
+    handleScroll(); 
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []); // Empty dependency array to run once on mount and clean up on unmount
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -156,7 +193,7 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
       </div>
       {/* Thông tin shop */}
       <div className="relative z-10 flex items-center px-4 mt-10">
-        <div className="w-20 h-20 rounded-full border-4 border-white shadow overflow-hidden bg-white">
+        <div className="w-16 h-16 rounded-full border-4 border-white shadow overflow-hidden bg-white">
           <Image src={avatarUrl} alt={brandName} width={80} height={80} className="object-cover w-full h-full" />
         </div>
         <div className="ml-4 flex-1">
@@ -189,15 +226,26 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
         <span className="text-white/90 text-sm drop-shadow">185 Video</span>
       </div>
       {/* Tabs */}
-      <div className="mt-4 flex border-b border-gray-200 bg-white text-base font-semibold">
-        {['Shop', 'Sản phẩm', 'Danh mục hàng'].map((tab, idx) => (
-          <button
-            key={tab}
-            className={`flex-1 py-3 text-center font-semibold ${idx === 1 ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-700'}`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="mt-4"> {/* Wrapper to handle original margin */}
+        {isTabsSticky && <div style={{ height: `${tabsPlaceholderHeight}px` }} />}
+        <div
+          ref={tabsRef}
+          className={`flex text-base font-semibold border-b border-gray-200 bg-white ${
+            isTabsSticky 
+            ? 'fixed top-0 left-0 right-0 z-40 shadow-md' 
+            : '' 
+          }`}
+        >
+          {['Sản phẩm', 'Danh mục', 'Video'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`flex-1 py-3 text-center font-semibold ${activeTab === tab ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-700'}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

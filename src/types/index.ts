@@ -16,6 +16,7 @@ export type Product = {
   original_price?: number;
   discount_percentage?: number;
   slug?: string;
+  video_url?: string;
 };
 
 export type Category = {
