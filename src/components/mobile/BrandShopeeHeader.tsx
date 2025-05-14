@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react';
 import { Product } from '@/types';
+import { COMPANY_INFO } from '@/constants';
 
 interface BrandShopeeHeaderProps {
   brandName: string;
@@ -28,6 +29,18 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const totalSold = React.useMemo(() => {
+    return products.reduce((sum) => sum + Math.floor(Math.random() * 100 + 1), 0);
+  }, [products]);
+
+  const averageRating = React.useMemo(() => {
+    if (products.length === 0) {
+      return 0;
+    }
+    const sumOfRatings = products.reduce((sum, product) => sum + (product.rating || 4.9), 0);
+    return sumOfRatings / products.length;
+  }, [products]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,10 +164,15 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
             <span className="text-lg font-bold text-white drop-shadow line-clamp-1">{brandName}</span>
             <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">Mall</span>
           </div>
-          <div className="text-white text-sm mt-2 drop-shadow">{rating} ★ | {followers.toLocaleString()} Người theo dõi</div>
+          <div className="text-white text-sm mt-2 drop-shadow">{averageRating.toFixed(1)} <span className="text-yellow-400">★</span> | {totalSold.toLocaleString()} đơn hàng đã bán</div>
         </div>
         <div className="flex flex-col gap-2 ml-2">
-          <button className="bg-red-600 text-white rounded px-4 py-1.5 text-sm font-semibold">Theo dõi</button>
+          <button 
+            className="bg-red-600 text-white rounded px-4 py-1.5 text-sm font-semibold"
+            onClick={() => window.location.href = `tel:${COMPANY_INFO.hotline}`}
+          >
+            Liên hệ
+          </button>
           <button className="bg-white text-red-600 rounded px-4 py-1.5 text-sm font-semibold border border-red-600">Chat</button>
         </div>
       </div>
