@@ -1,5 +1,7 @@
 'use client';
 
+import { COMPANY_INFO } from '../../constants';
+
 export default function AboutPage() {
   return (
     <main className="min-h-screen py-12">
@@ -32,16 +34,16 @@ export default function AboutPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold mb-4">Liên hệ</h2>
           <p className="text-gray-700 mb-2">
-            <strong>Địa chỉ:</strong> 199/14B đường 3 tháng 2, phường 11, quận 10, Hồ Chí Minh
+            <strong>Địa chỉ:</strong> {COMPANY_INFO.address}
           </p>
           <p className="text-gray-700 mb-2">
-            <strong>Điện thoại:</strong> 0983 410 222
+            <strong>Điện thoại:</strong> {COMPANY_INFO.hotline}
           </p>
           <p className="text-gray-700 mb-2">
-            <strong>Email:</strong> contact@G3 TECH.vn
+            <strong>Email:</strong> {COMPANY_INFO.email}
           </p>
           <p className="text-gray-700 mb-2">
-            <strong>Thời gian làm việc:</strong> T2-T7: 9:00 - 20:00, CN: 9:00 - 14:00
+            <strong>Thời gian làm việc:</strong> {COMPANY_INFO.workingHours}
           </p>
         </div>
       </div>
