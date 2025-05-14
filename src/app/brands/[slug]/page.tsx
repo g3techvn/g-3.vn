@@ -125,7 +125,7 @@ export default function BrandProductsPage({ params }: { params: Promise<{ slug: 
           {products.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-4 px-2 sm:px-4 md:px-6">
               {products.map((product) => (
-                <div key={product.id}>
+                <Link key={product.id} href={`/san-pham/${product.slug || product.id}`} className="block">
                   <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden">
                     <div className="aspect-square w-full">
                       <Image
@@ -166,7 +166,7 @@ export default function BrandProductsPage({ params }: { params: Promise<{ slug: 
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

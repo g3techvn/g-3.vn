@@ -274,6 +274,21 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
               <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                 {lightboxIndex + 1}/{galleryItems.length}
               </div>
+              {/* Navigation Buttons */}
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeftIcon className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
+                aria-label="Next image"
+              >
+                <ChevronRightIcon className="w-6 h-6" />
+              </button>
             </>
           )}
         </div>
