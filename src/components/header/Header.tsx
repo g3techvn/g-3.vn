@@ -79,7 +79,7 @@ const Header = () => {
       {/* Top Header Section */}
       <div 
         className={`container mx-auto bg-white px-4 py-3 rounded-lg 
-          ${isSticky ? 'fixed top-2 left-0  right-0 z-50 shadow-md px-4 md:mx-auto mx-0' : ''}`}>
+          ${isSticky ? 'fixed top-2 left-0 translate-x-16 right-16 z-50 shadow-md px-4 md:mx-auto mx-0' : ''}`}>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">

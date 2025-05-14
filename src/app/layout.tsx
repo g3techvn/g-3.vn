@@ -27,9 +27,11 @@ export default function RootLayout({
         <Providers>
           <CartLayout>
             <div className="desktop-layout bg-gray-100">
-              <Header />
+              <div className="pl-16">
+                <Header />
+              </div>
               <StickyNavbar />
-              <main>{children}</main>
+              <main className="pl-16">{children}</main>
               <Footer />
             </div>
             <MobileLayout>{children}</MobileLayout>
