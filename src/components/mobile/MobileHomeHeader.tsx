@@ -285,13 +285,15 @@ const MobileHomeHeader: React.FC = () => {
       >
         {/* Logo */}
         <div className={`flex items-center gap-2 transition-all duration-300 ${isSearchVisible ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-          <Image
-            src="/images/logo-g3.svg"
-            alt="G3 Logo"
-            width={100}
-            height={28}
-            className="h-7 w-auto object-contain"
-          />
+          <button onClick={() => router.push('/')} className="focus:outline-none">
+            <Image
+              src="/images/logo-g3.svg"
+              alt="G3 Logo"
+              width={100}
+              height={28}
+              className="h-7 w-auto object-contain"
+            />
+          </button>
         </div>
         {/* Search bar */}
         <div 

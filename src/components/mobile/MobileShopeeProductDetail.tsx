@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon, StarIcon, ShareIcon, CloudIcon, MinusCircleIcon, TrashIcon, ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, XMarkIcon, ChevronRightIcon, PlayCircleIcon, ChevronUpIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface Comment {
   id: string;
@@ -67,7 +68,7 @@ type GalleryImage = {
 type GalleryItem = GalleryVideo | GalleryImage;
 
 export function MobileShopeeProductDetail({ product }: MobileProductDetailProps) {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Các info phụ dùng giá trị mặc định vì không có trong Product
@@ -199,7 +200,7 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
       <div className="sticky top-0 z-20 bg-[#f5f5f5] border-b border-gray-200">
         <div className="flex items-center h-14 px-2 relative">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
             className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900"
           >
             <ChevronLeftIcon className="w-6 h-6" />
@@ -208,6 +209,17 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
             <span className="font-bold text-lg text-red-700 tracking-wide pointer-events-none">{publisher.toUpperCase()}</span>
           </div>
           <div className="flex items-center gap-1 absolute right-2 top-1/2 -translate-y-1/2">
+            <button
+              onClick={() => router.push('/gio-hang')}
+              className="w-10 h-10 flex items-center justify-center text-gray-600 relative"
+            >
+              <ShoppingCartIcon className="w-6 h-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="w-10 h-10 flex items-center justify-center text-gray-600"
@@ -289,11 +301,6 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         </div>
       </div>
 
-      {/* Title sản phẩm */}
-      <div className="bg-white px-4 pt-2 pb-2">
-        <h1 className="text-lg font-medium text-gray-900">{product.name}</h1>
-      </div>
-
       {/* GIÁ & PHÂN LOẠI (chỉ giữ giá, xoá tuỳ chọn màu) */}
       <div className="bg-white px-4 pt-2 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-2">
@@ -306,6 +313,11 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
           <div className="text-xs text-gray-500">Đã bán 114</div>
         </div>
         {/* Đã xoá tuỳ chọn màu ở đây */}
+      </div>
+
+      {/* Title sản phẩm */}
+      <div className="bg-white px-4 pt-2 pb-2">
+        <h1 className="text-lg font-medium text-gray-900">{product.name}</h1>
       </div>
 
       {/* THÔNG SỐ NỔI BẬT */}
@@ -352,7 +364,29 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         <div className="h-8 w-px bg-gray-300 self-center"></div>
         <button
           className="flex flex-col items-center justify-center basis-1/4 h-14 text-red-600 rounded-xl hover:bg-gray-50 transition-colors"
-          onClick={() => { addToCart(product); }}
+          onClick={() => { 
+            addToCart(product);
+            toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
+              duration: 3000,
+              position: 'top-right',
+              style: {
+                background: '#fff',
+                color: '#333',
+                padding: '16px',
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                fontSize: '14px',
+                fontWeight: '500',
+                maxWidth: '300px',
+                border: 'none',
+              },
+              icon: '🛒',
+              iconTheme: {
+                primary: '#fff',
+                secondary: '#333',
+              },
+            });
+          }}
         >
           <ShoppingCartIcon className="w-6 h-6" />
           <span className="text-xs mt-1">Thêm giỏ hàng</span>
