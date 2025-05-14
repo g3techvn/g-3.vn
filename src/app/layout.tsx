@@ -32,7 +32,9 @@ export default function RootLayout({
               </div>
               <StickyNavbar />
               <main className="pl-16">{children}</main>
-              <Footer />
+              <div className="pl-16">
+                <Footer />
+              </div>
             </div>
             <MobileLayout>{children}</MobileLayout>
           </CartLayout>
