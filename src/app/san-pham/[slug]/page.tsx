@@ -6,12 +6,13 @@ import { Product } from '@/types';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
 import Image from 'next/image';
 import { MobileShopeeProductDetail } from '@/components/mobile/MobileShopeeProductDetail';
-import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
 import { Rating } from '@/components/ui/Rating';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -53,6 +54,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [loadingSimilar, setLoadingSimilar] = useState(true);
   const videoRef = React.useRef<HTMLIFrameElement>(null);
   const [player, setPlayer] = useState<YTPlayer | null>(null);
+  const router = useRouter();
 
   // Sample gallery images
   const galleryItems = [

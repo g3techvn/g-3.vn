@@ -12,6 +12,7 @@ import MobileHomeTabs from '@/components/mobile/MobileHomeTabs';
 import { Product } from '@/types';
 import MobileFeatureProduct from '@/components/mobile/MobileFeatureProduct';
 import MobileBestsellerProducts from '@/components/mobile/MobileBestsellerProducts';
+import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
@@ -56,16 +57,11 @@ export default function Home() {
       <div className="bg-gray-50 min-h-screen">
         <MobileHomeHeader />
         <MobileHomeTabs />
-        
         {/* Section: Sản phẩm bán chạy */}
         <MobileBestsellerProducts />
-
-      
-
+        <MobileCatogeryFeature />
         {/* Được đề xuất cho bạn */}
         <MobileFeatureProduct products={products} loading={loading} error={error} />
-
-     
       </div>
     );
   }

@@ -9,6 +9,7 @@ export type Product = {
   category_id: string;
   brand_id: string;
   brand?: string;
+  brand_slug?: string;
   rating?: number;
   created_at: string;
   updated_at: string;

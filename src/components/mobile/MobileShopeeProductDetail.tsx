@@ -200,7 +200,13 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
       <div className="sticky top-0 z-20 bg-[#f5f5f5] border-b border-gray-200">
         <div className="flex items-center h-14 px-2 relative">
           <button
-            onClick={() => router.push('/')}
+            onClick={() => {
+              if (product.brand_slug) {
+                router.push(`/brands/${product.brand_slug}`);
+              } else {
+                router.back();
+              }
+            }}
             className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900"
           >
             <ChevronLeftIcon className="w-6 h-6" />
