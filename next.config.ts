@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
       'product.hstatic.net',
       'congthaihoc.vn',
       'images.unsplash.com',
-      'picsum.photos'
+      'picsum.photos',
+      'static.g-3.vn',
+      'img.youtube.com',
     ],
   },
 };
