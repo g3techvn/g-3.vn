@@ -168,14 +168,14 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
                 onChange={(val) => {
                   if (Array.isArray(val) && val.length === 2) setPriceRange({ min: val[0], max: val[1] });
                 }}
-                onAfterChange={(val) => {
+                onChangeComplete={(val) => {
                   if (Array.isArray(val) && val.length === 2) setPriceRange({ min: val[0], max: val[1] });
                 }}
                 allowCross={false}
-                trackStyle={[{ backgroundColor: '#2563eb' }]}
+                trackStyle={[{ backgroundColor: '#ef4444' }]}
                 handleStyle={[
-                  { borderColor: '#2563eb', backgroundColor: '#fff' },
-                  { borderColor: '#2563eb', backgroundColor: '#fff' }
+                  { borderColor: '#ef4444', backgroundColor: '#fff' },
+                  { borderColor: '#ef4444', backgroundColor: '#fff' }
                 ]}
                 railStyle={{ backgroundColor: '#e5e7eb' }}
               />

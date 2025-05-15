@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link'; // Import Link
+import { Brand } from '@/types'; // Uncomment this import
 // import { Brand } from '@/types'; // Will replace this
 import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
@@ -19,6 +20,9 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
   const [productCats, setProductCats] = useState<ProductCat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [brands, setBrands] = useState<Brand[]>([]); // Add brands state
+  const [loadingBrands, setLoadingBrands] = useState(true); // Add loadingBrands state
+  const [brandError, setBrandError] = useState<string | null>(null); // Add brandError state
 
   const fetchProductCats = async () => { // Renamed from fetchBrands
     try {
@@ -40,8 +44,30 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
     }
   };
 
+  // Add fetchBrands function
+  const fetchBrands = async () => {
+    try {
+      setLoadingBrands(true);
+      const url = '/api/brands';
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Lỗi HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setBrands(data.brands || []);
+    } catch (error: unknown) {
+      console.error('Error fetching brands:', error);
+      setBrandError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
+    } finally {
+      setLoadingBrands(false);
+    }
+  };
+
   useEffect(() => {
-    fetchProductCats(); // Call the renamed function
+    fetchProductCats();
+    fetchBrands(); // Call fetchBrands
   }, []);
 
   // Mobile View
@@ -49,7 +75,11 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
     <div className="md:hidden">
       <MobileHomeHeader />
       <div className="px-4 py-4">
-        <MobileCatogeryFeature />
+        <MobileCatogeryFeature
+          brands={brands}
+          loading={loadingBrands}
+          error={brandError}
+        />
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600">
             Đã xảy ra lỗi: {error}

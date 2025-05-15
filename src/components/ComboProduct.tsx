@@ -8,6 +8,7 @@ import { AspectRatio } from './ui/AspectRatio';
 import { Rating } from './ui/Rating';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { Button } from './ui/Button';
 
 interface ProductOption {
   id: number;
@@ -26,7 +27,13 @@ interface ComboItem {
   image: string;
   brand?: string;
   rating?: number;
+  slug: string;
   options: ProductOption[];
+}
+
+// Extend Product type to include combo_products
+interface ComboProduct extends Product {
+  combo_products?: Product[];
 }
 
 const ProductOptionCard = ({
@@ -111,7 +118,8 @@ const ComboCard = ({ combo, selectedOptionId }: {
       originalPrice: selectedOption.originalPrice,
       image: combo.image,
       quantity: 1,
-      brand: combo.brand
+      brand: combo.brand,
+      slug: combo.slug
     };
     
     addToCart(cartItem);
@@ -228,7 +236,8 @@ const ComboDetailModal = ({
       originalPrice: selectedOption.originalPrice,
       image: combo.image,
       quantity: 1,
-      brand: combo.brand
+      brand: combo.brand,
+      slug: combo.slug
     };
     
     addToCart(cartItem);
@@ -343,51 +352,35 @@ const ComboDetailModal = ({
   );
 };
 
-export default function ComboProduct() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function ComboProduct({ 
+  products = [],
+  loading = false,
+  error = null
+}: {
+  products: ComboProduct[];
+  loading: boolean;
+  error: string | null;
+}) {
+  const { addToCart } = useCart();
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/products?sort=created_at:desc&limit=8');
-        
-        if (!response.ok) {
-          throw new Error(`Lỗi HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setProducts((data.products || []).slice(0, 8));
-      } catch (error: unknown) {
-        console.error('Error fetching products:', error);
-        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   // Convert Product to ComboItem format
   const convertToComboItem = (product: Product): ComboItem => {
     return {
       id: product.id,
       name: product.name,
-      description: product.description,
-      image: product.image_url,
+      description: product.description || '',
+      image: product.image_url || '',
       brand: product.brand,
       rating: product.rating,
+      slug: product.slug || product.id,
       options: [{
         id: 1,
         name: product.name,
         price: product.price,
         originalPrice: product.original_price,
         discount: product.discount_percentage,
-        image: product.image_url,
+        image: product.image_url || '',
         isAvailable: true
       }]
     };
@@ -413,7 +406,18 @@ export default function ComboProduct() {
     if (changed) {
       setSelectedOptions(newSelections);
     }
-  }, [selectedOptions, comboItems]);
+  }, [comboItems, selectedOptions]);
+
+  // Handle adding multiple products to cart
+  const handleAddComboToCart = (products: Product[]) => {
+    products.forEach(product => {
+      // Make sure we are passing all needed data including slug
+      addToCart({
+        ...product,
+        slug: product.slug || product.id
+      });
+    });
+  };
 
   return (
     <section className="py-8 bg-gray-100">
@@ -467,7 +471,7 @@ export default function ComboProduct() {
               {/* First 2 products - takes 1 column each */}
               {comboItems.slice(0, 2).map((combo) => (
                 <div key={combo.id} className="col-span-3 lg:col-span-1">
-                  <Link href={`/san-pham/${combo.id}`}>
+                  <Link href={`/san-pham/${combo.slug}`}>
                     <ComboCard
                       combo={combo}
                       selectedOptionId={selectedOptions[combo.id]}
@@ -480,7 +484,7 @@ export default function ComboProduct() {
             {/* Row 2 with remaining products */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {comboItems.slice(2).map((combo) => (
-                <Link key={combo.id} href={`/san-pham/${combo.id}`}>
+                <Link key={combo.id} href={`/san-pham/${combo.slug}`}>
                   <ComboCard
                     combo={combo}
                     selectedOptionId={selectedOptions[combo.id]}

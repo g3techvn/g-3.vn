@@ -10,11 +10,16 @@ import { useCart } from '@/context/CartContext';
 const MAX_PRODUCTS = 8;
 
 export default function FeaturedProducts({ 
-  autoSlideInterval = 5000 // Default 5 seconds
-}: { autoSlideInterval?: number }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  autoSlideInterval = 5000, // Default 5 seconds
+  products = [],
+  loading = false,
+  error = null
+}: { 
+  autoSlideInterval?: number;
+  products: Product[];
+  loading: boolean;
+  error: string | null;
+}) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [isPaused, setIsPaused] = useState(false);
@@ -22,30 +27,6 @@ export default function FeaturedProducts({
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
   
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/products?sort=featured:desc&limit=${MAX_PRODUCTS}`);
-        
-        if (!response.ok) {
-          throw new Error(`Lỗi HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setProducts((data.products || []).slice(0, MAX_PRODUCTS));
-      } catch (error: unknown) {
-        console.error('Error fetching products:', error);
-        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
   // Hiển thị 4 sản phẩm mỗi slide trên màn hình lớn, 2 trên màn hình vừa và 1 trên màn hình nhỏ
   const totalSlides = Math.ceil(products.length / 4);
   
@@ -252,27 +233,10 @@ export default function FeaturedProducts({
                 </TabsContent>
               ))
             ) : (
-              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
-                <p className="text-base text-gray-600">Không tìm thấy sản phẩm nổi bật nào.</p>
-                <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
+              <div className="p-8 bg-white rounded shadow text-center">
+                <p className="text-gray-600">Không có sản phẩm nổi bật.</p>
               </div>
             )}
-          </div>
-          
-          {/* Slide indicators */}
-          <div className="flex justify-center space-x-2 mt-4">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setCurrentSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide ? 'w-8 bg-gray-500' : 'w-2 bg-gray-300 hover:bg-gray-400'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-                aria-current={index === currentSlide ? 'true' : 'false'}
-              />
-            ))}
           </div>
         </Tabs>
       </div>

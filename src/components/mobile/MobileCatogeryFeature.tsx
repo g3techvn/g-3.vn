@@ -1,32 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Brand } from '@/types';
 import Image from 'next/image';
+import Link from 'next/link';
 
-const MobileCatogeryFeature = () => {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface MobileCatogeryFeatureProps {
+  brands: Brand[];
+  loading: boolean;
+  error: string | null;
+  categorySlug?: string;
+}
+
+const MobileCatogeryFeature: React.FC<MobileCatogeryFeatureProps> = ({ 
+  brands,
+  loading,
+  error,
+  categorySlug
+}) => {
   const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
-
-  const fetchBrands = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/brands');
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      setBrands(data.brands || []);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBrands();
-  }, []);
+  
+  // Đặt tiêu đề dựa trên category
+  const title = 'Thương hiệu ưa chuộng';
 
   const handleImageError = (brandId: string) => {
     setImageErrors(prev => ({
@@ -35,10 +28,13 @@ const MobileCatogeryFeature = () => {
     }));
   };
 
+  // Lấy tối đa 4 thương hiệu để hiển thị
+  const displayBrands = brands.slice(0, 4);
+
   return (
     <section className="pt-4">
       <div className="flex items-center px-4 mb-2">
-        <h2 className="text-lg font-semibold text-red-700">Thương hiệu ưa chuộng</h2>
+        <h2 className="text-lg font-semibold text-red-700">{title}</h2>
       </div>
       <div className="grid grid-cols-4 gap-4 px-4">
         {loading ? (
@@ -50,9 +46,13 @@ const MobileCatogeryFeature = () => {
           ))
         ) : error ? (
           <div className="col-span-4 text-center text-red-600">{error}</div>
-        ) : brands.length > 0 ? (
-          brands.slice(0, 4).map((brand) => (
-            <div key={brand.id} className="flex flex-col items-center bg-gray-50 rounded-lg p-1 shadow-sm">
+        ) : displayBrands.length > 0 ? (
+          displayBrands.map((brand) => (
+            <Link
+              key={brand.id}
+              href={`/brands/${brand.slug || brand.id}`}
+              className="flex flex-col items-center bg-gray-50 rounded-lg p-1 shadow-sm hover:shadow-md transition-shadow"
+            >
               {brand.image_url && !imageErrors[brand.id] ? (
                 <Image
                   src={brand.image_url}
@@ -68,7 +68,7 @@ const MobileCatogeryFeature = () => {
                 </div>
               )}
               <span className="text-xs text-gray-700 text-center font-medium">{brand.title}</span>
-            </div>
+            </Link>
           ))
         ) : (
           <div className="col-span-4 text-center text-gray-600">Không tìm thấy thương hiệu nào.</div>

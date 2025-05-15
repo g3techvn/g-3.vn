@@ -9,38 +9,18 @@ import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 
 const VISIBLE_ITEMS = 6;
-const MAX_PRODUCTS = 12;
 
-export default function NewProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function NewProducts({ 
+  products = [],
+  loading = false,
+  error = null
+}: {
+  products: Product[];
+  loading: boolean;
+  error: string | null;
+}) {
   const [startIndex, setStartIndex] = useState(0);
   const { addToCart } = useCart();
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/products?sort=created_at:desc&limit=${MAX_PRODUCTS}`);
-        
-        if (!response.ok) {
-          throw new Error(`Lỗi HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        // Ensure we only take the first 12 products
-        setProducts((data.products || []).slice(0, MAX_PRODUCTS));
-      } catch (error: unknown) {
-        console.error('Error fetching products:', error);
-        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   const nextItem = () => {
     setStartIndex((prev) => (prev + 1) % products.length);

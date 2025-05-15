@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types';
@@ -16,36 +16,20 @@ const bannerImages = [
   'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&auto=format', // Tech
 ];
 
-const MobileBestsellerProducts: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface MobileBestsellerProductsProps {
+  products: Product[];
+  loading: boolean;
+  error: string | null;
+}
+
+const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = ({ 
+  products,
+  loading,
+  error
+}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/products');
-        
-        if (!response.ok) {
-          throw new Error(`Lỗi HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setProducts(data.products || []);
-      } catch (error: unknown) {
-        console.error('Error fetching products:', error);
-        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   // Function to get random banner image
   const getRandomBanner = () => {
@@ -62,12 +46,17 @@ const MobileBestsellerProducts: React.FC = () => {
     }
   };
 
+  // Lấy tối đa 4 sản phẩm để hiển thị và sắp xếp theo rating
+  const displayProducts = [...products]
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, 4);
+
   return (
     <section className="pt-4">
       <div className="flex items-center justify-between px-4 mb-2">
         <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
         <div className="flex gap-1">
-          {products.slice(0, 4).map((_, index) => (
+          {displayProducts.map((_, index) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -100,14 +89,14 @@ const MobileBestsellerProducts: React.FC = () => {
             </div>
           ))}
         </div>
-      ) : products.length > 0 ? (
+      ) : displayProducts.length > 0 ? (
         <div className="relative">
           <div 
             ref={scrollContainerRef}
             onScroll={handleScroll}
             className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide"
           >
-            {products.slice(0, 4).map((product) => (
+            {displayProducts.map((product) => (
               <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
                 <div className="relative w-full aspect-video">
                   <Image

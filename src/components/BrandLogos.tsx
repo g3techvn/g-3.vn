@@ -1,35 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipProvider } from '@/components/ui/Tooltip';
 import { motion } from 'framer-motion';
 import { Brand } from '@/types';
 import Image from 'next/image';
 
-export default function BrandLogos() {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function BrandLogos({
+  brands = [],
+  loading = false,
+  error = null
+}: {
+  brands: Brand[];
+  loading: boolean;
+  error: string | null;
+}) {
   const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
-
-  const fetchBrands = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/brands');
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      setBrands(data.brands || []);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBrands();
-  }, []);
 
   const handleImageError = (brandId: string) => {
     setImageErrors(prev => ({

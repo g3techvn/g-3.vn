@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatCurrency } from '@/utils/helpers';
 import { Product } from '@/types';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +11,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { id, name, price, image_url, original_price, discount_percentage, brand_id, brand, rating, slug } = product;
+  const { addToCart } = useCart();
   
   const hasDiscount = original_price && original_price > price;
   const displayRating = rating || Math.floor(Math.random() * 5) + 1; // Sử dụng rating từ API hoặc tạo giá trị ngẫu nhiên
@@ -77,25 +79,17 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </Link>
-      <div className="absolute bottom-3 right-3 translate-y-10 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+      <div className="absolute bottom-3 right-3">
         <button
-          className="rounded-full bg-primary p-2 text-white shadow-md hover:bg-primary/90"
+          className="rounded-full bg-red-600 p-2 text-white shadow-md hover:bg-red-700 transition-colors duration-200"
           aria-label="Add to cart"
+          onClick={(e) => {
+            e.preventDefault();
+            addToCart(product);
+          }}
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </button>
       </div>

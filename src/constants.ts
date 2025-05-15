@@ -12,6 +12,7 @@ export const SOCIAL_LINKS = [
   { name: 'Shopee', href: 'https://shopee.vn/g3tech' },
   { name: 'Facebook', href: 'https://www.facebook.com/g3.vntech/' },
   { name: 'Tiktok', href: 'https://www.tiktok.com/@g3tech.vn' },
+  { name: 'Youtube', href: 'https://www.youtube.com/@g3-tech' },
 ] as const;
 
 export const SHIPPING_PROVIDERS = [
