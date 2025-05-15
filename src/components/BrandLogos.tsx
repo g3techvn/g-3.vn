@@ -1,93 +1,85 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipProvider } from '@/components/ui/Tooltip';
 import { motion } from 'framer-motion';
-
-// Định nghĩa các thương hiệu
-const brands = [
-  { 
-    name: 'YUNTENG', 
-    color: '#0864b1', 
-    url: '/brands/yunteng', 
-    fontWeight: '600',
-    description: 'Sản phẩm chính: Tripod, Monopod, Gimbal và phụ kiện máy ảnh'
-  },
-  { 
-    name: 'Ulanzi', 
-    color: '#e5004f', 
-    url: '/brands/ulanzi', 
-    fontWeight: '400',
-    description: 'Phụ kiện sáng tạo cho nhiếp ảnh và quay phim'
-  },
-  { 
-    name: 'AUKEY', 
-    color: '#00b798', 
-    url: '/brands/aukey', 
-    fontWeight: '600',
-    description: 'Phụ kiện công nghệ, sạc, adapter chất lượng cao'
-  },
-  { 
-    name: 'TELESIN', 
-    color: '#000000', 
-    url: '/brands/telesin', 
-    fontWeight: '600',
-    description: 'Phụ kiện chuyên dụng cho GoPro và action camera'
-  },
-  { 
-    name: 'PULUZ', 
-    color: '#2175c7', 
-    url: '/brands/puluz', 
-    fontWeight: '600',
-    description: 'Phụ kiện nhiếp ảnh đa dạng, chất lượng'
-  },
-  { 
-    name: 'BOYA', 
-    color: '#000000', 
-    url: '/brands/boya', 
-    fontWeight: '600',
-    description: 'Thiết bị thu âm, microphone chuyên nghiệp'
-  },
-  { 
-    name: 'Baseus', 
-    color: '#1a1a1a', 
-    url: '/brands/baseus', 
-    fontWeight: '600',
-    description: 'Phụ kiện điện tử cao cấp và sạc nhanh'
-  },
-];
+import { Brand } from '@/types';
 
 export default function BrandLogos() {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
+
+  const fetchBrands = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/brands');
+      if (!response.ok) {
+        throw new Error(`Lỗi HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      setBrands(data.brands || []);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  const handleImageError = (brandId: string) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [brandId]: true
+    }));
+  };
+
   return (
     <TooltipProvider>
       <section className="py-8 bg-gray-100 border-y border-gray-100">
         <div className="container bg-white mx-auto px-4 rounded-lg py-4">
           <div className="flex flex-wrap items-center justify-center md:justify-between">
-            {brands.map((brand, index) => (
-              <Tooltip key={index} content={brand.description}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <Link 
-                    href={brand.url}
-                    className="mx-4 md:mx-0 my-3 block"
+            {loading ? (
+              [...Array(7)].map((_, i) => (
+                <div key={i} className="mx-4 md:mx-0 my-3 block h-8 w-24 bg-gray-200 rounded animate-pulse" />
+              ))
+            ) : error ? (
+              <div className="text-center text-red-600 w-full">{error}</div>
+            ) : brands.length > 0 ? (
+              brands.map((brand, index) => (
+                <Tooltip key={brand.id} content={brand.title}>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    <div className="h-8 flex items-center justify-center">
-                      <span 
-                        style={{ 
-                          color: brand.color, 
-                          fontWeight: brand.fontWeight,
-                          letterSpacing: brand.name === 'PULUZ' ? '1px' : 'normal' 
-                        }}
-                        className="text-2xl transition-all hover:opacity-100"
-                      >
-                        {brand.name}
-                      </span>
-                    </div>
-                  </Link>
-                </motion.div>
-              </Tooltip>
-            ))}
+                    <Link 
+                      href={`/brands/${brand.slug}`}
+                      className="mx-4 md:mx-0 my-3 block"
+                    >
+                      <div className="h-8 flex items-center justify-center">
+                        {brand.image_url && !imageErrors[brand.id] ? (
+                          <img
+                            src={brand.image_url}
+                            alt={brand.title}
+                            className="h-8 w-auto max-w-[90px] object-contain"
+                            onError={() => handleImageError(brand.id)}
+                          />
+                        ) : (
+                          <span className="text-2xl font-semibold text-gray-700">
+                            {brand.title.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  </motion.div>
+                </Tooltip>
+              ))
+            ) : (
+              <div className="text-center text-gray-600 w-full">Không tìm thấy thương hiệu nào.</div>
+            )}
           </div>
         </div>
       </section>

@@ -1,56 +1,107 @@
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { CameraIcon } from '@radix-ui/react-icons';
+import { useEffect, useState } from 'react';
 
 type Category = {
   name: string;
-  image: string;
+  slug: string;
+  image_url: string;
 };
-
-// Sample categories data
-const sampleCategories: Category[] = [
-  { name: 'Điện thoại', image: '/images/categories/phone.jpg' },
-  { name: 'Laptop', image: '/images/categories/laptop.jpg' },
-  { name: 'Máy tính bảng', image: '/images/categories/tablet.jpg' },
-  { name: 'Phụ kiện', image: '/images/categories/accessories.jpg' },
-  { name: 'Đồng hồ', image: '/images/categories/watch.jpg' },
-  { name: 'Tai nghe', image: '/images/categories/headphone.jpg' },
-  { name: 'Loa', image: '/images/categories/speaker.jpg' },
-  { name: 'Camera', image: '/images/categories/camera.jpg' },
-  { name: 'Máy in', image: '/images/categories/printer.jpg' },
-  { name: 'Màn hình', image: '/images/categories/monitor.jpg' },
-];
 
 type CategoryGridProps = {
   categories?: Category[];
 };
 
-export default function CategoryGrid({ categories = sampleCategories }: CategoryGridProps) {
+export default function CategoryGrid({ categories: propCategories }: CategoryGridProps) {
+  const [categories, setCategories] = useState<Category[]>(propCategories || []);
+  const [loading, setLoading] = useState(!propCategories);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (propCategories) return; // Nếu có props thì không fetch
+
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/categories');
+        if (!res.ok) throw new Error('Lỗi khi tải danh mục');
+        const data = await res.json();
+        // Giả sử API trả về data.product_cats với trường title, slug, image
+        const mapped = (data.product_cats || []).map((cat: any) => ({
+          name: cat.title,
+          slug: cat.slug,
+          image_url: cat.image_url || '/images/categories/default.jpg', // fallback nếu không có ảnh
+        }));
+        setCategories(mapped);
+      } catch (err: any) {
+        setError(err.message || 'Lỗi không xác định');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [propCategories]);
+
+  if (loading) {
+    return (
+      <section className="py-8 bg-gray-100">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-4 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="animate-pulse h-32 bg-gray-200 rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-8 bg-gray-100">
+        <div className="container mx-auto text-red-600">{error}</div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {categories.map((category, index) => (
-            <Link 
-              key={index} 
-              href={`/product-category/${category.name.toLowerCase().replace(/\s+/g, '-')}`} 
-              className="group"
-            >
-              <Card className="h-full bg-gray-300 hover:bg-gray-200">
-                <CardContent className="flex items-center justify-between w-full p-4">
-                  <div className="flex-1 text-left mr-3">
-                    <h3 className="text-xs md:text-sm font-bold text-gray-800 group-hover:text-red-600 transition-colors leading-tight">
-                      {category.name}
-                    </h3>
-                  </div>
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white shadow-sm flex-shrink-0 flex items-center justify-center">
-                    <CameraIcon className="h-8 w-8 text-gray-500" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        {(() => {
+          const colCount = Math.min(categories.length, 5);
+          const gridColsClass = `grid-cols-${colCount}`;
+          return (
+            <div className={`grid ${gridColsClass} gap-4`}>
+              {categories.map((category, index) => (
+                <Link 
+                  key={index} 
+                  href={`/categories/${category.slug}`} 
+                  className="group"
+                >
+                  <Card className="h-full bg-gray-300 hover:bg-gray-200">
+                    <CardContent className="flex-row items-center  w-full p-4 min-w-0">
+                      <div className="flex-1 text-left">
+                        <h3 className="text-xs md:text-sm font-bold text-gray-800 group-hover:text-red-600 transition-colors leading-tight truncate whitespace-nowrap">
+                          {category.name}
+                        </h3>
+                      </div>
+                      <div className="w-14 h-14 md:w-18 md:h-18 rounded-full shadow-sm  bg-white  flex-shrink-0 flex items-center justify-center ml-3 overflow-hidden">
+                        <img
+                          src={category.image_url}
+                          alt={category.name}
+                          className="object-cover w-full h-full"
+                          onError={(e) => { e.currentTarget.src = '/images/categories/default.jpg'; }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </section>
   );

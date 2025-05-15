@@ -23,63 +23,43 @@ function formatPhoneNumber(phoneNumber: string) {
   return phoneNumber;
 }
 
-interface Category {
-  id: string;
+type Category = {
   name: string;
-  icon: React.ReactNode;
-  href: string;
-  subCategories?: { id: string; name: string; href: string }[];
-}
-
-const categories: Category[] = [
-  {
-    id: 'ergonomic-chair',
-    name: 'GHẾ CÔNG THÁI HỌC',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5zM12 9.5V4.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0zM19 11.5a2.5 2.5 0 015 0v5a2.5 2.5 0 01-5 0v-5z" />
-      </svg>
-    ),
-    href: '#',
-  },
-  {
-    id: 'adjustable-desk',
-    name: 'BÀN NÂNG HẠ',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    ),
-    href: '#',
-  },
-  {
-    id: 'kids-furniture',
-    name: 'BÀN GHẾ TRẺ EM',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    ),
-    href: '#',
-  },
-  {
-    id: 'accessories',
-    name: 'PHỤ KIỆN',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-      </svg>
-    ),
-    href: '#',
-  },
-];
+  slug: string;
+  image_url: string;
+};
 
 export default function StickyNavbar() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isSticky, setIsSticky] = useState(false);
   const [showText, setShowText] = useState(false);
   
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/categories');
+        if (!res.ok) throw new Error('Lỗi khi tải danh mục');
+        const data = await res.json();
+        const mapped = (data.product_cats || []).map((cat: any) => ({
+          name: cat.title,
+          slug: cat.slug,
+          image_url: cat.image_url || '/images/categories/default.jpg',
+        }));
+        setCategories(mapped);
+      } catch (err: any) {
+        setError(err.message || 'Lỗi không xác định');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   // Effect to handle scroll behavior and make the navbar sticky
   useEffect(() => {
     const handleScroll = () => {
@@ -176,59 +156,39 @@ export default function StickyNavbar() {
           </div>
           
           <ul className="py-2 flex-1 overflow-y-auto">
-            {categories.map((category) => (
-              <li 
-                key={category.id}
-                className="relative"
-                onMouseEnter={() => handleMouseEnter(category.id)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link 
-                  href={category.href}
-                  className={cn(
-                    "flex items-center py-3 hover:bg-gray-100 transition-colors",
-                    isSticky ? "px-4" : "px-0 justify-center"
-                  )}
+            {loading ? (
+              <li className="px-4 py-2 text-gray-400">Đang tải...</li>
+            ) : error ? (
+              <li className="px-4 py-2 text-red-600">{error}</li>
+            ) : (
+              categories.map((category) => (
+                <li 
+                  key={category.slug}
+                  className="relative"
+                  onMouseEnter={() => handleMouseEnter(category.slug)}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  <span className={cn(
-                    "text-gray-500",
-                    !isSticky && "mx-auto"
-                  )}>{category.icon}</span>
-                  <span className={cn(
-                    "text-sm font-medium transition-all duration-300 whitespace-nowrap",
-                    showText ? "opacity-100 ml-3" : "opacity-0 ml-0 w-0 overflow-hidden"
-                  )}>{category.name}</span>
-                  {category.subCategories && showText && (
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-4 w-4 ml-auto text-gray-400" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </Link>
-                
-                {category.subCategories && activeCategory === category.id && showText && (
-                  <div className="absolute left-full top-0 w-[250px] bg-white shadow-lg rounded-r-lg overflow-hidden z-50">
-                    <ul className="py-2">
-                      {category.subCategories.map((subCategory) => (
-                        <li key={subCategory.id}>
-                          <Link 
-                            href={subCategory.href}
-                            className="block px-4 py-2 hover:bg-gray-100 transition-colors text-sm"
-                          >
-                            {subCategory.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            ))}
+                  <Link 
+                    href={`/categories/${category.slug}`}
+                    className={cn(
+                      "flex items-center py-3 hover:bg-gray-100 transition-colors",
+                      isSticky ? "px-4" : "px-0 justify-center"
+                    )}
+                  >
+                    <span className={cn(
+                      "text-gray-500",
+                      !isSticky && "mx-auto"
+                    )}>
+                      <img src={category.image_url} alt={category.name} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                    </span>
+                    <span className={cn(
+                      "text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                      showText ? "opacity-100 ml-3" : "opacity-0 ml-0 w-0 overflow-hidden"
+                    )}>{category.name}</span>
+                  </Link>
+                </li>
+              ))
+            )}
           </ul>
         </div>
         

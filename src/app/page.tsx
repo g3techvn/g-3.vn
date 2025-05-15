@@ -73,7 +73,7 @@ export default function Home() {
       <HeroCarousel />
 
       {/* Category Grid */}
-      {/* <CategoryGrid /> */}
+      <CategoryGrid />
 
       {/* Featured Products */}
       <FeaturedProducts  />
@@ -85,7 +85,7 @@ export default function Home() {
       <NewProducts />
 
       {/* Brands */}
-      {/* <BrandLogos /> */}
+      <BrandLogos />
 
       {/* Blog Posts */}
       <BlogPosts />

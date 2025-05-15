@@ -29,10 +29,10 @@ export type Category = {
 
 export type Brand = {
   id: string;
-  name: string;
-  description: string;
+  title: string;
+  slug: string;
   created_at: string;
-  updated_at: string;
+  image_url?: string;
 };
 
 export type Tag = {

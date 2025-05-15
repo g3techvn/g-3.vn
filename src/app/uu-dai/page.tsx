@@ -66,19 +66,19 @@ export default function PromotionsPage() {
         {error && <p className="text-red-500 text-center">Lỗi: {error}</p>}
         {!isLoading && !error && promotions.length === 0 && <p className="text-center">Không có khuyến mãi nào.</p>}
         {!isLoading && !error && promotions.length > 0 && (
-          <div className="flex flex-col items-center space-y-8">
+          <div className="flex flex-col items-center space-y-1 bg-gray-200">
             {promotions.map((promo) => (
-              <div key={promo.id} className="w-full bg-white flex flex-col items-center shadow rounded-lg overflow-hidden max-w-lg mx-auto border border-gray-200">
+              <div key={promo.id} className="w-full bg-white flex flex-col items-center  overflow-hidden max-w-lg mx-auto border border-gray-200">
                 {/* Facebook-style Header */}
                 <div className="flex items-center justify-between w-full p-4 pb-2">
                   <div className="flex items-center space-x-3">
                     <img src="/images/g3-avatar.jpg" alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
                     <div>
-                      <div className="font-semibold text-gray-900 text-sm">G3-TECH</div>
-                      <div className="text-xs text-gray-500">{getTimeAgo(promo.created_at)} · <span className="inline-block align-middle">🌐</span></div>
+                      <div className="font-semibold text-gray-900 text-sm">G3 - Công Thái Học</div>
+                      <div className="text-xs text-gray-500 ">{getTimeAgo(promo.created_at)} · <span className="inline-block align-middle">🌐</span></div>
                     </div>
                   </div>
-                  <button className="text-gray-400 hover:text-gray-600 text-xl">⋯</button>
+                  <button className="text-gray-400 hover:text-gray-600 text-xl rotate-90">⋯</button>
                 </div>
 
                 {/* Description Section */}

@@ -1,29 +1,27 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: { slug: string } }) {
   try {
-    // Khởi tạo Supabase client
+    const { slug } = params;
     const supabase = createServerClient();
 
-    // Lấy danh sách thương hiệu từ bảng brands
-    const { data: brands, error } = await supabase
-      .from('brands')
-      .select('id, title, slug, created_at, image_url');
+    // Join products với product_cats, lọc theo slug
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*, product_cats!inner(id, title, slug)')
+      .eq('product_cats.slug', slug);
 
     if (error) {
-      console.error('Supabase error:', error);
       return NextResponse.json(
         { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
         { status: 500 }
       );
     }
 
-    console.log(`Query successful, returning ${brands.length} brands`);
-    return NextResponse.json({ brands });
+    return NextResponse.json({ products });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in brands API:', error);
     return NextResponse.json(
       { error: `Đã xảy ra lỗi khi xử lý yêu cầu: ${errorMessage}` },
       { status: 500 }

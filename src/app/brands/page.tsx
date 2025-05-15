@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Brand } from '@/types';
-import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileLayout from '@/components/mobile/MobileLayout';
 
@@ -40,7 +39,7 @@ export default function BrandsPage() {
     <div className="md:hidden">
       <MobileHomeHeader />
       <div className="px-4 py-4">
-        <MobileCatogeryFeature />
+       
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600">
             Đã xảy ra lỗi: {error}
@@ -65,17 +64,14 @@ export default function BrandsPage() {
                 <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                   <div className="flex h-full items-center justify-center">
                     <span className="text-2xl font-bold text-gray-400">
-                      {brand.name.charAt(0)}
+                      {brand.title.charAt(0)}
                     </span>
                   </div>
                 </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {brand.name}
+                    {brand.title}
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                    {brand.description}
-                  </p>
                 </div>
               </div>
             ))}
@@ -92,7 +88,6 @@ export default function BrandsPage() {
   // Desktop View
   const DesktopView = () => (
     <div className="hidden md:block container mx-auto px-2 py-4">
-      <h1 className="mb-4 text-2xl font-bold">Thương hiệu</h1>
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600">
           Đã xảy ra lỗi: {error}
@@ -117,17 +112,14 @@ export default function BrandsPage() {
               <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                 <div className="flex h-full items-center justify-center">
                   <span className="text-2xl font-bold text-gray-400">
-                    {brand.name.charAt(0)}
+                    {brand.title.charAt(0)}
                   </span>
                 </div>
               </div>
               <div className="mt-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {brand.name}
+                  {brand.title}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                  {brand.description}
-                </p>
               </div>
             </div>
           ))}
