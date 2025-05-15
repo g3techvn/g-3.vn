@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const supabase = createServerClient();
     
     // Xây dựng query để lấy dữ liệu từ bảng product_cats
-    let query = supabase
+    const query = supabase
       .from('product_cats') // Changed from 'products'
       .select('*');
     

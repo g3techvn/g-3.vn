@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
-export async function GET(request: Request, { params }: { params: { slug: string } }) {
+export async function GET(request: Request) {
   try {
-    const { slug } = params;
+    // Lấy slug từ URL
+    const url = new URL(request.url);
+    const slug = url.pathname.split('/').pop();
+
     const supabase = createServerClient();
 
     // Join products với product_cats, lọc theo slug

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Brand } from '@/types';
+import Image from 'next/image';
 
 const MobileCatogeryFeature = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -53,9 +54,11 @@ const MobileCatogeryFeature = () => {
           brands.slice(0, 4).map((brand) => (
             <div key={brand.id} className="flex flex-col items-center bg-gray-50 rounded-lg p-1 shadow-sm">
               {brand.image_url && !imageErrors[brand.id] ? (
-                <img
+                <Image
                   src={brand.image_url}
                   alt={brand.title}
+                  width={56}
+                  height={56}
                   className="w-14 h-14 object-contain rounded-lg mb-2"
                   onError={() => handleImageError(brand.id)}
                 />

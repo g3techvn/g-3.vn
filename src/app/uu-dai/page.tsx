@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
+import Image from 'next/image';
 
 interface Promotion {
   id: number;
@@ -72,7 +73,13 @@ export default function PromotionsPage() {
                 {/* Facebook-style Header */}
                 <div className="flex items-center justify-between w-full p-4 pb-2">
                   <div className="flex items-center space-x-3">
-                    <img src="/images/g3-avatar.jpg" alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
+                    <Image
+                      src="/images/g3-avatar.jpg"
+                      alt="avatar"
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                    />
                     <div>
                       <div className="font-semibold text-gray-900 text-sm">G3 - Công Thái Học</div>
                       <div className="text-xs text-gray-500 ">{getTimeAgo(promo.created_at)} · <span className="inline-block align-middle">🌐</span></div>
@@ -99,9 +106,11 @@ export default function PromotionsPage() {
                 {/* Image/Video Section */}
                 <div className="relative w-full bg-black flex justify-center items-center">
                   {promo.image && (
-                    <img
+                    <Image
                       src={promo.image}
                       alt={promo.title}
+                      width={800}
+                      height={600}
                       className="w-full h-auto object-contain max-h-[600px] bg-gray-100"
                     />
                   )}

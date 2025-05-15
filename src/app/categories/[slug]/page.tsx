@@ -141,7 +141,7 @@ export default function CategoryProductsPage({ params }: { params: Promise<{ slu
                             alt={product.name}
                             width={300}
                             height={300}
-                            className="object-contain w-full h-full"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 flex flex-col px-2 pt-2 pb-1">
@@ -258,9 +258,11 @@ export default function CategoryProductsPage({ params }: { params: Promise<{ slu
                             onClick={() => setOpenVideo({ videoUrl: getEmbedUrl(product.video_url!), name: product.name })}
                             title={product.name}
                           >
-                            <img
+                            <Image
                               src={product.image_url}
                               alt={product.name}
+                              width={300}
+                              height={300}
                               className="w-full h-full object-cover"
                             />
                           </button>

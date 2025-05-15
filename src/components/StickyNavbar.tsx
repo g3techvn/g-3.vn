@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { COMPANY_INFO } from '@/constants';
+import Image from 'next/image';
 
 // Định nghĩa hàm cn inline để tránh lỗi import
 function cn(...inputs: ClassValue[]) {
@@ -29,6 +30,12 @@ type Category = {
   image_url: string;
 };
 
+type ApiCategory = {
+  title: string;
+  slug: string;
+  image_url?: string;
+};
+
 export default function StickyNavbar() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,14 +52,18 @@ export default function StickyNavbar() {
         const res = await fetch('/api/categories');
         if (!res.ok) throw new Error('Lỗi khi tải danh mục');
         const data = await res.json();
-        const mapped = (data.product_cats || []).map((cat: any) => ({
+        const mapped = (data.product_cats || []).map((cat: ApiCategory) => ({
           name: cat.title,
           slug: cat.slug,
           image_url: cat.image_url || '/images/categories/default.jpg',
         }));
         setCategories(mapped);
-      } catch (err: any) {
-        setError(err.message || 'Lỗi không xác định');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message || 'Lỗi không xác định');
+        } else {
+          setError('Lỗi không xác định');
+        }
       } finally {
         setLoading(false);
       }
@@ -179,7 +190,13 @@ export default function StickyNavbar() {
                       "text-gray-500",
                       !isSticky && "mx-auto"
                     )}>
-                      <img src={category.image_url} alt={category.name} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                      <Image
+                        src={category.image_url}
+                        alt={category.name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      />
                     </span>
                     <span className={cn(
                       "text-sm font-medium transition-all duration-300 whitespace-nowrap",

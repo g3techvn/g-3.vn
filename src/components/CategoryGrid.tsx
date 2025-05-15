@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { CameraIcon } from '@radix-ui/react-icons';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 type Category = {
   name: string;
@@ -9,9 +10,30 @@ type Category = {
   image_url: string;
 };
 
+type ApiCategory = {
+  title: string;
+  slug: string;
+  image_url?: string;
+};
+
 type CategoryGridProps = {
   categories?: Category[];
 };
+
+// Helper component to handle fallback for Next.js Image
+function CategoryImage({ src, alt }: { src: string; alt: string }) {
+  const [imgSrc, setImgSrc] = useState(src);
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      width={56}
+      height={56}
+      className="object-cover w-full h-full"
+      onError={() => setImgSrc('/images/categories/default.jpg')}
+    />
+  );
+}
 
 export default function CategoryGrid({ categories: propCategories }: CategoryGridProps) {
   const [categories, setCategories] = useState<Category[]>(propCategories || []);
@@ -28,14 +50,18 @@ export default function CategoryGrid({ categories: propCategories }: CategoryGri
         if (!res.ok) throw new Error('Lỗi khi tải danh mục');
         const data = await res.json();
         // Giả sử API trả về data.product_cats với trường title, slug, image
-        const mapped = (data.product_cats || []).map((cat: any) => ({
+        const mapped = (data.product_cats || []).map((cat: ApiCategory) => ({
           name: cat.title,
           slug: cat.slug,
           image_url: cat.image_url || '/images/categories/default.jpg', // fallback nếu không có ảnh
         }));
         setCategories(mapped);
-      } catch (err: any) {
-        setError(err.message || 'Lỗi không xác định');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Lỗi không xác định');
+        }
       } finally {
         setLoading(false);
       }
@@ -88,11 +114,9 @@ export default function CategoryGrid({ categories: propCategories }: CategoryGri
                         </h3>
                       </div>
                       <div className="w-14 h-14 md:w-18 md:h-18 rounded-full shadow-sm  bg-white  flex-shrink-0 flex items-center justify-center ml-3 overflow-hidden">
-                        <img
+                        <CategoryImage
                           src={category.image_url}
                           alt={category.name}
-                          className="object-cover w-full h-full"
-                          onError={(e) => { e.currentTarget.src = '/images/categories/default.jpg'; }}
                         />
                       </div>
                     </CardContent>

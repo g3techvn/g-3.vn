@@ -257,9 +257,11 @@ export default function BrandProductsPage({ params }: { params: Promise<{ slug: 
                             onClick={() => setOpenVideo({ videoUrl: getEmbedUrl(product.video_url!), name: product.name })}
                             title={product.name}
                           >
-                            <img
+                            <Image
                               src={product.image_url}
                               alt={product.name}
+                              width={300}
+                              height={300}
                               className="w-full h-full object-cover"
                             />
                           </button>

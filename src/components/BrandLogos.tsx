@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Tooltip, TooltipProvider } from '@/components/ui/Tooltip';
 import { motion } from 'framer-motion';
 import { Brand } from '@/types';
+import Image from 'next/image';
 
 export default function BrandLogos() {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -61,11 +62,14 @@ export default function BrandLogos() {
                     >
                       <div className="h-8 flex items-center justify-center">
                         {brand.image_url && !imageErrors[brand.id] ? (
-                          <img
+                          <Image
                             src={brand.image_url}
                             alt={brand.title}
-                            className="h-8 w-auto max-w-[90px] object-contain"
+                            width={90}
+                            height={32}
+                            style={{ objectFit: 'contain', height: '2rem', width: 'auto', maxWidth: '90px' }}
                             onError={() => handleImageError(brand.id)}
+                            unoptimized
                           />
                         ) : (
                           <span className="text-2xl font-semibold text-gray-700">
