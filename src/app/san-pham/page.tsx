@@ -14,7 +14,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
-  const [maxPrice, setMaxPrice] = useState(10000000);
+  const [maxPrice, setMaxPrice] = useState<number>(0); // Bắt đầu với 0 và cập nhật sau khi có dữ liệu
 
   const fetchProducts = async () => {
     try {
@@ -37,9 +37,16 @@ export default function ProductsPage() {
       setFilteredProducts(productsData);
       
       // Tính giá trị sản phẩm đắt nhất và làm tròn lên hàng triệu
-      let max = productsData.length > 0 ? Math.max(...productsData.map((p: Product) => p.price)) : 10000000;
-      max = Math.ceil(max / 1000000) * 1000000;
-      setMaxPrice(max);
+      if (productsData.length > 0) {
+        let max = Math.max(...productsData.map((p: Product) => p.price));
+        // Làm tròn lên hàng triệu gần nhất
+        max = Math.ceil(max / 1000000) * 1000000;
+        setMaxPrice(max);
+        console.log(`Giá cao nhất: ${max.toLocaleString()} VND`);
+      } else {
+        // Nếu không có sản phẩm, đặt giá cao nhất mặc định là 10 triệu
+        setMaxPrice(10000000);
+      }
       
       console.log(`Nhận được ${productsData.length} sản phẩm từ API`);
 
@@ -47,6 +54,8 @@ export default function ProductsPage() {
     } catch (error: unknown) {
       console.error('Error fetching products:', error);
       setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
+      // Đặt giá mặc định nếu có lỗi
+      setMaxPrice(10000000);
     } finally {
       setLoading(false);
     }
@@ -62,7 +71,7 @@ export default function ProductsPage() {
     const filtered = products.filter((product) => {
       const priceInRange = product.price >= priceRange.min && product.price <= priceRange.max;
       const brandMatch = brandIds.length === 0 || (product.brand_id && brandIds.includes(Number(product.brand_id)));
-      const categoryMatch = categoryIds.length === 0 || (product.category_id && categoryIds.includes(Number(product.category_id)));
+      const categoryMatch = categoryIds.length === 0 || (product.pd_cat_id && categoryIds.includes(Number(product.pd_cat_id)));
       return priceInRange && brandMatch && categoryMatch;
     });
     
@@ -79,7 +88,11 @@ export default function ProductsPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
         {/* Sidebar Filter */}
         <div className="md:col-span-1">
-          <SidebarFilter onFilterChange={handleFilterChange} maxPrice={maxPrice} />
+          <SidebarFilter 
+            onFilterChange={handleFilterChange}
+            maxPrice={maxPrice}
+            products={products}
+          />
         </div>
 
         {/* Products Grid */}

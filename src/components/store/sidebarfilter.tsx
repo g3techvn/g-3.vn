@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import { Product } from '@/types';
 
 interface SidebarFilterProps {
   onFilterChange: (filters: {
@@ -11,6 +12,7 @@ interface SidebarFilterProps {
     categoryIds: number[];
   }) => void;
   maxPrice: number;
+  products: Product[];
 }
 
 interface Brand {
@@ -27,8 +29,8 @@ interface Category {
   description?: string;
 }
 
-export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) {
-  const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice });
+export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFilterProps) {
+  const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice || 10000000 });
   const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
@@ -38,14 +40,29 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [errorCategories, setErrorCategories] = useState<string | null>(null);
+  
+  // Refs để theo dõi brands và categories đã tải từ API
+  const allBrandsRef = useRef<Brand[]>([]);
+  const allCategoriesRef = useRef<Category[]>([]);
 
+  // Cập nhật lại priceRange khi maxPrice thay đổi
+  useEffect(() => {
+    if (maxPrice > 0 && priceRange.max !== maxPrice) {
+      setPriceRange(prev => ({ min: prev.min, max: maxPrice }));
+    }
+  }, [maxPrice]);
+
+  // Lấy danh sách brands từ API
   useEffect(() => {
     const fetchBrands = async () => {
       setLoadingBrands(true);
       try {
         const res = await fetch('/api/brands');
         const data = await res.json();
-        setBrands(data.brands || []);
+        const fetchedBrands = data.brands || [];
+        // Lưu tất cả brands vào ref
+        allBrandsRef.current = fetchedBrands;
+        setBrands(fetchedBrands);
       } catch (err) {
         setErrorBrands('Không thể tải danh sách thương hiệu');
       } finally {
@@ -55,13 +72,17 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
     fetchBrands();
   }, []);
 
+  // Lấy danh sách categories từ API
   useEffect(() => {
     const fetchCategories = async () => {
       setLoadingCategories(true);
       try {
         const res = await fetch('/api/categories');
         const data = await res.json();
-        setCategories(data.product_cats || []);
+        const fetchedCategories = data.product_cats || [];
+        // Lưu tất cả categories vào ref
+        allCategoriesRef.current = fetchedCategories;
+        setCategories(fetchedCategories);
       } catch (err) {
         setErrorCategories('Không thể tải danh sách danh mục');
       } finally {
@@ -70,6 +91,43 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
     };
     fetchCategories();
   }, []);
+
+  // Lọc danh sách thương hiệu và danh mục dựa trên sản phẩm hiện tại
+  useEffect(() => {
+    if (products.length > 0 && !loadingBrands && !loadingCategories) {
+      // Tạo Set các ID từ sản phẩm hiện tại
+      const productBrandIds = new Set(products.map(product => Number(product.brand_id)).filter(Boolean));
+      const productCategoryIds = new Set(products.map(product => Number(product.pd_cat_id)).filter(Boolean));
+      
+      // Lọc brands từ danh sách gốc
+      const availableBrands = allBrandsRef.current.filter(brand => productBrandIds.has(brand.id));
+      const availableCategories = allCategoriesRef.current.filter(category => productCategoryIds.has(category.id));
+      
+      // So sánh để kiểm tra có cần update state không
+      const brandsChanged = JSON.stringify(availableBrands.map(b => b.id)) !== JSON.stringify(brands.map(b => b.id));
+      const categoriesChanged = JSON.stringify(availableCategories.map(c => c.id)) !== JSON.stringify(categories.map(c => c.id));
+      
+      // Chỉ cập nhật state khi có thay đổi thực sự
+      if (brandsChanged) {
+        setBrands(availableBrands);
+      }
+      
+      if (categoriesChanged) {
+        setCategories(availableCategories);
+      }
+      
+      // Cập nhật selected IDs
+      const newSelectedBrandIds = selectedBrandIds.filter(id => productBrandIds.has(id));
+      if (JSON.stringify(newSelectedBrandIds) !== JSON.stringify(selectedBrandIds)) {
+        setSelectedBrandIds(newSelectedBrandIds);
+      }
+      
+      const newSelectedCategoryIds = selectedCategoryIds.filter(id => productCategoryIds.has(id));
+      if (JSON.stringify(newSelectedCategoryIds) !== JSON.stringify(selectedCategoryIds)) {
+        setSelectedCategoryIds(newSelectedCategoryIds);
+      }
+    }
+  }, [products, loadingBrands, loadingCategories]);
 
   // Gọi onFilterChange mỗi khi filter thay đổi
   useEffect(() => {
@@ -108,6 +166,8 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
             <div>Đang tải...</div>
           ) : errorBrands ? (
             <div className="text-red-500 text-sm">{errorBrands}</div>
+          ) : brands.length === 0 ? (
+            <div className="text-sm text-gray-500">Không có thương hiệu</div>
           ) : (
             <div className="space-y-2">
               {brands.map((brand) => (
@@ -131,6 +191,8 @@ export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) 
             <div>Đang tải...</div>
           ) : errorCategories ? (
             <div className="text-red-500 text-sm">{errorCategories}</div>
+          ) : categories.length === 0 ? (
+            <div className="text-sm text-gray-500">Không có danh mục</div>
           ) : (
             <div className="space-y-2">
               {categories.map((cat) => (

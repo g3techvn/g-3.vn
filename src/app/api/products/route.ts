@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     
     // Thêm các điều kiện filter
     if (category_id) {
-      query = query.eq('category_id', category_id);
+      query = query.eq('pd_cat_id', category_id);
     }
     
     if (brand_id) {
