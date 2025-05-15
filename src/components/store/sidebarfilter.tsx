@@ -28,7 +28,7 @@ interface Category {
 }
 
 export function SidebarFilter({ onFilterChange, maxPrice }: SidebarFilterProps) {
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice });
   const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
