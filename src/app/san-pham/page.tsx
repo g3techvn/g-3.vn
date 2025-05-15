@@ -13,8 +13,8 @@ export default function ProductsPage() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [brands, setBrands] = useState<string[]>([]);
   const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
+  const [maxPrice, setMaxPrice] = useState(10000000);
 
   const fetchProducts = async () => {
     try {
@@ -30,33 +30,20 @@ export default function ProductsPage() {
       }
       
       const data = await response.json();
-      const productsData = data.products || [];
+      let productsData = data.products || [];
+      // Sắp xếp sản phẩm theo giá tăng dần
+      productsData = productsData.sort((a: Product, b: Product) => a.price - b.price);
       setProducts(productsData);
       setFilteredProducts(productsData);
       
-      // Extract unique brands and ensure they are strings
-      const uniqueBrands = Array.from(
-        new Set(productsData.map((p: Product) => p.brand || ''))
-      ).filter((brand): brand is string => typeof brand === 'string');
-      
-      setBrands(uniqueBrands);
+      // Tính giá trị sản phẩm đắt nhất và làm tròn lên hàng triệu
+      let max = productsData.length > 0 ? Math.max(...productsData.map((p: Product) => p.price)) : 10000000;
+      max = Math.ceil(max / 1000000) * 1000000;
+      setMaxPrice(max);
       
       console.log(`Nhận được ${productsData.length} sản phẩm từ API`);
 
-      // Phương án 2: Sử dụng trực tiếp browser client
-      // Uncomment nếu muốn sử dụng
-      // const supabase = createBrowserClient();
-      // const { data, error } = await supabase
-      //   .from('products')
-      //   .select('*')
-      //   .order('created_at', { ascending: false });
-      // 
-      // if (error) {
-      //   throw new Error(error.message);
-      // }
-      // 
-      // setProducts(data || []);
-      // console.log(`Nhận được ${data?.length || 0} sản phẩm từ Supabase Browser Client`);
+      
     } catch (error: unknown) {
       console.error('Error fetching products:', error);
       setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
@@ -67,17 +54,20 @@ export default function ProductsPage() {
 
   const handleFilterChange = (filters: {
     priceRange: { min: number; max: number };
-    brands: string[];
+    brandIds: number[];
+    categoryIds: number[];
   }) => {
-    const { priceRange, brands: selectedBrands } = filters;
+    const { priceRange, brandIds, categoryIds } = filters;
     
     const filtered = products.filter((product) => {
       const priceInRange = product.price >= priceRange.min && product.price <= priceRange.max;
-      const brandMatch = selectedBrands.length === 0 || (product.brand && selectedBrands.includes(product.brand));
-      return priceInRange && brandMatch;
+      const brandMatch = brandIds.length === 0 || (product.brand_id && brandIds.includes(Number(product.brand_id)));
+      const categoryMatch = categoryIds.length === 0 || (product.category_id && categoryIds.includes(Number(product.category_id)));
+      return priceInRange && brandMatch && categoryMatch;
     });
     
-    setFilteredProducts(filtered);
+    // Sắp xếp sản phẩm đã lọc theo giá tăng dần
+    setFilteredProducts(filtered.sort((a, b) => a.price - b.price));
   };
 
   useEffect(() => {
@@ -89,7 +79,7 @@ export default function ProductsPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
         {/* Sidebar Filter */}
         <div className="md:col-span-1">
-          <SidebarFilter onFilterChange={handleFilterChange} brands={brands} />
+          <SidebarFilter onFilterChange={handleFilterChange} maxPrice={maxPrice} />
         </div>
 
         {/* Products Grid */}
