@@ -1,10 +1,10 @@
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import Image from 'next/image';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon, StarIcon, ShareIcon, CloudIcon, MinusCircleIcon, TrashIcon, ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, XMarkIcon, ChevronRightIcon, PlayCircleIcon, ChevronUpIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon, StarIcon, ShareIcon, CloudIcon, MinusCircleIcon, TrashIcon, ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, XMarkIcon, ChevronRightIcon, PlayCircleIcon, ChevronUpIcon, ChatBubbleLeftIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 interface Comment {
@@ -71,14 +71,43 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
   const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Drawer state for "Thêm giỏ hàng"
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<string>('Đen');
+  const [quantity, setQuantity] = useState(1);
+  // Add new state for brand
+  const [brandInfo, setBrandInfo] = useState<Brand | null>(null);
+  // Available colors - mockup data
+  const colors = ['Đen', 'Xám', 'Đen Hồng'];
   // Các info phụ dùng giá trị mặc định vì không có trong Product
   const rating = product.rating || 4.1;
   const ratingCount = 394000; // mặc định
   const size = '163 MB'; // mặc định
   const age = '3+'; // mặc định
-  const publisher = product.brand || 'Nhà phát hành';
+  // Use brandInfo.title if available, otherwise fall back to product.brand or default
+  const publisher = brandInfo?.title || product.brand || 'G3 - TECH';
   // Tag thể loại tĩnh (vì Product không có tags)
   const tags: string[] = ['Công thái học', 'Văn phòng', 'Sức khỏe', 'Làm việc lâu dài', 'Hỗ trợ lưng'];
+
+  // Add useEffect to fetch brand details
+  useEffect(() => {
+    const fetchBrandInfo = async () => {
+      if (product.brand_id) {
+        try {
+          const response = await fetch(`/api/brands/id/${product.brand_id}`);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const data = await response.json();
+          if (data.brand) {
+            setBrandInfo(data.brand);
+          }
+        } catch (error) {
+          console.error('Error fetching brand info:', error);
+        }
+      }
+    };
+    
+    fetchBrandInfo();
+  }, [product.brand_id]);
 
   // Mock comments data
   const comments: Comment[] = [
@@ -194,6 +223,58 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
     setIsMenuOpen(false);
   };
 
+  const handleAddToCart = () => {
+    // Open drawer instead of directly adding to cart
+    setIsCartDrawerOpen(true);
+  };
+  
+  const confirmAddToCart = () => {
+    // Add to cart with selected options
+    const productWithOptions = {
+      ...product,
+      selectedOptions: {
+        color: selectedColor,
+        quantity: quantity
+      }
+    };
+    
+    // Add to cart multiple times based on quantity or pass the quantity to addToCart
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product);
+    }
+    
+    setIsCartDrawerOpen(false);
+    
+    toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, {
+      duration: 3000,
+      position: 'top-right',
+      style: {
+        background: '#fff',
+        color: '#333',
+        padding: '16px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        fontSize: '14px',
+        fontWeight: '500',
+        maxWidth: '300px',
+        border: 'none',
+      },
+      icon: '🛒',
+      iconTheme: {
+        primary: '#fff',
+        secondary: '#333',
+      },
+    });
+  };
+  
+  const incrementQuantity = () => {
+    setQuantity(prev => Math.min(prev + 1, 99));
+  };
+  
+  const decrementQuantity = () => {
+    setQuantity(prev => Math.max(prev - 1, 1));
+  };
+
   return (
     <div className="md:hidden bg-white min-h-screen">
       {/* HEADER Shopee style */}
@@ -201,7 +282,9 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         <div className="flex items-center h-14 px-2 relative">
           <button
             onClick={() => {
-              if (product.brand_slug) {
+              if (brandInfo?.slug) {
+                router.push(`/brands/${brandInfo.slug}`);
+              } else if (product.brand_slug) {
                 router.push(`/brands/${product.brand_slug}`);
               } else {
                 router.back();
@@ -338,7 +421,13 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
           </div>
           <div className="text-xs text-gray-500">Đã bán 114</div>
         </div>
-        {/* Đã xoá tuỳ chọn màu ở đây */}
+        {/* Brand display */}
+        {publisher && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-sm text-gray-600">Thương hiệu:</span>
+            <span className="text-sm font-medium text-gray-800">{publisher}</span>
+          </div>
+        )}
       </div>
 
       {/* Title sản phẩm */}
@@ -382,29 +471,7 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         <div className="h-8 w-px bg-gray-300 self-center"></div>
         <button
           className="flex flex-col items-center justify-center basis-1/4 h-14 text-red-600 rounded-xl hover:bg-gray-50 transition-colors"
-          onClick={() => { 
-            addToCart(product);
-            toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
-              duration: 3000,
-              position: 'top-right',
-              style: {
-                background: '#fff',
-                color: '#333',
-                padding: '16px',
-                borderRadius: '10px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                fontSize: '14px',
-                fontWeight: '500',
-                maxWidth: '300px',
-                border: 'none',
-              },
-              icon: '🛒',
-              iconTheme: {
-                primary: '#fff',
-                secondary: '#333',
-              },
-            });
-          }}
+          onClick={handleAddToCart}
         >
           <ShoppingCartIcon className="w-6 h-6" />
           <span className="text-xs mt-1">Thêm giỏ hàng</span>
@@ -418,7 +485,107 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
         </button>
       </div>
 
-      
+      {/* Cart Drawer */}
+      {isCartDrawerOpen && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-70 transition-opacity"
+            onClick={() => setIsCartDrawerOpen(false)}
+          />
+          
+          {/* Drawer */}
+          <div className="fixed bottom-0 left-0 right-0 z-80 bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-in-out max-h-[90vh] overflow-y-auto">
+            {/* Header with close button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="text-lg font-medium">Thêm vào giỏ hàng</h3>
+              <button 
+                onClick={() => setIsCartDrawerOpen(false)}
+                className="p-1 rounded-full hover:bg-gray-100"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            
+            {/* Product info */}
+            <div className="p-4 flex items-center gap-3 border-b border-gray-100">
+              <div className="relative w-20 h-20 rounded-lg border border-gray-200 overflow-hidden flex-shrink-0">
+                <Image 
+                  src={product.image_url || '/placeholder.png'}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-medium text-gray-900 line-clamp-2">{product.name}</h4>
+                <div className="mt-1 text-red-600 font-semibold">
+                  {product.price?.toLocaleString('vi-VN')}₫
+                </div>
+                <div className="mt-1 text-sm text-gray-500">
+                  Kho: 999
+                </div>
+              </div>
+            </div>
+            
+            {/* Color options */}
+            <div className="p-4 border-b border-gray-100">
+              <h4 className="text-base font-medium mb-3">Màu Sắc</h4>
+              <div className="flex flex-wrap gap-2">
+                {colors.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`px-4 py-2 border rounded-lg text-sm ${
+                      selectedColor === color 
+                        ? 'border-red-500 text-red-600 bg-red-50' 
+                        : 'border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Quantity */}
+            <div className="p-4 border-b border-gray-100">
+              <h4 className="text-base font-medium mb-3">Số lượng</h4>
+              <div className="flex items-center w-32">
+                <button 
+                  onClick={decrementQuantity}
+                  disabled={quantity <= 1}
+                  className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded-l-lg ${
+                    quantity <= 1 ? 'text-gray-300' : 'text-gray-700'
+                  }`}
+                >
+                  <MinusIcon className="w-5 h-5" />
+                </button>
+                <div className="w-12 h-10 flex items-center justify-center border-t border-b border-gray-300 text-center">
+                  {quantity}
+                </div>
+                <button 
+                  onClick={incrementQuantity}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-r-lg text-gray-700"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Action buttons */}
+            <div className="p-4">
+              <button
+                onClick={confirmAddToCart}
+                className="w-full bg-red-600 text-white h-12 text-base font-semibold shadow hover:bg-red-700 transition-colors rounded-lg flex items-center justify-center"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Mô tả sản phẩm */}
       <div className="prose max-w-none px-4 mt-2 pb-8">
