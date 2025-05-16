@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { ImageItem } from '@/types/supabase';
+import { COMPANY_INFO } from '@/constants';
 
 interface Comment {
   id: string;
@@ -535,7 +536,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       <div className="fixed bottom-0 left-0 right-0 z-60 bg-white border-t border-gray-200 flex gap-2 shadow-lg p-3">
         <button
           className="flex flex-col items-center justify-center basis-1/4 h-14 text-red-600 rounded-xl hover:bg-gray-50 transition-colors"
-          onClick={() => { console.log('Chat now:', product.id); }}
+          onClick={() => window.open(COMPANY_INFO.zalo, '_blank')}
         >
           <ChatBubbleLeftIcon className="w-6 h-6" />
           <span className="text-xs mt-1">Chat ngay</span>
