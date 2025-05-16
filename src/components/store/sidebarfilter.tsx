@@ -50,7 +50,7 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
     if (maxPrice > 0 && priceRange.max !== maxPrice) {
       setPriceRange(prev => ({ min: prev.min, max: maxPrice }));
     }
-  }, [maxPrice]);
+  }, [maxPrice, priceRange.max]);
 
   // Lấy danh sách brands từ API
   useEffect(() => {
@@ -127,7 +127,7 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
         setSelectedCategoryIds(newSelectedCategoryIds);
       }
     }
-  }, [products, loadingBrands, loadingCategories]);
+  }, [products, loadingBrands, loadingCategories, brands, categories, selectedBrandIds, selectedCategoryIds]);
 
   // Gọi onFilterChange mỗi khi filter thay đổi
   useEffect(() => {

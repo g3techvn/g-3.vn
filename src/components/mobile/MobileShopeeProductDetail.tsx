@@ -6,6 +6,7 @@ import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon, StarIcon, Shar
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { ImageItem } from '@/types/supabase';
 
 interface Comment {
   id: string;
@@ -25,6 +26,20 @@ interface Comment {
 
 interface MobileProductDetailProps {
   product: Product;
+  galleryImages?: string[];
+  videoInfo?: {
+    videoUrl: string;
+    thumbnail: string;
+  };
+  comments?: Comment[];
+  ratingSummary?: {
+    average: number;
+    total: number;
+    stars: {
+      star: number;
+      count: number;
+    }[];
+  };
 }
 
 // Hàm tạo màu ngẫu nhiên từ tên
@@ -67,7 +82,7 @@ type GalleryImage = {
 };
 type GalleryItem = GalleryVideo | GalleryImage;
 
-export function MobileShopeeProductDetail({ product }: MobileProductDetailProps) {
+export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary }: MobileProductDetailProps) {
   const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -77,6 +92,10 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
   const [quantity, setQuantity] = useState(1);
   // Add new state for brand
   const [brandInfo, setBrandInfo] = useState<Brand | null>(null);
+  // Add state for gallery images
+  const [localGalleryImages, setLocalGalleryImages] = useState<string[]>(galleryImages);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(false);
+  
   // Available colors - mockup data
   const colors = ['Đen', 'Xám', 'Đen Hồng'];
   // Các info phụ dùng giá trị mặc định vì không có trong Product
@@ -109,8 +128,61 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
     fetchBrandInfo();
   }, [product.brand_id]);
 
-  // Mock comments data
-  const comments: Comment[] = [
+  // Fetch gallery images only if not provided as props
+  useEffect(() => {
+    // If gallery images are provided as props, use them
+    if (galleryImages.length > 0) {
+      setLocalGalleryImages(galleryImages);
+      return;
+    }
+    
+    // Otherwise fetch them
+    const fetchGalleryImages = async () => {
+      if (!product.gallery_url) {
+        setLocalGalleryImages([]);
+        return;
+      }
+
+      try {
+        setIsLoadingGallery(true);
+        const response = await fetch(`/api/images?folder=${encodeURIComponent(product.gallery_url)}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          const imageUrls = data.images.map((img: ImageItem) => img.url);
+          setLocalGalleryImages(imageUrls);
+        } else {
+          setLocalGalleryImages([]);
+        }
+      } catch (error) {
+        console.error('Error fetching gallery images:', error);
+        setLocalGalleryImages([]);
+      } finally {
+        setIsLoadingGallery(false);
+      }
+    };
+
+    fetchGalleryImages();
+  }, [product.gallery_url, galleryImages]);
+
+  // Use provided rating summary or default to mock data
+  const defaultRatingSummary = {
+    average: product.rating || 4.1,
+    total: 394168,
+    stars: [
+      { star: 5, count: 300000 },
+      { star: 4, count: 60000 },
+      { star: 3, count: 20000 },
+      { star: 2, count: 8000 },
+      { star: 1, count: 6200 },
+    ]
+  };
+
+  // Use provided rating summary or fall back to default
+  const currentRatingSummary = ratingSummary || defaultRatingSummary;
+
+  // Mock comments data - now only used as fallback if none provided
+  const defaultComments: Comment[] = [
     {
       id: '1',
       user: { name: 'Tám Phạm' },
@@ -142,45 +214,23 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
     }
   ];
 
-  // Mock rating summary
-  const ratingSummary = {
-    average: 4.1,
-    total: 394168,
-    stars: [
-      { star: 5, count: 300000 },
-      { star: 4, count: 60000 },
-      { star: 3, count: 20000 },
-      { star: 2, count: 8000 },
-      { star: 1, count: 6200 },
-    ]
-  };
+  // Use provided comments or fall back to default
+  const currentComments = comments.length > 0 ? comments : defaultComments;
 
-  // Mock gallery images (ergonomic chair theme)
-  let galleryImages = [
-    'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
-  ];
-  // Thêm ảnh sản phẩm vào đầu gallery nếu chưa có
-  if (product.image_url && !galleryImages.includes(product.image_url)) {
-    galleryImages = [product.image_url, ...galleryImages];
-  }
-
-  // Video info
+  // Video info - use videoInfo prop or fallback to default
   const video: GalleryVideo = {
     type: 'video',
-    url: 'https://youtu.be/c2F2An3YU04?si=x4rVDMlPldHkkbYz',
-    embed: 'https://www.youtube.com/embed/c2F2An3YU04',
-    thumbnail: 'https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg',
+    url: product.video_url || 'https://youtu.be/c2F2An3YU04?si=x4rVDMlPldHkkbYz',
+    embed: videoInfo?.videoUrl || 'https://www.youtube.com/embed/c2F2An3YU04',
+    thumbnail: videoInfo?.thumbnail || 'https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg',
     title: 'Video giới thiệu sản phẩm G3-TECH',
   };
 
-  // Gallery: ảnh sản phẩm đầu tiên, sau đó video, sau đó các ảnh còn lại (không trùng lặp)
+  // Gallery: ảnh sản phẩm đầu tiên, sau đó video, sau đó các ảnh từ Supabase
   const galleryItems: GalleryItem[] = [
     ...(product.image_url ? [{ type: 'image' as const, src: product.image_url, alt: 'Ảnh sản phẩm' }] : []),
     video,
-    ...galleryImages
+    ...localGalleryImages
       .filter((src) => src !== product.image_url)
       .map((src, idx) => ({ type: 'image' as const, src, alt: `Gallery image ${idx + 1}` })),
   ];
@@ -332,81 +382,103 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
       </div>
 
       {/* Gallery ảnh lớn + thumbnail ngang */}
-      <div className="w-full flex flex-col items-center bg-white  pb-2">
+      <div className="w-full flex flex-col items-center bg-white pb-2">
         {/* Ảnh lớn */}
         <div className="relative w-full aspect-square max-w-full overflow-hidden border border-gray-200 bg-gray-50 mb-2">
-          {galleryItems[lightboxIndex].type === 'video' ? (
-            <iframe
-              src={galleryItems[lightboxIndex].embed + '?autoplay=1&mute=1'}
-              title={galleryItems[lightboxIndex].type === 'video' ? galleryItems[lightboxIndex].title : ''}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              className="w-full h-full absolute inset-0 bg-black"
-              style={{ aspectRatio: '1/1', minHeight: 200 }}
-            />
-          ) : (
-            <>
-              <Image
-                src={galleryItems[lightboxIndex].src}
-                alt={galleryItems[lightboxIndex].alt}
-                fill
-                className="object-contain"
-                sizes="100vw"
-                priority
+          {isLoadingGallery ? (
+            // Loading state for main gallery image
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="w-8 h-8 border-3 border-t-3 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="mt-4 text-sm text-gray-600">Đang tải ảnh sản phẩm...</span>
+            </div>
+          ) : galleryItems.length > 0 ? (
+            galleryItems[lightboxIndex].type === 'video' ? (
+              <iframe
+                src={`${galleryItems[lightboxIndex].embed}?autoplay=1&mute=0&enablejsapi=1`}
+                title={galleryItems[lightboxIndex].type === 'video' ? galleryItems[lightboxIndex].title : ''}
+                allow="autoplay"
+                allowFullScreen
+                className="w-full h-full absolute inset-0 bg-black"
+                style={{ aspectRatio: '1/1', minHeight: 200 }}
               />
-              <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                {lightboxIndex + 1}/{galleryItems.length}
-              </div>
-              {/* Navigation Buttons */}
-              <button
-                onClick={prevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
-                aria-label="Previous image"
-              >
-                <ChevronLeftIcon className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
-                aria-label="Next image"
-              >
-                <ChevronRightIcon className="w-6 h-6" />
-              </button>
-            </>
+            ) : (
+              <>
+                <Image
+                  src={galleryItems[lightboxIndex].src}
+                  alt={galleryItems[lightboxIndex].alt}
+                  fill
+                  className="object-contain"
+                  sizes="100vw"
+                  priority
+                />
+                <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                  {lightboxIndex + 1}/{galleryItems.length}
+                </div>
+                {/* Navigation Buttons */}
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeftIcon className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full z-10"
+                  aria-label="Next image"
+                >
+                  <ChevronRightIcon className="w-6 h-6" />
+                </button>
+              </>
+            )
+          ) : (
+            // Placeholder for empty gallery
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-gray-400">Không có ảnh sản phẩm</span>
+            </div>
           )}
         </div>
         {/* Thumbnails ngang */}
         <div className="flex gap-2 overflow-x-auto px-2 w-full justify-start">
-          {galleryItems.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative w-14 h-14 rounded-lg border-2 cursor-pointer flex-shrink-0 ${lightboxIndex === idx ? 'border-red-500' : 'border-gray-200'}`}
-              onClick={() => setLightboxIndex(idx)}
-            >
-              {item.type === 'video' ? (
-                <>
+          {isLoadingGallery ? (
+            // Loading indicator for gallery thumbnails
+            <div className="flex items-center justify-center w-full py-4">
+              <div className="w-5 h-5 border-2 border-t-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="ml-2 text-sm text-gray-600">Đang tải ảnh...</span>
+            </div>
+          ) : (
+            // Render gallery thumbnails
+            galleryItems.map((item, idx) => (
+              <div
+                key={idx}
+                className={`relative w-14 h-14 rounded-lg border-2 cursor-pointer flex-shrink-0 ${lightboxIndex === idx ? 'border-red-500' : 'border-gray-200'}`}
+                onClick={() => setLightboxIndex(idx)}
+              >
+                {item.type === 'video' ? (
+                  <>
+                    <Image
+                      src={item.thumbnail}
+                      alt={item.title}
+                      fill
+                      className="object-cover rounded-lg"
+                      sizes="56px"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                      <PlayCircleIcon className="w-7 h-7 text-white" />
+                    </div>
+                  </>
+                ) : (
                   <Image
-                    src={item.thumbnail}
-                    alt={item.title}
+                    src={item.src}
+                    alt={item.alt}
                     fill
                     className="object-cover rounded-lg"
                     sizes="56px"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                    <PlayCircleIcon className="w-7 h-7 text-white" />
-                  </div>
-                </>
-              ) : (
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  className="object-cover rounded-lg"
-                  sizes="56px"
-                />
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -633,17 +705,17 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
           <p className="text-gray-500 text-sm mb-4">Điểm xếp hạng và bài đánh giá đã được xác minh và do những người sử dụng cùng loại thiết bị với bạn đưa ra</p>
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center min-w-[70px]">
-              <span className="text-4xl font-bold text-gray-900 leading-none">{ratingSummary.average.toFixed(1)}</span>
+              <span className="text-4xl font-bold text-gray-900 leading-none">{currentRatingSummary.average.toFixed(1)}</span>
               <div className="flex items-center mt-1">
                 {[...Array(5)].map((_, i) => (
-                  <StarIcon key={i} className={`w-5 h-5 ${i < Math.round(ratingSummary.average) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                  <StarIcon key={i} className={`w-5 h-5 ${i < Math.round(currentRatingSummary.average) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                 ))}
               </div>
-              <span className="text-xs text-gray-500 mt-1">{ratingSummary.total.toLocaleString()}</span>
+              <span className="text-xs text-gray-500 mt-1">{currentRatingSummary.total.toLocaleString()}</span>
             </div>
             <div className="flex-1 flex flex-col gap-1">
-              {ratingSummary.stars.map((s, idx) => {
-                const percent = (s.count / ratingSummary.total) * 100;
+              {currentRatingSummary.stars.map((s, idx) => {
+                const percent = (s.count / currentRatingSummary.total) * 100;
                 return (
                   <div key={s.star} className="flex items-center gap-2">
                     <span className="text-xs w-3 text-gray-700">{s.star}</span>
@@ -659,7 +731,7 @@ export function MobileShopeeProductDetail({ product }: MobileProductDetailProps)
 
         {/* Danh sách bình luận */}
         <div className="space-y-8">
-          {[...comments].reverse().map((comment) => (
+          {[...currentComments].reverse().map((comment) => (
             <div key={comment.id}>
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-lg ${getRandomColor(comment.user.name)}`}>{getInitials(comment.user.name)}</div>

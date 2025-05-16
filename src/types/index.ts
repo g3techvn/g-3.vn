@@ -18,6 +18,7 @@ export type Product = {
   discount_percentage?: number;
   slug?: string;
   video_url?: string;
+  gallery_url?: string;
 };
 
 export type Category = {

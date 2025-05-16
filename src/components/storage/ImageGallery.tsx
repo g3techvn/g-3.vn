@@ -36,6 +36,7 @@ export function ImageGallery({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showDebug, setShowDebug] = useState(false);
   const [useAlternativeUrl, setUseAlternativeUrl] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   
   const { images, loading, error, refetch, debug, suggestedFolders } = useSupabaseStorage({
     folder,
@@ -71,10 +72,16 @@ export function ImageGallery({
       ? image.alternativeUrl 
       : image.url;
     
-    const [imageError, setImageError] = useState(false);
+    // Use the image key to track error state
+    const imageKey = `${image.name}-${image.url}`;
+    const imageError = imageErrors[imageKey] || false;
     
     const handleImageError = () => {
-      setImageError(true);
+      // Update the error state for this specific image
+      setImageErrors(prev => ({
+        ...prev,
+        [imageKey]: true
+      }));
       
       // If using the default URL format and it fails, try the alternative
       if (!useAlternativeUrl && image.alternativeUrl) {
@@ -97,7 +104,14 @@ export function ImageGallery({
                   <Button 
                     size="small"
                     className="mt-2"
-                    onClick={() => setUseAlternativeUrl(false)}
+                    onClick={() => {
+                      setUseAlternativeUrl(false);
+                      // Reset error state for this image
+                      setImageErrors(prev => ({
+                        ...prev,
+                        [imageKey]: false
+                      }));
+                    }}
                   >
                     Try Standard URL
                   </Button>
@@ -105,7 +119,14 @@ export function ImageGallery({
                   <Button 
                     size="small"
                     className="mt-2"
-                    onClick={() => setUseAlternativeUrl(true)}
+                    onClick={() => {
+                      setUseAlternativeUrl(true);
+                      // Reset error state for this image
+                      setImageErrors(prev => ({
+                        ...prev,
+                        [imageKey]: false
+                      }));
+                    }}
                   >
                     Try Alternative URL
                   </Button>
@@ -338,7 +359,7 @@ export function ImageGallery({
               <li>Check if the folder path is correct (currently: <strong>{folder}</strong>)</li>
               <li>Verify that the bucket name is correct (currently: <strong>{bucket}</strong>)</li>
               <li>Make sure the images exist in this path in Supabase</li>
-              <li>Try clicking "Try Alternative URL Format" button</li>
+              <li>Try clicking &quot;Try Alternative URL Format&quot; button</li>
               <li>Check if file names have special characters or spaces</li>
               <li>Confirm your Supabase permissions</li>
             </ul>

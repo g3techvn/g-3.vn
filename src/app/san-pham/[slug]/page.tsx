@@ -13,6 +13,7 @@ import { Rating } from '@/components/ui/Rating';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ImageItem } from '@/types/supabase';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -41,6 +42,23 @@ interface YTPlayer {
   destroy(): void;
 }
 
+// Define Comment interface at the top
+interface Comment {
+  id: string;
+  user: {
+    name: string;
+  };
+  rating: number;
+  content: string;
+  date: string;
+  likes: number;
+  publisherReply?: {
+    name: string;
+    date: string;
+    content: string;
+  };
+}
+
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { addToCart } = useCart();
@@ -55,26 +73,120 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const videoRef = React.useRef<HTMLIFrameElement>(null);
   const [player, setPlayer] = useState<YTPlayer | null>(null);
   const router = useRouter();
+  
+  // Add new state for gallery images from Supabase
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(false);
 
-  // Sample gallery images
-  const galleryItems = [
+  // Add product comments data
+  const [comments] = useState<Comment[]>([
     {
-      type: 'video',
+      id: '1',
+      user: { name: 'Tám Phạm' },
+      rating: 5,
+      content: 'Ghế công thái học này thực sự rất thoải mái, ngồi làm việc lâu không bị đau lưng. Chất liệu tốt, lắp ráp dễ dàng. Rất đáng tiền!',
+      date: '26/4/2025',
+      likes: 156,
+      publisherReply: {
+        name: 'G3-TECH',
+        date: '26/4/2025',
+        content: 'Cảm ơn bạn đã tin tưởng và lựa chọn ghế công thái học của G3-TECH. Chúng tôi rất vui khi sản phẩm giúp bạn làm việc thoải mái hơn. Nếu cần hỗ trợ thêm, bạn cứ liên hệ với chúng tôi nhé!'
+      }
+    },
+    {
+      id: '2',
+      user: { name: 'Anh Trương' },
+      rating: 4,
+      content: 'Ghế ngồi êm, tựa lưng tốt nhưng phần kê tay hơi thấp so với mình. Mong shop có thêm phụ kiện nâng kê tay.',
+      date: '11/5/2025',
+      likes: 23
+    },
+    {
+      id: '3',
+      user: { name: 'Minh Hằng' },
+      rating: 5,
+      content: 'Mình rất thích thiết kế của ghế, hiện đại và chắc chắn. Giao hàng nhanh, đóng gói cẩn thận. Sẽ giới thiệu cho bạn bè!',
+      date: '2/6/2025',
+      likes: 41
+    }
+  ]);
+  
+  // Add rating summary data
+  const [ratingSummary] = useState({
+    average: 4.1,
+    total: 394168,
+    stars: [
+      { star: 5, count: 300000 },
+      { star: 4, count: 60000 },
+      { star: 3, count: 20000 },
+      { star: 2, count: 8000 },
+      { star: 1, count: 6200 },
+    ]
+  });
+
+  // Helper function to get random color from name for avatar
+  const getRandomColor = (name: string) => {
+    const colors = [
+      'bg-red-500',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-yellow-500',
+      'bg-purple-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+    ];
+    const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[index % colors.length];
+  };
+
+  // Helper function to get initials
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
+
+  // Video info
+  const getVideoInfo = () => {
+    if (product?.video_url) {
+      // Extract YouTube video ID from URL
+      const getYouTubeId = (url: string) => {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+      };
+
+      const videoId = getYouTubeId(product.video_url);
+      
+      if (videoId) {
+        return {
+          type: 'video' as const,
+          videoUrl: `https://www.youtube.com/embed/${videoId}`,
+          thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        };
+      }
+    }
+    
+    // Fallback to default video if no valid video_url
+    return {
+      type: 'video' as const,
       videoUrl: 'https://www.youtube.com/embed/c2F2An3YU04',
       thumbnail: 'https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg',
-    },
-    ...[
-      'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80',
-    ].map(url => ({ type: 'image', url }))
+    };
+  };
+  
+  const video = getVideoInfo();
+
+  // Create galleryItems based on product and fetched gallery images
+  const galleryItems = [
+    ...(product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
+    video,
+    ...galleryImages
+      .filter(url => url !== product?.image_url)
+      .map(url => ({ type: 'image' as const, url }))
   ];
 
   // Sửa fetch liên tục: fetchSimilarProducts chỉ nhận productId, không phụ thuộc product object
@@ -118,6 +230,38 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     };
     fetchProduct();
   }, [slug]);
+
+  // Add useEffect to fetch gallery images from Supabase
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      if (!product?.gallery_url) {
+        setGalleryImages([]);
+        return;
+      }
+
+      try {
+        setIsLoadingGallery(true);
+        const response = await fetch(`/api/images?folder=${encodeURIComponent(product.gallery_url)}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          const imageUrls = data.images.map((img: ImageItem) => img.url);
+          setGalleryImages(imageUrls);
+        } else {
+          setGalleryImages([]);
+        }
+      } catch (error) {
+        console.error('Error fetching gallery images:', error);
+        setGalleryImages([]);
+      } finally {
+        setIsLoadingGallery(false);
+      }
+    };
+
+    if (product) {
+      fetchGalleryImages();
+    }
+  }, [product]);
 
   React.useEffect(() => {
     if (selectedIndex !== 0) return;
@@ -206,7 +350,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       {/* Mobile View */}
-      <MobileShopeeProductDetail product={product} />
+      <MobileShopeeProductDetail 
+        product={product} 
+        galleryImages={galleryImages}
+        videoInfo={{
+          videoUrl: video.videoUrl,
+          thumbnail: video.thumbnail
+        }}
+        comments={comments}
+        ratingSummary={ratingSummary}
+      />
 
       {/* Desktop View */}
       <div className="hidden md:block container mx-auto py-8">
@@ -225,7 +378,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <div className="md:col-span-3">
               <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
                 {/* Nút mũi tên trái */}
-                {selectedIndex > 1 && (
+                {selectedIndex > 0 && (
                   <button
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow"
                     onClick={() => setSelectedIndex(selectedIndex - 1)}
@@ -234,8 +387,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                   </button>
                 )}
-                {/* Hiển thị video hoặc ảnh */}
-                {galleryItems.length > 0 && selectedIndex >= 0 && selectedIndex < galleryItems.length ? (
+                {/* Hiển thị loading state hoặc video/image */}
+                {isLoadingGallery ? (
+                  // Loading state for main gallery image
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="w-8 h-8 border-3 border-t-3 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="mt-4 text-sm text-gray-600">Đang tải ảnh sản phẩm...</span>
+                  </div>
+                ) : galleryItems.length > 0 && selectedIndex >= 0 && selectedIndex < galleryItems.length ? (
                   galleryItems[selectedIndex].type === 'video'
                     ? (
                       <iframe
@@ -243,7 +402,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                         id="product-video-yt"
                         width="100%"
                         height="100%"
-                        src={(galleryItems[selectedIndex] as { type: 'video'; videoUrl: string }).videoUrl + '?enablejsapi=1&autoplay=1&mute=1'}
+                        src={(galleryItems[selectedIndex] as typeof video).videoUrl + '?enablejsapi=1&autoplay=1&mute=1'}
                         title="YouTube video player"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -253,7 +412,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     )
                     : (
                       <Image
-                        src={(galleryItems[selectedIndex] as { type: 'image'; url: string }).url}
+                        src={(galleryItems[selectedIndex] as {type: 'image', url: string}).url}
                         alt={product.name}
                         fill
                         className="object-contain"
@@ -278,60 +437,57 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               
               {/* Gallery */}
               <div className="mt-4 flex overflow-x-auto gap-2 pb-2">
-                {/* Video thumbnail */}
-                <div
-                  className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer flex items-center justify-center ${selectedIndex === 0 ? 'border-red-500' : 'border-gray-200'}`}
-                  onClick={() => setSelectedIndex(0)}
-                >
-                  <Image
-                    src="https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg"
-                    alt="Video thumbnail"
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                  />
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="20" cy="20" r="20" fill="rgba(0,0,0,0.5)" />
-                      <polygon points="16,12 30,20 16,28" fill="white" />
-                    </svg>
-                  </span>
-                </div>
-                {/* Main product image thumbnail */}
-                <div
-                  className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer ${selectedIndex === 1 ? 'border-red-500' : 'border-gray-200'}`}
-                  onClick={() => setSelectedIndex(1)}
-                >
-                  <Image
-                    src={product.image_url}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                  />
-                </div>
-                {/* Gallery image thumbnails */}
-                {galleryItems.slice(1).map((item, index) => {
-                  if (item.type === 'image') {
-                    const url = (item as { type: 'image'; url: string }).url;
-                    return (
-                      <div
-                        key={index}
-                        className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer ${selectedIndex === index + 1 ? 'border-red-500' : 'border-gray-200'}`}
-                        onClick={() => setSelectedIndex(index + 1)}
-                      >
-                        <Image
-                          src={url}
-                          alt={`${product.name} - ${index + 1}`}
-                          fill
-                          className="object-cover"
-                          sizes="96px"
-                        />
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                {isLoadingGallery ? (
+                  // Loading indicator for gallery thumbnails
+                  <div className="flex items-center justify-center w-full py-4">
+                    <div className="w-5 h-5 border-2 border-t-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="ml-2 text-sm text-gray-600">Đang tải ảnh...</span>
+                  </div>
+                ) : (
+                  // Render gallery thumbnails
+                  galleryItems.map((item, index) => {
+                    if (item.type === 'video') {
+                      return (
+                        <div
+                          key={`video-${index}`}
+                          className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer flex items-center justify-center ${selectedIndex === index ? 'border-red-500' : 'border-gray-200'}`}
+                          onClick={() => setSelectedIndex(index)}
+                        >
+                          <Image
+                            src={(item as typeof video).thumbnail}
+                            alt="Video thumbnail"
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                          />
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="20" cy="20" r="20" fill="rgba(0,0,0,0.5)" />
+                              <polygon points="16,12 30,20 16,28" fill="white" />
+                            </svg>
+                          </span>
+                        </div>
+                      );
+                    } else if (item.type === 'image') {
+                      return (
+                        <div
+                          key={`image-${index}-${(item as {type: 'image', url: string}).url}`}
+                          className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer ${selectedIndex === index ? 'border-red-500' : 'border-gray-200'}`}
+                          onClick={() => setSelectedIndex(index)}
+                        >
+                          <Image
+                            src={(item as {type: 'image', url: string}).url}
+                            alt={`${product.name} - ${index}`}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })
+                )}
               </div>
             </div>
 
@@ -371,7 +527,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                   onClick={() => {
                     // TODO: Implement buy now functionality
-                    console.log('Buy now:', product.id);
                   }}
                 >
                   <CheckIcon className="h-5 w-5" />
@@ -525,59 +680,61 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 {/* Tổng quan điểm đánh giá */}
                 <div className="flex items-center gap-6 mb-6">
                   <div className="flex flex-col items-center min-w-[70px]">
-                    <span className="text-4xl font-bold text-gray-900 leading-none">4.1</span>
+                    <span className="text-4xl font-bold text-gray-900 leading-none">{ratingSummary.average.toFixed(1)}</span>
                     <div className="flex items-center mt-1">
                       {[...Array(5)].map((_, i) => (
-                        <svg key={i} className={`w-5 h-5 ${i < 4 ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
+                        <svg key={i} className={`w-5 h-5 ${i < Math.round(ratingSummary.average) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
                       ))}
                     </div>
-                    <span className="text-xs text-gray-500 mt-1">394,168</span>
+                    <span className="text-xs text-gray-500 mt-1">{ratingSummary.total.toLocaleString()}</span>
                   </div>
                   {/* Biểu đồ sao */}
                   <div className="flex-1 flex flex-col gap-1">
-                    {[5,4,3,2,1].map((star, idx) => (
-                      <div key={star} className="flex items-center gap-2">
-                        <span className="text-xs w-3 text-gray-700">{star}</span>
-                        <div className="flex-1 h-2 bg-gray-200 rounded">
-                          <div className="h-2 rounded bg-blue-500" style={{ width: `${[76,15,5,2,2][idx]}%` }} />
+                    {ratingSummary.stars.map((starItem) => {
+                      const percent = (starItem.count / ratingSummary.total) * 100;
+                      return (
+                        <div key={starItem.star} className="flex items-center gap-2">
+                          <span className="text-xs w-3 text-gray-700">{starItem.star}</span>
+                          <div className="flex-1 h-2 bg-gray-200 rounded">
+                            <div className="h-2 rounded bg-blue-500" style={{ width: `${percent}%` }} />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 {/* Danh sách bình luận */}
                 <div className="space-y-8">
-                  {[
-                    {
-                      user: "Tám Phạm",
-                      rating: 5,
-                      content: "Ghế công thái học này thực sự rất thoải mái, ngồi làm việc lâu không bị đau lưng. Chất liệu tốt, lắp ráp dễ dàng. Rất đáng tiền!",
-                      date: "26/4/2025",
-                      likes: 156
-                    },
-                    {
-                      user: "Anh Trương",
-                      rating: 4,
-                      content: "Ghế ngồi êm, tựa lưng tốt nhưng phần kê tay hơi thấp so với mình. Mong shop có thêm phụ kiện nâng kê tay.",
-                      date: "11/5/2025",
-                      likes: 23
-                    }
-                  ].map((c, idx) => (
-                    <div key={idx}>
+                  {comments.map((comment) => (
+                    <div key={comment.id}>
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-medium text-lg">{c.user[0]}</div>
+                        <div className={`w-10 h-10 rounded-full ${getRandomColor(comment.user.name)} flex items-center justify-center text-white font-medium text-lg`}>{getInitials(comment.user.name)}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">{c.user}</span>
-                            <span className="text-xs text-gray-500">{c.date}</span>
+                            <span className="font-medium text-gray-900">{comment.user.name}</span>
+                            <span className="text-xs text-gray-500">{comment.date}</span>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
                             {[...Array(5)].map((_, i) => (
-                              <svg key={i} className={`w-4 h-4 ${i < c.rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
+                              <svg key={i} className={`w-4 h-4 ${i < comment.rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
                             ))}
                           </div>
-                          <p className="text-gray-800 text-sm mt-2">{c.content}</p>
-                          <div className="mt-2 text-xs text-gray-500">{c.likes} người thấy bài đánh giá này hữu ích</div>
+                          <p className="text-gray-800 text-sm mt-2">{comment.content}</p>
+                          <div className="mt-2 text-xs text-gray-500">{comment.likes} người thấy bài đánh giá này hữu ích</div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-sm text-gray-700">Bài đánh giá này có hữu ích không?</span>
+                            <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100">Có</button>
+                            <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100">Không</button>
+                          </div>
+                          {comment.publisherReply && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-xs text-gray-700">{comment.publisherReply.name}</span>
+                                <span className="text-xs text-gray-400">{comment.publisherReply.date}</span>
+                              </div>
+                              <div className="text-gray-700 text-sm whitespace-pre-line">{comment.publisherReply.content}</div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const folder = (searchParams.get('folder') || 'products/gami/ghe-gami-core').replace(/^\/|\/$/g, '');
   const bucket = searchParams.get('bucket') || 'g3tech';
   
-  console.log('Fetching images from:', { bucket, folder });
+  // console.log('Fetching images from:', { bucket, folder }); // NOTE: Log commented out - re-enable when needed for debugging
   
   try {
     const supabase = createServerClient();
@@ -27,25 +27,25 @@ export async function GET(request: NextRequest) {
       });
     
     if (error) {
-      console.error('Supabase list error:', error);
+      // console.error('Supabase list error:', error); // NOTE: Log commented out - re-enable when needed for debugging
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     
-    console.log('Raw data from Supabase:', data);
+    // console.log('Raw data from Supabase:', data); // NOTE: Log commented out - re-enable when needed for debugging
     
     // If data is null or undefined, return an appropriate response
     if (!data) {
-      console.log('No data returned from Supabase');
+      // console.log('No data returned from Supabase'); // NOTE: Log commented out - re-enable when needed for debugging
       return NextResponse.json({ images: [], message: 'No data returned from storage' }, { status: 200 });
     }
     
     // Filter out any potential folders in results and only keep files
     const files = data.filter(item => !item.metadata?.mimetype?.includes('directory') && item.name.includes('.'));
-    console.log('Filtered files:', files.map(f => f.name));
+    // console.log('Filtered files:', files.map(f => f.name)); // NOTE: Log commented out - re-enable when needed for debugging
     
     // Try to list root level if no files found and folder isn't empty
     if (files.length === 0 && folder !== '') {
-      console.log('No files found in specified folder, trying root level');
+      // console.log('No files found in specified folder, trying root level'); // NOTE: Log commented out - re-enable when needed for debugging
       try {
         const rootResponse = await supabase.storage.from(bucket).list('', {
           limit: 100,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         });
         
         if (!rootResponse.error && rootResponse.data) {
-          console.log('Root level items:', rootResponse.data.map(item => item.name));
+          // console.log('Root level items:', rootResponse.data.map(item => item.name)); // NOTE: Log commented out - re-enable when needed for debugging
           
           // Check if the folder exists at root level
           const folderExists = rootResponse.data.some(item => 
@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
           );
           
           if (folderExists) {
-            console.log(`Folder '${folder}' exists at root level`);
+            // console.log(`Folder '${folder}' exists at root level`); // NOTE: Log commented out - re-enable when needed for debugging
           } else {
-            console.log(`Folder '${folder}' not found at root level`);
+            // console.log(`Folder '${folder}' not found at root level`); // NOTE: Log commented out - re-enable when needed for debugging
           }
         }
       } catch (listError) {
-        console.error('Error listing root level:', listError);
+        // console.error('Error listing root level:', listError); // NOTE: Log commented out - re-enable when needed for debugging
       }
     }
     
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       })
     );
     
-    console.log(`Generated ${images.length} image URLs`);
+    // console.log(`Generated ${images.length} image URLs`); // NOTE: Log commented out - re-enable when needed for debugging
     
     // If no images found but we have folders, suggest them
     const folders = data.filter(item => 
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       }
     }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching images:', error);
+    // console.error('Error fetching images:', error); // NOTE: Log commented out - re-enable when needed for debugging
     return NextResponse.json(
       { error: 'Failed to fetch images', details: error instanceof Error ? error.message : String(error) }, 
       { status: 500 }

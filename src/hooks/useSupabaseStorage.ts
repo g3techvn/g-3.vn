@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ImageItem } from '@/types/supabase';
 
 interface UseSupabaseStorageProps {
@@ -7,12 +7,19 @@ interface UseSupabaseStorageProps {
   sortOrder?: 'asc' | 'desc';
 }
 
+interface DebugInfo {
+  error?: string;
+  message?: string;
+  suggested_folders?: string[];
+  [key: string]: unknown;
+}
+
 interface UseSupabaseStorageResult {
   images: ImageItem[];
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  debug: any;
+  debug: DebugInfo | null;
   suggestedFolders: string[];
 }
 
@@ -24,10 +31,10 @@ export function useSupabaseStorage({
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debug, setDebug] = useState<any>(null);
+  const [debug, setDebug] = useState<DebugInfo | null>(null);
   const [suggestedFolders, setSuggestedFolders] = useState<string[]>([]);
 
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -54,7 +61,7 @@ export function useSupabaseStorage({
         }
       }
       
-      let sortedImages = [...(data.images || [])];
+      const sortedImages = [...(data.images || [])];
       console.log(`Received ${sortedImages.length} images`);
       
       // Sort images by name based on the specified sort order
@@ -73,11 +80,11 @@ export function useSupabaseStorage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [folder, bucket, sortOrder]);
 
   useEffect(() => {
     fetchImages();
-  }, [folder, bucket, sortOrder]);
+  }, [fetchImages]);
 
   return {
     images,
