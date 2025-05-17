@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import BrandShopeeHeader from '@/components/mobile/BrandShopeeHeader';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
+import { useParams } from 'next/navigation';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -36,8 +37,9 @@ interface YTPlayer {
   destroy(): void;
 }
 
-export default function BrandProductsPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = React.use(params);
+export default function BrandProductsPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,8 @@ export default function BrandProductsPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!slug) return;
+      
       try {
         setLoading(true);
         const response = await fetch(`/api/brands/${slug}`);

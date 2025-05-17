@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/utils/cn';
-import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
-import { AspectRatio } from './ui/AspectRatio';
-import { Rating } from './ui/Rating';
+import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
+import { AspectRatio } from '@/components/ui/AspectRatio';
+import { Rating } from '@/components/ui/Rating';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
-import { Button } from './ui/Button';
+import { Button } from '@/components/ui/Button';
 
 interface ProductOption {
   id: number;

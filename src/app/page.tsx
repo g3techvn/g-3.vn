@@ -1,11 +1,11 @@
 'use client';
-import HeroCarousel from '@/components/HeroCarousel';
-import CategoryGrid from '@/components/CategoryGrid';
-import NewProducts from '@/components/NewProducts';
-import BlogPosts from '@/components/BlogPosts';
-import BrandLogos from '@/components/BrandLogos';
-import FeaturedProducts from '@/components/FeaturedProducts';
-import ComboProduct from '@/components/ComboProduct';
+import HeroCarousel from '@/components/home/HeroCarousel';
+import CategoryGrid from '@/components/home/CategoryGrid';
+import NewProducts from '@/components/product/NewProducts';
+import BlogPosts from '@/components/home/BlogPosts';
+import BrandLogos from '@/components/home/BrandLogos';
+import FeaturedProducts from '@/components/product/FeaturedProducts';
+import ComboProduct from '@/components/product/ComboProduct';
 import { useEffect, useState, useCallback } from 'react';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileHomeTabs from '@/components/mobile/MobileHomeTabs';

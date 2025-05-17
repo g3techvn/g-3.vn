@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { AspectRatio } from './ui/AspectRatio';
-import { Card, CardBadge, CardContent, CardHeader } from './ui/Card';
-import { Rating } from './ui/Rating';
+import { AspectRatio } from '@/components/ui/AspectRatio';
+import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
+import { Rating } from '@/components/ui/Rating';
 import { Product } from '@/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';

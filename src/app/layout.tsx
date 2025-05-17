@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
-import StickyNavbar from '@/components/StickyNavbar';
+import StickyNavbar from '@/components/header/StickyNavbar';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import CartLayout from '@/components/layout/CartLayout';
 import Providers from './providers';
@@ -12,8 +12,8 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'G3 TECH - Phụ kiện chính hãng',
-  description: 'Cung cấp phụ kiện điện thoại, action cam và thiết bị điện tử chính hãng',
+  title: 'G3 - Công Thái Học',
+  description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học',
 };
 
 export default function RootLayout({

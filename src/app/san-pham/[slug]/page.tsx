@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Product } from '@/types';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
 import Image from 'next/image';
-import { MobileShopeeProductDetail } from '@/components/mobile/MobileShopeeProductDetail';
+import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
