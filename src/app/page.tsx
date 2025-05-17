@@ -1,18 +1,28 @@
 'use client';
-import HeroCarousel from '@/components/pc/home/HeroCarousel';
-import CategoryGrid from '@/components/pc/home/CategoryGrid';
-import NewProducts from '@/components/pc/product/NewProducts';
-import BlogPosts from '@/components/pc/home/BlogPosts';
-import BrandLogos from '@/components/pc/home/BrandLogos';
-import FeaturedProducts from '@/components/pc/product/FeaturedProducts';
-import ComboProduct from '@/components/pc/product/ComboProduct';
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
-import MobileHomeTabs from '@/components/mobile/MobileHomeTabs';
+import { useEffect, useState, useCallback, useRef, useMemo, Suspense, lazy } from 'react';
 import { Product, Brand } from '@/types';
-import MobileFeatureProduct from '@/components/mobile/MobileFeatureProduct';
-import MobileBestsellerProducts from '@/components/mobile/MobileBestsellerProducts';
-import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Lazy loaded components
+const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
+const CategoryGrid = lazy(() => import('@/components/pc/home/CategoryGrid'));
+const FeaturedProducts = lazy(() => import('@/components/pc/product/FeaturedProducts'));
+const ComboProduct = lazy(() => import('@/components/pc/product/ComboProduct'));
+const NewProducts = lazy(() => import('@/components/pc/product/NewProducts'));
+const BrandLogos = lazy(() => import('@/components/pc/home/BrandLogos'));
+const BlogPosts = lazy(() => import('@/components/pc/home/BlogPosts'));
+const MobileHomeHeader = lazy(() => import('@/components/mobile/MobileHomeHeader'));
+const MobileHomeTabs = lazy(() => import('@/components/mobile/MobileHomeTabs'));
+const MobileFeatureProduct = lazy(() => import('@/components/mobile/MobileFeatureProduct'));
+const MobileBestsellerProducts = lazy(() => import('@/components/mobile/MobileBestsellerProducts'));
+const MobileCatogeryFeature = lazy(() => import('@/components/mobile/MobileCatogeryFeature'));
+
+// Fallback loading component
+const LoadingFallback = () => (
+  <div className="w-full py-20 flex items-center justify-center">
+    <div className="skeleton-shimmer w-full h-48 rounded-lg bg-gray-200"></div>
+  </div>
+);
 
 // Import or define ComboProduct type
 interface ComboProduct extends Product {
@@ -25,6 +35,129 @@ interface CategoryData {
   brands: Brand[];
   isLoaded: boolean;
 }
+
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const slideUp = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 24 }
+  }
+};
+
+// Page loading overlay component
+const PageLoadingOverlay = ({ isVisible }: { isVisible: boolean }) => {
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center"
+          initial={{ opacity: 1 }}
+          exit={{ 
+            opacity: 0, 
+            transition: { 
+              duration: 0.8,
+              ease: [0.22, 1, 0.36, 1] 
+            } 
+          }}
+        >
+          <motion.div
+            className="w-16 h-16 mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ 
+              scale: [0.8, 1.2, 1],
+              opacity: [0, 1, 1]
+            }}
+            transition={{
+              duration: 1,
+              ease: "easeInOut",
+              times: [0, 0.5, 1],
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-full h-full">
+              <path 
+                d="M12 4L12 20" 
+                stroke="#FF4444" 
+                strokeWidth="2" 
+                strokeLinecap="round"
+                strokeDasharray="1 3"
+              >
+                <animate 
+                  attributeName="stroke-dashoffset" 
+                  values="0;4" 
+                  dur="0.6s" 
+                  repeatCount="indefinite"
+                />
+              </path>
+              <path 
+                d="M4 12L20 12" 
+                stroke="#FF4444" 
+                strokeWidth="2" 
+                strokeLinecap="round"
+                strokeDasharray="1 3"
+              >
+                <animate 
+                  attributeName="stroke-dashoffset" 
+                  values="0;4" 
+                  dur="0.6s" 
+                  repeatCount="indefinite"
+                />
+              </path>
+              <circle 
+                cx="12" 
+                cy="12" 
+                r="10" 
+                stroke="#FF4444" 
+                strokeWidth="2" 
+                strokeLinecap="round"
+                fill="none"
+              >
+                <animate 
+                  attributeName="stroke-dasharray" 
+                  values="0 63; 63 63" 
+                  dur="1.5s" 
+                  repeatCount="indefinite"
+                />
+                <animate 
+                  attributeName="stroke-dashoffset" 
+                  values="0; 63" 
+                  dur="1.5s" 
+                  repeatCount="indefinite"
+                />
+              </circle>
+            </svg>
+          </motion.div>
+          <motion.p
+            className="text-gray-700 font-medium"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Đang tải...
+          </motion.p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
@@ -51,6 +184,10 @@ export default function Home() {
   const [newError, setNewError] = useState<string | null>(null);
   const [comboError, setComboError] = useState<string | null>(null);
   
+  // Animation states
+  const [pageLoaded, setPageLoaded] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  
   // Track if initial data has loaded
   const initialLoadComplete = useRef(false);
   // Track if manual category change
@@ -59,9 +196,20 @@ export default function Home() {
   const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
   // Cache for category data to prevent reloads
   const categoryDataCache = useRef<Record<string, CategoryData>>({});
+  
+  // Tracking visible sections for lazy loading
+  const [visibleSections, setVisibleSections] = useState({
+    hero: false,
+    categories: false,
+    featured: false,
+    combo: false,
+    new: false,
+    brands: false,
+    blog: false
+  });
 
   // Lấy tất cả sản phẩm
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const url = '/api/products';
@@ -79,10 +227,10 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Lấy tất cả thương hiệu
-  const fetchBrands = async () => {
+  const fetchBrands = useCallback(async () => {
     try {
       setLoadingBrands(true);
       const url = '/api/brands';
@@ -100,7 +248,7 @@ export default function Home() {
     } finally {
       setLoadingBrands(false);
     }
-  };
+  }, []);
 
   // Lấy sản phẩm theo danh mục
   const fetchProductsByCategory = useCallback(async (categorySlug: string) => {
@@ -223,7 +371,10 @@ export default function Home() {
   }, [selectedCategory]);
 
   // Fetch featured products
-  const fetchFeaturedProducts = async () => {
+  const fetchFeaturedProducts = useCallback(async () => {
+    // Don't fetch if already loaded or error occurred
+    if (featuredProducts.length > 0 || featuredError) return;
+    
     try {
       setLoadingFeatured(true);
       const MAX_PRODUCTS = 8;
@@ -241,10 +392,13 @@ export default function Home() {
     } finally {
       setLoadingFeatured(false);
     }
-  };
+  }, [featuredProducts.length, featuredError]);
 
   // Fetch new products
-  const fetchNewProducts = async () => {
+  const fetchNewProducts = useCallback(async () => {
+    // Don't fetch if already loaded or error occurred
+    if (newProducts.length > 0 || newError) return;
+    
     try {
       setLoadingNew(true);
       const MAX_PRODUCTS = 12;
@@ -262,10 +416,13 @@ export default function Home() {
     } finally {
       setLoadingNew(false);
     }
-  };
+  }, [newProducts.length, newError]);
 
   // Fetch combo products
-  const fetchComboProducts = async () => {
+  const fetchComboProducts = useCallback(async () => {
+    // Don't fetch if already loaded or error occurred
+    if (comboProducts.length > 0 || comboError) return;
+    
     try {
       setLoadingCombo(true);
       const MAX_PRODUCTS = 8;
@@ -283,7 +440,7 @@ export default function Home() {
     } finally {
       setLoadingCombo(false);
     }
-  };
+  }, [comboProducts.length, comboError]);
 
   // Handle category change from tab click
   const handleCategoryChange = useCallback((categorySlug: string) => {
@@ -317,7 +474,7 @@ export default function Home() {
     const loadInitialData = async () => {
       try {
         // First load essential data
-        const [brandsResult, productsResult] = await Promise.all([
+        await Promise.all([
           fetchBrands(),
           fetchProducts()
         ]);
@@ -325,21 +482,90 @@ export default function Home() {
         // Then load categories and initialize first category
         await fetchCategories();
         
-        // Load other data in the background
-        Promise.all([
-          fetchFeaturedProducts(),
-          fetchNewProducts(),
-          fetchComboProducts()
-        ]);
-        
         initialLoadComplete.current = true;
+        
+        // Set page as loaded for animation
+        setTimeout(() => {
+          setPageLoaded(true);
+          // Hide loading overlay
+          setTimeout(() => {
+            setInitialLoading(false);
+          }, 300);
+        }, 300);
       } catch (error) {
         console.error("Error loading initial data:", error);
+        setInitialLoading(false);
       }
     };
     
     loadInitialData();
-  }, []); 
+  }, [fetchBrands, fetchProducts, fetchCategories]); 
+
+  // Set up Intersection Observer for lazy loading
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1,
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.id;
+        if (entry.isIntersecting) {
+          setVisibleSections(prev => ({ ...prev, [id]: true }));
+          
+          // Lazy load data when section becomes visible
+          if (id === 'featured' && !featuredProducts.length) {
+            fetchFeaturedProducts();
+          } else if (id === 'combo' && !comboProducts.length) {
+            fetchComboProducts();
+          } else if (id === 'new' && !newProducts.length) {
+            fetchNewProducts();
+          }
+        }
+      });
+    }, observerOptions);
+    
+    // Register all sections for observation
+    const sections = document.querySelectorAll('.lazy-section');
+    sections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+    
+    return () => {
+      sectionObserver.disconnect();
+    };
+  }, [
+    fetchFeaturedProducts,
+    fetchComboProducts,
+    fetchNewProducts,
+    featuredProducts.length,
+    comboProducts.length,
+    newProducts.length
+  ]);
+
+  // Handle scroll animations
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollElements = document.querySelectorAll('.scroll-trigger');
+      
+      scrollElements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const isInView = (rect.top <= window.innerHeight * 0.75) && (rect.bottom >= 0);
+        
+        if (isInView) {
+          element.classList.add('scroll-animate');
+        }
+      });
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    // Trigger once on load
+    setTimeout(handleScroll, 500);
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Get relevant brands for current category from cache
   const getCurrentCategoryBrands = useMemo(() => {
@@ -405,63 +631,156 @@ export default function Home() {
     error: error
   }), [categoryProducts, loading, error]);
 
-  if (isMobile) {
-    return (
-      <div className="bg-gray-50 min-h-screen">
-        <MobileHomeHeader />
-        <MobileHomeTabs 
-          categories={categories}
-          loading={loadingCategories}
-          onCategoryChange={handleCategoryChange} 
-        />
-        {/* Section: Sản phẩm bán chạy */}
-        <MobileBestsellerProducts {...mobileBestsellerProps} />
-        <MobileCatogeryFeature {...mobileCategoryFeatureProps} />
-        {/* Được đề xuất cho bạn */}
-        <MobileFeatureProduct {...mobileFeatureProductProps} />
-      </div>
-    );
-  }
+  // Add a CSS class for page transitions
+  useEffect(() => {
+    document.body.classList.add('smooth-transition');
+    return () => {
+      document.body.classList.remove('smooth-transition');
+    };
+  }, []);
 
-  // Desktop giữ nguyên
   return (
-    <div className="min-h-screen pb-20">
-      {/* Hero Section */}
-      <HeroCarousel />
+    <>
+      <PageLoadingOverlay isVisible={initialLoading} />
+      
+      {isMobile ? (
+        <AnimatePresence>
+          <motion.div 
+            className="bg-gray-50 min-h-screen"
+            initial="hidden"
+            animate={pageLoaded ? "visible" : "hidden"}
+            variants={fadeIn}
+          >
+            <Suspense fallback={<LoadingFallback />}>
+              <MobileHomeHeader />
+            </Suspense>
+            
+            <Suspense fallback={<LoadingFallback />}>
+              <MobileHomeTabs 
+                categories={categories}
+                loading={loadingCategories}
+                onCategoryChange={handleCategoryChange} 
+              />
+            </Suspense>
+            
+            <motion.div variants={staggerContainer} className="scroll-trigger">
+              {/* Section: Sản phẩm bán chạy */}
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <MobileBestsellerProducts {...mobileBestsellerProps} />
+                </Suspense>
+              </motion.div>
+            </motion.div>
+            
+            <motion.div variants={staggerContainer} className="scroll-trigger">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <MobileCatogeryFeature {...mobileCategoryFeatureProps} />
+                </Suspense>
+              </motion.div>
+            </motion.div>
+            
+            <motion.div variants={staggerContainer} className="scroll-trigger">
+              <motion.div variants={slideUp}>
+                {/* Được đề xuất cho bạn */}
+                <Suspense fallback={<LoadingFallback />}>
+                  <MobileFeatureProduct {...mobileFeatureProductProps} />
+                </Suspense>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      ) : (
+        <AnimatePresence>
+          <motion.div 
+            className="min-h-screen pb-20"
+            initial="hidden"
+            animate={pageLoaded ? "visible" : "hidden"}
+            variants={fadeIn}
+          >
+            {/* Hero Section */}
+            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="hero">
+              <Suspense fallback={<LoadingFallback />}>
+                <HeroCarousel />
+              </Suspense>
+            </motion.div>
 
-      {/* Category Grid */}
-      <CategoryGrid />
+            {/* Category Grid */}
+            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
+              <Suspense fallback={<LoadingFallback />}>
+                <CategoryGrid />
+              </Suspense>
+            </motion.div>
 
-      {/* Featured Products */}
-      <FeaturedProducts 
-        products={featuredProducts} 
-        loading={loadingFeatured} 
-        error={featuredError} 
-      />
+            {/* Featured Products */}
+            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="featured">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  {(visibleSections.featured || featuredProducts.length > 0) && (
+                    <FeaturedProducts 
+                      products={featuredProducts} 
+                      loading={loadingFeatured} 
+                      error={featuredError} 
+                    />
+                  )}
+                </Suspense>
+              </motion.div>
+            </motion.div>
 
-      {/* Combo Product */}
-      <ComboProduct 
-        products={comboProducts} 
-        loading={loadingCombo} 
-        error={comboError} 
-      />
+            {/* Combo Product */}
+            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="combo">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  {(visibleSections.combo || comboProducts.length > 0) && (
+                    <ComboProduct 
+                      products={comboProducts} 
+                      loading={loadingCombo} 
+                      error={comboError} 
+                    />
+                  )}
+                </Suspense>
+              </motion.div>
+            </motion.div>
 
-      {/* New Products */}
-      <NewProducts 
-        products={newProducts} 
-        loading={loadingNew} 
-        error={newError} 
-      />
+            {/* New Products */}
+            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="new">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  {(visibleSections.new || newProducts.length > 0) && (
+                    <NewProducts 
+                      products={newProducts} 
+                      loading={loadingNew} 
+                      error={newError} 
+                    />
+                  )}
+                </Suspense>
+              </motion.div>
+            </motion.div>
 
-      {/* Brands */}
-      <BrandLogos 
-        brands={brands} 
-        loading={loadingBrands} 
-        error={brandError} 
-      />
+            {/* Brands */}
+            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="brands">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <BrandLogos 
+                    brands={brands} 
+                    loading={loadingBrands} 
+                    error={brandError} 
+                  />
+                </Suspense>
+              </motion.div>
+            </motion.div>
 
-      {/* Blog Posts */}
-      <BlogPosts />
-    </div>
+            {/* Blog Posts */}
+            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="blog">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <BlogPosts />
+                </Suspense>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+    </>
   );
 }
