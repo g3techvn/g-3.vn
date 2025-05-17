@@ -351,31 +351,35 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       {/* Mobile View */}
-      <MobileShopeeProductDetail 
-        product={product} 
-        galleryImages={galleryImages}
-        videoInfo={{
-          videoUrl: video.videoUrl,
-          thumbnail: video.thumbnail
-        }}
-        comments={comments}
-        ratingSummary={ratingSummary}
-      />
+      <div className="md:hidden">
+        <MobileShopeeProductDetail 
+          product={product} 
+          galleryImages={galleryImages}
+          videoInfo={{
+            videoUrl: video.videoUrl,
+            thumbnail: video.thumbnail
+          }}
+          comments={comments}
+          ratingSummary={ratingSummary}
+        />
+      </div>
 
       {/* Desktop View */}
-      <ProductDetailDesktop 
-        product={product}
-        galleryImages={galleryImages}
-        isLoadingGallery={isLoadingGallery}
-        videoInfo={{
-          videoUrl: video.videoUrl,
-          thumbnail: video.thumbnail
-        }}
-        comments={comments}
-        ratingSummary={ratingSummary}
-        similarProducts={similarProducts}
-        loadingSimilar={loadingSimilar}
-      />
+      <div className="hidden md:block">
+        <ProductDetailDesktop 
+          product={product}
+          galleryImages={galleryImages}
+          isLoadingGallery={isLoadingGallery}
+          videoInfo={{
+            videoUrl: video.videoUrl,
+            thumbnail: video.thumbnail
+          }}
+          comments={comments}
+          ratingSummary={ratingSummary}
+          similarProducts={similarProducts}
+          loadingSimilar={loadingSimilar}
+        />
+      </div>
     </>
   );
 } 
