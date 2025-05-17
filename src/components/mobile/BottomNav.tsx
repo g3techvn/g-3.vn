@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
+import { Slot } from '@radix-ui/react-slot';
 import './bottomNav.css';
 
 interface MenuItem {
@@ -21,7 +23,6 @@ interface BottomNavProps {
 const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const [isMobile, setIsMobile] = useState(false);
-  const navigationRef = useRef<HTMLDivElement>(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -29,13 +30,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
       setIsMobile(window.innerWidth < 768);
     };
 
-    // Initial check
     checkMobile();
-
-    // Add event listener for window resize
     window.addEventListener('resize', checkMobile);
-
-    // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -44,9 +40,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
     const currentPath = window.location.pathname;
     const activeIndex = menuItems.findIndex(item => {
       if (item.href === currentPath) return true;
-      // Handle root path
       if (currentPath === '/' && item.href === '/') return true;
-      // Handle nested paths
       if (item.href !== '/' && currentPath.startsWith(item.href)) return true;
       return false;
     });
@@ -56,50 +50,45 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
     }
   }, [menuItems]);
 
-  // Kiểm tra số lượng menuItems
   useEffect(() => {
     if (menuItems.length !== 5) {
       console.warn('BottomNav được thiết kế tốt nhất cho 5 menu items. Bạn hiện đang sử dụng ' + menuItems.length + ' items.');
     }
   }, [menuItems]);
 
-  // If not mobile, don't render
-  if (!isMobile) {
-    return null;
-  }
+  if (!isMobile) return null;
 
-  // Xử lý khi click vào menu item
   const handleItemClick = (index: number) => {
     setActiveTab(index);
-    
-    if (menuItems[index].action) {
-      menuItems[index].action?.();
-    }
+    menuItems[index].action?.();
   };
 
   return (
-    <div className="navigation" ref={navigationRef}>
+    <div className="navigation">
       <div className="nav-container">
-        <ul className="menu-items">
+        <ul className="menu-items" role="navigation">
           {menuItems.map((item, index) => (
             <li 
               key={index} 
-              className={`list ${activeTab === index ? 'active' : ''}`}
+              data-role="NavigationMenuItem"
+              className={activeTab === index ? 'active' : ''}
             >
               {item.action ? (
-                <a href="#" onClick={(e) => {
-                  e.preventDefault();
-                  handleItemClick(index);
-                }}>
+                <a 
+                  href="#" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleItemClick(index);
+                  }}
+                >
                   <span className="icon">
                     {item.icon}
                     {item.badgeCount !== undefined && item.badgeCount > 0 && (
                       <span className="badge">{item.badgeCount}</span>
                     )}
                   </span>
-                  <span className="title">
-                    {item.text}
-                  </span>
+                  <span className="title">{item.text}</span>
                 </a>
               ) : (
                 <Link 
@@ -110,6 +99,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                     }
                     handleItemClick(index);
                   }}
+                  className="nav-link"
                 >
                   <span className="icon">
                     {item.icon}
@@ -117,9 +107,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                       <span className="badge">{item.badgeCount}</span>
                     )}
                   </span>
-                  <span className="title">
-                    {item.text}
-                  </span>
+                  <span className="title">{item.text}</span>
                 </Link>
               )}
             </li>

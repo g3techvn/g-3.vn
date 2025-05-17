@@ -5,9 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { COMPANY_INFO, SOCIAL_LINKS } from '../../constants';
-import { useCart } from '../../context/CartContext';
-import ProfileDrawer from '../store/ProfileDrawer';
+import { COMPANY_INFO, SOCIAL_LINKS } from '../../../constants';
+import { useCart } from '../../../context/CartContext';
+import ProfileDrawer from '../../store/ProfileDrawer';
 
 /**
  * Format phone number with spaces

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/types';
-import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';

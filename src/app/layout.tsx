@@ -1,9 +1,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Header from '@/components/header/Header';
-import Footer from '@/components/footer/Footer';
-import StickyNavbar from '@/components/header/StickyNavbar';
+import Header from '@/components/pc/header/Header';
+import Footer from '@/components/pc/footer/Footer';
+import StickyNavbar from '@/components/pc/header/StickyNavbar';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import CartLayout from '@/components/layout/CartLayout';
 import Providers from './providers';

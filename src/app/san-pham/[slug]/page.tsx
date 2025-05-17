@@ -3,7 +3,7 @@
 import React, { use, useCallback } from 'react';
 import { useState, useEffect } from 'react';
 import { Product } from '@/types';
-import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
 import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';

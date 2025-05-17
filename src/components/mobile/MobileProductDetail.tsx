@@ -1,10 +1,13 @@
 import { Product } from '@/types';
 import Image from 'next/image';
-import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon, StarIcon, ShareIcon, CloudIcon, MinusCircleIcon, TrashIcon, ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, XMarkIcon, ChevronRightIcon, PlayCircleIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as AspectRatio from '@radix-ui/react-aspect-ratio';
+import * as DropdownMenu from '@radix-ui/react-dialog';
 
 interface Comment {
   id: string;
@@ -241,14 +244,16 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
       {/* Product Info */}
       <div className="flex items-center gap-4 p-4 pb-0">
         <div className="relative w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border border-gray-200">
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="80px"
-            priority
-          />
+          <AspectRatio.Root ratio={1 / 1}>
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="80px"
+              priority
+            />
+          </AspectRatio.Root>
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-bold text-gray-900 truncate">{product.name}</h1>
@@ -363,62 +368,69 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
         </div>
       </div>
 
-      {/* Lightbox overlay */}
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex flex-col">
-          {/* Top bar with back button */}
-          <div className="flex items-center h-14 px-2">
-            <button
-              onClick={closeLightbox}
-              className="flex items-center justify-center w-10 h-10 text-white hover:text-gray-300"
-            >
-              <ChevronLeftIcon className="w-7 h-7" />
-            </button>
-          </div>
-          {/* Image/video viewer */}
-          <div className="flex-1 flex items-center justify-center relative">
-            {/* Prev button */}
-            <button
-              onClick={prevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 rounded-full p-2 text-white hover:bg-opacity-70"
-              style={{ zIndex: 1 }}
-              aria-label="Previous"
-            >
-              <ChevronLeftIcon className="w-7 h-7" />
-            </button>
-            <div className="relative w-full max-w-md h-[60vw] max-h-[70vh] mx-auto flex items-center justify-center">
-              {galleryItems[lightboxIndex].type === 'video' ? (
-                <iframe
-                  src={galleryItems[lightboxIndex].embed + '?autoplay=1'}
-                  title={galleryItems[lightboxIndex].title}
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                  className="w-full h-full rounded-xl bg-black"
-                  style={{ aspectRatio: '16/9', minHeight: 200 }}
-                />
-              ) : (
-                <Image
-                  src={galleryItems[lightboxIndex].src}
-                  alt={galleryItems[lightboxIndex].alt}
-                  fill
-                  className="object-contain rounded-xl"
-                  sizes="100vw"
-                  priority
-                />
-              )}
+      {/* Lightbox */}
+      <Dialog.Root open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/90 z-50" />
+          <Dialog.Content className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="relative w-full max-w-3xl mx-auto">
+              <Dialog.Close asChild>
+                <button 
+                  className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition"
+                  aria-label="Close lightbox"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </Dialog.Close>
+              
+              <div className="w-full">
+                {galleryItems[lightboxIndex].type === 'image' ? (
+                  <div className="relative w-full aspect-w-16 aspect-h-9 bg-black flex items-center justify-center">
+                    <Image
+                      src={galleryItems[lightboxIndex].src}
+                      alt={galleryItems[lightboxIndex].alt}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 1200px) 100vw, 1200px"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full aspect-w-16 aspect-h-9">
+                    <iframe
+                      src={galleryItems[lightboxIndex].embed}
+                      title={galleryItems[lightboxIndex].title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    ></iframe>
+                  </div>
+                )}
+              </div>
+              
+              {/* Navigation buttons */}
+              <div className="absolute inset-y-0 left-4 flex items-center">
+                <button
+                  onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                  className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeftIcon className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="absolute inset-y-0 right-4 flex items-center">
+                <button
+                  onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                  className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition"
+                  aria-label="Next image"
+                >
+                  <ChevronRightIcon className="w-6 h-6" />
+                </button>
+              </div>
             </div>
-            {/* Next button */}
-            <button
-              onClick={nextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 rounded-full p-2 text-white hover:bg-opacity-70"
-              style={{ zIndex: 1 }}
-              aria-label="Next"
-            >
-              <ChevronRightIcon className="w-7 h-7" />
-            </button>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       {/* Tag thể loại */}
       {tags && tags.length > 0 && (

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import BottomNav from './BottomNav';
 import { useCart } from '@/context/CartContext';
+import { Slot } from '@radix-ui/react-slot';
+import './radix-styles.css';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -89,9 +91,9 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
 
   return (
     <div className="mobile-layout">
-      <main className="pb-20">
+      <Slot className="pb-20">
         {children}
-      </main>
+      </Slot>
       <BottomNav menuItems={menuItems} />
     </div>
   );

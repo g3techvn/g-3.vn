@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import CallBox from './CallBox';
 import ZaloBox from './ZaloBox';
-import { COMPANY_INFO} from '../../constants';
+import { COMPANY_INFO} from '../../../constants';
 
 // Type declarations for environment variables
 declare global {

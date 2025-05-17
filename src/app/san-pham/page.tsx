@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ProductCard } from '@/features/product/ProductCard';
 import { Product } from '@/types';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
-import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 // Đã comment import vì hiện tại chưa sử dụng
 // import { createBrowserClient } from '@/lib/supabase';
 

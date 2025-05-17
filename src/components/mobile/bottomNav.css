@@ -59,7 +59,7 @@
   margin: 0;
 }
 
-.navigation li {
+.navigation [data-role="NavigationMenuItem"] {
   position: relative;
   list-style: none;
   height: 70px;
@@ -69,7 +69,7 @@
   justify-content: center;
 }
 
-.navigation li a {
+.navigation .nav-link {
   position: relative;
   display: flex;
   justify-content: center;
@@ -83,7 +83,7 @@
   transition: all 0.3s ease;
 }
 
-.navigation li a .icon {
+.navigation .nav-link .icon {
   position: relative;
   display: block;
   line-height: 65px;
@@ -95,13 +95,13 @@
 }
 
 /* Active state styles */
-.navigation li.active a {
+.navigation [data-role="NavigationMenuItem"].active .nav-link {
   background: none;
   border-radius: 0;
   padding: 0;
 }
 
-.navigation li.active a .icon {
+.navigation [data-role="NavigationMenuItem"].active .nav-link .icon {
   background: none;
   border-radius: 0;
   padding: 0;
@@ -110,13 +110,13 @@
   transition: color 0.3s ease;
 }
 
-.navigation li.active a .title {
+.navigation [data-role="NavigationMenuItem"].active .nav-link .title {
   color: var(--active-color);
   font-weight: 600;
 }
 
 /* Style cho title */
-.navigation li a .title {
+.navigation .nav-link .title {
   position: relative;
   display: block;
   font-weight: 400;
@@ -129,14 +129,14 @@
 }
 
 /* Style cho svg icon */
-.navigation li a .icon svg {
+.navigation .nav-link .icon svg {
   width: 24px;
   height: 24px;
   position: relative;
 }
 
 /* Badge styling for cart count */
-.navigation li a .icon .badge {
+.navigation .nav-link .icon .badge {
   position: absolute;
   top: -5px;
   right: 0px; 
@@ -156,7 +156,7 @@
   z-index: 2;
 }
 
-.navigation li.active a .icon .badge {
+.navigation [data-role="NavigationMenuItem"].active .nav-link .icon .badge {
   background-color: var(--active-color);
 }
 
@@ -190,13 +190,7 @@
   display: none;
 }
 
-.navigation li.active a {
-  background: none;
-  border-radius: 0;
-  padding: 0;
-}
-
-.navigation li:not(.active) a .icon:hover {
+.navigation [data-role="NavigationMenuItem"]:not(.active) .nav-link .icon:hover {
   background: rgba(142, 142, 147, 0.12); /* subtle gray background */
   border-radius: 20px; /* For pill shape, based on 40px height (24px icon + 2*8px vertical padding) */
   padding: 8px 12px;   /* 8px top/bottom, 12px left/right to make it wider */
@@ -205,7 +199,7 @@
 }
 
 /* Circular highlight for the icon of an active item on hover */
-.navigation li.active a:hover .icon {
+.navigation [data-role="NavigationMenuItem"].active .nav-link:hover .icon {
   background: rgba(255, 0, 0, 0.05); /* Light red background (equivalent to bg-red-50) */
   border-radius: 50%; /* Makes it circular */
   padding: 8px;       /* Padding to create space for the circular background */

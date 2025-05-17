@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types';
@@ -22,7 +22,7 @@ interface MobileBestsellerProductsProps {
   error: string | null;
 }
 
-const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = ({ 
+const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.memo(({ 
   products,
   loading,
   error
@@ -31,12 +31,12 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
 
-  // Function to get random banner image
-  const getRandomBanner = () => {
+  // Function to get random banner image - memoized for each product
+  const getRandomBanner = useCallback(() => {
     return bannerImages[Math.floor(Math.random() * bannerImages.length)];
-  };
+  }, []);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const slideWidth = container.offsetWidth * 0.95; // 95% of container width
@@ -44,34 +44,36 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = ({
       const newSlide = Math.round(scrollPosition / slideWidth);
       setCurrentSlide(newSlide);
     }
-  };
+  }, []);
 
-  // Lấy tối đa 4 sản phẩm để hiển thị và sắp xếp theo rating
-  const displayProducts = [...products]
-    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-    .slice(0, 4);
+  const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+  }, [addToCart]);
 
-  return (
-    <section className="pt-4">
-      <div className="flex items-center justify-between px-4 mb-2">
-        <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
-        <div className="flex gap-1">
-          {displayProducts.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentSlide === index ? 'bg-red-500 w-4' : 'bg-gray-300'
-              }`}
-            />
-          ))}
+  // Lấy tối đa 4 sản phẩm để hiển thị và sắp xếp theo rating - memoized
+  const displayProducts = useMemo(() => {
+    return [...products]
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, 4);
+  }, [products]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className="pt-4">
+        <div className="flex items-center justify-between px-4 mb-2">
+          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
+          <div className="flex gap-1">
+            {[...Array(4)].map((_, index) => (
+              <div
+                key={index}
+                className="w-2 h-2 rounded-full bg-gray-300"
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
-          Đã xảy ra lỗi: {error}
-        </div>
-      )}
-      {loading ? (
         <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4 scrollbar-hide">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
@@ -89,125 +91,165 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = ({
             </div>
           ))}
         </div>
-      ) : displayProducts.length > 0 ? (
-        <div className="relative">
-          <div 
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide"
-          >
-            {displayProducts.map((product) => (
-              <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
-                <div className="relative w-full aspect-video">
-                  <Image
-                    src={getRandomBanner()}
-                    alt={`Banner ${product.name}`}
-                    fill
-                    className="object-cover rounded-lg"
-                    priority
-                  />
-                </div>
-                <Link 
-                  href={`/san-pham/${product.slug || product.id}`}
-                  className="bg-white rounded-lg shadow overflow-hidden block"
-                >
-                  <div className="flex items-center p-2">
-                    <div className="relative w-20 h-20">
-                      <Image
-                        src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
-                        alt={product.name}
-                        fill
-                        className="rounded-lg object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0 ml-2">
-                      <div className="font-medium text-sm line-clamp-2">
-                        {product.name}
-                      </div>
-                      <div className="flex items-center justify-between mt-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-red-500 font-semibold">
-                            {formatCurrency(product.price)}
-                          </span>
-                          {product.original_price && product.original_price > product.price && (
-                            <span className="text-xs text-gray-500 line-through">
-                              {formatCurrency(product.original_price)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => {
-                            const ratingValue = product.rating || 0;
-                            const isFilled = i < Math.floor(ratingValue);
-                            const isHalfFilled = !isFilled && i === Math.floor(ratingValue) && (ratingValue % 1) >= 0.5;
-                            
-                            return (
-                              <svg
-                                key={i}
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill={isFilled || isHalfFilled ? "#FFD700" : "none"}
-                                stroke={"#FFD700"}
-                                className="h-3 w-3 text-gray-300"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="1.5"
-                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                />
-                                {isHalfFilled && (
-                                  <clipPath id={`clip-half-bestseller-${product.id}-${i}`}>
-                                    <rect x="0" y="0" width="50%" height="100%" />
-                                  </clipPath>
-                                )}
-                                {isHalfFilled && (
-                                  <path
-                                    clipPath={`url(#clip-half-bestseller-${product.id}-${i})`}
-                                    fill="#FFD700"
-                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                  />
-                                )}
-                              </svg>
-                            );
-                          })}
-                          {product.rating && (
-                            <span className="text-xs text-gray-600 ml-1">
-                              {product.rating.toFixed(1)}
-                            </span>
-                          )}
-                        </div>
-                        <button 
-                          className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
-                          aria-label="Thêm vào giỏ hàng"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addToCart(product);
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section className="pt-4">
+        <div className="flex items-center justify-between px-4 mb-2">
+          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
         </div>
-      ) : (
+        <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+          Đã xảy ra lỗi: {error}
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state
+  if (displayProducts.length === 0) {
+    return (
+      <section className="pt-4">
+        <div className="flex items-center justify-between px-4 mb-2">
+          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
+        </div>
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
           <p className="text-base text-gray-600">Không tìm thấy sản phẩm nào.</p>
           <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
         </div>
-      )}
+      </section>
+    );
+  }
+
+  return (
+    <section className="pt-4">
+      <div className="flex items-center justify-between px-4 mb-2">
+        <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
+        <div className="flex gap-1">
+          {displayProducts.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentSlide === index ? 'bg-red-500 w-4' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="relative">
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-8 scrollbar-hide"
+        >
+          {displayProducts.map((product) => (
+            <div key={product.id} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
+              <div className="relative w-full aspect-video">
+                <Image
+                  src={getRandomBanner()}
+                  alt={`Banner ${product.name}`}
+                  fill
+                  className="object-cover rounded-lg"
+                  priority
+                />
+              </div>
+              <Link 
+                href={`/san-pham/${product.slug || product.id}`}
+                className="bg-white rounded-lg shadow overflow-hidden block"
+              >
+                <div className="flex items-center p-2">
+                  <div className="relative w-20 h-20">
+                    <Image
+                      src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
+                      alt={product.name}
+                      fill
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 ml-2">
+                    <div className="font-medium text-sm line-clamp-2">
+                      {product.name}
+                    </div>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-red-500 font-semibold">
+                          {formatCurrency(product.price)}
+                        </span>
+                        {product.original_price && product.original_price > product.price && (
+                          <span className="text-xs text-gray-500 line-through">
+                            {formatCurrency(product.original_price)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => {
+                          const ratingValue = product.rating || 0;
+                          const isFilled = i < Math.floor(ratingValue);
+                          const isHalfFilled = !isFilled && i === Math.floor(ratingValue) && (ratingValue % 1) >= 0.5;
+                          
+                          return (
+                            <svg
+                              key={i}
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill={isFilled || isHalfFilled ? "#FFD700" : "none"}
+                              stroke={"#FFD700"}
+                              className="h-3 w-3 text-gray-300"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.5"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                              />
+                              {isHalfFilled && (
+                                <clipPath id={`clip-half-bestseller-${product.id}-${i}`}>
+                                  <rect x="0" y="0" width="50%" height="100%" />
+                                </clipPath>
+                              )}
+                              {isHalfFilled && (
+                                <path
+                                  clipPath={`url(#clip-half-bestseller-${product.id}-${i})`}
+                                  fill="#FFD700"
+                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                />
+                              )}
+                            </svg>
+                          );
+                        })}
+                        {product.rating && (
+                          <span className="text-xs text-gray-600 ml-1">
+                            {product.rating.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+                        aria-label="Thêm vào giỏ hàng"
+                        onClick={(e) => handleAddToCart(e, product)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
-};
+});
+
+// Add display name for debugging
+MobileBestsellerProducts.displayName = 'MobileBestsellerProducts';
 
 export default MobileBestsellerProducts; 

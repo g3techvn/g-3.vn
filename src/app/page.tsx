@@ -1,12 +1,12 @@
 'use client';
-import HeroCarousel from '@/components/home/HeroCarousel';
-import CategoryGrid from '@/components/home/CategoryGrid';
-import NewProducts from '@/components/product/NewProducts';
-import BlogPosts from '@/components/home/BlogPosts';
-import BrandLogos from '@/components/home/BrandLogos';
-import FeaturedProducts from '@/components/product/FeaturedProducts';
-import ComboProduct from '@/components/product/ComboProduct';
-import { useEffect, useState, useCallback } from 'react';
+import HeroCarousel from '@/components/pc/home/HeroCarousel';
+import CategoryGrid from '@/components/pc/home/CategoryGrid';
+import NewProducts from '@/components/pc/product/NewProducts';
+import BlogPosts from '@/components/pc/home/BlogPosts';
+import BrandLogos from '@/components/pc/home/BrandLogos';
+import FeaturedProducts from '@/components/pc/product/FeaturedProducts';
+import ComboProduct from '@/components/pc/product/ComboProduct';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileHomeTabs from '@/components/mobile/MobileHomeTabs';
 import { Product, Brand } from '@/types';
@@ -17,6 +17,13 @@ import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
 // Import or define ComboProduct type
 interface ComboProduct extends Product {
   combo_products?: Product[];
+}
+
+// Store data by category to prevent reloading
+interface CategoryData {
+  products: Product[];
+  brands: Brand[];
+  isLoaded: boolean;
 }
 
 export default function Home() {
@@ -32,6 +39,7 @@ export default function Home() {
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ name: string; slug: string; productCount: number }[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  
   // New states for component-specific data
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newProducts, setNewProducts] = useState<Product[]>([]);
@@ -42,6 +50,15 @@ export default function Home() {
   const [featuredError, setFeaturedError] = useState<string | null>(null);
   const [newError, setNewError] = useState<string | null>(null);
   const [comboError, setComboError] = useState<string | null>(null);
+  
+  // Track if initial data has loaded
+  const initialLoadComplete = useRef(false);
+  // Track if manual category change
+  const isManualCategoryChange = useRef(false);
+  // Track if category products are loading
+  const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
+  // Cache for category data to prevent reloads
+  const categoryDataCache = useRef<Record<string, CategoryData>>({});
 
   // Lấy tất cả sản phẩm
   const fetchProducts = async () => {
@@ -92,7 +109,15 @@ export default function Home() {
       return;
     }
     
+    // Check if we already have this category data cached
+    if (categoryDataCache.current[categorySlug]?.isLoaded) {
+      // Use cached data if available
+      setCategoryProducts(categoryDataCache.current[categorySlug].products);
+      return;
+    }
+    
     try {
+      setLoadingCategoryProducts(true);
       setLoading(true);
       const url = `/api/categories/${categorySlug}`;
       const response = await fetch(url);
@@ -102,14 +127,30 @@ export default function Home() {
       }
       
       const data = await response.json();
-      setCategoryProducts(data.products || []);
+      const categoryProducts = data.products || [];
+      setCategoryProducts(categoryProducts);
+      
+      // Filter brands for this category
+      const brandIdsInCategory = new Set(
+        categoryProducts.map((product: Product) => product.brand_id).filter(Boolean)
+      );
+      
+      const filteredBrands = brands.filter(brand => brandIdsInCategory.has(brand.id));
+      
+      // Cache this category's data
+      categoryDataCache.current[categorySlug] = {
+        products: categoryProducts,
+        brands: filteredBrands,
+        isLoaded: true
+      };
     } catch (error: unknown) {
       console.error(`Error fetching products for category ${categorySlug}:`, error);
       setCategoryProducts([]);
     } finally {
       setLoading(false);
+      setLoadingCategoryProducts(false);
     }
-  }, [products]);
+  }, [products, brands]);
 
   // Lấy tất cả danh mục và đếm sản phẩm
   const fetchCategories = useCallback(async () => {
@@ -135,6 +176,15 @@ export default function Home() {
             const prodData = await prodResponse.json();
             const count = prodData.products?.length || 0;
             
+            // Cache initial category data to prevent future reloads
+            if (count > 0) {
+              categoryDataCache.current[cat.slug] = {
+                products: prodData.products || [],
+                brands: [], // We'll populate this later
+                isLoaded: true
+              };
+            }
+            
             return { 
               name: cat.title, 
               slug: cat.slug, 
@@ -154,9 +204,15 @@ export default function Home() {
       
       setCategories(filteredCategories);
       
-      // Thiết lập danh mục mặc định là danh mục đầu tiên
-      if (filteredCategories.length > 0 && !selectedCategory) {
-        setSelectedCategory(filteredCategories[0].slug);
+      // Thiết lập danh mục mặc định là danh mục đầu tiên chỉ khi chưa có selectedCategory
+      if (filteredCategories.length > 0 && !selectedCategory && !initialLoadComplete.current) {
+        const firstCategorySlug = filteredCategories[0].slug;
+        setSelectedCategory(firstCategorySlug);
+        
+        // If we already fetched this category's data, use it immediately
+        if (categoryDataCache.current[firstCategorySlug]?.isLoaded) {
+          setCategoryProducts(categoryDataCache.current[firstCategorySlug].products);
+        }
       }
     } catch (error: unknown) {
       console.error('Error fetching categories:', error);
@@ -229,6 +285,12 @@ export default function Home() {
     }
   };
 
+  // Handle category change from tab click
+  const handleCategoryChange = useCallback((categorySlug: string) => {
+    isManualCategoryChange.current = true;
+    setSelectedCategory(categorySlug);
+  }, []);
+
   // Xử lý khi danh mục thay đổi
   useEffect(() => {
     if (selectedCategory) {
@@ -238,29 +300,110 @@ export default function Home() {
     }
   }, [selectedCategory, products, fetchProductsByCategory]);
 
+  // Check if we're on mobile
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const onResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    const checkIfMobile = () => {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+  // Initial data fetch - only run once
   useEffect(() => {
-    fetchProducts();
-    fetchBrands();
-    fetchCategories();
-    fetchFeaturedProducts();
-    fetchNewProducts();
-    fetchComboProducts();
-  }, [fetchCategories]);
+    const loadInitialData = async () => {
+      try {
+        // First load essential data
+        const [brandsResult, productsResult] = await Promise.all([
+          fetchBrands(),
+          fetchProducts()
+        ]);
+        
+        // Then load categories and initialize first category
+        await fetchCategories();
+        
+        // Load other data in the background
+        Promise.all([
+          fetchFeaturedProducts(),
+          fetchNewProducts(),
+          fetchComboProducts()
+        ]);
+        
+        initialLoadComplete.current = true;
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+      }
+    };
+    
+    loadInitialData();
+  }, []); 
 
-  // Lọc brands theo danh mục
-  const filteredBrands = selectedCategory
-    ? brands.filter(brand => {
-        // Kiểm tra xem brand có sản phẩm thuộc category hiện tại không
-        return categoryProducts.some(product => product.brand_id === brand.id);
-      })
-    : brands;
+  // Get relevant brands for current category from cache
+  const getCurrentCategoryBrands = useMemo(() => {
+    // If loading or no category selected, return all brands
+    if (loadingCategoryProducts || !selectedCategory) {
+      return brands;
+    }
+    
+    // If we have cached data for this category, use the filtered brands
+    if (categoryDataCache.current[selectedCategory]?.isLoaded) {
+      // If we have cached brands and they're not empty, use them
+      const cachedBrands = categoryDataCache.current[selectedCategory].brands;
+      if (cachedBrands.length > 0) {
+        return cachedBrands;
+      }
+      
+      // Otherwise, filter brands based on products and update cache
+      const products = categoryDataCache.current[selectedCategory].products;
+      const brandIdsInCategory = new Set(
+        products.map((product: Product) => product.brand_id).filter(Boolean)
+      );
+      
+      const filteredBrands = brands.filter(brand => brandIdsInCategory.has(brand.id));
+      
+      // Update cache with filtered brands
+      categoryDataCache.current[selectedCategory].brands = filteredBrands;
+      
+      return filteredBrands;
+    }
+    
+    // Fallback: filter brands based on current category products
+    if (categoryProducts.length > 0) {
+      const brandIdsInCategory = new Set(
+        categoryProducts.map((product: Product) => product.brand_id).filter(Boolean)
+      );
+      
+      return brands.filter(brand => brandIdsInCategory.has(brand.id));
+    }
+    
+    return brands;
+  }, [brands, selectedCategory, categoryProducts, loadingCategoryProducts]);
+
+  // Memoize các props truyền xuống MobileCategoryFeature để tránh re-render
+  const mobileCategoryFeatureProps = useMemo(() => ({
+    brands: getCurrentCategoryBrands,
+    loading: !!(loadingBrands || loadingCategoryProducts),
+    error: brandError,
+    categorySlug: selectedCategory
+  }), [getCurrentCategoryBrands, loadingBrands, loadingCategoryProducts, brandError, selectedCategory]);
+
+  // Memoize các props truyền xuống MobileFeatureProduct để tránh re-render
+  const mobileFeatureProductProps = useMemo(() => ({
+    products: categoryProducts,
+    brands,
+    loading: loading,
+    error: error
+  }), [categoryProducts, brands, loading, error]);
+
+  // Memoize các props truyền xuống MobileBestsellerProducts để tránh re-render
+  const mobileBestsellerProps = useMemo(() => ({
+    products: categoryProducts,
+    loading: loading,
+    error: error
+  }), [categoryProducts, loading, error]);
 
   if (isMobile) {
     return (
@@ -269,27 +412,13 @@ export default function Home() {
         <MobileHomeTabs 
           categories={categories}
           loading={loadingCategories}
-          onCategoryChange={setSelectedCategory} 
+          onCategoryChange={handleCategoryChange} 
         />
         {/* Section: Sản phẩm bán chạy */}
-        <MobileBestsellerProducts 
-          products={categoryProducts} 
-          loading={loading} 
-          error={error} 
-        />
-        <MobileCatogeryFeature 
-          brands={filteredBrands} 
-          loading={loadingBrands} 
-          error={brandError} 
-          categorySlug={selectedCategory}
-        />
+        <MobileBestsellerProducts {...mobileBestsellerProps} />
+        <MobileCatogeryFeature {...mobileCategoryFeatureProps} />
         {/* Được đề xuất cho bạn */}
-        <MobileFeatureProduct 
-          products={categoryProducts} 
-          brands={brands} 
-          loading={loading} 
-          error={error} 
-        />
+        <MobileFeatureProduct {...mobileFeatureProductProps} />
       </div>
     );
   }

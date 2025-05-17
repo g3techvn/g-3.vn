@@ -20,13 +20,19 @@ const MobileHomeTabs: React.FC<MobileHomeTabsProps> = ({
 }) => {
   const [active, setActive] = useState(0);
   const isVisible = useHeaderVisibility();
+  const hasInitialized = React.useRef(false);
 
-  // Khi categories thay đổi, gọi callback với category đầu tiên
+  // Only initialize active tab on first render with valid categories
   useEffect(() => {
-    if (categories.length > 0 && onCategoryChange) {
-      onCategoryChange(categories[0].slug);
+    if (categories.length > 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
+      setActive(0);
+      
+      // We're removing this automatic category change that was triggering
+      // extra fetches. Category selection will now only happen on tab click
+      // or from the parent component initially setting it.
     }
-  }, [categories, onCategoryChange]);
+  }, [categories]);
 
   const handleTabClick = (idx: number, slug: string) => {
     setActive(idx);
