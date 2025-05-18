@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link'; // Import Link
 import { Brand } from '@/types'; // Uncomment this import
 // import { Brand } from '@/types'; // Will replace this
-import MobileCatogeryFeature from '@/components/mobile/MobileCatogeryFeature';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileLayout from '@/components/mobile/MobileLayout';
 
@@ -75,11 +74,6 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
     <div className="md:hidden">
       <MobileHomeHeader />
       <div className="px-4 py-4">
-        <MobileCatogeryFeature
-          brands={brands}
-          loading={loadingBrands}
-          error={brandError}
-        />
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600">
             Đã xảy ra lỗi: {error}

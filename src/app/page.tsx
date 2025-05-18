@@ -184,7 +184,7 @@ const fetchBatchData = async (endpoints: string[]) => {
 };
 
 // Add this custom hook for better data caching
-const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: any[] = []) => {
+const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: unknown[] = []) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -221,6 +221,7 @@ const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: 
   
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, ...dependencies]);
   
   return { data, loading, error, refetch: fetchData };

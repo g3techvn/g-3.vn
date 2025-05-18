@@ -63,7 +63,7 @@ export async function GET(request: Request) {
     }
     
     // Get all categories
-    let query = supabase.from('product_cats').select('*');
+    const query = supabase.from('product_cats').select('*');
     
     // Execute query to get all categories
     const { data: allProductCats, error } = await query;

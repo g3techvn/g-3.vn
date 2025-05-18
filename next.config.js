@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     domains: ['localhost', 'api.g-3.vn', 'g-3.vn', 'cdn.g-3.vn'],
     formats: ['image/avif', 'image/webp'],
