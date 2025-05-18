@@ -19,6 +19,7 @@ export type Product = {
   slug?: string;
   video_url?: string;
   gallery_url?: string;
+  thong_so_ky_thuat?: { title: string; value: string }[];
 };
 
 export type Category = {

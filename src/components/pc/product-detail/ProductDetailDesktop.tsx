@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import { ProductGallery } from './ProductGallery';
 import { ProductInfo } from './ProductInfo';
 import { ProductDescription } from './ProductDescription';
-import { TechnicalSpecs, defaultChairSpecs } from './TechnicalSpecs';
+import { TechnicalSpecs } from './TechnicalSpecs';
 import { FAQ } from './FAQ';
 import { ReviewsSection } from './ReviewsSection';
 import { SimilarProducts } from './SimilarProducts';
@@ -46,6 +46,11 @@ interface ProductDetailDesktopProps {
   };
   similarProducts: Product[];
   loadingSimilar: boolean;
+  technicalSpecs?: Array<{ name: string; value: string }> | Array<{ title: string; value: string }>;
+  keyFeatures?: string[];
+  benefits?: string[];
+  instructions?: string[];
+  overview?: string;
 }
 
 export function ProductDetailDesktop({
@@ -56,7 +61,12 @@ export function ProductDetailDesktop({
   comments,
   ratingSummary,
   similarProducts,
-  loadingSimilar
+  loadingSimilar,
+  technicalSpecs = [],
+  keyFeatures,
+  benefits,
+  instructions,
+  overview
 }: ProductDetailDesktopProps) {
   
   // Create galleryItems based on product and fetched gallery images
@@ -94,54 +104,7 @@ export function ProductDetailDesktop({
         ]}
       />
       
-      {/* Quick navigation */}
-      <motion.div 
-        className="sticky top-0 z-10 bg-white border-b border-gray-200 py-3 mb-6 flex space-x-6 overflow-x-auto"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
-        <motion.button 
-          className="text-sm font-medium text-gray-600 hover:text-red-600 whitespace-nowrap"
-          onClick={() => scrollToSection('overview')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Tổng quan
-        </motion.button>
-        <motion.button 
-          className="text-sm font-medium text-gray-600 hover:text-red-600 whitespace-nowrap"
-          onClick={() => scrollToSection('specs')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Thông số kỹ thuật
-        </motion.button>
-        <motion.button 
-          className="text-sm font-medium text-gray-600 hover:text-red-600 whitespace-nowrap"
-          onClick={() => scrollToSection('faq')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Câu hỏi thường gặp
-        </motion.button>
-        <motion.button 
-          className="text-sm font-medium text-gray-600 hover:text-red-600 whitespace-nowrap"
-          onClick={() => scrollToSection('reviews')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Đánh giá
-        </motion.button>
-        <motion.button 
-          className="text-sm font-medium text-gray-600 hover:text-red-600 whitespace-nowrap"
-          onClick={() => scrollToSection('similar')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Sản phẩm tương tự
-        </motion.button>
-      </motion.div>
+   
 
       <div className="mt-8" id="overview">
         {/* Product Content */}
@@ -182,7 +145,12 @@ export function ProductDetailDesktop({
         <div className="grid grid-cols-5 gap-8">
           {/* Main Content - 3 columns */}
           <div className="col-span-3 space-y-8">
-            <ProductDescription />
+            <ProductDescription 
+              keyFeatures={keyFeatures}
+              benefits={benefits}
+              instructions={instructions}
+              overview={overview}
+            />
             
             <motion.div 
               id="faq"
@@ -214,7 +182,12 @@ export function ProductDetailDesktop({
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5 }}
           >
-            <TechnicalSpecs specifications={defaultChairSpecs} />
+            <TechnicalSpecs specifications={technicalSpecs.length > 0 
+              ? technicalSpecs.map(spec => ({ 
+                  title: 'name' in spec ? spec.name : spec.title, 
+                  value: spec.value 
+                })) 
+              : []} />
           </motion.div>
         </div>
 

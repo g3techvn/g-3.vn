@@ -60,6 +60,12 @@ interface Comment {
   };
 }
 
+// Add interface for technical specifications
+interface TechnicalSpec {
+  name: string;
+  value: string;
+}
+
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { addToCart } = useCart();
@@ -124,6 +130,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       { star: 1, count: 6200 },
     ]
   });
+
+  // Add technical specifications data
+  const [technicalSpecs, setTechnicalSpecs] = useState<TechnicalSpec[]>([]);
+
+  // Add product detail sections data
+  const [keyFeatures, setKeyFeatures] = useState<string[]>([]);
+  const [benefits, setBenefits] = useState<string[]>([]);
+  const [instructions, setInstructions] = useState<string[]>([]);
+  const [overview, setOverview] = useState<string>('');
 
   // Helper function to get random color from name for avatar
   const getRandomColor = (name: string) => {
@@ -218,9 +233,92 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setProduct(data.product);
-        // Gọi fetchSimilarProducts sau khi đã có product id
-        if (data.product && data.product.id) {
-          fetchSimilarProducts(data.product.id);
+        
+        // Set product detail sections data
+        if (data.product) {
+          try {
+            // Set key features from tinh_nang field
+            setKeyFeatures(data.product.tinh_nang ? 
+              (Array.isArray(data.product.tinh_nang) ? data.product.tinh_nang : [data.product.tinh_nang]) : 
+              []);
+            
+            // Set benefits from loi_ich field
+            setBenefits(data.product.loi_ich ? 
+              (Array.isArray(data.product.loi_ich) ? data.product.loi_ich : [data.product.loi_ich]) : 
+              []);
+            
+            // Set instructions from huong_dan field
+            setInstructions(data.product.huong_dan ? 
+              (Array.isArray(data.product.huong_dan) ? data.product.huong_dan : [data.product.huong_dan]) : 
+              []);
+            
+            // Set overview from description field
+            setOverview(data.product.description || '');
+            
+            // Process technical specifications
+            if (data.product.thong_so_ky_thuat) {
+              // Handle different formats the API might return
+              if (Array.isArray(data.product.thong_so_ky_thuat)) {
+                // If already in the correct format, use it directly
+                if (data.product.thong_so_ky_thuat.length > 0 && 
+                    typeof data.product.thong_so_ky_thuat[0] === 'object' &&
+                    'name' in data.product.thong_so_ky_thuat[0] && 
+                    'value' in data.product.thong_so_ky_thuat[0]) {
+                  setTechnicalSpecs(data.product.thong_so_ky_thuat);
+                } else {
+                  // Convert array of strings to name/value pairs
+                  setTechnicalSpecs(
+                    data.product.thong_so_ky_thuat.map((spec: string, index: number) => ({
+                      name: `Thông số ${index + 1}`,
+                      value: spec
+                    }))
+                  );
+                }
+              } else if (typeof data.product.thong_so_ky_thuat === 'object') {
+                // Convert object to array of name/value pairs
+                setTechnicalSpecs(
+                  Object.entries(data.product.thong_so_ky_thuat).map(([key, value]) => ({
+                    name: key,
+                    value: value as string
+                  }))
+                );
+              } else if (typeof data.product.thong_so_ky_thuat === 'string') {
+                // Split string by newlines and create name/value pairs
+                const specs = data.product.thong_so_ky_thuat.split('\n').filter((line: string) => line.trim() !== '');
+                setTechnicalSpecs(
+                  specs.map((spec: string, index: number) => {
+                    const parts = spec.split(':');
+                    if (parts.length > 1) {
+                      return {
+                        name: parts[0].trim(),
+                        value: parts.slice(1).join(':').trim()
+                      };
+                    }
+                    return {
+                      name: `Thông số ${index + 1}`,
+                      value: spec.trim()
+                    };
+                  })
+                );
+              }
+            } else {
+              // Set empty specs if none exist
+              setTechnicalSpecs([]);
+            }
+          } catch (error) {
+            console.error('Error processing product data:', error);
+            // Set default empty values in case of errors
+            setKeyFeatures([]);
+            setBenefits([]);
+            setInstructions([]);
+            setOverview(data.product.description || '');
+            setTechnicalSpecs([]);
+          }
+          
+          // Gọi fetchSimilarProducts sau khi đã có product id
+          if (data.product && data.product.id) {
+            fetchSimilarProducts(data.product.id);
+          }
         }
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -361,6 +459,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }}
           comments={comments}
           ratingSummary={ratingSummary}
+          technicalSpecs={technicalSpecs}
+          keyFeatures={keyFeatures}
+          benefits={benefits}
+          instructions={instructions}
+          overview={overview}
         />
       </div>
 
@@ -378,6 +481,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           ratingSummary={ratingSummary}
           similarProducts={similarProducts}
           loadingSimilar={loadingSimilar}
+          technicalSpecs={technicalSpecs}
+          keyFeatures={keyFeatures}
+          benefits={benefits}
+          instructions={instructions}
+          overview={overview}
         />
       </div>
     </>

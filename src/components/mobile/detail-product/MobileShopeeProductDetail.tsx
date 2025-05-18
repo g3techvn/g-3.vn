@@ -15,6 +15,8 @@ import { ProductPolicies } from './ProductPolicies';
 import { ProductReviews } from './ProductReviews';
 import { ProductActions } from './ProductActions';
 import { ProductCartSheet } from './ProductCartSheet';
+import { TechnicalSpecs } from './TechnicalSpecs';
+import { ProductFeatures } from './ProductFeatures';
 
 interface Comment {
   id: string;
@@ -48,6 +50,11 @@ interface MobileProductDetailProps {
       count: number;
     }[];
   };
+  technicalSpecs?: Array<{ name: string; value: string }>;
+  keyFeatures?: string[];
+  benefits?: string[];
+  instructions?: string[];
+  overview?: string;
 }
 
 // Gallery item types
@@ -65,7 +72,7 @@ type GalleryImage = {
 };
 type GalleryItem = GalleryVideo | GalleryImage;
 
-export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary }: MobileProductDetailProps) {
+export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary, technicalSpecs = [], keyFeatures, benefits, instructions, overview }: MobileProductDetailProps) {
   const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
   
@@ -305,16 +312,29 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       />
 
       {/* Description */}
-      <ProductDescription description={product.description} />
-
-      {/* Policies */}
-      <ProductPolicies />
-
-      {/* Reviews */}
-      <ProductReviews 
-        comments={currentComments} 
-        ratingSummary={currentRatingSummary}
-      />
+      <div>
+        {/* Product Description */}
+        <ProductDescription description={product.description || overview} />
+        
+        {/* Product Features */}
+        <ProductFeatures 
+          keyFeatures={keyFeatures}
+          benefits={benefits}
+          instructions={instructions}
+        />
+        
+        {/* Technical Specifications */}
+        <TechnicalSpecs specifications={technicalSpecs} />
+        
+        {/* Product Policies */}
+        <ProductPolicies />
+        
+        {/* Product Reviews */}
+        <ProductReviews
+          comments={currentComments}
+          ratingSummary={currentRatingSummary}
+        />
+      </div>
 
       {/* Bottom Actions */}
       <ProductActions
