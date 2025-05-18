@@ -49,6 +49,19 @@ export type ProductTag = {
   tag_id: string;
 };
 
+// New types for domain-sector based filtering
+export type Sector = {
+  id: string;
+  title: string; // Using domain as the title for filtering
+  created_at: string;
+  updated_at?: string;
+};
+
+export type ProductSector = {
+  product_id: string;
+  sector_id: string;
+};
+
 export type User = {
   id: string;
   email: string;

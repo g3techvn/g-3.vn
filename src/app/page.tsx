@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo, Suspense, lazy } from 'react';
 import { Product, Brand } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProducts } from '@/hooks/useProducts';
 
 // Lazy loaded components
 const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
@@ -208,26 +209,18 @@ export default function Home() {
     blog: false
   });
 
-  // Lấy tất cả sản phẩm
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const url = '/api/products';
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setProducts(data.products || []);
-    } catch (error: unknown) {
-      console.error('Error fetching products:', error);
-      setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
-    } finally {
+  // Use the useProducts hook to get domain-aware products
+  const { products: useProductsProducts, loading: productsLoading, error: productsError, refresh: refreshProducts } = useProducts();
+
+  // Update the existing useEffect that calls fetchProducts to use our new hook's data
+  useEffect(() => {
+    if (useProductsProducts.length > 0 && !initialLoadComplete.current) {
       setLoading(false);
+      setProducts(useProductsProducts);
+      initialLoadComplete.current = true;
+      console.log('Products loaded:', useProductsProducts.length);
     }
-  }, []);
+  }, [useProductsProducts]);
 
   // Lấy tất cả thương hiệu
   const fetchBrands = useCallback(async () => {
@@ -476,15 +469,13 @@ export default function Home() {
         // First load essential data
         await Promise.all([
           fetchBrands(),
-          fetchProducts()
+          fetchCategories()
         ]);
         
-        // Then load categories and initialize first category
-        await fetchCategories();
+        // Products are loaded by the useProducts hook
+        // No need to fetch products explicitly
         
-        initialLoadComplete.current = true;
-        
-        // Set page as loaded for animation
+        // Animation and page transitions
         setTimeout(() => {
           setPageLoaded(true);
           // Hide loading overlay
@@ -499,7 +490,7 @@ export default function Home() {
     };
     
     loadInitialData();
-  }, [fetchBrands, fetchProducts, fetchCategories]); 
+  }, [fetchBrands, fetchCategories]); 
 
   // Set up Intersection Observer for lazy loading
   useEffect(() => {
