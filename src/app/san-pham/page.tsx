@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ProductCard } from '@/features/product/ProductCard';
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 // Đã comment import vì hiện tại chưa sử dụng
@@ -15,6 +15,9 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
   const [maxPrice, setMaxPrice] = useState<number>(0); // Bắt đầu với 0 và cập nhật sau khi có dữ liệu
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
+  const [brandError, setBrandError] = useState<string | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -49,8 +52,6 @@ export default function ProductsPage() {
       }
       
       console.log(`Nhận được ${productsData.length} sản phẩm từ API`);
-
-      
     } catch (error: unknown) {
       console.error('Error fetching products:', error);
       setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');
@@ -58,6 +59,28 @@ export default function ProductsPage() {
       setMaxPrice(10000000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch brands data
+  const fetchBrands = async () => {
+    try {
+      setLoadingBrands(true);
+      const url = '/api/brands';
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Lỗi HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Fetched brands:', data.brands);
+      setBrands(data.brands || []);
+    } catch (error: unknown) {
+      console.error('Error fetching brands:', error);
+      setBrandError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
+    } finally {
+      setLoadingBrands(false);
     }
   };
 
@@ -79,12 +102,21 @@ export default function ProductsPage() {
     setFilteredProducts(filtered.sort((a, b) => a.price - b.price));
   };
 
+  // Add debug logging
+  useEffect(() => {
+    if (brands.length > 0) {
+      console.log("Ready to render with brands:", brands.length);
+      console.log("Sample brand data:", brands[0]);
+    }
+  }, [brands]);
+
   useEffect(() => {
     fetchProducts();
+    fetchBrands(); // Fetch brands on component mount
   }, []);
 
   return (
-    <div className="container mx-auto  py-8 ">
+    <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
         {/* Sidebar Filter */}
         <div className="md:col-span-1">
@@ -103,7 +135,7 @@ export default function ProductsPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg  mb-6">
+          <div className="bg-white rounded-lg mb-6">
             <div className="flex items-center justify-between">
               <Breadcrumb
                 items={[
@@ -150,7 +182,7 @@ export default function ProductsPage() {
           </div>
 
           {loading ? (
-            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'} lg:grid-cols-${gridView}`}>
+            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'}`}>
               {[...Array(10)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square w-full rounded-lg bg-gray-200" />
@@ -162,9 +194,15 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'} lg:grid-cols-${gridView}`}>
+            <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'}`}>
+              {/* Log debugging info */}
+              {(() => { console.log('Rendering with brands:', brands.length, 'brands available'); return null; })()}
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  brands={brands} 
+                />
               ))}
             </div>
           ) : (

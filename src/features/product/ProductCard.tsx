@@ -22,6 +22,11 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
   const hasDiscount = original_price && original_price > price;
   const displayRating = rating || Math.floor(Math.random() * 5) + 1;
 
+  // Log when brands prop changes
+  useEffect(() => {
+    console.log(`ProductCard for ${name} received brands array with ${brands.length} items`);
+  }, [brands, name]);
+
   // Find brand name from brands array using brand_id
   useEffect(() => {
     if (brand) {
@@ -29,10 +34,26 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
       setBrandName(brand);
     } else if (brand_id && brands.length > 0) {
       // Otherwise look up from brands array
-      const foundBrand = brands.find(b => b.id === brand_id);
+      // Log for debugging
+      console.log('Looking up brand_id:', brand_id, 'type:', typeof brand_id);
+      console.log('Available brands sample:', brands.slice(0, 3).map(b => ({id: b.id, title: b.title, idType: typeof b.id})));
+      
+      // Normalize IDs for comparison - we've seen issues with string vs number comparisons
+      const brandIdString = String(brand_id).trim();
+      
+      // Try matching by string comparison to avoid type issues
+      const foundBrand = brands.find(b => String(b.id).trim() === brandIdString);
+      
       if (foundBrand) {
+        console.log('Found brand match:', foundBrand.title);
         setBrandName(foundBrand.title);
       } else {
+        console.log('No brand match found for brand_id:', brand_id);
+        // Try additional debugging to see format differences
+        if (brands.length > 0) {
+          console.log('First brand id:', String(brands[0].id), '(', typeof brands[0].id, ')');
+          console.log('vs brand_id:', brandIdString, '(', typeof brand_id, ')');
+        }
         setBrandName(brand_id);
       }
     } else {
