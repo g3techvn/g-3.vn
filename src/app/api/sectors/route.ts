@@ -3,12 +3,14 @@ import { createServerClient } from '@/lib/supabase';
 
 export async function GET(request: Request) {
   try {
-    // Get domain from request headers
-    const { headers } = request;
-    const host = headers.get('host') || '';
-    const domain = host.split(':')[0]; // Remove port if present
+    // Get domain from request parameters
+    const { searchParams } = new URL(request.url);
+    const title = searchParams.get('title');
     
-    console.log('API Request - Sectors for domain:', domain);
+    // Get domain from environment variable if title is not provided
+    const g3Domain = title || process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
+    
+    console.log('API Request - Sectors for domain:', g3Domain);
     
     // Initialize Supabase client
     const supabase = createServerClient();
@@ -16,9 +18,9 @@ export async function GET(request: Request) {
     // Query to get sectors
     let query = supabase.from('sectors').select('*');
     
-    // If domain is provided, filter sectors by title matching domain
-    if (domain) {
-      query = query.eq('title', domain);
+    // Filter sectors by title matching the domain
+    if (g3Domain) {
+      query = query.eq('title', g3Domain);
     }
     
     // Execute query to get data
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
       );
     }
     
-    console.log(`Query successful, returning ${sectors.length} sectors`);
+    console.log(`Query successful, returning ${sectors?.length || 0} sectors`);
     return NextResponse.json({ sectors });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

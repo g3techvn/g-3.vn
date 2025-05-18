@@ -11,7 +11,7 @@ interface UseProductsOptions {
 }
 
 export function useProducts(options: UseProductsOptions = {}) {
-  const { sectorId, isLocalhost } = useDomain();
+  const { sectorId } = useDomain();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +23,8 @@ export function useProducts(options: UseProductsOptions = {}) {
       // Build URL with query parameters
       const url = new URL('/api/products', window.location.origin);
       
-      // Add sector ID if available and not on localhost
-      if (sectorId && !isLocalhost) {
+      // Add sector ID if available
+      if (sectorId) {
         url.searchParams.append('sector_id', sectorId);
       }
       
@@ -41,11 +41,6 @@ export function useProducts(options: UseProductsOptions = {}) {
         url.searchParams.append('sort', options.sort);
       }
       
-      // On localhost, explicitly disable domain-based filtering
-      if (isLocalhost) {
-        url.searchParams.append('use_domain', 'false');
-      }
-      
       const response = await fetch(url.toString());
       
       if (!response.ok) {
@@ -60,7 +55,7 @@ export function useProducts(options: UseProductsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [sectorId, isLocalhost, options.categoryId, options.brandId, options.sort]);
+  }, [sectorId, options.categoryId, options.brandId, options.sort]);
 
   useEffect(() => {
     fetchProducts();

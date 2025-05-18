@@ -11,10 +11,11 @@ interface ProductSectorJoin {
 export async function GET(request: Request) {
   try {
     // Get domain and query parameters from request
-    const { headers, url } = request;
-    const { searchParams } = new URL(url);
-    const host = headers.get('host') || '';
-    const domain = host.split(':')[0]; // Remove port if present
+    const { searchParams } = new URL(request.url);
+    
+    // Get domain from searchParams or environment variable
+    const domainParam = searchParams.get('domain');
+    const g3Domain = domainParam || process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
     
     const category_id = searchParams.get('category_id');
     const brand_id = searchParams.get('brand_id');
@@ -22,24 +23,28 @@ export async function GET(request: Request) {
     const sector_id = searchParams.get('sector_id');
     const use_domain = searchParams.get('use_domain') !== 'false'; // Default to true
     
-    console.log('API Request - Query params:', { domain, category_id, brand_id, sort, sector_id, use_domain });
+    console.log('API Request - Query params:', { 
+      g3Domain, 
+      category_id, 
+      brand_id, 
+      sort, 
+      sector_id, 
+      use_domain
+    });
     
     // Initialize Supabase client
     const supabase = createServerClient();
     
     // First, check if we need domain-based filtering
     let products: Product[] = [];
-    
-    // Check if we're on localhost - skip sector filtering on localhost
-    const isLocalhost = domain === 'localhost' || domain === '127.0.0.1';
 
-    // Skip domain filtering if on localhost or if explicitly disabled
-    if (use_domain && domain && !sector_id && !isLocalhost) {
+    // Apply domain-based filtering when sector_id is not provided
+    if (use_domain && !sector_id) {
       // Get sector ID for this domain
       const { data: sectors, error: sectorError } = await supabase
         .from('sectors')
         .select('id')
-        .eq('title', domain)
+        .eq('title', g3Domain)
         .limit(1);
       
       if (sectorError) {

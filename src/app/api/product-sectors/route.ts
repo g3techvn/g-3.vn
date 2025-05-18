@@ -9,27 +9,27 @@ interface ProductSectorJoinItem {
 
 export async function GET(request: Request) {
   try {
-    // Get domain and query parameters from request
-    const { headers, url } = request;
-    const { searchParams } = new URL(url);
-    const host = headers.get('host') || '';
-    const domain = host.split(':')[0]; // Remove port if present
+    // Get query parameters from request
+    const { searchParams } = new URL(request.url);
     const sectorId = searchParams.get('sector_id');
     
-    console.log('API Request - Product Sectors:', { domain, sectorId });
+    // Get domain from environment variable
+    const g3Domain = process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
+    
+    console.log('API Request - Product Sectors:', { g3Domain, sectorId });
     
     // Initialize Supabase client
     const supabase = createServerClient();
     
-    // First, get the appropriate sector based on domain
+    // First, get the appropriate sector based on domain or sector_id
     let sectorQuery = supabase.from('sectors').select('id');
     
     if (sectorId) {
       // If sector_id is provided, use it
       sectorQuery = sectorQuery.eq('id', sectorId);
-    } else if (domain) {
-      // Otherwise use domain as filter
-      sectorQuery = sectorQuery.eq('title', domain);
+    } else {
+      // Otherwise use the environment variable domain
+      sectorQuery = sectorQuery.eq('title', g3Domain);
     }
     
     const { data: sectors, error: sectorError } = await sectorQuery;

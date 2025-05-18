@@ -33,23 +33,17 @@ export function DomainProvider({ children }: { children: ReactNode }) {
       try {
         setIsLoading(true);
         
-        // Get the current domain from the window location
-        const host = window.location.host;
-        const currentDomain = host.split(':')[0]; // Remove port if present
+        // Get the domain from environment variable instead of window.location
+        const currentDomain = process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
         setDomain(currentDomain);
         
-        // Check if we're on localhost
-        const localhost = currentDomain === 'localhost' || currentDomain === '127.0.0.1';
+        // Check if we're on localhost (just for information, no longer affects sector fetching)
+        const host = window.location.host;
+        const hostname = host.split(':')[0]; // Remove port if present
+        const localhost = hostname === 'localhost' || hostname === '127.0.0.1';
         setIsLocalhost(localhost);
         
-        // If we're on localhost, we don't need to fetch a sector
-        if (localhost) {
-          console.log('Running on localhost - bypassing sector filtering');
-          setIsLoading(false);
-          return;
-        }
-        
-        // Fetch the sector ID for this domain
+        // Fetch the sector ID for this domain - always fetch regardless of localhost
         const response = await fetch(`/api/sectors?title=${currentDomain}`);
         
         if (!response.ok) {
