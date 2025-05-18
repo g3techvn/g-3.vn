@@ -62,7 +62,7 @@ interface Comment {
 
 // Add interface for technical specifications
 interface TechnicalSpec {
-  name: string;
+  title: string;
   value: string;
 }
 
@@ -259,47 +259,53 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             if (data.product.thong_so_ky_thuat) {
               // Handle different formats the API might return
               if (Array.isArray(data.product.thong_so_ky_thuat)) {
-                // If already in the correct format, use it directly
-                if (data.product.thong_so_ky_thuat.length > 0 && 
-                    typeof data.product.thong_so_ky_thuat[0] === 'object' &&
-                    'name' in data.product.thong_so_ky_thuat[0] && 
-                    'value' in data.product.thong_so_ky_thuat[0]) {
-                  setTechnicalSpecs(data.product.thong_so_ky_thuat);
-                } else {
-                  // Convert array of strings to name/value pairs
-                  setTechnicalSpecs(
-                    data.product.thong_so_ky_thuat.map((spec: string, index: number) => ({
-                      name: `Thông số ${index + 1}`,
-                      value: spec
-                    }))
-                  );
+                            // If already in the correct format, use it directly
+            if (data.product.thong_so_ky_thuat.length > 0 && 
+                typeof data.product.thong_so_ky_thuat[0] === 'object' &&
+                ('title' in data.product.thong_so_ky_thuat[0] || 'name' in data.product.thong_so_ky_thuat[0]) && 
+                'value' in data.product.thong_so_ky_thuat[0]) {
+              // Map to ensure title property exists
+              setTechnicalSpecs(
+                data.product.thong_so_ky_thuat.map((spec: any) => ({
+                  title: spec.title || spec.name,
+                  value: spec.value
+                }))
+              );
+            } else {
+              // Convert array of strings to title/value pairs
+              setTechnicalSpecs(
+                data.product.thong_so_ky_thuat.map((spec: string, index: number) => ({
+                  title: `Thông số ${index + 1}`,
+                  value: spec
+                }))
+              );
+            }
+                        } else if (typeof data.product.thong_so_ky_thuat === 'object') {
+            // Convert object to array of title/value pairs
+            setTechnicalSpecs(
+              Object.entries(data.product.thong_so_ky_thuat).map(([key, value]) => ({
+                title: key,
+                value: value as string
+              }))
+            );
+          } else if (typeof data.product.thong_so_ky_thuat === 'string') {
+            // Split string by newlines and create title/value pairs
+            const specs = data.product.thong_so_ky_thuat.split('\n').filter((line: string) => line.trim() !== '');
+            setTechnicalSpecs(
+              specs.map((spec: string, index: number) => {
+                const parts = spec.split(':');
+                if (parts.length > 1) {
+                  return {
+                    title: parts[0].trim(),
+                    value: parts.slice(1).join(':').trim()
+                  };
                 }
-              } else if (typeof data.product.thong_so_ky_thuat === 'object') {
-                // Convert object to array of name/value pairs
-                setTechnicalSpecs(
-                  Object.entries(data.product.thong_so_ky_thuat).map(([key, value]) => ({
-                    name: key,
-                    value: value as string
-                  }))
-                );
-              } else if (typeof data.product.thong_so_ky_thuat === 'string') {
-                // Split string by newlines and create name/value pairs
-                const specs = data.product.thong_so_ky_thuat.split('\n').filter((line: string) => line.trim() !== '');
-                setTechnicalSpecs(
-                  specs.map((spec: string, index: number) => {
-                    const parts = spec.split(':');
-                    if (parts.length > 1) {
-                      return {
-                        name: parts[0].trim(),
-                        value: parts.slice(1).join(':').trim()
-                      };
-                    }
-                    return {
-                      name: `Thông số ${index + 1}`,
-                      value: spec.trim()
-                    };
-                  })
-                );
+                return {
+                  title: `Thông số ${index + 1}`,
+                  value: spec.trim()
+                };
+              })
+            );
               }
             } else {
               // Set empty specs if none exist
@@ -459,7 +465,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }}
           comments={comments}
           ratingSummary={ratingSummary}
-          technicalSpecs={technicalSpecs}
+          technicalSpecs={technicalSpecs.map(spec => ({ name: spec.title, value: spec.value }))}
           keyFeatures={keyFeatures}
           benefits={benefits}
           instructions={instructions}
@@ -481,7 +487,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           ratingSummary={ratingSummary}
           similarProducts={similarProducts}
           loadingSimilar={loadingSimilar}
-          technicalSpecs={technicalSpecs}
+          technicalSpecs={technicalSpecs.map(spec => ({ name: spec.title, value: spec.value }))}
           keyFeatures={keyFeatures}
           benefits={benefits}
           instructions={instructions}
