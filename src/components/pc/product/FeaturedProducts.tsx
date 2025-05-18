@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import { ProductCard } from '@/features/product/ProductCard';
 import { motion, useInView } from 'framer-motion';
 
@@ -11,12 +11,14 @@ export default function FeaturedProducts({
   autoSlideInterval = 5000, // Default 5 seconds
   products = [],
   loading = false,
-  error = null
+  error = null,
+  brands = []
 }: { 
   autoSlideInterval?: number;
   products: Product[];
   loading: boolean;
   error: string | null;
+  brands?: Brand[];
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -209,6 +211,7 @@ export default function FeaturedProducts({
                           index={idx}
                           // Only prioritize first slide, first two products
                           priority={slideIdx === 0 && idx < 2}
+                          brands={brands}
                         />
                       ))}
                     </div>

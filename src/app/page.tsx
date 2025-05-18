@@ -17,7 +17,6 @@ const MobileHomeHeader = lazy(() => import('@/components/mobile/MobileHomeHeader
 const MobileHomeTabs = lazy(() => import('@/components/mobile/MobileHomeTabs'));
 const MobileFeatureProduct = lazy(() => import('@/components/mobile/MobileFeatureProduct'));
 const MobileBestsellerProducts = lazy(() => import('@/components/mobile/MobileBestsellerProducts'));
-const MobileCatogeryFeature = lazy(() => import('@/components/mobile/MobileCatogeryFeature'));
 
 // Fallback loading component
 const LoadingFallback = () => (
@@ -161,6 +160,72 @@ const PageLoadingOverlay = ({ isVisible }: { isVisible: boolean }) => {
   );
 };
 
+// Add a new function above the Home component
+const fetchBatchData = async (endpoints: string[]) => {
+  try {
+    const responses = await Promise.all(
+      endpoints.map(endpoint => fetch(endpoint))
+    );
+    
+    const data = await Promise.all(
+      responses.map(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return response.json();
+      })
+    );
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching batch data:', error);
+    throw error;
+  }
+};
+
+// Add this custom hook for better data caching
+const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: any[] = []) => {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cache = useRef(new Map<string, {data: T, timestamp: number}>());
+  
+  const fetchData = useCallback(async () => {
+    // Check cache first
+    const cachedItem = cache.current.get(key);
+    const now = Date.now();
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+    
+    if (cachedItem && (now - cachedItem.timestamp < CACHE_TTL)) {
+      setData(cachedItem.data);
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const result = await fetchFn();
+      setData(result);
+      
+      // Update cache
+      cache.current.set(key, {
+        data: result, 
+        timestamp: now
+      });
+    } catch (err) {
+      console.error(`Error fetching data for ${key}:`, err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }, [key, fetchFn]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, ...dependencies]);
+  
+  return { data, loading, error, refetch: fetchData };
+};
+
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -247,55 +312,41 @@ export default function Home() {
     }
   }, []);
 
-  // Lấy sản phẩm theo danh mục
-  const fetchProductsByCategory = useCallback(async (categorySlug: string) => {
-    if (!categorySlug) {
-      setCategoryProducts(products);
-      return;
+  // Replace fetchProductsByCategory with our custom hook
+  const fetchCategoryProducts = useCallback(async (categorySlug: string) => {
+    if (!categorySlug) return [];
+    const url = `/api/categories/${categorySlug}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
     }
     
-    // Check if we already have this category data cached
-    if (categoryDataCache.current[categorySlug]?.isLoaded) {
-      // Use cached data if available
-      setCategoryProducts(categoryDataCache.current[categorySlug].products);
-      return;
-    }
-    
-    try {
-      setLoadingCategoryProducts(true);
-      setLoading(true);
-      const url = `/api/categories/${categorySlug}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
+    const data = await response.json();
+    return data.products || [];
+  }, []);
+  
+  // Use our custom hook for category data
+  const { 
+    data: currentCategoryProducts, 
+    loading: currentCategoryLoading,
+    error: currentCategoryError 
+  } = useDataCache<Product[]>(
+    `category-${selectedCategory}`,
+    () => fetchCategoryProducts(selectedCategory),
+    [selectedCategory]
+  );
+  
+  // Update state when the cached data changes
+  useEffect(() => {
+    if (currentCategoryProducts) {
+      setCategoryProducts(currentCategoryProducts);
+      setLoading(currentCategoryLoading);
+      if (currentCategoryError) {
+        setError(currentCategoryError);
       }
-      
-      const data = await response.json();
-      const categoryProducts = data.products || [];
-      setCategoryProducts(categoryProducts);
-      
-      // Filter brands for this category
-      const brandIdsInCategory = new Set(
-        categoryProducts.map((product: Product) => product.brand_id).filter(Boolean)
-      );
-      
-      const filteredBrands = brands.filter(brand => brandIdsInCategory.has(brand.id));
-      
-      // Cache this category's data
-      categoryDataCache.current[categorySlug] = {
-        products: categoryProducts,
-        brands: filteredBrands,
-        isLoaded: true
-      };
-    } catch (error: unknown) {
-      console.error(`Error fetching products for category ${categorySlug}:`, error);
-      setCategoryProducts([]);
-    } finally {
-      setLoading(false);
-      setLoadingCategoryProducts(false);
     }
-  }, [products, brands]);
+  }, [currentCategoryProducts, currentCategoryLoading, currentCategoryError]);
 
   // Lấy tất cả danh mục và đếm sản phẩm
   const fetchCategories = useCallback(async () => {
@@ -427,29 +478,37 @@ export default function Home() {
     }
   }, [newProducts.length, newError]);
 
-  // Fetch combo products
-  const fetchComboProducts = useCallback(async () => {
-    // Don't fetch if already loaded or error occurred
-    if (comboProducts.length > 0 || comboError) return;
-    
-    try {
-      setLoadingCombo(true);
+  // Use our cache hook for combo products
+  const { 
+    data: cachedComboProducts, 
+    loading: comboProductsLoading, 
+    error: comboProductsError 
+  } = useDataCache<ComboProduct[]>(
+    'combo-products',
+    async () => {
       const MAX_PRODUCTS = 8;
       const response = await fetch(`/api/products?type=combo&limit=${MAX_PRODUCTS}`);
       
       if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
+        throw new Error(`HTTP error ${response.status}`);
       }
       
       const data = await response.json();
-      setComboProducts((data.products || []).slice(0, MAX_PRODUCTS) as ComboProduct[]);
-    } catch (error: unknown) {
-      console.error('Error fetching combo products:', error);
-      setComboError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải combo sản phẩm');
-    } finally {
-      setLoadingCombo(false);
+      return (data.products || []).slice(0, MAX_PRODUCTS) as ComboProduct[];
+    },
+    []
+  );
+  
+  // Update state when the cached combo products change
+  useEffect(() => {
+    if (cachedComboProducts) {
+      setComboProducts(cachedComboProducts);
+      setLoadingCombo(comboProductsLoading);
+      if (comboProductsError) {
+        setComboError(comboProductsError);
+      }
     }
-  }, [comboProducts.length, comboError]);
+  }, [cachedComboProducts, comboProductsLoading, comboProductsError]);
 
   // Handle category change from tab click
   const handleCategoryChange = useCallback((categorySlug: string) => {
@@ -460,11 +519,11 @@ export default function Home() {
   // Xử lý khi danh mục thay đổi
   useEffect(() => {
     if (selectedCategory) {
-      fetchProductsByCategory(selectedCategory);
+      fetchCategoryProducts(selectedCategory);
     } else {
       setCategoryProducts(products);
     }
-  }, [selectedCategory, products, fetchProductsByCategory]);
+  }, [selectedCategory, products, fetchCategoryProducts]);
 
   // Check if we're on mobile
   useEffect(() => {
@@ -478,18 +537,40 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
-  // Initial data fetch - only run once
+  // Replace the initial data fetch with a batched approach
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // First load essential data
-        await Promise.all([
-          fetchBrands(),
-          fetchCategories()
-        ]);
+        // Batch API calls for initial core data
+        const endpoints = [
+          '/api/brands',
+          '/api/categories',
+          '/api/products?sort=featured:desc&limit=8',
+          '/api/products?sort=created_at:desc&limit=12'
+        ];
         
-        // Products are loaded by the useProducts hook
-        // No need to fetch products explicitly
+        const [brandsData, categoriesData, featuredData, newProductsData] = await fetchBatchData(endpoints);
+        
+        // Set data from batch response
+        setBrands(brandsData.brands || []);
+        
+        const cats = categoriesData.product_cats || [];
+        // Process categories with product counts
+        const categoriesWithProductCount = cats.map((cat: { title: string; slug: string }) => ({
+          name: cat.title,
+          slug: cat.slug,
+          productCount: 0 // We'll fetch counts in a separate step if needed
+        }));
+        
+        setCategories(categoriesWithProductCount);
+        setFeaturedProducts((featuredData.products || []).slice(0, 8));
+        setNewProducts((newProductsData.products || []).slice(0, 12));
+        
+        // Set loading states
+        setLoadingBrands(false);
+        setLoadingCategories(false);
+        setLoadingFeatured(false);
+        setLoadingNew(false);
         
         // Animation and page transitions
         setTimeout(() => {
@@ -506,13 +587,13 @@ export default function Home() {
     };
     
     loadInitialData();
-  }, [fetchBrands, fetchCategories]); 
+  }, []); 
 
   // Set up Intersection Observer for lazy loading
   useEffect(() => {
     const observerOptions = {
       root: null,
-      rootMargin: '0px',
+      rootMargin: '200px', // Increased margin to load earlier
       threshold: 0.1,
     };
 
@@ -522,14 +603,10 @@ export default function Home() {
         if (entry.isIntersecting) {
           setVisibleSections(prev => ({ ...prev, [id]: true }));
           
-          // Lazy load data when section becomes visible
-          if (id === 'featured' && !featuredProducts.length) {
-            fetchFeaturedProducts();
-          } else if (id === 'combo' && !comboProducts.length) {
-            fetchComboProducts();
-          } else if (id === 'new' && !newProducts.length) {
-            fetchNewProducts();
-          }
+          // Section is visible - combo products will load via the cache hook
+          
+          // Once observed, unobserve the section to prevent additional fetches
+          sectionObserver.unobserve(entry.target);
         }
       });
     }, observerOptions);
@@ -537,6 +614,13 @@ export default function Home() {
     // Register all sections for observation
     const sections = document.querySelectorAll('.lazy-section');
     sections.forEach(section => {
+      const sectionId = section.id;
+      // Skip observing sections that already have data
+      if ((sectionId === 'featured' && featuredProducts.length > 0) ||
+          (sectionId === 'new' && newProducts.length > 0) ||
+          (sectionId === 'combo' && comboProducts.length > 0)) {
+        return;
+      }
       sectionObserver.observe(section);
     });
     
@@ -544,11 +628,8 @@ export default function Home() {
       sectionObserver.disconnect();
     };
   }, [
-    fetchFeaturedProducts,
-    fetchComboProducts,
-    fetchNewProducts,
-    featuredProducts.length,
     comboProducts.length,
+    featuredProducts.length,
     newProducts.length
   ]);
 
@@ -615,14 +696,6 @@ export default function Home() {
     return brands;
   }, [brands, selectedCategory, categoryProducts, loadingCategoryProducts]);
 
-  // Memoize các props truyền xuống MobileCategoryFeature để tránh re-render
-  const mobileCategoryFeatureProps = useMemo(() => ({
-    brands: getCurrentCategoryBrands,
-    loading: !!(loadingBrands || loadingCategoryProducts),
-    error: brandError,
-    categorySlug: selectedCategory
-  }), [getCurrentCategoryBrands, loadingBrands, loadingCategoryProducts, brandError, selectedCategory]);
-
   // Memoize các props truyền xuống MobileFeatureProduct để tránh re-render
   const mobileFeatureProductProps = useMemo(() => ({
     products: categoryProducts,
@@ -681,14 +754,6 @@ export default function Home() {
             
             <motion.div variants={staggerContainer} className="scroll-trigger">
               <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <MobileCatogeryFeature {...mobileCategoryFeatureProps} />
-                </Suspense>
-              </motion.div>
-            </motion.div>
-            
-            <motion.div variants={staggerContainer} className="scroll-trigger">
-              <motion.div variants={slideUp}>
                 {/* Được đề xuất cho bạn */}
                 <Suspense fallback={<LoadingFallback />}>
                   <MobileFeatureProduct {...mobileFeatureProductProps} />
@@ -727,7 +792,8 @@ export default function Home() {
                     <FeaturedProducts 
                       products={featuredProducts} 
                       loading={loadingFeatured} 
-                      error={featuredError} 
+                      error={featuredError}
+                      brands={brands}
                     />
                   )}
                 </Suspense>
@@ -742,7 +808,8 @@ export default function Home() {
                     <ComboProduct 
                       products={comboProducts} 
                       loading={loadingCombo} 
-                      error={comboError} 
+                      error={comboError}
+                      brands={brands}
                     />
                   )}
                 </Suspense>
@@ -757,7 +824,8 @@ export default function Home() {
                     <NewProducts 
                       products={newProducts} 
                       loading={loadingNew} 
-                      error={newError} 
+                      error={newError}
+                      brands={brands}
                     />
                   )}
                 </Suspense>

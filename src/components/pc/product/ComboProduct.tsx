@@ -6,7 +6,7 @@ import { cn } from '@/utils/cn';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
 import { Rating } from '@/components/ui/Rating';
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/Button';
 
@@ -26,6 +26,7 @@ interface ComboItem {
   description: string;
   image: string;
   brand?: string;
+  brand_id?: string;
   rating?: number;
   slug: string;
   options: ProductOption[];
@@ -100,12 +101,21 @@ const ProductOptionCard = ({
   );
 };
 
-const ComboCard = ({ combo, selectedOptionId }: { 
+const ComboCard = ({ combo, selectedOptionId, brandNames }: { 
   combo: ComboItem, 
-  selectedOptionId?: number 
+  selectedOptionId?: number,
+  brandNames?: Record<string, string>
 }) => {
   const selectedOption = combo.options.find(opt => opt.id === selectedOptionId) || combo.options[0];
   const { addToCart } = useCart();
+  
+  const getBrandName = () => {
+    if (combo.brand) return combo.brand;
+    if (combo.brand_id && brandNames && brandNames[combo.brand_id]) {
+      return brandNames[combo.brand_id];
+    }
+    return 'Insta360';
+  };
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -118,7 +128,7 @@ const ComboCard = ({ combo, selectedOptionId }: {
       originalPrice: selectedOption.originalPrice,
       image: combo.image,
       quantity: 1,
-      brand: combo.brand,
+      brand: getBrandName(),
       slug: combo.slug
     };
     
@@ -148,7 +158,7 @@ const ComboCard = ({ combo, selectedOptionId }: {
       </CardHeader>
       
       <CardContent>
-        <div className="text-xs text-gray-500 mb-1">{combo.brand || 'Insta360'}</div>
+        <div className="text-xs text-gray-500 mb-1">{getBrandName()}</div>
         
         <h3 className="text-xs font-medium mb-2 text-gray-800 group-hover:text-red-600 line-clamp-2 h-[2.5rem]">
           {combo.name}
@@ -355,14 +365,28 @@ const ComboDetailModal = ({
 export default function ComboProduct({ 
   products = [],
   loading = false,
-  error = null
+  error = null,
+  brands = []
 }: {
   products: ComboProduct[];
   loading: boolean;
   error: string | null;
+  brands?: Brand[];
 }) {
   const { addToCart } = useCart();
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
+  const [brandNames, setBrandNames] = useState<Record<string, string>>({});
+
+  // Build a map of brand_id to brand name
+  useEffect(() => {
+    if (brands.length > 0) {
+      const brandMap: Record<string, string> = {};
+      brands.forEach(brand => {
+        brandMap[brand.id] = brand.title;
+      });
+      setBrandNames(brandMap);
+    }
+  }, [brands]);
 
   // Convert Product to ComboItem format
   const convertToComboItem = (product: Product): ComboItem => {
@@ -372,6 +396,7 @@ export default function ComboProduct({
       description: product.description || '',
       image: product.image_url || '',
       brand: product.brand,
+      brand_id: product.brand_id,
       rating: product.rating,
       slug: product.slug || product.id,
       options: [{
@@ -475,6 +500,7 @@ export default function ComboProduct({
                     <ComboCard
                       combo={combo}
                       selectedOptionId={selectedOptions[combo.id]}
+                      brandNames={brandNames}
                     />
                   </Link>
                 </div>
@@ -488,6 +514,7 @@ export default function ComboProduct({
                   <ComboCard
                     combo={combo}
                     selectedOptionId={selectedOptions[combo.id]}
+                    brandNames={brandNames}
                   />
                 </Link>
               ))}

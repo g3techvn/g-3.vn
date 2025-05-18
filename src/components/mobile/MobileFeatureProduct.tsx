@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Product, Brand } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface MobileFeatureProductProps {
   products: Product[];
@@ -195,11 +195,14 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
                         className="w-full bg-white rounded-lg shadow flex items-center"
                       >
                         <div className="relative w-24 h-24">
-                          <Image
+                          <OptimizedImage
                             src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
                             alt={product.name}
                             fill
-                            className="rounded-l-lg object-cover"
+                            className="rounded-l-lg"
+                            objectFit="cover"
+                            quality={70}
+                            sizes="96px"
                           />
                         </div>
                         <div className="flex-1 min-w-0 p-3">

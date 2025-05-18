@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { AspectRatio } from '@/components/ui/AspectRatio';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { Rating } from '@/components/ui/Rating';
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
@@ -13,14 +13,35 @@ const VISIBLE_ITEMS = 6;
 export default function NewProducts({ 
   products = [],
   loading = false,
-  error = null
+  error = null,
+  brands = []
 }: {
   products: Product[];
   loading: boolean;
   error: string | null;
+  brands?: Brand[];
 }) {
   const [startIndex, setStartIndex] = useState(0);
   const { addToCart } = useCart();
+  const [brandNames, setBrandNames] = useState<Record<string, string>>({});
+
+  // Build a map of brand_id to brand name
+  useEffect(() => {
+    if (brands.length > 0) {
+      const brandMap: Record<string, string> = {};
+      brands.forEach(brand => {
+        brandMap[brand.id] = brand.title;
+      });
+      setBrandNames(brandMap);
+    }
+  }, [brands]);
+
+  // Get brand name from the map or use defaults
+  const getBrandName = (product: Product) => {
+    if (product.brand) return product.brand;
+    if (product.brand_id && brandNames[product.brand_id]) return brandNames[product.brand_id];
+    return 'Không rõ';
+  };
 
   const nextItem = () => {
     setStartIndex((prev) => (prev + 1) % products.length);
@@ -123,7 +144,7 @@ export default function NewProducts({
                       </CardHeader>
                       
                       <CardContent>
-                        <div className="text-xs text-gray-500 mb-1">{product.brand || 'Không rõ'}</div>
+                        <div className="text-xs text-gray-500 mb-1">{getBrandName(product)}</div>
                         
                         <h3 className="text-xs font-medium mb-2 text-gray-800 group-hover:text-red-600 line-clamp-2 h-[2.5rem]">
                           {product.name}

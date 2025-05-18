@@ -1,25 +1,44 @@
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatCurrency } from '@/utils/helpers';
-import { Product } from '@/types';
+import { Product, Brand } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface ProductCardProps {
   product: Product;
   index?: number;
   priority?: boolean;
+  brands?: Brand[];
 }
 
-export function ProductCard({ product, index = 0, priority = false }: ProductCardProps) {
+export function ProductCard({ product, index = 0, priority = false, brands = [] }: ProductCardProps) {
   const { id, name, price, image_url, original_price, discount_percentage, brand_id, brand, rating, slug } = product;
   const { addToCart } = useCart();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [brandName, setBrandName] = useState<string>('');
   
   const hasDiscount = original_price && original_price > price;
-  const displayRating = rating || Math.floor(Math.random() * 5) + 1; // Sử dụng rating từ API hoặc tạo giá trị ngẫu nhiên
-  const displayBrand = brand || brand_id || 'Unknown';
+  const displayRating = rating || Math.floor(Math.random() * 5) + 1;
+
+  // Find brand name from brands array using brand_id
+  useEffect(() => {
+    if (brand) {
+      // If brand name already exists, use it
+      setBrandName(brand);
+    } else if (brand_id && brands.length > 0) {
+      // Otherwise look up from brands array
+      const foundBrand = brands.find(b => b.id === brand_id);
+      if (foundBrand) {
+        setBrandName(foundBrand.title);
+      } else {
+        setBrandName(brand_id);
+      }
+    } else {
+      setBrandName('Unknown');
+    }
+  }, [brand, brand_id, brands]);
 
   // Animation variants
   const cardVariants = {
@@ -60,20 +79,18 @@ export function ProductCard({ product, index = 0, priority = false }: ProductCar
               -{discount_percentage}%
             </motion.div>
           )}
-          <Image
+          <OptimizedImage
             src={image_url || '/placeholder-product.jpg'}
             alt={name}
             fill
-            loading={priority ? "eager" : "lazy"}
-            placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFeAJtuZl9sQAAAABJRU5ErkJggg=="
+            priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
-            className={`object-cover transition-transform duration-300 group-hover:scale-105 ${imageLoaded ? 'image-fade-in' : 'opacity-0'}`}
-            onLoadingComplete={() => setImageLoaded(true)}
+            className="transition-transform duration-300 group-hover:scale-105"
+            objectFit="cover"
           />
         </div>
         <div className="p-3">
-          <div className="text-xs text-gray-500 mb-1">{displayBrand}</div>
+          <div className="text-xs text-gray-500 mb-1">{brandName}</div>
           
           <h3 className="mb-1 text-sm font-medium text-gray-900 line-clamp-2 h-[2.5rem] group-hover:text-red-600 transition-colors duration-200">
             {name}
