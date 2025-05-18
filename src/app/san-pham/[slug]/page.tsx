@@ -266,8 +266,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 'value' in data.product.thong_so_ky_thuat[0]) {
               // Map to ensure title property exists
               setTechnicalSpecs(
-                data.product.thong_so_ky_thuat.map((spec: any) => ({
-                  title: spec.title || spec.name,
+                data.product.thong_so_ky_thuat.map((spec: { title?: string; name?: string; value: string }) => ({
+                  title: spec.title || spec.name || '',
                   value: spec.value
                 }))
               );
