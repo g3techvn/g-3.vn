@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef, useMemo, Suspense, lazy } fro
 import { Product, Brand } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
+import { useDomain } from '@/context/domain-context';
 
 // Lazy loaded components
 const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
@@ -212,6 +213,9 @@ export default function Home() {
   // Use the useProducts hook to get domain-aware products
   const { products: useProductsProducts, loading: productsLoading, error: productsError, refresh: refreshProducts } = useProducts();
 
+  // Lấy sector info
+  const { sectorId, isLocalhost } = useDomain();
+
   // Update the existing useEffect that calls fetchProducts to use our new hook's data
   useEffect(() => {
     if (useProductsProducts.length > 0 && !initialLoadComplete.current) {
@@ -297,8 +301,14 @@ export default function Home() {
   const fetchCategories = useCallback(async () => {
     try {
       setLoadingCategories(true);
-      const url = '/api/categories';
-      const response = await fetch(url);
+      
+      // Build URL with query parameters for categories
+      const url = new URL('/api/categories', window.location.origin);
+      if (sectorId && !isLocalhost) {
+        url.searchParams.append('sector_id', sectorId);
+      }
+      
+      const response = await fetch(url.toString());
       
       if (!response.ok) {
         throw new Error(`Lỗi HTTP ${response.status}`);
@@ -311,7 +321,13 @@ export default function Home() {
       const categoriesWithProductCount = await Promise.all(
         cats.map(async (cat: { title: string; slug: string }) => {
           try {
-            const prodResponse = await fetch(`/api/categories/${cat.slug}`);
+            // Build URL with sector_id if available
+            const url = new URL(`/api/categories/${cat.slug}`, window.location.origin);
+            if (sectorId && !isLocalhost) {
+              url.searchParams.append('sector_id', sectorId);
+            }
+            
+            const prodResponse = await fetch(url.toString());
             if (!prodResponse.ok) return { ...cat, productCount: 0 };
             
             const prodData = await prodResponse.json();
@@ -332,7 +348,7 @@ export default function Home() {
               productCount: count 
             };
           } catch (error) {
-            console.error(`Error counting products for ${cat.slug}:`, error);
+            // console.error(`Error counting products for ${cat.slug}:`, error);
             return { name: cat.title, slug: cat.slug, productCount: 0 };
           }
         })
@@ -356,12 +372,12 @@ export default function Home() {
         }
       }
     } catch (error: unknown) {
-      console.error('Error fetching categories:', error);
+      // console.error('Error fetching categories:', error);
       setCategories([]);
     } finally {
       setLoadingCategories(false);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, sectorId, isLocalhost]);
 
   // Fetch featured products
   const fetchFeaturedProducts = useCallback(async () => {
