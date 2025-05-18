@@ -114,7 +114,7 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
     if (combo.brand_id && brandNames && brandNames[combo.brand_id]) {
       return brandNames[combo.brand_id];
     }
-    return 'Insta360';
+    return '';
   };
   
   const handleAddToCart = (e: React.MouseEvent) => {

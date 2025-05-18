@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Header from '@/components/pc/header/Header';
 import Footer from '@/components/pc/footer/Footer';
@@ -19,11 +19,16 @@ const inter = Inter({
   adjustFontFallback: true
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#ffffff'
+};
+
 export const metadata: Metadata = {
   title: 'G3 - Công Thái Học',
   description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
-  themeColor: '#ffffff',
   metadataBase: new URL('https://g-3.vn'),
   alternates: {
     canonical: '/'
