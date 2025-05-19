@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Product } from '@/types';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function VideoPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,6 +17,17 @@ export default function VideoPage() {
   const touchStartY = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Check if user explicitly navigated to this page
+  useEffect(() => {
+    const fromNavigation = searchParams.get('fromNav') === 'true';
+    
+    // Only unmute if user explicitly navigated from bottom nav
+    if (fromNavigation) {
+      setIsMuted(false);
+    }
+  }, [searchParams]);
   
   // Fetch all products
   useEffect(() => {
@@ -153,7 +164,7 @@ export default function VideoPage() {
   }
 
   const currentProduct = products[currentIndex];
-  const videoId = getYouTubeId(currentProduct.video_url || '');
+  const videoId = getYouTubeId(currentProduct?.video_url || '');
   
   return (
     <div 
@@ -167,7 +178,7 @@ export default function VideoPage() {
             <iframe
               ref={(el) => { videoRefs.current[currentIndex] = el; }}
               className="h-full w-full"
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&modestbranding=1&rel=0&enablejsapi=1&playsinline=1&playlist=${videoId}&showinfo=0&iv_load_policy=3&fs=0`}
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&modestbranding=1&rel=0&enablejsapi=1&playsinline=1&playlist=${videoId}&showinfo=0&iv_load_policy=3&fs=0`}
               title=""
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -179,6 +190,27 @@ export default function VideoPage() {
             />
           </>
         )}
+      </div>
+      
+      {/* Sound toggle button */}
+      <button
+        onClick={() => setIsMuted(!isMuted)}
+        className="absolute bottom-20 right-4 z-20 rounded-full bg-black/50 p-3"
+      >
+        {isMuted ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        )}
+      </button>
+      
+      {/* Product title */}
+      <div className="sticky bottom-16 left-4 z-20 ml-4 max-w-[70%] rounded bg-black/50 px-3 py-2">
+        <h3 className="text-lg font-semibold text-white">{currentProduct?.name || 'Sản phẩm'}</h3>
       </div>
       
       {/* Video progress indicators */}
@@ -198,6 +230,9 @@ export default function VideoPage() {
         {debug}
         <div>
           {currentIndex + 1}/{products.length} (Vuốt lên/xuống để chuyển video)
+        </div>
+        <div>
+          {isMuted ? 'Đã tắt tiếng' : 'Đã bật tiếng'}
         </div>
       </div>
     </div>

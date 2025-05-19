@@ -63,6 +63,15 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
     menuItems[index].action?.();
   };
 
+  // Function to get the appropriate href with query params if needed
+  const getHref = (href: string) => {
+    // Add fromNav=true parameter for video page to enable audio
+    if (href === '/video') {
+      return `${href}?fromNav=true`;
+    }
+    return href;
+  };
+
   return (
     <div className="navigation">
       <div className="nav-container">
@@ -92,7 +101,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ menuItems, defaultActiveTab = 0 }
                 </a>
               ) : (
                 <Link 
-                  href={item.href} 
+                  href={getHref(item.href)} 
                   onClick={(e) => {
                     if (index === activeTab) {
                       e.preventDefault();
