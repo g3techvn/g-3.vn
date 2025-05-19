@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Product } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function VideoPage() {
+// Create a separate component that uses useSearchParams to wrap in Suspense
+function VideoContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +75,28 @@ export default function VideoPage() {
     return (match && match[2].length === 11) ? match[2] : 'dQw4w9WgXcQ';
   };
   
+  // Navigate to next video with transition effect
+  const navigateToNextVideo = useCallback(() => {
+    if (currentIndex < products.length - 1) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex(prev => prev + 1);
+        setIsTransitioning(false);
+      }, 300);
+    }
+  }, [currentIndex, products.length]);
+  
+  // Navigate to previous video with transition effect
+  const navigateToPreviousVideo = useCallback(() => {
+    if (currentIndex > 0) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex(prev => prev - 1);
+        setIsTransitioning(false);
+      }, 300);
+    }
+  }, [currentIndex]);
+  
   // Handle swipe gesture
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
@@ -109,29 +132,7 @@ export default function VideoPage() {
         container.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [currentIndex, products.length, isTransitioning]);
-  
-  // Navigate to next video with transition effect
-  const navigateToNextVideo = () => {
-    if (currentIndex < products.length - 1) {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex(prev => prev + 1);
-        setIsTransitioning(false);
-      }, 300);
-    }
-  };
-  
-  // Navigate to previous video with transition effect
-  const navigateToPreviousVideo = () => {
-    if (currentIndex > 0) {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex(prev => prev - 1);
-        setIsTransitioning(false);
-      }, 300);
-    }
-  };
+  }, [currentIndex, products.length, isTransitioning, navigateToNextVideo, navigateToPreviousVideo]);
 
   // Update debug info when current product changes
   useEffect(() => {
@@ -236,5 +237,17 @@ export default function VideoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VideoPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
+      </div>
+    }>
+      <VideoContent />
+    </Suspense>
   );
 }
