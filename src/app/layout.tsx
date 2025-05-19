@@ -48,9 +48,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.g-3.vn" crossOrigin="anonymous" />
         
-        {/* Preload critical assets */}
-        <link rel="preload" as="image" href="/images/section-1.jpeg" />
-        
         {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

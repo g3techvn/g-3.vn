@@ -2,13 +2,13 @@ import React from 'react';
 import { ShoppingCartIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { COMPANY_INFO } from '@/constants';
 
-interface ProductActionsProps {
+interface VideoProductActionsProps {
   productPrice?: number;
   onAddToCart: () => void;
   onBuyNow: () => void;
 }
 
-export function ProductActions({ productPrice, onAddToCart, onBuyNow }: ProductActionsProps) {
+export function VideoProductActions({ productPrice, onAddToCart, onBuyNow }: VideoProductActionsProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-70 bg-white border-t border-gray-200 flex gap-2 shadow-lg p-3">
       <button

@@ -19,7 +19,9 @@ export type Product = {
   slug?: string;
   video_url?: string;
   gallery_url?: string;
-  thong_so_ky_thuat?: { title: string; value: string }[];
+  thong_so_ky_thuat?: { [key: string]: { title: string; value: string } };
+  tinh_nang?: string | string[];
+  loi_ich?: string | string[];
 };
 
 export type Category = {
