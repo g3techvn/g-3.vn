@@ -91,7 +91,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
 
   return (
     <div className="mobile-layout">
-      <Slot className="pb-20">
+      <Slot className="pb-24">
         {children}
       </Slot>
       <BottomNav menuItems={menuItems} />
