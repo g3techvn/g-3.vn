@@ -1,5 +1,8 @@
 'use client';
 
+import React from 'react';
+import { StarIcon } from '@heroicons/react/24/outline';
+
 interface Comment {
   id: string;
   user: {
@@ -30,74 +33,98 @@ interface VideoProductReviewsProps {
   ratingSummary: RatingSummary;
 }
 
+// Hàm tạo màu ngẫu nhiên từ tên
+const getRandomColor = (name: string) => {
+  const colors = [
+    'bg-red-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-yellow-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+  ];
+  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
+};
+
+// Hàm lấy 2 ký tự đầu của tên
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+};
+
 export function VideoProductReviews({ comments, ratingSummary }: VideoProductReviewsProps) {
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Đánh giá sản phẩm</h3>
-      
-      {/* Rating Summary */}
-      <div className="flex items-center space-x-4 mb-6">
-        <div className="flex items-center">
-          <span className="text-3xl font-bold text-gray-900">{ratingSummary.average}</span>
-          <span className="text-sm text-gray-500 ml-1">/5</span>
-        </div>
-        <div className="flex-1">
-          <div className="text-sm text-gray-500">
-            {ratingSummary.total.toLocaleString()} đánh giá
+    <div className="px-4 pb-8">
+      {/* Tổng quan điểm đánh giá */}
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold mb-2">Điểm xếp hạng và bài đánh giá</h2>
+        <p className="text-gray-500 text-sm mb-4">Điểm xếp hạng và bài đánh giá đã được xác minh và do những người sử dụng cùng loại thiết bị với bạn đưa ra</p>
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col items-center min-w-[70px]">
+            <span className="text-4xl font-bold text-gray-900 leading-none">{ratingSummary.average.toFixed(1)}</span>
+            <div className="flex items-center mt-1">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon key={i} className={`w-5 h-5 ${i < Math.round(ratingSummary.average) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 mt-1">{ratingSummary.total.toLocaleString()}</span>
           </div>
-          <div className="flex items-center mt-1">
-            {[5, 4, 3, 2, 1].map((star) => (
-              <div key={star} className="flex items-center mr-2">
-                <span className="text-sm text-gray-500 mr-1">{star}★</span>
-                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-yellow-400"
-                    style={{
-                      width: `${(ratingSummary.stars.find(s => s.star === star)?.count || 0) / ratingSummary.total * 100}%`
-                    }}
-                  />
+          <div className="flex-1 flex flex-col gap-1">
+            {ratingSummary.stars.map((s) => {
+              const percent = (s.count / ratingSummary.total) * 100;
+              return (
+                <div key={s.star} className="flex items-center gap-2">
+                  <span className="text-xs w-3 text-gray-700">{s.star}</span>
+                  <div className="flex-1 h-2 bg-gray-200 rounded">
+                    <div className="h-2 rounded bg-blue-500" style={{ width: `${percent}%` }} />
+                  </div>
                 </div>
-                <span className="text-sm text-gray-500 ml-1">
-                  {ratingSummary.stars.find(s => s.star === star)?.count.toLocaleString()}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Comments */}
-      <div className="space-y-6">
-        {comments.map((comment) => (
-          <div key={comment.id} className="border-b border-gray-200 pb-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <span className="font-medium text-gray-900">{comment.user.name}</span>
-                <div className="flex items-center ml-2">
+      {/* Danh sách bình luận */}
+      <div className="space-y-8">
+        {[...comments].reverse().map((comment) => (
+          <div key={comment.id}>
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-lg ${getRandomColor(comment.user.name)}`}>{getInitials(comment.user.name)}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">{comment.user.name}</span>
+                  <span className="text-xs text-gray-500">{comment.date}</span>
+                </div>
+                <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className={`h-4 w-4 ${i < comment.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
+                    <StarIcon key={i} className={`w-4 h-4 ${i < comment.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                   ))}
                 </div>
-              </div>
-              <span className="text-sm text-gray-500">{comment.date}</span>
-            </div>
-            <p className="text-gray-600 mb-4">{comment.content}</p>
-            {comment.publisherReply && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">{comment.publisherReply.name}</span>
-                  <span className="text-sm text-gray-500">{comment.publisherReply.date}</span>
+                <p className="text-gray-800 text-sm mt-2 whitespace-pre-line">{comment.content}</p>
+                <div className="mt-2 text-xs text-gray-500">{comment.likes} người thấy bài đánh giá này hữu ích</div>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-gray-700">Bài đánh giá này có hữu ích không?</span>
+                  <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100">Có</button>
+                  <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100">Không</button>
                 </div>
-                <p className="text-gray-600">{comment.publisherReply.content}</p>
+                {comment.publisherReply && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-xs text-gray-700">{comment.publisherReply.name}</span>
+                      <span className="text-xs text-gray-400">{comment.publisherReply.date}</span>
+                    </div>
+                    <div className="text-gray-700 text-sm whitespace-pre-line">{comment.publisherReply.content}</div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>

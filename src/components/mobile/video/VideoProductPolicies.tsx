@@ -1,46 +1,35 @@
 'use client';
 
-import { TruckIcon, ShieldCheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { TruckIcon, ShieldCheckIcon, ArrowPathIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 
 export function VideoProductPolicies() {
   return (
-    <div className="mt-6 space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">Chính sách sản phẩm</h3>
-      
-      <div className="space-y-3">
-        <div className="flex items-start">
-          <TruckIcon className="h-6 w-6 text-gray-400 mr-3 flex-shrink-0" />
+    <div className="px-4 pt-0 pb-2">
+      <h2 className="text-lg font-semibold mb-2 text-red-700">Chính sách mua hàng tại G3-TECH</h2>
+      <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
+        <div className="flex items-start gap-3">
+          <ArrowPathIcon className="w-6 h-6 text-red-600 mt-0.5" />
           <div>
-            <h4 className="font-medium text-gray-900">Vận chuyển</h4>
-            <p className="text-sm text-gray-600 mt-1">
-              • Miễn phí vận chuyển cho đơn hàng từ 500.000đ<br />
-              • Giao hàng toàn quốc trong 1-3 ngày làm việc<br />
-              • Hỗ trợ giao hàng nhanh trong nội thành
-            </p>
+            <span className="font-medium text-gray-800">1 đổi 1 chi tiết lỗi trong 15 ngày</span>
+            <div className="text-xs text-gray-500">nếu lỗi do nhà sản xuất</div>
           </div>
         </div>
-
-        <div className="flex items-start">
-          <ShieldCheckIcon className="h-6 w-6 text-gray-400 mr-3 flex-shrink-0" />
+        <div className="flex items-start gap-3">
+          <ShieldCheckIcon className="w-6 h-6 text-red-600 mt-0.5" />
           <div>
-            <h4 className="font-medium text-gray-900">Bảo hành</h4>
-            <p className="text-sm text-gray-600 mt-1">
-              • Bảo hành chính hãng 12 tháng<br />
-              • Hỗ trợ sửa chữa tại nhà<br />
-              • Đổi trả miễn phí trong 30 ngày
-            </p>
+            <span className="font-medium text-gray-800">Bảo hành phần cơ khí 12 tháng, lưới 6 tháng</span>
           </div>
         </div>
-
-        <div className="flex items-start">
-          <ArrowPathIcon className="h-6 w-6 text-gray-400 mr-3 flex-shrink-0" />
+        <div className="flex items-start gap-3">
+          <TruckIcon className="w-6 h-6 text-red-600 mt-0.5" />
           <div>
-            <h4 className="font-medium text-gray-900">Đổi trả</h4>
-            <p className="text-sm text-gray-600 mt-1">
-              • Đổi trả miễn phí trong 30 ngày<br />
-              • Hoàn tiền 100% nếu sản phẩm không đúng mô tả<br />
-              • Hỗ trợ đổi size, màu sắc
-            </p>
+            <span className="font-medium text-gray-800">Vận chuyển toàn quốc, nhận hàng kiểm tra trước khi thanh toán</span>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <WrenchScrewdriverIcon className="w-6 h-6 text-red-600 mt-0.5" />
+          <div>
+            <span className="font-medium text-gray-800">Miễn phí lắp đặt tại Hà Nội và TP. Hồ Chí Minh</span>
           </div>
         </div>
       </div>

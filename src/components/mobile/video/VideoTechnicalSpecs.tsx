@@ -1,7 +1,7 @@
 'use client';
 
 interface TechnicalSpec {
-  title: string;
+  name: string;
   value: string;
 }
 
@@ -11,24 +11,17 @@ interface VideoTechnicalSpecsProps {
 
 export function VideoTechnicalSpecs({ specifications }: VideoTechnicalSpecsProps) {
   if (!specifications || specifications.length === 0) {
-    return (
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông số kỹ thuật</h3>
-        <div className="text-sm text-gray-500 italic">
-          Thông số kỹ thuật đang được cập nhật...
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông số kỹ thuật</h3>
-      <div className="space-y-2">
+    <div className="px-4 py-5 bg-white rounded-lg mb-3">
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">Thông số kỹ thuật</h3>
+      <div className="space-y-3">
         {specifications.map((spec, index) => (
-          <div key={index} className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-sm text-gray-600">{spec.title}</span>
-            <span className="text-sm text-gray-900">{spec.value}</span>
+          <div key={index} className="flex justify-between border-b border-gray-100 pb-2">
+            <span className="text-sm text-gray-500">{spec.name}</span>
+            <span className="text-sm font-medium text-gray-900">{spec.value}</span>
           </div>
         ))}
       </div>

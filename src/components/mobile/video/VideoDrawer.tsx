@@ -8,8 +8,9 @@ import { VideoProductActions } from './VideoProductActions';
 import { VideoProductReviews } from './VideoProductReviews';
 import { VideoProductPolicies } from './VideoProductPolicies';
 import { VideoTechnicalSpecs } from './VideoTechnicalSpecs';
-import { ShareIcon } from '@heroicons/react/24/outline';
+import { ShareIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ImageItem } from '@/types/supabase';
+import { VideoDescription } from './VideoDescription';
 
 interface VideoDrawerProps {
   isOpen: boolean;
@@ -67,14 +68,15 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
     ]
   };
 
-  // Mock technical specifications
-  const mockTechnicalSpecs = [
-    { title: 'Chất liệu', value: 'Lưới cao cấp, khung thép' },
-    { title: 'Kích thước', value: '65 x 65 x 110 cm' },
-    { title: 'Trọng lượng', value: '25 kg' },
-    { title: 'Màu sắc', value: 'Đen, Xám, Xanh' },
-    { title: 'Bảo hành', value: '12 tháng' }
-  ];
+  // Extract and format technical specifications from product data
+  const formatSpecifications = () => {
+    if (!product.thong_so_ky_thuat) return [];
+    
+    return Object.entries(product.thong_so_ky_thuat).map(([key, spec]) => ({
+      name: spec.title || key,
+      value: spec.value || ''
+    }));
+  };
 
   useEffect(() => {
     const fetchGalleryImages = async () => {
@@ -124,7 +126,7 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[100]">
       {/* Overlay */}
       <div 
         className="absolute inset-0 bg-black/50"
@@ -132,39 +134,59 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
       />
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto">
+      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto w-full">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+        <div className="sticky top-0 z-10 bg-white border- font-bold border-gray-200 px-4 py-3 flex items-center justify-between w-full">
+          <div className="flex items-center">
+            <span className="text-red-600">Sản phẩm</span>
             {brandName && (
-              <span className="text-sm text-gray-500">{brandName}</span>
+              <span className="text-sm text-red-600 mx-1">{brandName}</span>
             )}
+            <span className="text-red-600">chính hãng</span>
           </div>
-          <button
-            onClick={handleShare}
-            className="p-2 text-gray-500 hover:text-gray-700"
-          >
-            <ShareIcon className="h-6 w-6" />
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={handleShare}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
+              <ShareIcon className="h-6 w-6" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 hover:text-gray-700 ml-1"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
         </div>
 
-        <div className="p-4">
+        <div className="">
           {/* Gallery */}
           <VideoGallery 
-            images={galleryImages}
+            mainImageUrl={product.image_url}
+            galleryImages={galleryImages}
+            videoInfo={product.video_url ? {
+              videoUrl: `https://www.youtube.com/embed/${extractYouTubeId(product.video_url)}`,
+              thumbnail: `https://img.youtube.com/vi/${extractYouTubeId(product.video_url)}/hqdefault.jpg`
+            } : undefined}
             isLoading={isLoadingGallery}
             productName={product.name}
           />
 
           {/* Product Info */}
+          <div className="px-4">
           <VideoProductInfo 
             product={product}
             brandName={brandName}
           />
+          </div>
+
+          {/* Description */}
+          <VideoDescription description={product.description} />
 
           {/* Technical Specifications */}
           <VideoTechnicalSpecs 
-            specifications={mockTechnicalSpecs}
+            specifications={formatSpecifications()}
           />
 
           {/* Product Policies */}
@@ -178,6 +200,7 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
 
           {/* Action Buttons */}
           <VideoProductActions 
+            productPrice={product.price as number}
             onAddToCart={() => {
               // TODO: Implement add to cart
               console.log('Add to cart:', product);
@@ -191,4 +214,11 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
       </div>
     </div>
   );
+}
+
+function extractYouTubeId(url?: string): string {
+  if (!url) return '';
+  const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
 } 
