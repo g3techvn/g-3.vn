@@ -9,6 +9,7 @@ import CartLayout from '@/components/layout/CartLayout';
 import Providers from './providers';
 import { Toaster } from 'react-hot-toast';
 import Script from 'next/script';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -54,6 +55,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="G3 Store" />
         <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
+        
+        {/* Add Google Analytics */}
+        <GoogleAnalytics />
       </head>
       <body className={`${inter.className} h-full`}>
         <Providers>

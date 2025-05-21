@@ -8,6 +8,8 @@ import { AuthProvider } from '@/features/auth/AuthProvider';
 import { DomainProvider } from '@/context/domain-context';
 import { useState } from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import PageViewTracker from '@/components/PageViewTracker';
+import { Suspense } from 'react';
 
 const roboto = RobotoFlex({
   subsets: ['latin', 'vietnamese'],
@@ -31,7 +33,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <DomainProvider>
           <AuthProvider>
-            <AntdRegistry>{children}</AntdRegistry>
+            <AntdRegistry>
+              {/* Track page views */}
+              <Suspense fallback={null}>
+                <PageViewTracker />
+              </Suspense>
+              {children}
+            </AntdRegistry>
           </AuthProvider>
         </DomainProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}
