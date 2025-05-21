@@ -24,6 +24,13 @@ interface ChatSession {
   expiry: number; // Unix timestamp in milliseconds
 }
 
+interface Consultant {
+  name: string;
+  title: string;
+  phone?: string;
+  isBot: boolean;
+}
+
 const CHAT_SESSION_KEY = 'g3_chat_session';
 const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -40,17 +47,19 @@ export default function MessagesPage() {
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [showConsultantMenu, setShowConsultantMenu] = useState(false);
-  const [selectedConsultant, setSelectedConsultant] = useState({
+  const [selectedConsultant, setSelectedConsultant] = useState<Consultant>({
     name: 'Ms. Thuý',
-    title: 'Tư vấn viên'
+    title: 'Tư vấn viên',
+    phone: '0979983355',
+    isBot: false
   });
   const menuRef = useRef<HTMLDivElement>(null);
   
   const consultants = [
-    { name: 'Ms. Thuý', title: 'Tư vấn viên' },
-    { name: 'Ms. Thuỷ', title: 'Chuyên gia ghế công thái học' },
-    { name: 'Ms. Lan', title: 'Chuyên gia bàn điều chỉnh độ cao' },
-    { name: 'Mr. Đạt', title: 'Tư vấn sản phẩm cao cấp' }
+    { name: 'Ms. Thuý', title: 'Tư vấn viên', phone: '0979983355', isBot: false },
+    { name: 'Ms. Thuỷ', title: 'Chuyên gia ghế công thái học', phone: '0979983355', isBot: false },
+    { name: 'Mr. Đạt', title: 'Tư vấn sản phẩm cao cấp', phone: '0979983355', isBot: false },
+    { name: 'G3-Tech Assistant', title: 'Tư vấn viên tự động', isBot: true }
   ];
 
   // Save chat session to localStorage
@@ -93,7 +102,11 @@ export default function MessagesPage() {
   };
 
   const handleSendMessage = () => {
-    if (inputMessage.trim() === '') return;
+    if (inputMessage.trim() === '' || !userInfo) return;
+    
+    // Prevent duplicate submissions by disabling the input temporarily
+    const message = inputMessage;
+    setInputMessage('');
     
     // Format time manually to avoid hydration errors
     const now = new Date();
@@ -102,23 +115,125 @@ export default function MessagesPage() {
     const timeString = `${hours}:${minutes}`;
     
     const newMessage: Message = {
-      id: messages.length + 1,
-      sender: userInfo?.name || 'Bạn',
-      content: inputMessage,
+      id: Date.now(), // Use timestamp for more reliable IDs
+      sender: userInfo.name || 'Bạn',
+      content: message,
       timestamp: timeString,
       isRead: true,
     };
     
-    const updatedMessages = [...messages, newMessage];
-    setMessages(updatedMessages);
-    setInputMessage('');
+    // Use functional update to ensure we have the latest state
+    setMessages(prevMessages => {
+      const updatedMessages = [...prevMessages, newMessage];
+      
+      // Handle bot auto-response if G3 BOT is the selected consultant
+      if (selectedConsultant.name === 'G3 BOT') {
+        setTimeout(() => {
+          // Get bot response based on user's message
+          const botResponse = getBotResponse(message, userInfo?.name || '');
+          
+          // Format time for bot response with slight delay
+          const responseNow = new Date();
+          const responseHours = responseNow.getHours().toString().padStart(2, '0');
+          const responseMinutes = responseNow.getMinutes().toString().padStart(2, '0');
+          const responseTime = `${responseHours}:${responseMinutes}`;
+          
+          const botMessage: Message = {
+            id: Date.now() + 100, // Ensure unique ID
+            sender: 'G3 BOT',
+            content: botResponse,
+            timestamp: responseTime,
+            isRead: true,
+          };
+          
+          // Add bot response to messages
+          setMessages(currentMessages => {
+            const messagesWithBotResponse = [...currentMessages, botMessage];
+            
+            // Update the session with the new messages including bot response
+            const session: ChatSession = {
+              messages: messagesWithBotResponse,
+              userInfo,
+              expiry: Date.now() + SESSION_DURATION
+            };
+            localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+            
+            return messagesWithBotResponse;
+          });
+        }, 1000); // Slight delay for natural feel
+      }
+      
+      // Save to session inside the update function to ensure we're using the latest state
+      setTimeout(() => {
+        const session: ChatSession = {
+          messages: updatedMessages,
+          userInfo,
+          expiry: Date.now() + SESSION_DURATION
+        };
+        localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+      }, 0);
+      
+      return updatedMessages;
+    });
+  };
+
+  // Function to generate bot responses based on user input
+  const getBotResponse = (userMessage: string, userName: string): string => {
+    const lowerCaseMessage = userMessage.toLowerCase();
     
-    // Save updated messages to session
-    setTimeout(() => saveChatSession(), 0);
+    // Check for greetings
+    if (/xin chào|chào|hello|hi|hey|hola/i.test(lowerCaseMessage)) {
+      return `Chào ${userName}! Tôi có thể giúp gì cho bạn?`;
+    }
+    
+    // Check for specific product inquiries
+    if (/ghế|ghe|chair/i.test(lowerCaseMessage)) {
+      return 'Chúng tôi có nhiều loại ghế công thái học từ các thương hiệu nổi tiếng như Herman Miller, Steelcase, và Humanscale. Ghế công thái học giúp giảm đau lưng, cải thiện tư thế và tăng năng suất làm việc. Bạn muốn tìm hiểu thêm về mẫu ghế nào?';
+    }
+    
+    if (/bàn|ban|desk|table/i.test(lowerCaseMessage)) {
+      return 'G3 Tech cung cấp các loại bàn điều chỉnh độ cao giúp bạn linh hoạt làm việc ở tư thế đứng hoặc ngồi. Điều này rất tốt cho sức khỏe và năng suất. Chúng tôi có các mẫu từ thương hiệu FlexiSpot, Uplift và Jarvis với nhiều kích thước và mức giá khác nhau.';
+    }
+    
+    if (/màn hình|man hinh|monitor|screen/i.test(lowerCaseMessage)) {
+      return 'Chúng tôi có các loại màn hình công thái học và giá đỡ màn hình đa năng giúp bạn điều chỉnh vị trí màn hình phù hợp với tầm nhìn, giảm mỏi cổ và mắt. Các thương hiệu phổ biến gồm Dell, LG UltraWide và Samsung với nhiều kích thước từ 24" đến 49".';
+    }
+    
+    if (/phụ kiện|phu kien|accessory|accessories/i.test(lowerCaseMessage)) {
+      return 'G3 Tech cung cấp nhiều phụ kiện văn phòng như kê chân, đệm lưng, bàn phím cơ học, chuột công thái học và các giải pháp quản lý cáp giúp không gian làm việc của bạn gọn gàng và thoải mái hơn.';
+    }
+    
+    if (/giá|gia|price|cost/i.test(lowerCaseMessage)) {
+      return 'Chúng tôi có sản phẩm ở nhiều mức giá khác nhau phù hợp với ngân sách của bạn. Ghế công thái học từ 3 triệu đến 30 triệu, bàn điều chỉnh độ cao từ 5 triệu đến 20 triệu, và màn hình từ 4 triệu đến 25 triệu. Bạn quan tâm đến sản phẩm nào để tôi có thể cung cấp thông tin chi tiết hơn?';
+    }
+    
+    if (/1/i.test(lowerCaseMessage)) {
+      return 'Ghế công thái học là sự lựa chọn tuyệt vời! Chúng tôi có các mẫu phổ biến như Herman Miller Aeron, Steelcase Gesture và Humanscale Freedom. Ghế công thái học được thiết kế để hỗ trợ cột sống, giảm áp lực lên lưng và cổ, đồng thời thúc đẩy tư thế ngồi lành mạnh. Bạn quan tâm đến mức giá nào?';
+    }
+    
+    if (/2/i.test(lowerCaseMessage)) {
+      return 'Bàn điều chỉnh độ cao là lựa chọn thông minh! Chúng cho phép bạn thay đổi linh hoạt giữa ngồi và đứng, giúp tăng cường lưu thông máu và giảm các vấn đề sức khỏe liên quan đến ngồi quá lâu. Chúng tôi có các mẫu điều chỉnh bằng điện với bộ nhớ vị trí và khả năng chịu tải từ 70kg đến 150kg.';
+    }
+    
+    if (/3/i.test(lowerCaseMessage)) {
+      return 'Màn hình và giá đỡ là quan trọng cho góc nhìn tối ưu! Chúng tôi cung cấp màn hình cong, màn hình ultra-wide và giá đỡ màn hình đa năng giúp điều chỉnh độ cao, góc nghiêng và xoay, giúp giảm căng thẳng cho cổ và mắt. Màn hình của chúng tôi đều có công nghệ chống chói và bảo vệ mắt.';
+    }
+    
+    if (/4/i.test(lowerCaseMessage)) {
+      return 'Phụ kiện văn phòng giúp hoàn thiện không gian làm việc! Chúng tôi có bàn phím cơ học (tốt cho cổ tay), chuột công thái học (giảm hội chứng ống cổ tay), kê chân (cải thiện tư thế), đệm lưng (hỗ trợ thêm), đèn bàn, tai nghe chống ồn và nhiều phụ kiện khác. Bạn cần phụ kiện cụ thể nào?';
+    }
+    
+    if (/cảm ơn|cam on|thank|thanks/i.test(lowerCaseMessage)) {
+      return `Không có gì ${userName} ơi! Rất vui được hỗ trợ bạn. Nếu còn câu hỏi nào khác, cứ tự nhiên hỏi nhé.`;
+    }
+    
+    // Default response if no pattern matches
+    return 'Cảm ơn bạn đã nhắn tin. Bạn có thể cho tôi biết thêm bạn đang tìm kiếm sản phẩm hay dịch vụ nào, hoặc chọn một trong các mục sau:\n1. Ghế công thái học\n2. Bàn điều chỉnh độ cao\n3. Màn hình và giá đỡ\n4. Phụ kiện văn phòng';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && inputMessage.trim() !== '') {
+      e.preventDefault(); // Prevent default Enter behavior
       handleSendMessage();
     }
   };
@@ -162,23 +277,7 @@ export default function MessagesPage() {
       const timeString = `${hours}:${minutes}`;
       
       // Add welcome and support messages
-      const welcomeMessage: Message = {
-        id: 1,
-        sender: selectedConsultant.name,
-        content: `Xin chào ${nameInput}! Chúng tôi rất vui được hỗ trợ bạn.`,
-        timestamp: timeString,
-        isRead: true,
-      };
-      
-      const supportMessage: Message = {
-        id: 2,
-        sender: selectedConsultant.name,
-        content: 'G3 Tech chuyên cung cấp các sản phẩm công thái học cao cấp như ghế, bàn, màn hình và phụ kiện văn phòng. Bạn cần tư vấn về sản phẩm nào?',
-        timestamp: timeString,
-        isRead: true,
-      };
-      
-      const initialMessages = [welcomeMessage, supportMessage];
+      const initialMessages = createWelcomeMessages(selectedConsultant, nameInput);
       setMessages(initialMessages);
       
       // Save initial session
@@ -191,6 +290,63 @@ export default function MessagesPage() {
         localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
       }, 0);
     }
+  };
+
+  // Function to create welcome messages for the selected consultant
+  const createWelcomeMessages = (consultant: typeof selectedConsultant, userName: string) => {
+    // Format time manually to avoid hydration errors
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Special messages for the bot consultant
+    if (consultant.name === 'G3 BOT') {
+      const welcomeMessage: Message = {
+        id: 1,
+        sender: consultant.name,
+        content: `Xin chào ${userName}! Tôi là G3 BOT, trợ lý ảo hỗ trợ tư vấn tự động 24/7.`,
+        timestamp: timeString,
+        isRead: true,
+      };
+      
+      const supportMessage: Message = {
+        id: 2,
+        sender: consultant.name,
+        content: 'Tôi có thể giúp bạn tìm hiểu về các sản phẩm công thái học của G3 Tech. Bạn có thể hỏi tôi về ghế, bàn điều chỉnh độ cao, màn hình, phụ kiện hoặc bất kỳ sản phẩm nào khác.',
+        timestamp: timeString,
+        isRead: true,
+      };
+      
+      const optionsMessage: Message = {
+        id: 3,
+        sender: consultant.name,
+        content: 'Bạn đang quan tâm đến sản phẩm nào sau đây?\n1. Ghế công thái học\n2. Bàn điều chỉnh độ cao\n3. Màn hình và giá đỡ\n4. Phụ kiện văn phòng',
+        timestamp: timeString,
+        isRead: true,
+      };
+      
+      return [welcomeMessage, supportMessage, optionsMessage];
+    }
+    
+    // Regular messages for human consultants
+    const welcomeMessage: Message = {
+      id: 1,
+      sender: consultant.name,
+      content: `Xin chào ${userName}! Tôi là ${consultant.name}, ${consultant.title.toLowerCase()}. Rất vui được hỗ trợ bạn.`,
+      timestamp: timeString,
+      isRead: true,
+    };
+    
+    const supportMessage: Message = {
+      id: 2,
+      sender: consultant.name,
+      content: 'G3 Tech chuyên cung cấp các sản phẩm công thái học cao cấp như ghế, bàn, màn hình và phụ kiện văn phòng. Bạn cần tư vấn về sản phẩm nào?',
+      timestamp: timeString,
+      isRead: true,
+    };
+    
+    return [welcomeMessage, supportMessage];
   };
 
   // Check if user already entered info in session storage or localStorage
@@ -302,15 +458,32 @@ export default function MessagesPage() {
             </svg>
           </button>
           
-          <div className="absolute left-0 right-0 top-0 h-14 flex items-center justify-center pointer-events-none">
-            <span className="font-bold text-lg text-red-600 tracking-wide pointer-events-none">
-              {isClient ? `${selectedConsultant.name} - ${selectedConsultant.title}` : 'Tư vấn viên'}
+          <div className="absolute left-0 right-0 top-0 h-14 flex flex-col justify-center pl-16 pointer-events-none">
+            <span className="font-bold text-lg text-red-600 tracking-wide pointer-events-none text-left">
+              {isClient ? selectedConsultant.name : 'Tư vấn viên'}
+            </span>
+            <span className="text-sm text-gray-600 tracking-wide pointer-events-none text-left">
+              {isClient ? selectedConsultant.title : ''}
             </span>
           </div>
           
-          {/* Context menu button */}
+          {/* Call and Menu buttons */}
           {isClient && (
-            <div className="relative ml-auto z-10">
+            <div className="relative ml-auto z-10 flex items-center">
+              {/* Call button - hide for bot */}
+              {!selectedConsultant.isBot && (
+                <a 
+                  href={`tel:${selectedConsultant.phone}`}
+                  className="flex items-center justify-center w-10 h-10 text-green-600 hover:text-green-700 mr-1"
+                  aria-label={`Gọi ${selectedConsultant.name}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </a>
+              )}
+              
+              {/* Menu button */}
               <button 
                 onClick={() => setShowConsultantMenu(!showConsultantMenu)}
                 data-drawer-trigger="true"
@@ -355,6 +528,22 @@ export default function MessagesPage() {
                             : 'hover:bg-gray-50 text-gray-700'
                         }`}
                         onClick={() => {
+                          if (selectedConsultant.name !== consultant.name && userInfo) {
+                            // Create new welcome messages for the new consultant
+                            const newMessages = createWelcomeMessages(consultant, userInfo.name);
+                            setMessages(newMessages);
+                            
+                            // Update the session with the new messages
+                            setTimeout(() => {
+                              const session = loadChatSession();
+                              if (session) {
+                                session.messages = newMessages;
+                                session.expiry = Date.now() + SESSION_DURATION;
+                                localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+                              }
+                            }, 0);
+                          }
+                          
                           setSelectedConsultant(consultant);
                           setShowConsultantMenu(false);
                         }}
@@ -464,24 +653,56 @@ export default function MessagesPage() {
         <div className="flex-1 overflow-y-auto pb-24">
           <div className="container mx-auto px-4 py-2">
             <div className="space-y-4">
-              {messages.map((message) => (
-                <Card key={message.id} className={`${message.sender === userInfo?.name || message.sender === 'Bạn' ? 'ml-auto' : 'mr-auto'} max-w-[80%]`}>
-                  <CardContent>
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-sm text-gray-900">{message.sender}</span>
-                          <span className="text-xs text-gray-500">{message.timestamp}</span>
+              {messages.map((message, index) => {
+                const isUserMessage = message.sender === userInfo?.name || message.sender === 'Bạn';
+                return (
+                  <Card 
+                    key={message.id} 
+                    className={`
+                      ${isUserMessage ? 'ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white' : 'mr-auto bg-white'} 
+                      max-w-[80%] rounded-3xl shadow-sm border-0 relative 
+                      ${isUserMessage ? 'rounded-br-sm' : 'rounded-bl-sm'}
+                      animate-messageIn
+                    `}
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      transform: 'translateY(0)'
+                    }}
+                  >
+                    <CardContent className={`p-3 ${isUserMessage ? 'text-white' : ''}`}>
+                      <div className="flex items-start gap-3">
+                        {!isUserMessage && (
+                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 text-red-600 font-bold text-sm">
+                            {message.sender === 'G3 BOT' ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                            ) : (
+                              message.sender.charAt(0)
+                            )}
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`font-medium text-sm ${isUserMessage ? 'text-white/90' : 'text-gray-900'}`}>
+                              {message.sender}
+                            </span>
+                            <span className={`text-xs ${isUserMessage ? 'text-white/70' : 'text-gray-500'}`}>
+                              {message.timestamp}
+                            </span>
+                          </div>
+                          <p className={`text-sm ${isUserMessage ? 'text-white/95' : 'text-gray-700'}`}>
+                            {message.content}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-700">{message.content}</p>
+                        {!message.isRead && (
+                          <div className="w-2 h-2 rounded-full bg-red-500 mt-1"></div>
+                        )}
                       </div>
-                      {!message.isRead && (
-                        <div className="w-2 h-2 rounded-full bg-red-500 mt-1"></div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -493,14 +714,14 @@ export default function MessagesPage() {
               <input
                 type="text"
                 placeholder="Nhập tin nhắn..."
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                className="flex-1 rounded-2xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400 transition-all"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={!userInfo}
               />
               <button 
-                className={`bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-lg transition-all ${userInfo ? 'hover:opacity-90 transform hover:scale-[0.99]' : 'opacity-50 cursor-not-allowed'}`}
+                className={`bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-3 rounded-2xl transition-all ${userInfo ? 'hover:opacity-90 transform hover:scale-[0.99] active:scale-[0.97]' : 'opacity-50 cursor-not-allowed'}`}
                 onClick={handleSendMessage}
                 disabled={!userInfo}
               >
@@ -518,6 +739,14 @@ export default function MessagesPage() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes messageIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-messageIn {
+          animation: messageIn 0.3s ease-out forwards;
         }
       `}</style>
     </>
