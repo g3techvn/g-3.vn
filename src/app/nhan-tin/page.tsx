@@ -323,7 +323,7 @@ export default function MessagesPage() {
               
               {/* Consultant selection drawer - client-side only */}
               <div 
-                className={`fixed inset-y-0 right-0 z-[9999] w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+                className={`fixed inset-y-0 right-0 z-[9999] w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
                   showConsultantMenu ? 'translate-x-0' : 'translate-x-full'
                 }`}
                 ref={menuRef}
