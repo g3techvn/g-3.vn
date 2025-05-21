@@ -48,7 +48,7 @@ export default function MessagesPage() {
   
   const consultants = [
     { name: 'Ms. Thuý', title: 'Tư vấn viên' },
-    { name: 'Mr. Hùng', title: 'Chuyên gia ghế công thái học' },
+    { name: 'Ms. Thuỷ', title: 'Chuyên gia ghế công thái học' },
     { name: 'Ms. Lan', title: 'Chuyên gia bàn điều chỉnh độ cao' },
     { name: 'Mr. Đạt', title: 'Tư vấn sản phẩm cao cấp' }
   ];
@@ -164,7 +164,7 @@ export default function MessagesPage() {
       // Add welcome and support messages
       const welcomeMessage: Message = {
         id: 1,
-        sender: 'G3 Tech',
+        sender: selectedConsultant.name,
         content: `Xin chào ${nameInput}! Chúng tôi rất vui được hỗ trợ bạn.`,
         timestamp: timeString,
         isRead: true,
@@ -172,7 +172,7 @@ export default function MessagesPage() {
       
       const supportMessage: Message = {
         id: 2,
-        sender: 'G3 Tech',
+        sender: selectedConsultant.name,
         content: 'G3 Tech chuyên cung cấp các sản phẩm công thái học cao cấp như ghế, bàn, màn hình và phụ kiện văn phòng. Bạn cần tư vấn về sản phẩm nào?',
         timestamp: timeString,
         isRead: true,
@@ -294,7 +294,7 @@ export default function MessagesPage() {
       <div className="fixed top-0 left-0 right-0 z-[9998] bg-white border-b border-gray-200 shadow-sm">
         <div className="flex items-center h-14 px-4 relative">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
             className="flex items-center justify-center w-10 h-10 text-red-500 hover:text-red-600"
           >
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -383,7 +383,7 @@ export default function MessagesPage() {
       {showInfoModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div 
-            className="w-[90%] max-w-md p-6 rounded-xl animate-fadeIn overflow-hidden"
+            className="w-[90%] max-w-md p-6 rounded-xl animate-fadeIn overflow-hidden relative"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(10px)',
@@ -392,6 +392,17 @@ export default function MessagesPage() {
               border: '1px solid rgba(255, 255, 255, 0.2)'
             }}
           >
+            {/* Close button */}
+            <button 
+              onClick={() => router.push('/')}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500 p-2 z-10"
+              aria-label="Đóng"
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
             <h2 className="text-xl font-bold mb-4 text-center bg-gradient-to-r from-red-600 to-red-400 text-transparent bg-clip-text">Thông tin liên hệ</h2>
             <p className="text-gray-600 mb-6 text-center">Vui lòng cung cấp thông tin để chúng tôi có thể hỗ trợ bạn tốt hơn</p>
             
