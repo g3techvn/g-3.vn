@@ -270,25 +270,34 @@ export default function MessagesPage() {
       setUserInfo(newUserInfo);
       setShowInfoModal(false);
       
-      // Format time manually to avoid hydration errors
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const timeString = `${hours}:${minutes}`;
-      
-      // Add welcome and support messages
+      // Create welcome messages but don't add them all at once
       const initialMessages = createWelcomeMessages(selectedConsultant, nameInput);
-      setMessages(initialMessages);
       
-      // Save initial session
-      setTimeout(() => {
-        const session: ChatSession = {
-          messages: initialMessages,
-          userInfo: newUserInfo,
-          expiry: Date.now() + SESSION_DURATION
-        };
-        localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
-      }, 0);
+      // Add messages with delay
+      setMessages([initialMessages[0]]); // Add first message immediately
+      
+      // Add remaining messages with delay
+      initialMessages.slice(1).forEach((message, index) => {
+        setTimeout(() => {
+          setMessages(prev => [...prev, message]);
+          
+          // After each message is added, update the session in localStorage
+          const session: ChatSession = {
+            messages: [...initialMessages.slice(0, index + 2)], // Just use the known messages up to this point
+            userInfo: newUserInfo,
+            expiry: Date.now() + SESSION_DURATION
+          };
+          localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+        }, 3000 * (index + 1)); // 3 seconds delay between messages
+      });
+      
+      // Save initial session with just the first message
+      const session: ChatSession = {
+        messages: [initialMessages[0]],
+        userInfo: newUserInfo,
+        expiry: Date.now() + SESSION_DURATION
+      };
+      localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
     }
   };
 
@@ -531,17 +540,32 @@ export default function MessagesPage() {
                           if (selectedConsultant.name !== consultant.name && userInfo) {
                             // Create new welcome messages for the new consultant
                             const newMessages = createWelcomeMessages(consultant, userInfo.name);
-                            setMessages(newMessages);
                             
-                            // Update the session with the new messages
-                            setTimeout(() => {
-                              const session = loadChatSession();
-                              if (session) {
-                                session.messages = newMessages;
-                                session.expiry = Date.now() + SESSION_DURATION;
-                                localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
-                              }
-                            }, 0);
+                            // Show messages with delay
+                            setMessages([newMessages[0]]); // Show first message immediately
+                            
+                            // Add remaining messages with delay
+                            newMessages.slice(1).forEach((message, index) => {
+                              setTimeout(() => {
+                                setMessages(prev => [...prev, message]);
+                                
+                                // Update session after each message
+                                const session = loadChatSession();
+                                if (session) {
+                                  session.messages = [...newMessages.slice(0, index + 2)];
+                                  session.expiry = Date.now() + SESSION_DURATION;
+                                  localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+                                }
+                              }, 3000 * (index + 1)); // 3 seconds delay
+                            });
+                            
+                            // Update session with just the first message
+                            const session = loadChatSession();
+                            if (session) {
+                              session.messages = [newMessages[0]];
+                              session.expiry = Date.now() + SESSION_DURATION;
+                              localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+                            }
                           }
                           
                           setSelectedConsultant(consultant);
@@ -658,6 +682,7 @@ export default function MessagesPage() {
                 return (
                   <Card 
                     key={message.id} 
+                    data-message-id={message.id}
                     className={`
                       ${isUserMessage ? 'ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white' : 'mr-auto bg-white'} 
                       max-w-[80%] rounded-3xl shadow-sm border-0 relative 
