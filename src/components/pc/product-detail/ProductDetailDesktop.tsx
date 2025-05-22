@@ -27,6 +27,9 @@ interface Comment {
   };
 }
 
+// Define the benefits type to match what's used in ProductDescription
+type Benefits = string[] | { benefits: string[] } | string;
+
 interface ProductDetailDesktopProps {
   product: Product;
   galleryImages: string[];
@@ -48,7 +51,7 @@ interface ProductDetailDesktopProps {
   loadingSimilar: boolean;
   technicalSpecs?: Array<{ name: string; value: string }> | Array<{ title: string; value: string }>;
   keyFeatures?: string[];
-  benefits?: string[];
+  benefits?: Benefits;
   instructions?: string[];
   overview?: string;
 }
@@ -147,9 +150,18 @@ export function ProductDetailDesktop({
           <div className="col-span-3 space-y-8">
             <ProductDescription 
               keyFeatures={keyFeatures}
-              benefits={benefits}
+              benefits={
+                benefits 
+                  ? typeof benefits === 'object' && !Array.isArray(benefits) && 'benefits' in benefits
+                    ? { bullets: benefits.benefits }
+                    : Array.isArray(benefits)
+                      ? { bullets: benefits }
+                      : { bullets: [benefits as string] }
+                  : undefined
+              }
               instructions={instructions}
               overview={overview}
+              content={product.content}
             />
             
             <motion.div 

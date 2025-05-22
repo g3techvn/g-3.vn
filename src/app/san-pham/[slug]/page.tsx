@@ -234,6 +234,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         const response = await fetch(`/api/products/${slug}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
+        console.log("Product data:", data.product); // Log product data to check content field
         setProduct(data.product);
         
         // Set product detail sections data
