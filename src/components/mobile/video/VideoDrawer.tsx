@@ -72,10 +72,17 @@ export function VideoDrawer({ isOpen, onClose, product, brandName }: VideoDrawer
   const formatSpecifications = () => {
     if (!product.thong_so_ky_thuat) return [];
     
-    return Object.entries(product.thong_so_ky_thuat).map(([key, spec]) => ({
-      name: spec.title || key,
-      value: spec.value || ''
-    }));
+    // Use a Map to ensure unique specification names
+    const specsMap = new Map();
+    Object.entries(product.thong_so_ky_thuat).forEach(([key, spec]) => {
+      const name = spec.title || key;
+      specsMap.set(name, {
+        name: name,
+        value: spec.value || ''
+      });
+    });
+    
+    return Array.from(specsMap.values());
   };
 
   useEffect(() => {
