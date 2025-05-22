@@ -32,9 +32,9 @@ export default function CartPage() {
         </button>
       </header>
 
-      <div className="container mx-4 pb-20">
+      <div className="px-4 pb-20 max-w-full overflow-hidden">
         {/* Products section */}
-        <div className="flex items-center mb-3 px-4">
+        <div className="flex items-center mb-3 mt-4">
           <div className="w-8 h-8 mr-2">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
               <path d="M4.5 3.75a3 3 0 013-3h9a3 3 0 013 3v.75H4.5v-.75z" fill="#DC2626" />
@@ -42,54 +42,72 @@ export default function CartPage() {
               <path d="M21.75 4.5H2.25v5.25h19.5V4.5z" fill="#DC2626" opacity="0.6" />
             </svg>
           </div>
-          <span className="text-lg font-medium ">Sản phẩm đặt mua</span>
+          <span className="text-lg font-medium">Sản phẩm đặt mua</span>
         </div>
         
         <div className="bg-white p-4 rounded-md">
-
           {loading ? (
-            <div className="py-6 text-center">
-              <p className="text-gray-500">Đang tải...</p>
+            <div className="py-3 flex items-center">
+              <div className="flex-shrink-0 mr-3">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800 animate-spin">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="text-gray-500">Đang tải...</div>
+              </div>
             </div>
           ) : cartItems.length === 0 ? (
-            <div className="py-6 text-center">
-              <p className="text-gray-500">Giỏ hàng của bạn đang trống</p>
-              <div className="mt-6">
-                <Link
-                  href="/"
-                  className="inline-block rounded-md border border-transparent bg-red-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-red-700"
-                >
-                  Tiếp tục mua sắm
-                </Link>
+            <div className="py-3 flex items-center">
+              <div className="flex-shrink-0 mr-3">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="text-gray-500">Giỏ hàng của bạn đang trống</div>
+                <div className="mt-3">
+                  <Link
+                    href="/"
+                    className="inline-block rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-red-700"
+                  >
+                    Tiếp tục mua sắm
+                  </Link>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm">
-              {cartItems.map((item) => (
-                <div key={item.id} className="p-3 border-b border-gray-100 relative">
-                  <div className="flex">
-                    <div className="w-14 h-14 rounded-md overflow-hidden flex-shrink-0">
-                      <Image 
-                        src={item.image} 
-                        alt={item.name} 
-                        width={60} 
-                        height={60} 
-                        className="w-full h-full object-cover" 
-                      />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
-                      <div className="flex justify-between items-center">
-                        <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ <span className="text-sm text-gray-500">x{item.quantity}</span></div>
+            <div>
+              {cartItems.map((item, index) => (
+                <div key={item.id}>
+                  <div className="py-3 flex items-center">
+                    <div className="flex-shrink-0 mr-3">
+                      <div className="w-14 h-14 rounded-md overflow-hidden">
+                        <Image 
+                          src={item.image} 
+                          alt={item.name} 
+                          width={56} 
+                          height={56} 
+                          className="w-full h-full object-cover" 
+                        />
                       </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
+                      <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ <span className="text-sm text-gray-500">x{item.quantity}</span></div>
                     </div>
                     <button 
                       onClick={() => removeFromCart(item.id)}
-                      className="absolute top-3 right-3 rounded-full bg-white shadow-sm p-1"
+                      className="flex-shrink-0"
                     >
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
+                  {index < cartItems.length - 1 && <div className="border-t border-gray-100 my-2"></div>}
                 </div>
               ))}
             </div>
@@ -97,7 +115,7 @@ export default function CartPage() {
         </div>
 
         {/* Shipping information */}
-        <div className="flex items-center mb-3 px-4 mt-6">
+        <div className="flex items-center mb-3 mt-6">
           <div className="w-8 h-8 mr-2">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
               <rect width="24" height="24" rx="12" fill="#DC2626" opacity="0.1"/>
@@ -167,7 +185,7 @@ export default function CartPage() {
         </div>
 
         {/* Voucher information */}
-        <div className="flex items-center mb-3 px-4 mt-6">
+        <div className="flex items-center mb-3 mt-6">
           <div className="w-8 h-8 mr-2">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
               <path d="M21.41 11.58l-9-9C12.04 2.21 11.53 2 11 2H4C2.9 2 2 2.9 2 4v7c0 .53.21 1.04.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" fill="#DC2626"/>
@@ -202,7 +220,7 @@ export default function CartPage() {
         </div>
 
         {/* Payment details */}
-        <div className="flex items-center mb-3 px-4 mt-6">
+        <div className="flex items-center mb-3 mt-6">
           <div className="w-8 h-8 mr-2">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.93.82 1.62 2.02 1.62 1.19 0 1.78-.6 1.78-1.53 0-.9-.59-1.46-2.05-1.87-1.77-.46-3.19-1.29-3.19-3.06 0-1.63 1.32-2.71 3.11-3.06V5h2.67v1.8c1.71.39 2.73 1.71 2.83 3.24h-2.1c-.1-.92-.71-1.52-1.74-1.52-.93 0-1.65.47-1.65 1.39 0 .84.58 1.26 2.01 1.67 1.8.51 3.29 1.29 3.29 3.19 0 1.77-1.39 2.83-3.1 3.16z" fill="#DC2626"/>
@@ -357,13 +375,14 @@ export default function CartPage() {
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 flex justify-between items-center">
-        <div>
-          <div className="text-gray-500 text-sm">{cartItems.length} sản phẩm</div>
-          <div className="text-xl font-bold">{total.toLocaleString()}đ</div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 flex justify-between items-center z-[9999] shadow-lg">
+        <div className="flex flex-col justify-center h-full">
+          <div className="text-gray-500 text-[10px] leading-tight">{cartItems.length} sản phẩm</div>
+          <div className="text-gray-500 text-[10px] leading-tight">Tổng thanh toán</div>
+          <div className="text-base font-bold leading-tight">{total.toLocaleString()}đ</div>
         </div>
-        <button className="bg-[#DC2626] text-white py-3 px-8 rounded-full font-medium flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-2">
+        <button className="bg-[#DC2626] text-white px-8 rounded-full font-medium flex items-center h-10">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 mr-1">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
           </svg>
           Đặt hàng
