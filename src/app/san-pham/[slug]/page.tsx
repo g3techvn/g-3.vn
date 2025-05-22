@@ -15,6 +15,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ImageItem } from '@/types/supabase';
 import { ProductDetailDesktop } from '@/components/pc/product-detail/ProductDetailDesktop';
+import { Metadata } from 'next';
+import { generateMetadata } from '@/app/metadata';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {

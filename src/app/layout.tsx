@@ -10,6 +10,7 @@ import Providers from './providers';
 import { Toaster } from 'react-hot-toast';
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { defaultMetadata } from './metadata';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -27,14 +28,7 @@ export const viewport: Viewport = {
   themeColor: '#ffffff'
 };
 
-export const metadata: Metadata = {
-  title: 'G3 - Công Thái Học',
-  description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học',
-  metadataBase: new URL('https://g-3.vn'),
-  alternates: {
-    canonical: '/'
-  }
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
   children,

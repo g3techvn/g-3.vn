@@ -1,0 +1,12 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /admin/*
+
+# Host
+Host: https://g-3.vn
+
+# Sitemaps
+Sitemap: https://g-3.vn/sitemap.xml
+Sitemap: https://g-3.vn/server-sitemap.xml
