@@ -3,6 +3,12 @@ User-agent: *
 Allow: /
 Disallow: /api/*
 Disallow: /admin/*
+Disallow: /gio-hang
+Disallow: /checkout/*
+Disallow: /tai-khoan/*
+Disallow: /404
+Disallow: /500
+Disallow: /offline
 
 # Host
 Host: https://g-3.vn
