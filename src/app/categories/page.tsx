@@ -13,6 +13,7 @@ interface ProductCat {
   title: string;
   description?: string; // Assuming it might have a description
   slug: string; // Added slug field
+  image_url?: string; // Add image_url field
 }
 
 export default function CategoriesPage() { // Renamed from BrandsPage for clarity
@@ -97,11 +98,19 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
               <Link key={category.id} href={`/categories/${category.slug}`} className="block">
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm h-full flex flex-col">
                   <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-                    <div className="flex h-full items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-400">
-                        {category.title.charAt(0)}
-                      </span>
-                    </div>
+                    {category.image_url ? (
+                      <img
+                        src={category.image_url}
+                        alt={category.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <span className="text-2xl font-bold text-gray-400">
+                          {category.title.charAt(0)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-4 flex-grow">
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -153,11 +162,19 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
             <Link key={category.id} href={`/categories/${category.slug}`} className="block">
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm h-full flex flex-col">
                 <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-                  <div className="flex h-full items-center justify-center">
-                    <span className="text-2xl font-bold text-gray-400">
-                      {category.title.charAt(0)}
-                    </span>
-                  </div>
+                  {category.image_url ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-400">
+                        {category.title.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-4 flex-grow">
                   <h3 className="text-lg font-semibold text-gray-900">
