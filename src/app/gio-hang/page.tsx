@@ -1,21 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { Drawer } from 'antd';
 
 // Font data
 const fontDataUrl = 'https://raw.githubusercontent.com/Kiyoshika/jsPDF-Vietnamese/master/fonts/times.ttf';
+
+interface LocationData {
+  code: number;
+  name: string;
+  districts?: LocationData[];
+  wards?: LocationData[];
+}
+
+interface LocationResponse {
+  code: number;
+  name: string;
+  districts: LocationData[];
+  wards: LocationData[];
+}
 
 export default function CartPage() {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showAddressDrawer, setShowAddressDrawer] = useState(false);
+  const [showShippingDrawer, setShowShippingDrawer] = useState(false);
   
   // Guest user form state
   const [guestInfo, setGuestInfo] = useState({
@@ -32,6 +49,129 @@ export default function CartPage() {
     fullName: '',
     phone: ''
   });
+
+  // Address state
+  const [addressForm, setAddressForm] = useState({
+    city: '',
+    district: '',
+    ward: '',
+    address: ''
+  });
+
+  // Shipping carrier state
+  const [selectedCarrier, setSelectedCarrier] = useState('');
+  const carriers = [
+    { id: 'ghtk', name: 'Giao hàng tiết kiệm', price: 30000, time: '2-3 ngày' },
+    { id: 'ghn', name: 'Giao hàng nhanh', price: 35000, time: '1-2 ngày' },
+    { id: 'vnpost', name: 'VN Post', price: 25000, time: '3-5 ngày' }
+  ];
+
+  // Location data state
+  const [cities, setCities] = useState<Array<{code: number, name: string}>>([]);
+  const [districts, setDistricts] = useState<Array<{code: number, name: string}>>([]);
+  const [wards, setWards] = useState<Array<{code: number, name: string}>>([]);
+
+  // Loading states for location data
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [loadingWards, setLoadingWards] = useState(false);
+
+  // Add state for note
+  const [note, setNote] = useState('');
+
+  // Fetch cities on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      setLoadingCities(true);
+      try {
+        const response = await fetch('https://provinces.open-api.vn/api/p/');
+        const data: LocationData[] = await response.json();
+        setCities(data.map((city) => ({
+          code: city.code,
+          name: city.name
+        })));
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+      }
+      setLoadingCities(false);
+    };
+
+    fetchCities();
+  }, []);
+
+  // Fetch districts when city changes
+  const fetchDistricts = async (cityCode: number) => {
+    setLoadingDistricts(true);
+    try {
+      const response = await fetch(`https://provinces.open-api.vn/api/p/${cityCode}?depth=2`);
+      const data: LocationResponse = await response.json();
+      setDistricts(data.districts.map((district) => ({
+        code: district.code,
+        name: district.name
+      })));
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+    }
+    setLoadingDistricts(false);
+  };
+
+  // Fetch wards when district changes
+  const fetchWards = async (districtCode: number) => {
+    setLoadingWards(true);
+    try {
+      const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+      const data: LocationResponse = await response.json();
+      setWards(data.wards.map((ward) => ({
+        code: ward.code,
+        name: ward.name
+      })));
+    } catch (error) {
+      console.error('Error fetching wards:', error);
+    }
+    setLoadingWards(false);
+  };
+
+  // Handle location selection changes
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cityCode = Number(e.target.value);
+    const cityName = e.target.options[e.target.selectedIndex].text;
+    setAddressForm(prev => ({ ...prev, city: cityName, district: '', ward: '' }));
+    if (cityCode) {
+      fetchDistricts(cityCode);
+    } else {
+      setDistricts([]);
+      setWards([]);
+    }
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const districtCode = Number(e.target.value);
+    const districtName = e.target.options[e.target.selectedIndex].text;
+    setAddressForm(prev => ({ ...prev, district: districtName, ward: '' }));
+    if (districtCode) {
+      fetchWards(districtCode);
+    } else {
+      setWards([]);
+    }
+  };
+
+  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const wardName = e.target.options[e.target.selectedIndex].text;
+    setAddressForm(prev => ({ ...prev, ward: wardName }));
+    // Auto close drawer when all fields are filled
+    if (addressForm.city && addressForm.district && wardName && addressForm.address.trim()) {
+      setShowAddressDrawer(false);
+    }
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAddress = e.target.value;
+    setAddressForm(prev => ({ ...prev, address: newAddress }));
+    // Auto close drawer when all fields are filled
+    if (addressForm.city && addressForm.district && addressForm.ward && newAddress.trim()) {
+      setShowAddressDrawer(false);
+    }
+  };
 
   const validateField = (name: string, value: string) => {
     if (name === 'fullName') {
@@ -78,6 +218,42 @@ export default function CartPage() {
   
   const shipping = 30000;
   const total = totalPrice + shipping;
+
+  const handlePreviewPDF = async () => {
+    try {
+      // Get buyer info based on whether user is logged in or guest
+      const buyerInfo = user ? {
+        fullName: user.fullName,
+        phone: userPhone,
+        email: user.email
+      } : {
+        fullName: guestInfo.fullName,
+        phone: guestInfo.phone,
+        email: guestInfo.email || undefined
+      };
+
+      // Validate required fields
+      if (!buyerInfo.fullName.trim()) {
+        setErrors(prev => ({ ...prev, fullName: 'Vui lòng nhập họ tên' }));
+        return;
+      }
+      if (!buyerInfo.phone.trim()) {
+        setErrors(prev => ({ ...prev, phone: 'Vui lòng nhập số điện thoại' }));
+        return;
+      }
+      // Validate phone format
+      if (!/^(0|\+84)[3|5|7|8|9][0-9]{8}$/.test(buyerInfo.phone.trim())) {
+        setErrors(prev => ({ ...prev, phone: 'Số điện thoại không hợp lệ' }));
+        return;
+      }
+
+      // Call preview function (you'll need to implement this in PDFGenerator)
+      await generatePDF({ cartItems, totalPrice, shipping, buyerInfo, preview: true });
+      setShowMenu(false);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
 
   const handleDownloadPDF = async () => {
     try {
@@ -140,13 +316,26 @@ export default function CartPage() {
             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <button
+                  onClick={handlePreviewPDF}
+                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 border-b border-gray-100"
+                  role="menuitem"
+                >
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Xem trước PDF
+                  </div>
+                </button>
+                <button
                   onClick={handleDownloadPDF}
                   className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   role="menuitem"
                 >
                   <div className="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
                     Tải PDF
                   </div>
@@ -187,15 +376,11 @@ export default function CartPage() {
           ) : cartItems.length === 0 ? (
             <div className="py-3 flex items-center">
               <div className="flex-shrink-0 mr-3">
-                <div className="w-10 h-10 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
-                </div>
+                
               </div>
               <div className="flex-1">
-                <div className="text-gray-500">Giỏ hàng của bạn đang trống</div>
-                <div className="mt-3">
+                <div className="text-center text-gray-500">Giỏ hàng của bạn đang trống</div>
+                <div className="mt-3 flex justify-center">
                   <Link
                     href="/"
                     className="inline-block rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-red-700"
@@ -356,7 +541,7 @@ export default function CartPage() {
         
         <div className="bg-white p-4 rounded-md">
           {/* Address information */}
-          <div className="py-3 flex items-center">
+          <div className="py-3 flex items-center cursor-pointer" onClick={() => setShowAddressDrawer(true)}>
             <div className="flex-shrink-0 mr-3">
               <div className="w-10 h-10 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-800">
@@ -366,8 +551,17 @@ export default function CartPage() {
               </div>
             </div>
             <div className="flex-1">
-              <div className="text-red-500 font-medium mb-0.5">Bạn chưa có thông tin địa chỉ</div>
-              <div className="text-gray-500 text-sm">Bấm vào đây bạn nhé</div>
+              {addressForm.city && addressForm.district && addressForm.ward && addressForm.address ? (
+                <>
+                  <div className="text-gray-800 font-medium mb-0.5">Địa chỉ giao hàng</div>
+                  <div className="text-gray-600 text-sm">{`${addressForm.address}, ${addressForm.ward}, ${addressForm.district}, ${addressForm.city}`}</div>
+                </>
+              ) : (
+                <>
+                  <div className="text-red-500 font-medium mb-0.5">Bạn chưa có thông tin địa chỉ</div>
+                  <div className="text-gray-500 text-sm">Bấm vào đây để thêm địa chỉ</div>
+                </>
+              )}
             </div>
             <div className="flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-400">
@@ -375,6 +569,170 @@ export default function CartPage() {
               </svg>
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100 my-2"></div>
+
+          {/* Shipping Carrier Selection */}
+          <div className="py-3 flex items-center cursor-pointer" onClick={() => setShowShippingDrawer(true)}>
+            <div className="flex-shrink-0 mr-3">
+              <div className="w-10 h-10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-800">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              {selectedCarrier ? (
+                <>
+                  <div className="text-gray-800 font-medium mb-0.5">
+                    {carriers.find(c => c.id === selectedCarrier)?.name}
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    {carriers.find(c => c.id === selectedCarrier)?.time} - {carriers.find(c => c.id === selectedCarrier)?.price.toLocaleString()}đ
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-red-500 font-medium mb-0.5">Chọn đơn vị vận chuyển</div>
+                  <div className="text-gray-500 text-sm">Bấm vào đây để chọn đơn vị vận chuyển</div>
+                </>
+              )}
+            </div>
+            <div className="flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Address Drawer */}
+          <Drawer
+            title="Thông tin địa chỉ"
+            placement="bottom"
+            onClose={() => setShowAddressDrawer(false)}
+            open={showAddressDrawer}
+            height="auto"
+            className="address-drawer"
+            styles={{
+              body: {
+                padding: '16px 24px',
+                paddingBottom: '100px'
+              },
+              mask: {
+                background: 'rgba(0, 0, 0, 0.45)'
+              }
+            }}
+          >
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tỉnh/Thành phố <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="city"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  value={cities.find(city => city.name === addressForm.city)?.code || ''}
+                  onChange={handleCityChange}
+                >
+                  <option value="">Chọn Tỉnh/Thành phố</option>
+                  {cities.map(city => (
+                    <option key={city.code} value={city.code}>{city.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
+                  Quận/Huyện <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="district"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  value={districts.find(district => district.name === addressForm.district)?.code || ''}
+                  onChange={handleDistrictChange}
+                  disabled={!addressForm.city}
+                >
+                  <option value="">Chọn Quận/Huyện</option>
+                  {districts.map(district => (
+                    <option key={district.code} value={district.code}>{district.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="ward" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phường/Xã <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="ward"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  value={wards.find(ward => ward.name === addressForm.ward)?.code || ''}
+                  onChange={handleWardChange}
+                  disabled={!addressForm.district}
+                >
+                  <option value="">Chọn Phường/Xã</option>
+                  {wards.map(ward => (
+                    <option key={ward.code} value={ward.code}>{ward.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                  Địa chỉ cụ thể <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  placeholder="Số nhà, tên đường..."
+                  value={addressForm.address}
+                  onChange={handleAddressChange}
+                />
+              </div>
+            </div>
+          </Drawer>
+
+          {/* Shipping Carrier Drawer */}
+          <Drawer
+            title="Chọn đơn vị vận chuyển"
+            placement="bottom"
+            onClose={() => setShowShippingDrawer(false)}
+            open={showShippingDrawer}
+            height="auto"
+            className="shipping-drawer"
+            styles={{
+              body: {
+                padding: '16px 24px',
+                paddingBottom: '100px'
+              },
+              mask: {
+                background: 'rgba(0, 0, 0, 0.45)'
+              }
+            }}
+          >
+            <div className="space-y-4">
+              {carriers.map((carrier) => (
+                <div
+                  key={carrier.id}
+                  className={`p-4 rounded-lg border ${selectedCarrier === carrier.id ? 'border-red-500 bg-red-50' : 'border-gray-200'} cursor-pointer`}
+                  onClick={() => {
+                    setSelectedCarrier(carrier.id);
+                    setShowShippingDrawer(false);
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-800">{carrier.name}</div>
+                      <div className="text-sm text-gray-500 mt-1">Thời gian giao hàng: {carrier.time}</div>
+                    </div>
+                    <div className="text-red-600 font-medium">{carrier.price.toLocaleString()}đ</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Drawer>
 
           {/* Divider */}
           <div className="border-t border-gray-100 my-2"></div>
@@ -407,7 +765,13 @@ export default function CartPage() {
               </div>
             </div>
             <div className="flex-1">
-              <div className="text-gray-500 text-sm">Nhập ghi chú...</div>
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Nhập ghi chú..."
+                className="w-full px-0 text-gray-500 text-sm bg-transparent border-none focus:outline-none focus:ring-0"
+              />
             </div>
           </div>
         </div>
@@ -466,7 +830,7 @@ export default function CartPage() {
               <div className="flex-shrink-0 mr-3">
                 <div className="w-10 h-10 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                   </svg>
                 </div>
               </div>
@@ -502,7 +866,7 @@ export default function CartPage() {
               <div className="flex-shrink-0 mr-3">
                 <div className="w-10 h-10 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                   </svg>
                 </div>
               </div>
@@ -571,7 +935,7 @@ export default function CartPage() {
               <div className="flex justify-between mb-6">
                 <div className="w-16 h-16 p-2 flex flex-col items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-red-600 mb-1">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.129-.504 1.125-1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
                   </svg>
                   <span className="text-xs text-gray-600">COD</span>
                 </div>

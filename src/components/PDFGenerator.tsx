@@ -23,6 +23,7 @@ interface PDFGeneratorProps {
   totalPrice: number;
   shipping: number;
   buyerInfo: BuyerInfo;
+  preview?: boolean;
 }
 
 // Extended jsPDF type with lastAutoTable
@@ -45,7 +46,7 @@ const generateVietQRUrl = (
   return `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodedDesc}&accountName=${encodedName}`;
 };
 
-export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo }: PDFGeneratorProps) => {
+export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo, preview = false }: PDFGeneratorProps) => {
   try {
     // Load fonts
     const [normalFontBytes, mediumFontBytes] = await Promise.all([
@@ -249,14 +250,21 @@ export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo }
     doc.setTextColor(80, 80, 80);
     doc.text('Cảm ơn quý khách đã mua hàng!', 105, finalY + 70, { align: 'center' });
     
-    // Save the PDF
+    // Save or preview the PDF based on the preview flag
     const safeCustomerName = buyerInfo.fullName
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9\s-]/g, '')
       .replace(/\s+/g, '-');
     
-    doc.save(`${safeCustomerName}-${invoiceNumber}.pdf`);
+    if (preview) {
+      // Open PDF in a new tab for preview
+      const pdfDataUri = doc.output('datauristring');
+      window.open(pdfDataUri, '_blank');
+    } else {
+      // Save the PDF as before
+      doc.save(`${safeCustomerName}-${invoiceNumber}.pdf`);
+    }
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw new Error('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại sau.');
