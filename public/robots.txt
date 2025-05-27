@@ -16,3 +16,4 @@ Host: https://g-3.vn
 # Sitemaps
 Sitemap: https://g-3.vn/sitemap.xml
 Sitemap: https://g-3.vn/server-sitemap.xml
+Sitemap: https://g-3.vn/product-sitemap.xml

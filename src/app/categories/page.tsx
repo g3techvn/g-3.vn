@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link'; // Import Link
+import Image from 'next/image';
 import { Brand } from '@/types'; // Uncomment this import
 // import { Brand } from '@/types'; // Will replace this
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
@@ -100,10 +101,12 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm h-full flex flex-col">
                   <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                     {category.image_square_url ? (
-                      <img
+                      <Image
                         src={category.image_square_url}
                         alt={category.title}
                         className="h-full w-full object-cover"
+                        width={400}
+                        height={400}
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
@@ -164,10 +167,12 @@ export default function CategoriesPage() { // Renamed from BrandsPage for clarit
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm h-full flex flex-col">
                 <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                   {category.image_square_url ? (
-                    <img
+                    <Image
                       src={category.image_square_url}
                       alt={category.title}
                       className="h-full w-full object-cover"
+                      width={400}
+                      height={400}
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
