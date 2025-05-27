@@ -8,6 +8,12 @@ export const COMPANY_INFO = {
   zalo: 'https://zalo.me/0979983355',
 } as const;
 
+export const BANK_INFO = {
+  accountName: 'NGUYEN VAN DAT',
+  accountNumber: '0190149332332',
+  bankName: 'MB Bank',
+} as const;
+
 export const SOCIAL_LINKS = [
   { name: 'Shopee', href: 'https://shopee.vn/g3tech' },
   { name: 'Facebook', href: 'https://www.facebook.com/g3.vntech/' },
