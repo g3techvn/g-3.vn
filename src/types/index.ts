@@ -6,7 +6,9 @@ export type Product = {
   description: string;
   price: number;
   image_url: string;
+  image_square_url?: string;
   category_id: string;
+  category_name?: string;
   pd_cat_id: string;
   brand_id: string;
   brand?: string;

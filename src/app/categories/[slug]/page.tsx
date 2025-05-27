@@ -45,6 +45,7 @@ export default function CategoryProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState<string>('');
+  const [categoryImageUrl, setCategoryImageUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('Sản phẩm');
   const [openVideo, setOpenVideo] = useState<null | { videoUrl: string; name: string; isPortrait?: boolean }>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -58,14 +59,13 @@ export default function CategoryProductsPage() {
         const response = await fetch(`/api/categories/${slug}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        const productsData = data.products || [];
-        setProducts(productsData);
         
-        if (productsData.length > 0) {
-          setCategoryName(productsData[0].category_name || productsData[0].category?.name || slug);
-        } else {
-          setCategoryName(slug);
+        if (data.category) {
+          setCategoryName(data.category.name || '');
+          setCategoryImageUrl(data.category.image_square_url || data.category.image_url || '');
         }
+        
+        setProducts(data.products || []);
       } catch (error) {
         console.error('Error fetching category products:', error);
         setError(error instanceof Error ? error.message : 'An error occurred while fetching category products');
@@ -113,7 +113,8 @@ export default function CategoryProductsPage() {
       {/* Mobile Shopee Header */}
       <div className="md:hidden">
         <BrandShopeeHeader 
-          brandName={categoryName || 'Tên danh mục'}
+          brandName={categoryName || 'Danh mục sản phẩm'}
+          avatarUrl={categoryImageUrl || 'https://placehold.co/80x80/e2e8f0/475569?text=Category'}
           products={products}
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -169,7 +170,10 @@ export default function CategoryProductsPage() {
                             <button 
                               className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
                               aria-label="Thêm vào giỏ hàng"
-                              onClick={() => addToCart(product)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                addToCart(product);
+                              }}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -191,25 +195,26 @@ export default function CategoryProductsPage() {
           {activeTab === 'Danh mục' && (
             <div className="p-4 bg-white">
               <ul className="divide-y divide-gray-200">
-                {[
-                  { name: 'GHẾ CÔNG THÁI HỌC', href: '#', imageUrl: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=40&h=40&fit=crop&q=80' },
-                  { name: 'BÀN NÂNG HẠ', href: '#', imageUrl: 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=40&h=40&fit=crop&q=80' },
-                  { name: 'BÀN GHẾ TRẺ EM', href: '#', imageUrl: 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?w=40&h=40&fit=crop&q=80' },
-                  { name: 'PHỤ KIỆN', href: '#', imageUrl: 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?w=40&h=40&fit=crop&q=80' },
-                ].map((category) => (
-                  <li key={category.name}>
+                {products.reduce((uniqueCategories, product) => {
+                  const existingCategory = uniqueCategories.find(p => p.category_id === product.category_id);
+                  if (!existingCategory) {
+                    uniqueCategories.push(product);
+                  }
+                  return uniqueCategories;
+                }, [] as Product[]).map((product) => (
+                  <li key={product.category_id}>
                     <Link 
-                      href={category.href} 
+                      href={`/categories/${product.slug || product.category_id}`}
                       className="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-red-600 transition-colors duration-150 space-x-3"
                     >
                       <Image 
-                        src={category.imageUrl} 
-                        alt={category.name} 
+                        src={product.image_square_url || product.image_url} 
+                        alt={product.name} 
                         width={40} 
                         height={40} 
                         className="rounded-full object-cover"
                       />
-                      <span>{category.name}</span>
+                      <span>{product.category_name || product.name}</span>
                     </Link>
                   </li>
                 ))}
@@ -221,7 +226,7 @@ export default function CategoryProductsPage() {
               {(() => {
                 const videos = products.filter(p => p.video_url);
                 if (videos.length === 0) {
-                  return <p className="text-center text-gray-600">Không có video nào cho thương hiệu này.</p>;
+                  return <p className="text-center text-gray-600">Không có video nào cho danh mục này.</p>;
                 }
                 // Hàm chuyển link YouTube thường sang embed
                 const getEmbedUrl = (url: string) => {
@@ -236,10 +241,6 @@ export default function CategoryProductsPage() {
                   if (ytShort) {
                     return `https://www.youtube.com/embed/${ytShort[1]}?autoplay=1`;
                   }
-                  // Nếu đã là embed hoặc link khác thì trả về nguyên bản
-                  // For non-YouTube URLs, autoplay might work if the URL itself supports it or if the provider has other means
-                  // We could also try to append ?autoplay=1 generically, but it might break some URLs.
-                  // For now, only adding it to known YouTube patterns.
                   if (url.includes('youtube.com/embed/')) {
                     return url.includes('?') ? `${url}&autoplay=1` : `${url}?autoplay=1`;
                   }
@@ -276,9 +277,7 @@ export default function CategoryProductsPage() {
                     {/* Modal popup video */}
                     {openVideo && (
                       <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md" onClick={() => setOpenVideo(null)}>
-                        {/* Fullscreen Video Area (relative container for header and iframe) */}
                         <div className="relative w-screen h-screen" onClick={e => e.stopPropagation()}>
-                          {/* New Header with white background */}
                           <div className="absolute top-0 left-0 right-0 h-14 bg-white flex items-center px-4 z-10 shadow-md">
                             <button 
                               className="text-gray-700 hover:text-gray-900 flex items-center p-2 rounded hover:bg-gray-100 transition-colors duration-150"
@@ -290,9 +289,7 @@ export default function CategoryProductsPage() {
                               </svg>
                               Back
                             </button>
-                            {/* Spacer to push a new button to the right if needed, or for title */}
-                            <div className="flex-grow"></div> 
-                            {/* Three dots button for context menu */}
+                            <div className="flex-grow"></div>
                             <div className="relative">
                               <button
                                 className="text-gray-700 hover:text-gray-900 p-2 rounded-full hover:bg-gray-200 transition-colors duration-150"
@@ -303,7 +300,6 @@ export default function CategoryProductsPage() {
                                   <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                                 </svg>
                               </button>
-                              {/* Context Menu Panel */}
                               {isContextMenuOpen && (
                                 <div 
                                   className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5 focus:outline-none"
@@ -314,7 +310,6 @@ export default function CategoryProductsPage() {
                                   <button
                                     onClick={() => { 
                                       console.log('Share action triggered for:', openVideo?.videoUrl);
-                                      // Implement Web Share API or other sharing logic here
                                       setIsContextMenuOpen(false); 
                                     }}
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -340,8 +335,6 @@ export default function CategoryProductsPage() {
                               )}
                             </div>
                           </div>
-
-                          {/* Iframe container (takes full space of its parent) */}
                           <div className="w-full h-full">
                             <iframe
                               src={openVideo.videoUrl}

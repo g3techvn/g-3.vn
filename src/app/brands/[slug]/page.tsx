@@ -45,6 +45,7 @@ export default function BrandProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [brandName, setBrandName] = useState<string>('');
+  const [brandImageUrl, setBrandImageUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('Sản phẩm');
   const [openVideo, setOpenVideo] = useState<null | { videoUrl: string; name: string; isPortrait?: boolean }>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -55,18 +56,19 @@ export default function BrandProductsPage() {
       
       try {
         setLoading(true);
+        // Fetch brand and products data
         const response = await fetch(`/api/brands/${slug}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        const productsData = data.products || [];
-        setProducts(productsData);
         
-        // Lấy tên brand từ sản phẩm đầu tiên
-        if (productsData.length > 0) {
-          setBrandName(productsData[0].brand || '');
+        if (data.brand) {
+          setBrandName(data.brand.title || '');
+          setBrandImageUrl(data.brand.image_square_url || data.brand.image_url || '');
         }
+        
+        setProducts(data.products || []);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching brand data:', error);
         setError(error instanceof Error ? error.message : 'An error occurred');
       } finally {
         setLoading(false);
@@ -113,6 +115,7 @@ export default function BrandProductsPage() {
       <div className="md:hidden">
         <BrandShopeeHeader 
           brandName={brandName || 'Tên thương hiệu'} 
+          avatarUrl={brandImageUrl}
           products={products}
           activeTab={activeTab}
           onTabChange={setActiveTab}

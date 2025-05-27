@@ -11,10 +11,10 @@ export async function GET(
     // Khởi tạo Supabase client
     const supabase = createServerClient();
 
-    // First get the brand ID from the slug
+    // First get the brand from the slug
     const { data: brand, error: brandError } = await supabase
       .from('brands')
-      .select('id')
+      .select('*')
       .eq('slug', slug)
       .single();
 
@@ -33,21 +33,12 @@ export async function GET(
       );
     }
     
-    // Query tất cả sản phẩm theo brand_id
+    // Then get all products for this brand
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select(`
-        *,
-        brands:brand_id (
-          id,
-          title,
-          slug,
-          image_url,
-          image_square_url
-        )
-      `)
+      .select('*')
       .eq('brand_id', brand.id);
-    
+
     if (productsError) {
       console.error('Supabase error:', productsError);
       return NextResponse.json(
@@ -55,11 +46,15 @@ export async function GET(
         { status: 500 }
       );
     }
-    
-    return NextResponse.json({ products });
+
+    // Return both brand and products data
+    return NextResponse.json({ 
+      brand,
+      products: products || []
+    });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in products by brand API:', error);
+    console.error('Error in brand API:', error);
     return NextResponse.json(
       { error: `Đã xảy ra lỗi khi xử lý yêu cầu: ${errorMessage}` },
       { status: 500 }
