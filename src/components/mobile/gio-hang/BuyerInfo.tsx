@@ -1,8 +1,9 @@
 'use client';
 
 import { BuyerInfoProps } from '@/types/cart';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ProfileDrawer from '@/components/store/ProfileDrawer';
 
 interface ExtendedBuyerInfoProps extends BuyerInfoProps {
   setGuestInfo: Dispatch<SetStateAction<{
@@ -27,6 +28,7 @@ export default function BuyerInfo({
   setErrors
 }: ExtendedBuyerInfoProps) {
   const router = useRouter();
+  const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
 
   const validateField = (name: string, value: string) => {
     if (name === 'fullName') {
@@ -123,7 +125,7 @@ export default function BuyerInfo({
           <div className="space-y-4">
             <div className="flex items-center justify-center mb-4">
               <button
-                onClick={() => router.push('/dang-nhap')}
+                onClick={() => setIsLoginDrawerOpen(true)}
                 className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors flex items-center"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
@@ -190,6 +192,12 @@ export default function BuyerInfo({
           </div>
         )}
       </div>
+
+      {/* Login Drawer */}
+      <ProfileDrawer 
+        isOpen={isLoginDrawerOpen} 
+        onClose={() => setIsLoginDrawerOpen(false)} 
+      />
     </>
   );
 } 

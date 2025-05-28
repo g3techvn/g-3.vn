@@ -10,7 +10,7 @@ export interface CartItem {
   price: number
   originalPrice?: number
   quantity: number
-  image: string
+  image_url: string
   brand?: string
 }
 
@@ -86,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           name: product.name,
           price: 'price' in product ? product.price : 0,
           originalPrice: 'original_price' in product ? product.original_price : undefined,
-          image: 'image_url' in product ? product.image_url : ('image' in product ? product.image : ''),
+          image_url: 'image_url' in product ? product.image_url : '',
           quantity: 1,
           brand: 'brand' in product ? product.brand : undefined
         }

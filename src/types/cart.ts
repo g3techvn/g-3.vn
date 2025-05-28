@@ -8,7 +8,8 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  image: string;
+  image_url: string;
+  original_price?: number;
 }
 
 export interface Voucher {

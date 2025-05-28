@@ -126,7 +126,7 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
       name: combo.name,
       price: selectedOption.price,
       originalPrice: selectedOption.originalPrice,
-      image: combo.image,
+      image_url: combo.image,
       quantity: 1,
       brand: getBrandName(),
       slug: combo.slug
@@ -241,7 +241,7 @@ const ComboDetailModal = ({
       name: combo.name,
       price: selectedOption.price,
       originalPrice: selectedOption.originalPrice,
-      image: combo.image,
+      image_url: combo.image,
       quantity: 1,
       brand: combo.brand,
       slug: combo.slug
