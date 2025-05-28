@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 interface CartHeaderProps {
   showMenu: boolean;
@@ -15,6 +17,8 @@ export default function CartHeader({
   handlePreviewPDF,
   handleDownloadPDF
 }: CartHeaderProps) {
+  const { user } = useAuth();
+
   return (
     <header className="bg-white border-b border-gray-200 p-3 flex items-center sticky top-0 z-10">
       <Link href="/" className="absolute left-3">
@@ -25,7 +29,27 @@ export default function CartHeader({
       <div className="flex-1 flex justify-center">
         <h1 className="text-lg font-medium text-gray-800">Giỏ hàng</h1>
       </div>
-      <div className="absolute right-3">
+      <div className="absolute right-3 flex items-center">
+        {/* User Avatar */}
+        <div className="mr-2">
+          {user ? (
+            <div className="relative w-8 h-8">
+              <Image 
+                src={user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
+                alt="avatar" 
+                fill
+                className="rounded-full object-cover" 
+              />
+            </div>
+          ) : (
+            <div className="w-8 h-8 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+        </div>
+        {/* Menu Button */}
         <button 
           className="p-2 text-gray-600"
           onClick={() => setShowMenu(!showMenu)}
