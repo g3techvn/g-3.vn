@@ -20,6 +20,10 @@ const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
           className="fixed inset-0 flex items-center justify-center z-50 px-4 animate-fadeIn"
           onEscapeKeyDown={onClose}
         >
+          <Dialog.Title className="sr-only">
+            Tài khoản
+          </Dialog.Title>
+          
           <div 
             className="relative w-full max-w-sm rounded-xl overflow-hidden"
             style={{
