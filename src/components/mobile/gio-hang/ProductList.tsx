@@ -9,12 +9,14 @@ interface ProductListProps {
   loading: boolean;
   cartItems: CartItem[];
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
 }
 
 export default function ProductList({
   loading,
   cartItems,
-  removeFromCart
+  removeFromCart,
+  updateQuantity
 }: ProductListProps) {
   return (
     <>
@@ -78,11 +80,30 @@ export default function ProductList({
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
-                    <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ <span className="text-sm text-gray-500">x{item.quantity}</span></div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ</div>
+                      <div className="flex items-center">
+                        <button 
+                          onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                          className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-l text-sm"
+                        >
+                          -
+                        </button>
+                        <div className="w-8 h-6 flex items-center justify-center border-t border-b border-gray-300 text-sm">
+                          {item.quantity}
+                        </div>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-r text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   <button 
                     onClick={() => removeFromCart(item.id)}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 ml-3"
                   >
                     <XMarkIcon className="h-5 w-5 text-gray-400" />
                   </button>

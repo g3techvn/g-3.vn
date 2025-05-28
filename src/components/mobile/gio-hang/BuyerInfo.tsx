@@ -2,6 +2,7 @@
 
 import { BuyerInfoProps } from '@/types/cart';
 import { Dispatch, SetStateAction } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface ExtendedBuyerInfoProps extends BuyerInfoProps {
   setGuestInfo: Dispatch<SetStateAction<{
@@ -25,6 +26,8 @@ export default function BuyerInfo({
   errors,
   setErrors
 }: ExtendedBuyerInfoProps) {
+  const router = useRouter();
+
   const validateField = (name: string, value: string) => {
     if (name === 'fullName') {
       if (!value.trim()) {
@@ -118,6 +121,22 @@ export default function BuyerInfo({
         ) : (
           // Guest user input form
           <div className="space-y-4">
+            <div className="flex items-center justify-center mb-4">
+              <button
+                onClick={() => router.push('/dang-nhap')}
+                className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                </svg>
+                Đăng nhập
+              </button>
+            </div>
+            <div className="relative flex items-center justify-center mb-4">
+              <div className="border-t border-gray-300 flex-grow"></div>
+              <div className="mx-4 text-sm text-gray-500">hoặc tiếp tục với thông tin khách</div>
+              <div className="border-t border-gray-300 flex-grow"></div>
+            </div>
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
                 Họ và tên <span className="text-red-500">*</span>

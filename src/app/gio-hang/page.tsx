@@ -260,6 +260,7 @@ export default function CartPage() {
           loading={loading}
           cartItems={cartItems}
           removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
         />
 
         <BuyerInfo 
