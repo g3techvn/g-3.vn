@@ -151,9 +151,6 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 16vw"
             />
           </div>
-          <div className="absolute top-2 right-2 bg-red-700 text-white text-xs font-bold rounded-sm px-2 py-1 z-10">
-            Chính hãng
-          </div>
         </AspectRatio>
       </CardHeader>
       
@@ -272,9 +269,7 @@ const ComboDetailModal = ({
           <div className="md:flex">
             {/* Combo image */}
             <div className="md:w-2/5 p-6 bg-slate-50 flex items-center justify-center relative">
-              <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
-                Chính hãng
-              </div>
+              
               <div className="relative w-full aspect-square max-w-xs">
                 <Image
                   src={combo.image}

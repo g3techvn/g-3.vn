@@ -27,8 +27,8 @@ export default function FeaturedProducts({
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" });
   
-  // Hiển thị 4 sản phẩm mỗi slide trên màn hình lớn, 2 trên màn hình vừa và 1 trên màn hình nhỏ
-  const totalSlides = Math.ceil(products.length / 4);
+  // Hiển thị 6 sản phẩm mỗi slide
+  const totalSlides = Math.ceil(products.length / 6);
   
   const nextSlide = useCallback(() => {
     const newSlide = (currentSlide + 1) % totalSlides;
@@ -62,7 +62,7 @@ export default function FeaturedProducts({
   // Prepare slides for tabs - create array of slides with products
   const slides = Array.from({ length: totalSlides }).map((_, index) => ({
     id: `slide-${index}`,
-    products: products.slice(index * 4, index * 4 + 4)
+    products: products.slice(index * 6, index * 6 + 6)
   }));
 
   // Ensure we have a valid current slide value
@@ -171,8 +171,8 @@ export default function FeaturedProducts({
             onMouseLeave={handleMouseLeave}
           >
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                {[...Array(6)].map((_, i) => (
                   <motion.div 
                     key={i} 
                     className="animate-pulse"
@@ -203,7 +203,7 @@ export default function FeaturedProducts({
                 >
                   {/* Only preload current and next slide to save resources */}
                   {slidesToPreload.includes(slideIdx) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                       {slide.products.map((product, idx) => (
                         <ProductCard 
                           key={product.id} 
