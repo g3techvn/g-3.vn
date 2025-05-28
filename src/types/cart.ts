@@ -1,3 +1,8 @@
+import { User as BaseUser } from './index';
+
+// Simplified user type for cart context
+export type CartUser = Pick<BaseUser, 'id' | 'email' | 'name' | 'address' | 'phone'>;
+
 export interface CartItem {
   id: string;
   name: string;
@@ -17,7 +22,7 @@ export interface Voucher {
 }
 
 export interface BuyerInfoProps {
-  user: any;
+  user: CartUser | null;
   guestInfo: {
     fullName: string;
     phone: string;

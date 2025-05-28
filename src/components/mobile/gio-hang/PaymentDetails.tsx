@@ -3,6 +3,7 @@
 import OrderSummary from './OrderSummary';
 import RewardPoints from './RewardPoints';
 import PaymentMethodSelection from './PaymentMethodSelection';
+import { Voucher } from '@/types/cart';
 
 interface PaymentDetailsProps {
   user: {
@@ -11,9 +12,7 @@ interface PaymentDetailsProps {
   } | null;
   totalPrice: number;
   shipping: number;
-  selectedVoucher: {
-    discountAmount: number;
-  } | null;
+  selectedVoucher: Voucher | null;
   pointsDiscount: number;
   useRewardPoints: boolean;
   setUseRewardPoints: (use: boolean) => void;

@@ -92,7 +92,7 @@ export default function BuyerInfo({
                 </div>
               </div>
               <div className="flex-1">
-                <div className="text-gray-800 font-medium">{user.fullName}</div>
+                <div className="text-gray-800 font-medium">{user.name}</div>
                 <div className="text-gray-500 text-sm">{user.email}</div>
               </div>
             </div>
