@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Brand } from '@/types';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import MobileLayout from '@/components/mobile/MobileLayout';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -39,7 +41,6 @@ export default function BrandsPage() {
     <div className="md:hidden">
       <MobileHomeHeader />
       <div className="px-4 py-4">
-       
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600">
             Đã xảy ra lỗi: {error}
@@ -60,20 +61,38 @@ export default function BrandsPage() {
         ) : brands.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
             {brands.map((brand) => (
-              <div key={brand.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-                  <div className="flex h-full items-center justify-center">
-                    <span className="text-2xl font-bold text-gray-400">
-                      {brand.title.charAt(0)}
-                    </span>
+              <Link href={`/brands/${brand.slug}`} key={brand.id}>
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                  <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
+                    {(() => {
+                      const imageUrl = brand.image_square_url || brand.image_url;
+                      if (imageUrl) {
+                        return (
+                          <Image
+                            src={imageUrl}
+                            alt={brand.title}
+                            width={400}
+                            height={400}
+                            className="h-full w-full object-contain"
+                          />
+                        );
+                      }
+                      return (
+                        <div className="flex h-full items-center justify-center">
+                          <span className="text-2xl font-bold text-gray-400">
+                            {brand.title.charAt(0)}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                  <div className="mt-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {brand.title}
+                    </h3>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {brand.title}
-                  </h3>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
@@ -108,20 +127,38 @@ export default function BrandsPage() {
       ) : brands.length > 0 ? (
         <div className="grid grid-cols-3 gap-4 lg:grid-cols-5">
           {brands.map((brand) => (
-            <div key={brand.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-                <div className="flex h-full items-center justify-center">
-                  <span className="text-2xl font-bold text-gray-400">
-                    {brand.title.charAt(0)}
-                  </span>
+            <Link href={`/brands/${brand.slug}`} key={brand.id}>
+              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
+                  {(() => {
+                    const imageUrl = brand.image_square_url || brand.image_url;
+                    if (imageUrl) {
+                      return (
+                        <Image
+                          src={imageUrl}
+                          alt={brand.title}
+                          width={400}
+                          height={400}
+                          className="h-full w-full object-cover"
+                        />
+                      );
+                    }
+                    return (
+                      <div className="flex h-full items-center justify-center">
+                        <span className="text-2xl font-bold text-gray-400">
+                          {brand.title.charAt(0)}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {brand.title}
+                  </h3>
                 </div>
               </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {brand.title}
-                </h3>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       ) : (

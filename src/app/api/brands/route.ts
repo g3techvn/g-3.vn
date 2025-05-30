@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     // Lấy danh sách thương hiệu từ bảng brands
     const { data: brands, error } = await supabase
       .from('brands')
-      .select('id, title, slug, created_at, image_url');
+      .select('id, title, slug, created_at, image_url, image_square_url');
 
     if (error) {
       console.error('Supabase error:', error);

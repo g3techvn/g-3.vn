@@ -61,7 +61,7 @@ export default function CategoryProductsPage() {
         const data = await response.json();
         
         if (data.category) {
-          setCategoryName(data.category.name || '');
+          setCategoryName(data.category.title || '');
           setCategoryImageUrl(data.category.image_square_url || data.category.image_url || '');
         }
         

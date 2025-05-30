@@ -41,6 +41,7 @@ export type Brand = {
   slug: string;
   created_at: string;
   image_url?: string;
+  image_square_url?: string;
 };
 
 export type Tag = {
