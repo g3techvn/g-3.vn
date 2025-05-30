@@ -1,31 +1,23 @@
 // Định nghĩa các types chính cho dự án
 
-export type Product = {
+export interface Product {
   id: string;
   name: string;
-  description: string;
+  slug?: string;
+  description?: string;
   price: number;
+  original_price?: number;
   image_url: string;
   image_square_url?: string;
-  category_id: string;
-  category_name?: string;
-  pd_cat_id: string;
-  brand_id: string;
-  brand?: string;
-  brand_slug?: string;
-  rating?: number;
-  created_at: string;
-  updated_at: string;
-  original_price?: number;
-  discount_percentage?: number;
-  slug?: string;
   video_url?: string;
-  gallery_url?: string;
-  content?: string;
-  thong_so_ky_thuat?: { [key: string]: { title: string; value: string } };
-  tinh_nang?: string | string[];
-  loi_ich?: string | string[];
-};
+  rating?: number;
+  category_id?: string;
+  category_name?: string;
+  brand_id?: string;
+  stock?: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export type Category = {
   id: string;

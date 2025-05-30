@@ -38,10 +38,25 @@ export async function GET(request: Request) {
         sectorId = sectors[0].id;
       }
     }
+
+    // First get the category details
+    const { data: category, error: categoryError } = await supabase
+      .from('product_cats')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (categoryError) {
+      console.error('API Category Detail - Supabase category error:', categoryError);
+      return NextResponse.json(
+        { error: `Lỗi khi truy vấn danh mục: ${categoryError.message}` },
+        { status: 500 }
+      );
+    }
     
     let query = supabase
       .from('products')
-      .select('*, product_cats!inner(id, title, slug)')
+      .select('*, product_cats!inner(id, title, slug, image_url, image_square_url)')
       .eq('product_cats.slug', slug);
     
     // If we have a sector ID, apply the filtering
@@ -67,7 +82,7 @@ export async function GET(request: Request) {
       } else {
         // If no products in this sector, return empty array
         console.log(`API Category Detail - No products found for sector ${sectorId}`);
-        return NextResponse.json({ products: [] });
+        return NextResponse.json({ category, products: [] });
       }
     }
     
@@ -83,7 +98,7 @@ export async function GET(request: Request) {
     }
 
     console.log(`API Category Detail - Found ${products?.length || 0} products for category ${slug}`);
-    return NextResponse.json({ products });
+    return NextResponse.json({ category, products });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('API Category Detail - Error in category detail API:', error);

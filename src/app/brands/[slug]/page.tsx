@@ -119,6 +119,7 @@ export default function BrandProductsPage() {
           products={products}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          backUrl="/brands"
         />
       </div>
       {/* Desktop/main content */}

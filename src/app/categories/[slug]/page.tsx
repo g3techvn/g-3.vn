@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import CategoriesShopHeader from '@/components/mobile/CategoriesShopHeader';
 import BrandShopeeHeader from '@/components/mobile/BrandShopeeHeader';
 import MobileHomeHeader from '@/components/mobile/MobileHomeHeader';
 import { useParams } from 'next/navigation';
@@ -62,7 +63,7 @@ export default function CategoryProductsPage() {
         
         if (data.category) {
           setCategoryName(data.category.title || '');
-          setCategoryImageUrl(data.category.image_square_url || data.category.image_url || '');
+          setCategoryImageUrl(data.category.image_square_url || data.category.image_url || 'https://placehold.co/80x80/e2e8f0/475569?text=Category');
         }
         
         setProducts(data.products || []);
@@ -112,12 +113,13 @@ export default function CategoryProductsPage() {
     <>
       {/* Mobile Shopee Header */}
       <div className="md:hidden">
-        <BrandShopeeHeader 
-          brandName={categoryName || 'Danh mục sản phẩm'}
-          avatarUrl={categoryImageUrl || 'https://placehold.co/80x80/e2e8f0/475569?text=Category'}
+        <CategoriesShopHeader 
+          categoryName={categoryName || 'Danh mục sản phẩm'}
+          categoryImageUrl={categoryImageUrl || 'https://placehold.co/80x80/e2e8f0/475569?text=Category'}
           products={products}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          backUrl="/categories"
         />
       </div>
       {/* Desktop/main content */}

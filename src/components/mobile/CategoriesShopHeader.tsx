@@ -5,9 +5,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Product } from '@/types';
 import { COMPANY_INFO } from '@/constants';
 
-interface BrandShopeeHeaderProps {
-  brandName: string;
-  avatarUrl?: string;
+interface CategoriesShopHeaderProps {
+  categoryName: string;
+  categoryImageUrl?: string;
   coverUrl?: string;
   followers?: number;
   rating?: number;
@@ -18,9 +18,9 @@ interface BrandShopeeHeaderProps {
   backUrl?: string;
 }
 
-const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
-  brandName,
-  avatarUrl = '/images/g3-avatar.jpg',
+const CategoriesShopHeader: React.FC<CategoriesShopHeaderProps> = ({
+  categoryName,
+  categoryImageUrl = 'https://placehold.co/80x80/e2e8f0/475569?text=Category',
   coverUrl = 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop',
   followers = 16800,
   rating = 4.9,
@@ -28,7 +28,7 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
   products,
   activeTab,
   onTabChange,
-  backUrl = '/brands',
+  backUrl = '/categories',
 }) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +72,6 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
     setTabsPlaceholderHeight(tabsElement.offsetHeight);
 
     const handleScroll = () => {
-      // Ensure tabsRef.current is still valid within the handler
       if (!tabsRef.current) return; 
       
       const scrollY = window.scrollY;
@@ -84,13 +83,12 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Initial check in case the page loads already scrolled
     handleScroll(); 
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []); // Empty dependency array to run once on mount and clean up on unmount
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -143,7 +141,7 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="w-full rounded-full pl-10 pr-3 py-2.5 bg-white/90 shadow text-sm placeholder-gray-400"
-              placeholder="Tìm kiếm sản phẩm trong Shop"
+              placeholder="Tìm kiếm sản phẩm trong danh mục"
             />
           </div>
           
@@ -193,12 +191,12 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
           )}
         </div>
       </div>
-      {/* Thông tin shop */}
+      {/* Thông tin danh mục */}
       <div className="relative z-10 flex items-center px-4 mt-10">
         <div className="w-16 h-16 rounded-full border-4 border-white shadow overflow-hidden bg-white">
           <Image 
-            src={avatarUrl} 
-            alt={brandName} 
+            src={categoryImageUrl} 
+            alt={categoryName} 
             width={80} 
             height={80} 
             className="object-cover w-full h-full"
@@ -207,12 +205,9 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
         </div>
         <div className="ml-4 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-white drop-shadow line-clamp-1">{brandName}</span>
-            {brandName.toLowerCase() !== 'danh mục sản phẩm' && (
-              <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">Mall</span>
-            )}
+            <span className="text-lg font-bold text-white drop-shadow line-clamp-1">{categoryName}</span>
           </div>
-          <div className="text-white text-sm mt-2 drop-shadow">{averageRating.toFixed(1)} <span className="text-yellow-400">★</span> | {totalSold.toLocaleString()} đơn hàng đã bán</div>
+          <div className="text-white text-sm mt-2 drop-shadow">{averageRating.toFixed(1)} <span className="text-yellow-400">★</span> | {totalSold.toLocaleString()} sản phẩm đã bán</div>
         </div>
         <div className="flex flex-col gap-2 ml-2">
           <button 
@@ -232,12 +227,12 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
             </svg>
           </div>
-          <span className="text-white text-sm drop-shadow">Video của Shop</span>
+          <span className="text-white text-sm drop-shadow">Video của danh mục</span>
         </div>
         <span className="text-white/90 text-sm drop-shadow">185 Video</span>
       </div>
       {/* Tabs */}
-      <div className="mt-4"> {/* Wrapper to handle original margin */}
+      <div className="mt-4">
         {isTabsSticky && <div style={{ height: `${tabsPlaceholderHeight}px` }} />}
         <div
           ref={tabsRef}
@@ -262,4 +257,4 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
   );
 };
 
-export default BrandShopeeHeader; 
+export default CategoriesShopHeader;
