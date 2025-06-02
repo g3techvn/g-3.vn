@@ -160,7 +160,7 @@ export async function GET(request: Request) {
             // Add brand name to product
             products.push({
               ...item,
-              brand: (item as any).brands?.title
+              brand: (item as Product & { brands?: { title: string } }).brands?.title
             });
           }
         }

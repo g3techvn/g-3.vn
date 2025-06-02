@@ -41,7 +41,7 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
     debounce((value: string) => {
       setDebouncedSearchQuery(value);
     }, 300),
-    []
+    [setDebouncedSearchQuery]
   );
 
   // Handle search input change
@@ -188,7 +188,9 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
                       src={product.image_url || 'https://via.placeholder.com/200'}
                       alt={product.name}
                       fill
+                      sizes="(max-width: 768px) 50vw, 33vw"
                       className="object-cover"
+                      priority={false}
                     />
                   </div>
                   <div className="flex flex-col px-2 gap-1">
