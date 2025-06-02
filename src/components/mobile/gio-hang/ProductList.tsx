@@ -1,12 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
 import { Product } from '@/types';
 import { useCart, CartItem } from '@/context/CartContext';
+import ProductSelectionDrawer from './ProductSelectionDrawer';
 
 interface ProductListProps {
   loading: boolean;
@@ -22,31 +21,6 @@ export default function ProductList({
   updateQuantity
 }: ProductListProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const { addToCart } = useCart();
-
-  // Fetch products for the drawer
-  const fetchProducts = async () => {
-    try {
-      setLoadingProducts(true);
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
-
-  // Fetch products when drawer opens
-  useEffect(() => {
-    if (isDrawerOpen && products.length === 0) {
-      fetchProducts();
-    }
-  }, [isDrawerOpen, products.length]);
 
   return (
     <>
@@ -83,12 +57,15 @@ export default function ProductList({
             <div className="flex-1">
               <div className="text-center text-gray-500">Giỏ hàng của bạn đang trống</div>
               <div className="mt-3 flex justify-center">
-                <Link
-                  href="/"
-                  className="inline-block rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-red-700"
+                <button
+                  onClick={() => setIsDrawerOpen(true)}
+                  className="inline-flex items-center rounded-md border border-red-600 bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-xs hover:bg-red-50 transition-colors"
                 >
-                  Tiếp tục mua sắm
-                </Link>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Thêm sản phẩm
+                </button>
               </div>
             </div>
           </div>
@@ -163,62 +140,10 @@ export default function ProductList({
         )}
       </div>
 
-      {/* Product Selection Drawer */}
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="bottom" className="h-[85vh]">
-          <SheetHeader>
-            <SheetTitle>Chọn thêm sản phẩm</SheetTitle>
-          </SheetHeader>
-          <div className="mt-4 flex-1 overflow-auto">
-            {/* Product Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {loadingProducts ? (
-                // Loading skeleton
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-2 animate-pulse">
-                    <div className="relative aspect-square mb-2 bg-gray-200 rounded-md" />
-                    <div className="h-4 bg-gray-200 rounded mb-1" />
-                    <div className="h-4 w-1/2 bg-gray-200 rounded mb-2" />
-                    <div className="h-8 bg-gray-200 rounded" />
-                  </div>
-                ))
-              ) : (
-                // Actual products
-                products.map((product) => (
-                  <div key={product.id} className="border border-gray-200 rounded-lg p-2">
-                    <div className="relative aspect-square mb-2">
-                      <Image
-                        src={product.image_url || 'https://via.placeholder.com/200'}
-                        alt={product.name}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>
-                    <h3 className="text-sm font-medium text-gray-800 line-clamp-2">{product.name}</h3>
-                    <div className="mt-1">
-                      {product.original_price && product.original_price > product.price && (
-                        <div className="text-gray-500 text-xs line-through">
-                          {product.original_price.toLocaleString()}đ
-                        </div>
-                      )}
-                      <div className="text-red-600 font-medium text-sm">{product.price.toLocaleString()}đ</div>
-                    </div>
-                    <button 
-                      onClick={() => {
-                        addToCart(product);
-                        setIsDrawerOpen(false);
-                      }}
-                      className="mt-2 w-full py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
-                    >
-                      Thêm vào giỏ
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <ProductSelectionDrawer 
+        isOpen={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+      />
     </>
   );
 } 

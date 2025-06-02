@@ -63,7 +63,12 @@ export async function GET(request: Request) {
           .from('product_sectors')
           .select(`
             product_id,
-            products:product_id (*)
+            products:product_id (
+              *,
+              brands:brand_id (
+                title
+              )
+            )
           `)
           .eq('sector_id', domainSectorId);
         
@@ -80,9 +85,13 @@ export async function GET(request: Request) {
           for (const item of productSectors) {
             if (item.products && typeof item.products === 'object') {
               // Ensure this is a valid product object 
-              const product = item.products as unknown as Product;
+              const product = item.products as unknown as Product & { brands: { title: string } };
               if (product.id && product.name) {
-                products.push(product);
+                // Add brand name to product
+                products.push({
+                  ...product,
+                  brand: product.brands?.title
+                });
               }
             }
           }
@@ -90,7 +99,13 @@ export async function GET(request: Request) {
       }
     } else {
       // Regular product query without domain filtering or when sector_id is explicitly provided
-      let query = supabase.from('products').select('*');
+      let query = supabase.from('products')
+        .select(`
+          *,
+          brands:brand_id (
+            title
+          )
+        `);
       
       // Add filter conditions
       if (category_id) {
@@ -142,7 +157,11 @@ export async function GET(request: Request) {
       if (fetchedProducts && Array.isArray(fetchedProducts)) {
         for (const item of fetchedProducts) {
           if (item && typeof item === 'object' && 'id' in item && 'name' in item) {
-            products.push(item as Product);
+            // Add brand name to product
+            products.push({
+              ...item,
+              brand: (item as any).brands?.title
+            });
           }
         }
       }
