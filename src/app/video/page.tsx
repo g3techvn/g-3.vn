@@ -51,7 +51,9 @@ function VideoContent() {
       }
       
       const data = await response.json();
-      const fetchedProducts = data.products || [];
+      const fetchedProducts = (data.products || []).filter((product: Product) => 
+        product.video_url && product.video_url.trim() !== ''
+      );
       
       if (pageNumber === 1) {
         setProducts(fetchedProducts);
