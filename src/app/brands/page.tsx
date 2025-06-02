@@ -65,7 +65,7 @@ export default function BrandsPage() {
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                   <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                     {(() => {
-                      const imageUrl = brand.image_square_url || brand.image_url;
+                      const imageUrl = brand.image_square_url;
                       if (imageUrl) {
                         return (
                           <Image
@@ -139,7 +139,7 @@ export default function BrandsPage() {
                           alt={brand.title}
                           width={400}
                           height={400}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       );
                     }

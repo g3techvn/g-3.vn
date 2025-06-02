@@ -63,9 +63,7 @@ export default function BlogPosts() {
                     />
                     
                     {/* Overlay logo (small logo in top corner) */}
-                    <CardBadge className="bg-white/80 text-gray-900">
-                      METRO
-                    </CardBadge>
+                 
                   </AspectRatio>
                 </CardHeader>
                 
