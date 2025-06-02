@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/AuthProvider';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Slot } from '@radix-ui/react-slot';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
@@ -314,6 +315,7 @@ const MobileHomeHeader: React.FC = () => {
         </div>
         {/* Icons */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <button 
             className={`text-gray-600 transition-all duration-300 ${isSearchVisible ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}
             onClick={toggleSearch}

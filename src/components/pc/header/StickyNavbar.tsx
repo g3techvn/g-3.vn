@@ -6,6 +6,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { COMPANY_INFO } from '@/constants';
 import Image from 'next/image';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 // Định nghĩa hàm cn inline để tránh lỗi import
 function cn(...inputs: ClassValue[]) {
@@ -130,30 +131,32 @@ export default function StickyNavbar() {
 
   return (
     <div className="hidden md:block">
-      {/* Overlay khi menu mở rộng - áp dụng hiệu ứng glassmorphism */}
+      {/* Overlay */}
       <div 
         className={cn(
-          "fixed inset-0 backdrop-blur-sm bg-black/30 transition-all duration-300 z-[100]",
+          "fixed inset-0 backdrop-blur-sm bg-black/30 dark:bg-black/50 transition-all duration-300 z-[100]",
           isSticky ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setIsSticky(false)}
       />
       
+      {/* Main Navigation */}
       <div 
         className={cn(
-          "fixed left-0 top-0 z-[101] bg-white shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col",
+          "fixed left-0 top-0 z-[101] bg-white dark:bg-gray-900 shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col border-r border-gray-200 dark:border-gray-800",
           isSticky ? "w-[250px]" : "w-[60px]"
         )}
         onMouseEnter={() => setIsSticky(true)}
         onMouseLeave={() => setIsSticky(false)}
       >
         <div className="flex flex-col h-full">
+          {/* Header */}
           <div className={cn(
-            "bg-white py-4 px-4 text-red-600 font-medium transition-all duration-300 h-14 flex items-center",
+            "bg-white dark:bg-gray-900 py-4 text-red-600 dark:text-red-500 font-medium transition-all duration-300 h-14 flex items-center border-b border-gray-200 dark:border-gray-800",
             isSticky ? "px-4" : "px-0 justify-center"
           )}>
             <span className={cn(
-              "bg-red-600 rounded-full p-1 flex items-center",
+              "bg-red-600 dark:bg-red-500 rounded-full p-1 flex items-center",
               showText && "px-3 w-full"
             )}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -166,11 +169,12 @@ export default function StickyNavbar() {
             </span>
           </div>
           
-          <ul className="py-2 flex-1 overflow-y-auto">
+          {/* Categories List */}
+          <ul className="py-2 flex-1 overflow-y-auto bg-white dark:bg-gray-900">
             {loading ? (
-              <li className="px-4 py-2 text-gray-400">Đang tải...</li>
+              <li className="px-4 py-2 text-gray-400 dark:text-gray-500">Đang tải...</li>
             ) : error ? (
-              <li className="px-4 py-2 text-red-600">{error}</li>
+              <li className="px-4 py-2 text-red-600 dark:text-red-500">{error}</li>
             ) : (
               categories.map((category) => (
                 <li 
@@ -182,12 +186,12 @@ export default function StickyNavbar() {
                   <Link 
                     href={`/categories/${category.slug}`}
                     className={cn(
-                      "flex items-center py-3 hover:bg-gray-100 transition-colors",
+                      "flex items-center py-3 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors",
                       isSticky ? "px-4" : "px-0 justify-center"
                     )}
                   >
                     <span className={cn(
-                      "text-gray-500",
+                      "text-gray-500 dark:text-gray-400",
                       !isSticky && "mx-auto"
                     )}>
                       <Image
@@ -195,11 +199,11 @@ export default function StickyNavbar() {
                         alt={category.name}
                         width={32}
                         height={32}
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        className="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                       />
                     </span>
                     <span className={cn(
-                      "text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                      "text-sm font-medium transition-all duration-300 whitespace-nowrap text-gray-700 dark:text-gray-200",
                       showText ? "opacity-100 ml-3" : "opacity-0 ml-0 w-0 overflow-hidden"
                     )}>{category.name}</span>
                   </Link>
@@ -209,17 +213,19 @@ export default function StickyNavbar() {
           </ul>
         </div>
         
+        {/* Footer */}
         <div className={cn(
-          "bg-gray-100 py-2 px-4 transition-all duration-300 absolute bottom-0 left-0 right-0",
+          "bg-gray-50 dark:bg-gray-800/50 py-2 px-4 transition-all duration-300 absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800",
           !showText && "hidden"
         )}>
+          {/* Hotline */}
           <div className="px-2">
             <a 
               href={`tel:${COMPANY_INFO.hotline}`}
-              className="flex flex-col text-red-600 font-medium text-sm mb-3 border-2 border-red-600 rounded-lg p-3 shadow-sm w-full"
+              className="flex flex-col text-red-600 dark:text-red-500 font-medium text-sm mb-3 border-2 border-red-600 dark:border-red-500 rounded-lg p-3 shadow-sm w-full bg-white dark:bg-gray-900/50"
             >
               <span className="inline-flex items-center justify-center mb-1">
-                <span className="bg-red-600 rounded-full p-1 mr-2">
+                <span className="bg-red-600 dark:bg-red-500 rounded-full p-1 mr-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
@@ -230,11 +236,12 @@ export default function StickyNavbar() {
             </a>
           </div>
           
+          {/* App Store Links */}
           <div className="flex flex-col space-y-2 mb-2 items-center px-2">
             <Link 
               href="https://apps.apple.com" 
               target="_blank" 
-              className="flex items-center bg-gray-800 text-white text-xs rounded-md px-3 py-2 hover:bg-black transition-colors w-full justify-center"
+              className="flex items-center bg-gray-800 dark:bg-gray-700/75 text-white text-xs rounded-md px-3 py-2 hover:bg-black dark:hover:bg-gray-600 transition-colors w-full justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -248,7 +255,7 @@ export default function StickyNavbar() {
             <Link 
               href="https://play.google.com" 
               target="_blank" 
-              className="flex items-center bg-gray-800 text-white text-xs rounded-md px-3 py-2 hover:bg-black transition-colors w-full justify-center"
+              className="flex items-center bg-gray-800 dark:bg-gray-700/75 text-white text-xs rounded-md px-3 py-2 hover:bg-black dark:hover:bg-gray-600 transition-colors w-full justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
@@ -258,6 +265,11 @@ export default function StickyNavbar() {
                 <span className="font-semibold">Google Play</span>
               </div>
             </Link>
+
+            {/* Theme Toggle Button */}
+            <div className="w-full flex justify-center mt-2">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </div>

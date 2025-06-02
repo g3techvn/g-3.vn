@@ -7,7 +7,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { DomainProvider } from '@/context/domain-context';
 import { CartProvider } from '@/features/cart/CartProvider';
-import { useState } from 'react';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { useState, useRef } from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import PageViewTracker from '@/components/PageViewTracker';
 import { Suspense } from 'react';
@@ -18,30 +19,44 @@ const roboto = RobotoFlex({
   display: 'swap',
 });
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  // Tạo QueryClient mới cho mỗi session
-  // để tránh data sharing giữa các users và requests
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 phút
-      },
+// Create a client
+const queryClientOptions = {
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 phút
     },
-  }));
+  },
+};
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  const queryClientRef = useRef<QueryClient | null>(null);
+  if (!queryClientRef.current) {
+    queryClientRef.current = new QueryClient(queryClientOptions);
+  }
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className={`${roboto.variable} font-sans`}>
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClientRef.current}>
         <DomainProvider>
           <AuthProvider>
             <CartProvider>
-              <AntdRegistry>
-                {/* Track page views */}
-                <Suspense fallback={null}>
-                  <PageViewTracker />
-                </Suspense>
-                {children}
-              </AntdRegistry>
+              <ThemeProvider>
+                <AntdRegistry>
+                  {mounted && (
+                    <>
+                      <Suspense fallback={null}>
+                        <PageViewTracker />
+                      </Suspense>
+                      {children}
+                    </>
+                  )}
+                </AntdRegistry>
+              </ThemeProvider>
             </CartProvider>
           </AuthProvider>
         </DomainProvider>

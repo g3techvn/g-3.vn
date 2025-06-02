@@ -8,6 +8,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { COMPANY_INFO, SOCIAL_LINKS } from '../../../constants';
 import { useCart } from '../../../context/CartContext';
 import ProfileDrawer from '../../store/ProfileDrawer';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 /**
  * Format phone number with spaces
