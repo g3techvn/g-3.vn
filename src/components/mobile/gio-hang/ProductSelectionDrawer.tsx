@@ -37,19 +37,19 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
   }, [products]);
 
   // Debounced search handler
-  const debouncedSetSearch = useCallback(
-    debounce((value: string) => {
+  const debouncedSetSearch = useMemo(
+    () => debounce((value: string) => {
       setDebouncedSearchQuery(value);
     }, 300),
-    [setDebouncedSearchQuery]
+    []
   );
 
   // Handle search input change
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     debouncedSetSearch(value);
-  };
+  }, [debouncedSetSearch]);
 
   // Fetch products for the drawer
   const fetchProducts = async () => {
