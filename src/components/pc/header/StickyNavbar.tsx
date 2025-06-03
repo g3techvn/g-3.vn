@@ -199,7 +199,7 @@ export default function StickyNavbar() {
                         alt={category.name}
                         width={32}
                         height={32}
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                        className="w-8 h-8  object-cover"
                       />
                     </span>
                     <span className={cn(
