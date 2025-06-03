@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import * as Dialog from '@radix-ui/react-dialog';
-import { useAuth } from '@/features/auth/AuthProvider';
+import { createBrowserClient } from '@/lib/supabase';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,20 +12,60 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createBrowserClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    
     try {
-      const result = await signIn(email, password);
-      if (!result.error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
         onClose();
       }
     } catch (error) {
       console.error('Login failed:', error);
+      setError('Đã xảy ra lỗi khi đăng nhập');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Google login failed:', error);
+      setError('Đã xảy ra lỗi khi đăng nhập với Google');
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Facebook login failed:', error);
+      setError('Đã xảy ra lỗi khi đăng nhập với Facebook');
     }
   };
 
@@ -80,6 +120,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -148,7 +193,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <button className="flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                  <button 
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    className="flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
                       <path
                         fill="#EA4335"
@@ -172,7 +221,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     </span>
                   </button>
 
-                  <button className="flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                  <button 
+                    type="button"
+                    onClick={handleFacebookLogin}
+                    className="flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
                     <svg className="h-5 w-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
