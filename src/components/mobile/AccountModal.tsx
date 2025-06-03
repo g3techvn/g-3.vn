@@ -10,7 +10,7 @@ interface AccountModalProps {
 }
 
 const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   if (!isOpen) return null;
 
@@ -18,6 +18,11 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   if (!user) {
     return <LoginModal isOpen={isOpen} onClose={onClose} />;
   }
+
+  const handleLogout = async () => {
+    await signOut();
+    onClose();
+  };
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -43,13 +48,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
             }}
           >
             <div className="flex justify-between items-center p-4 border-b border-gray-100/80">
-              <Dialog.Close asChild>
-                <button className="text-gray-500 hover:text-gray-700 transition">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </Dialog.Close>
+              <div className="w-6"></div>
               <div className="mx-auto">
                 <Image
                   src="/images/logo-g3.svg"
@@ -59,7 +58,13 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                   className="h-7 w-auto object-contain"
                 />
               </div>
-              <div className="w-6"></div>
+              <Dialog.Close asChild>
+                <button className="text-gray-500 hover:text-gray-700 transition">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </Dialog.Close>
             </div>
             
             <div className="p-4 flex items-center border-b border-gray-100/80">
@@ -113,14 +118,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                 }
               `}</style>
               
-              <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
-                <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 7h16M4 12h16M4 17h16" />
-                  </svg>
-                </div>
-                <span className="text-gray-700">Quản lý ứng dụng và thiết bị</span>
-              </a>
+              
               
               <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
                 <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
@@ -137,17 +135,10 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                     <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </div>
-                <span className="text-gray-700">Thanh toán và gói thuê bao</span>
+                <span className="text-gray-700">Thanh toán và đơn hàng</span>
               </a>
               
-              <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
-                <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <span className="text-gray-700">Play Protect</span>
-              </a>
+             
               
               <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
                 <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
@@ -158,23 +149,9 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                 <span className="text-gray-700">Thư viện</span>
               </a>
               
-              <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
-                <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 12H4M20 12a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v4a2 2 0 002 2M20 12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2" />
-                  </svg>
-                </div>
-                <span className="text-gray-700">Play Pass</span>
-              </a>
               
-              <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
-                <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <span className="text-gray-700">Chế độ cá nhân hoá trong Play</span>
-              </a>
+              
+  
               
               <a href="#" className="flex items-center px-4 py-3 hover:bg-white/50 transition border-b border-gray-100/80">
                 <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
@@ -194,6 +171,18 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <span className="text-gray-700">Trợ giúp và phản hồi</span>
               </a>
+
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center px-4 py-3 hover:bg-white/50 transition border-t border-gray-100/80"
+              >
+                <div className="w-6 h-6 mr-4 flex-shrink-0 text-gray-500">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <span className="text-gray-700">Đăng xuất</span>
+              </button>
             </div>
             
             <div className="px-4 py-3 flex justify-between text-sm text-gray-500 border-t border-gray-100/80">
