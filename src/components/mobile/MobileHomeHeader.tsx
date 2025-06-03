@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/AuthProvider';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Slot } from '@radix-ui/react-slot';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useProducts } from '@/hooks/useProducts';
+import { Product } from '@/types';
 
 const AccountModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
@@ -211,6 +212,9 @@ const MobileHomeHeader: React.FC = () => {
   const { openCart, totalItems } = useCart();
   const router = useRouter();
   const { user } = useAuth();
+  const { products = [], loading } = useProducts();
+  const [showResults, setShowResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
 
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);
@@ -229,6 +233,7 @@ const MobileHomeHeader: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchVisible(false);
+        setShowResults(false);
       }
     };
 
@@ -241,9 +246,27 @@ const MobileHomeHeader: React.FC = () => {
     };
   }, [isSearchVisible]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Xử lý tìm kiếm ở đây
+  const handleSearch = (query: string) => {
+    setSearchText(query);
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    const searchTerm = query.toLowerCase();
+    const filtered = products.filter(product => 
+      product.name.toLowerCase().includes(searchTerm)
+    );
+    setSearchResults(filtered);
+    setShowResults(true);
+  };
+
+  const handleProductClick = (product: Product) => {
+    setShowResults(false);
+    setSearchText('');
+    setIsSearchVisible(false);
+    router.push(`/san-pham/${product.slug || product.id}`);
   };
 
   return (
@@ -291,7 +314,7 @@ const MobileHomeHeader: React.FC = () => {
           ref={searchRef}
           className={`flex-1 mx-2 transition-all duration-300 ${isSearchVisible ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}
         >
-          <form onSubmit={handleSearch} className="bg-gray-100 rounded-full px-4 py-2 flex items-center">
+          <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchText); }} className="relative bg-gray-100 rounded-full px-4 py-2 flex items-center">
             <svg 
               width="20" 
               height="20" 
@@ -307,15 +330,59 @@ const MobileHomeHeader: React.FC = () => {
               ref={inputRef}
               type="text"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               placeholder="Tìm kiếm sản phẩm"
               className="bg-transparent w-full text-sm text-gray-500 focus:outline-none"
             />
+
+            {/* Search Results Dropdown */}
+            {showResults && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg max-h-[60vh] overflow-y-auto z-50">
+                {searchResults.length > 0 ? (
+                  <div className="p-2">
+                    {searchResults.map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                      >
+                        <div className="w-12 h-12 relative flex-shrink-0">
+                          <Image
+                            src={product.image_url}
+                            alt={product.name}
+                            fill
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 truncate">
+                            {product.name}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-red-600 font-semibold">
+                              {product.price.toLocaleString()}₫
+                            </div>
+                            {product.original_price && product.original_price > product.price && (
+                              <div className="text-xs text-gray-400 line-through">
+                                {product.original_price.toLocaleString()}₫
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    Không tìm thấy sản phẩm nào
+                  </div>
+                )}
+              </div>
+            )}
           </form>
         </div>
         {/* Icons */}
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <button 
             className={`text-gray-600 transition-all duration-300 ${isSearchVisible ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}
             onClick={toggleSearch}
