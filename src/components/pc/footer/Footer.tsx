@@ -182,7 +182,7 @@ export default function Footer() {
               <p className="text-gray-600 mb-4 max-w-xs text-sm">Đội ngũ Kiểm Soát Chất Lượng của chúng tôi sẵn sàng lắng nghe quý khách.</p>
               <a href="#" className="inline-flex items-center px-6 py-3 bg-black text-white rounded-full font-semibold text-lg shadow hover:bg-gray-900 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m8 0a8 8 0 11-16 0 8 8 0 0116 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 Gửi phản hồi
               </a>
