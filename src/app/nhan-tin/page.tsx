@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import LoginModal from '@/components/mobile/LoginModal';
 
 interface Message {
   id: number;
@@ -39,6 +40,7 @@ export default function MessagesPage() {
   const router = useRouter();
   const [inputMessage, setInputMessage] = useState('');
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
@@ -102,7 +104,12 @@ export default function MessagesPage() {
   };
 
   const handleSendMessage = () => {
-    if (inputMessage.trim() === '' || !userInfo) return;
+    if (inputMessage.trim() === '' || !userInfo) {
+      if (!userInfo) {
+        setShowInfoModal(true); // Show info modal if trying to send without user info
+      }
+      return;
+    }
     
     // Prevent duplicate submissions by disabling the input temporarily
     const message = inputMessage;
@@ -396,11 +403,25 @@ export default function MessagesPage() {
       // If no saved info and not logged in, show the info modal
       if (!user && !savedSession && !savedInfo) {
         setShowInfoModal(true);
+        setUserInfo(null); // Reset user info when logged out
+        setMessages([]); // Clear messages when logged out
       }
     };
     
     initClientState();
   }, [user]); // Added user as dependency
+
+  // Add effect to handle logout
+  useEffect(() => {
+    if (!user) {
+      // Clear chat session when user logs out
+      localStorage.removeItem(CHAT_SESSION_KEY);
+      sessionStorage.removeItem('chatUserInfo');
+      setUserInfo(null);
+      setMessages([]);
+      setShowInfoModal(true);
+    }
+  }, [user]);
 
   // Save user info to session storage when it changes (backward compatibility)
   useEffect(() => {
@@ -635,6 +656,29 @@ export default function MessagesPage() {
             <p className="text-gray-600 mb-6 text-center">Vui lòng cung cấp thông tin để chúng tôi có thể hỗ trợ bạn tốt hơn</p>
             
             <div className="space-y-5">
+              {/* Login button */}
+              <button
+                onClick={() => {
+                  setShowInfoModal(false);
+                  setShowLoginModal(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                Đăng nhập để chat
+              </button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">hoặc</span>
+                </div>
+              </div>
+
               <div className="group">
                 <label className="block text-gray-700 text-sm font-medium mb-2 transition-all group-focus-within:text-red-500">Họ và tên</label>
                 <div className="relative">
@@ -683,6 +727,15 @@ export default function MessagesPage() {
           </div>
         </div>
       )}
+
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => {
+          setShowLoginModal(false);
+          setShowInfoModal(true);
+        }}
+      />
 
       <div className="flex flex-col h-screen bg-[url('/images/chat-partten.svg')] bg-repeat">
         {/* Space for header */}
@@ -787,6 +840,15 @@ export default function MessagesPage() {
         }
         .animate-messageIn {
           animation: messageIn 0.3s ease-out forwards;
+        }
+
+        /* Add glass effect styles */
+        .glass-effect {
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
       `}</style>
     </>
