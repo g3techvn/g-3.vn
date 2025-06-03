@@ -1,8 +1,9 @@
 import * as React from 'react';
-
+import Image from 'next/image';
+import Link from 'next/link';
 import CallBox from './CallBox';
 import ZaloBox from './ZaloBox';
-import { COMPANY_INFO} from '../../../constants';
+import { COMPANY_INFO, SOCIAL_LINKS } from '../../../constants';
 
 // Type declarations for environment variables
 declare global {
@@ -57,33 +58,10 @@ const sections = [
   },
 ];
 
-const socialLinks = [
-  { 
-    name: "Facebook", 
-    href: "https://www.facebook.com/g3.vntech", 
-    hoverColor: "text-blue-600",
-    icon: `<path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />`
-  },
-  { 
-    name: "YouTube", 
-    href: "https://www.youtube.com/@g3-tech", 
-    hoverColor: "text-red-600",
-    icon: `<path fill-rule="evenodd" d="M19.812 5.418c.861.23 1.538.907 1.768 1.768C21.998 8.746 22 12 22 12s0 3.255-.418 4.814a2.504 2.504 0 0 1-1.768 1.768c-1.56.419-7.814.419-7.814.419s-6.255 0-7.814-.419a2.505 2.505 0 0 1-1.768-1.768C2 15.255 2 12 2 12s0-3.255.417-4.814a2.507 2.507 0 0 1 1.768-1.768C5.744 5 11.998 5 11.998 5s6.255 0 7.814.418ZM15.194 12 10 15V9l5.194 3Z" clip-rule="evenodd" />`
-  },
-  { 
-    name: "TikTok", 
-    href: "https://www.tiktok.com/@g3tech.vn", 
-    hoverColor: "text-blue-400",
-    icon: `<path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z" />`
-  },
-];
-
 const products = [
-  { text: "Ghế công thái học G3 Pro", href: "/san-pham/ghe-cong-thai-hoc-g3-pro" },
-  { text: "Ghế công thái học E-Dra", href: "/san-pham/ghe-cong-thai-hoc-e-dra" },
-  { text: "Ghế công thái học Gami", href: "/san-pham/ghe-cong-thai-hoc-gami" },
-  { text: "Ghế công thái học Sihoo", href: "/san-pham/ghe-cong-thai-hoc-sihoo" },
-  { text: "Ghế công thái học Xiaomi", href: "/san-pham/ghe-cong-thai-hoc-xiaomi" },
+  { text: "Ghế công thái học G3 Tech", href: "/brands/g3tech" },
+  { text: "Ghế công thái học Gami", href: "/brands/gami" },
+  { text: "Ghế công thái học Sihoo", href: "/brands/sihoo" },
 ];
 
 // Helper function to format phone number
@@ -104,63 +82,88 @@ export default function Footer() {
   return (
     <footer className="bg-white text-gray-800">
       <div className="container mx-auto py-8 md:py-12 px-4 sm:px-6 lg:px-0">
-        {/* Footer content with responsive grid */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Thông tin liên hệ */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Thông tin liên hệ</h3>
+        {/* Footer content with 4 main columns */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+          {/* Cột 1: Logo + Social + Hotline */}
+          <div className="flex flex-col gap-6">
+            {/* Logo */}
+            <div className="mb-2">
+              <img src="/images/logo-g3.svg" alt="Logo" className="h-12 w-auto" />
+            </div>
+            {/* Social icons */}
+            <div className="flex gap-4 mb-2">
+              <Link href={SOCIAL_LINKS[1].href} aria-label="Facebook" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
+                <div className="rounded-full border-2 border-gray-300 p-1">
+                  <Image src="/images/icon/facebook-round-color-icon.svg" alt="Facebook" width={24} height={24} className="h-6 w-6" />
+                </div>
+              </Link>
+            
+              <Link href={SOCIAL_LINKS[2].href} aria-label="Tiktok" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
+                <div className="rounded-full border-2 border-gray-300 p-1">
+                  <Image src="/images/icon/tiktok-circle.svg" alt="Tiktok" width={24} height={24} className="h-6 w-6" />   
+                </div>
+              </Link>
+             
+              <Link href={SOCIAL_LINKS[3].href} aria-label="Youtube" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
+                <div className="rounded-full border-2 border-gray-300 p-1">
+                  <Image src="/images/icon/youtube-music-icon.svg" alt="Youtube" width={24} height={24} className="h-6 w-6" />   
+                </div>
+              </Link>
+
+              <Link href={SOCIAL_LINKS[0].href} aria-label="Shopee" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
+                <div className="rounded-full border-2 border-gray-300 p-1">
+                  <Image src="/images/icon/shopee-icon.svg" alt="Shopee" width={24} height={24} className="h-6 w-6" />
+                </div>
+              </Link>
+            </div>
+           
+          </div>
+
+          {/* Cột 2: Địa chỉ cửa hàng */}
+          <div className="space-y-4">
             <div className="space-y-4">
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span className="font-medium">{COMPANY_INFO.name}</span>
+              <div>
+                <div className="font-bold">Hotline</div>
+                <div className="flex items-start gap-2 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href={`tel:${COMPANY_INFO.hotline}`} className="text-sm text-black hover:text-red-600 transition-colors">{formattedPhoneNumber}</a>
+                </div>
               </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0 hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="text-sm md:text-base">{COMPANY_INFO.address}</span>
+              <div>
+                <div className="font-bold">Cửa hàng Hà Nội</div>
+                <div className="flex items-start gap-2 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-sm">Số 128 Phố Vọng, Phương Liệt, Thanh Xuân, Hà Nội (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                </div>
+                <div className="flex items-start gap-2 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-sm">Số 4 ngách 12 ngõ 135 Nguyễn Văn Cừ, Ngọc Lâm, Long Biên, Hà Nội (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                </div>
               </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <a href={`tel:${COMPANY_INFO.hotline}`} className="hover:text-red-600 transition-colors">{formattedPhoneNumber}</a>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <a href={`mailto:${COMPANY_INFO.email}`} className="hover:text-red-600 transition-colors text-sm md:text-base break-all">{COMPANY_INFO.email}</a>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm md:text-base">Giờ làm việc: {COMPANY_INFO.workingHours}</span>
+              <div>
+                <div className="font-bold">Cửa hàng TP. HCM</div>
+                <div className="flex items-start gap-2 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-sm">Số 1/23 Huỳnh Lan Khanh, Phường 2, Tân Bình, TP.HCM (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Danh mục sản phẩm */}
-          <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Sản phẩm</h3>
-            <ul className="space-y-2 md:space-y-3">
-              {products.map((product) => (
-                <li key={product.href}>
-                  <a href={product.href} className="text-sm md:text-base hover:text-red-600 transition-colors">
-                    {product.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Thông tin */}
-          <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Thông tin</h3>
+          {/* Cột 3: Thông tin hữu ích */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Thông tin hữu ích</h3>
             <ul className="space-y-2 md:space-y-3">
               {sections[1].links.map((link) => (
                 <li key={link.href}>
@@ -172,135 +175,35 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Kết nối */}
-          <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-4 md:mb-6 text-gray-900">Kết nối với chúng tôi</h3>
-            <div className="flex flex-wrap space-x-4 mb-6">
-              {socialLinks.map((link) => (
-                <a 
-                  key={link.href} 
-                  href={link.href} 
-                  className={`text-gray-500 hover:${link.hoverColor} transition-colors`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="sr-only">{link.name}</span>
-                  <span className="text-sm font-medium">{link.name}</span>
-                </a>
-              ))}
+          {/* Cột 4: Phản hồi, góp ý */}
+          <div className="flex flex-col items-center md:items-end justify-between h-full">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Phản hồi, góp ý</h3>
+              <p className="text-gray-600 mb-4 max-w-xs text-sm">Đội ngũ Kiểm Soát Chất Lượng của chúng tôi sẵn sàng lắng nghe quý khách.</p>
+              <a href="#" className="inline-flex items-center px-6 py-3 bg-black text-white rounded-full font-semibold text-lg shadow hover:bg-gray-900 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m8 0a8 8 0 11-16 0 8 8 0 0116 0z" />
+                </svg>
+                Gửi phản hồi
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Mobile Accordion for Policies */}
-        <div className="md:hidden mt-8 border-t border-gray-200 pt-6 px-2">
-          <details className="group mb-5 border-b border-gray-100 pb-2">
-            <summary className="flex justify-between items-center cursor-pointer list-none px-2 py-3 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <span className="font-semibold text-gray-900">Thông tin liên hệ</span>
-              <span className="transition-transform duration-300 ease-in-out group-open:rotate-180">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div className="mt-3 pl-4 space-y-3 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span className="font-medium">{COMPANY_INFO.name}</span>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="text-sm">{COMPANY_INFO.address}</span>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <a href={`tel:${COMPANY_INFO.hotline}`} className="hover:text-red-600 transition-colors">{formattedPhoneNumber}</a>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <a href={`mailto:${COMPANY_INFO.email}`} className="hover:text-red-600 transition-colors text-sm break-all">{COMPANY_INFO.email}</a>
-              </div>
-              <div className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm">Giờ làm việc: {COMPANY_INFO.workingHours}</span>
-              </div>
-            </div>
-          </details>
-
-          <details className="group mb-5 border-b border-gray-100 pb-2">
-            <summary className="flex justify-between items-center cursor-pointer list-none px-2 py-3 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <span className="font-semibold text-gray-900">Sản phẩm</span>
-              <span className="transition-transform duration-300 ease-in-out group-open:rotate-180">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div className="mt-3 pl-4 space-y-2 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              {products.map((product) => (
-                <p key={product.href}><a href={product.href} className="text-sm hover:text-red-600 transition-colors">{product.text}</a></p>
-              ))}
-            </div>
-          </details>
-
-          <details className="group mb-5 border-b border-gray-100 pb-2">
-            <summary className="flex justify-between items-center cursor-pointer list-none px-2 py-3 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <span className="font-semibold text-gray-900">Thông tin hữu ích</span>
-              <span className="transition-transform duration-300 ease-in-out group-open:rotate-180">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div className="mt-3 pl-4 space-y-2 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              {sections[1].links.map((link) => (
-                <p key={link.href}><a href={link.href} className="text-sm hover:text-red-600 transition-colors">{link.text}</a></p>
-              ))}
-            </div>
-          </details>
-
-          <details className="group mb-5 border-b border-gray-100 pb-2">
-            <summary className="flex justify-between items-center cursor-pointer list-none px-2 py-3 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <span className="font-semibold text-gray-900">Kết nối với chúng tôi</span>
-              <span className="transition-transform duration-300 ease-in-out group-open:rotate-180">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div className="mt-3 pl-4 space-y-2 mx-2 overflow-hidden transition-all duration-300 ease-in-out">
-              {socialLinks.map((link) => (
-                <p key={link.href}>
-                  <a 
-                    href={link.href} 
-                    className={`text-sm hover:${link.hoverColor} transition-colors`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {link.name}
-                  </a>
-                </p>
-              ))}
-            </div>
-          </details>
-        </div>
-
-        {/* Copyright */}
+        {/* Copyright & company info */}
         <div className="border-t border-gray-200 mt-8 md:mt-12 pt-6 md:pt-8">
-          <p className="text-center text-gray-500 text-xs md:text-sm px-4">
-            © {new Date().getFullYear()} {COMPANY_INFO.name}. Tất cả các quyền được bảo lưu.
-          </p>
+          <div className="flex flex-col   gap-2 ">
+            <p className="text-left text-gray-500 text-sm px-0">
+              © G3TECH {new Date().getFullYear()} <br />
+              {COMPANY_INFO.name} - GPĐKKD: 0110907369 do sở KH & ĐT TP Hà Nội cấp ngày 04/12/2024 <br />
+              Địa chỉ: Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Phường Trung Hoà, Quận Cầu Giấy,Hà Nội
+            </p>
+            <div className="flex gap-2 mt-2 md:mt-0">
+             <img src="/images/dmca_protected.png" alt="DMCA" className="h-6" />
+             <img src="/images/bo-cong-thuong.png" alt="Đã thông báo" className="h-6" />
+            
+            </div>
+          </div>
         </div>
       </div>
 
