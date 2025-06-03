@@ -38,7 +38,7 @@ export default function MessagesPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [inputMessage, setInputMessage] = useState('');
-  const [showInfoModal, setShowInfoModal] = useState(true);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
@@ -362,7 +362,17 @@ export default function MessagesPage() {
   useEffect(() => {
     // Move state initialization to client-side only
     const initClientState = () => {
-      // First try to load from localStorage (for the 1-hour session)
+      // First check if user is logged in
+      if (user) {
+        setUserInfo({
+          name: user.fullName || user.email?.split('@')[0] || 'Bạn',
+          phone: '' // Since phone is not available in User type
+        });
+        setShowInfoModal(false);
+        return;
+      }
+
+      // If not logged in, try to load from localStorage (for the 1-hour session)
       const savedSession = loadChatSession();
       if (savedSession && savedSession.userInfo) {
         setUserInfo(savedSession.userInfo);
@@ -382,10 +392,15 @@ export default function MessagesPage() {
           console.error('Failed to parse saved user info', e);
         }
       }
+
+      // If no saved info and not logged in, show the info modal
+      if (!user && !savedSession && !savedInfo) {
+        setShowInfoModal(true);
+      }
     };
     
     initClientState();
-  }, []);
+  }, [user]); // Added user as dependency
 
   // Save user info to session storage when it changes (backward compatibility)
   useEffect(() => {
