@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useState } from 'react';
+import AccountModal from '../AccountModal';
 
 interface CartHeaderProps {
   showMenu: boolean;
@@ -20,6 +21,7 @@ export default function CartHeader({
 }: CartHeaderProps) {
   const { user, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     const result = await signOut();
@@ -42,7 +44,7 @@ export default function CartHeader({
         {/* User Avatar with Context Menu */}
         <div className="relative mr-2">
           <button 
-            onClick={() => setShowUserMenu(!showUserMenu)}
+            onClick={() => setIsAccountModalOpen(true)}
             className="focus:outline-none"
           >
             {user ? (
@@ -62,65 +64,6 @@ export default function CartHeader({
               </div>
             )}
           </button>
-
-          {/* User Context Menu */}
-          {showUserMenu && user && (
-            <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-              <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center">
-                  <div className="relative w-12 h-12 mr-3">
-                    <Image 
-                      src={user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
-                      alt="avatar" 
-                      fill
-                      className="rounded-full object-cover" 
-                    />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">{user.fullName}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="py-1">
-                <Link
-                  href="/tai-khoan"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    Tài khoản của tôi
-                  </div>
-                </Link>
-                <Link
-                  href="/don-hang"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <div className="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    Đơn hàng của tôi
-                  </div>
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
-                >
-                  <div className="flex items-center text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Đăng xuất
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Menu Button */}
@@ -165,6 +108,9 @@ export default function CartHeader({
           </div>
         )}
       </div>
+
+      {/* Account Modal */}
+      <AccountModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
     </header>
   );
 } 
