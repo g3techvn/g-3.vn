@@ -185,48 +185,14 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => {
-                          const ratingValue = product.rating || 0;
-                          const isFilled = i < Math.floor(ratingValue);
-                          const isHalfFilled = !isFilled && i === Math.floor(ratingValue) && (ratingValue % 1) >= 0.5;
-                          
-                          return (
-                            <svg
-                              key={i}
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill={isFilled || isHalfFilled ? "#FFD700" : "none"}
-                              stroke={"#FFD700"}
-                              className="h-3 w-3 text-gray-300"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="1.5"
-                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                              />
-                              {isHalfFilled && (
-                                <clipPath id={`clip-half-bestseller-${product.id}-${i}`}>
-                                  <rect x="0" y="0" width="50%" height="100%" />
-                                </clipPath>
-                              )}
-                              {isHalfFilled && (
-                                <path
-                                  clipPath={`url(#clip-half-bestseller-${product.id}-${i})`}
-                                  fill="#FFD700"
-                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                />
-                              )}
-                            </svg>
-                          );
-                        })}
-                        {product.rating && (
-                          <span className="text-xs text-gray-600 ml-1">
-                            {product.rating.toFixed(1)}
-                          </span>
-                        )}
+                    <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-0.5">
+                          <svg className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
+                          {(product.rating || 4.9).toFixed(1)}
+                        </span>
+                        <span>•</span>
+                        <span>Đã bán {Math.floor(Math.random()*100+1)}</span>
                       </div>
                       <button 
                         className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
