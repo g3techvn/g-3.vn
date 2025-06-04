@@ -245,18 +245,16 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   };
   
   const confirmAddToCart = (product: Product, quantity: number, selectedColor: string) => {
-    // Add to cart with selected options
-    const productWithOptions = {
+    // Create a cart item from the product
+    const cartItem = {
       ...product,
-      selectedOptions: {
-        color: selectedColor,
-        quantity: quantity
-      }
+      quantity: 1, // Each item will be added individually
+      image: product.image_url || '', // Use image_url as image
     };
     
     // Add to cart multiple times based on quantity
     for (let i = 0; i < quantity; i++) {
-      addToCart(product);
+      addToCart(cartItem);
     }
     
     toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, {

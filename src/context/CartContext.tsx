@@ -3,16 +3,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react'
 import { Product } from '@/types'
 import { useAuth } from '@/features/auth/AuthProvider'
-
-export interface CartItem {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  quantity: number
-  image_url: string
-  brand?: string
-}
+import { CartItem } from '@/types/cart'
 
 interface CartContextType {
   isCartOpen: boolean
@@ -22,9 +13,9 @@ interface CartContextType {
   openCart: () => void
   closeCart: () => void
   toggleCart: () => void
-  addToCart: (product: Product | CartItem) => void
-  removeFromCart: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addToCart: (item: CartItem) => void
+  removeFromCart: (itemId: string) => void
+  updateQuantity: (itemId: string, quantity: number) => void
   clearCart: () => void
 }
 
@@ -66,52 +57,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = () => setIsCartOpen(false)
   const toggleCart = () => setIsCartOpen(prev => !prev)
 
-  const addToCart = (product: Product | CartItem) => {
+  const addToCart = (item: CartItem) => {
     setCartItems(prevItems => {
-      // Check if the product is already in the cart
-      const existingItemIndex = prevItems.findIndex(item => item.id === product.id)
-
-      if (existingItemIndex >= 0) {
-        // If it exists, increase the quantity
-        const updatedItems = [...prevItems]
-        updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + 1
-        }
-        return updatedItems
-      } else {
-        // Otherwise, add as a new item
-        const newItem: CartItem = {
-          id: product.id,
-          name: product.name,
-          price: 'price' in product ? product.price : 0,
-          originalPrice: 'original_price' in product ? product.original_price : undefined,
-          image_url: 'image_url' in product ? product.image_url : '',
-          quantity: 1,
-          brand: 'brand' in product ? product.brand : undefined
-        }
-        return [...prevItems, newItem]
+      const existingItem = prevItems.find(i => i.id === item.id)
+      if (existingItem) {
+        return prevItems.map(i =>
+          i.id === item.id
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
+        )
       }
+      return [...prevItems, item]
     })
 
     // Auto open cart when adding items
     openCart()
   }
 
-  const removeFromCart = (productId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId))
+  const removeFromCart = (itemId: string) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId))
   }
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId)
-      return
-    }
-
+  const updateQuantity = (itemId: string, quantity: number) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
+        item.id === itemId
+          ? { ...item, quantity: Math.max(0, quantity) }
+          : item
+      ).filter(item => item.quantity > 0)
     )
   }
 

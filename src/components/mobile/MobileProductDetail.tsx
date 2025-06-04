@@ -314,7 +314,12 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
           <button
             className="flex items-center justify-center w-12 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
             onClick={() => {
-              addToCart(product);
+              const cartItem = {
+                ...product,
+                quantity: 1,
+                image: product.image_url || ''
+              };
+              addToCart(cartItem);
             }}
           >
             <ShoppingCartIcon className="w-6 h-6" />

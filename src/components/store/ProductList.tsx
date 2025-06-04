@@ -56,7 +56,7 @@ export default function ProductList({
           {/* Product Image */}
           <div className="relative w-20 h-20 flex-shrink-0">
             <Image
-              src={item.image_url}
+              src={item.image}
               alt={item.name}
               fill
               className="object-cover rounded"

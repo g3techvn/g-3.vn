@@ -1,5 +1,9 @@
 'use client'
 
+import { useEffect, useState, useCallback } from 'react'
+import { calculateShippingFee, type GHNShippingFeeRequest } from '@/services/ghn'
+import { CartItem } from '@/types/cart'
+
 interface AddressForm {
   city: string;
   district: string;
@@ -58,6 +62,8 @@ interface ShippingInfoProps {
   fetchWards: (districtCode: number) => Promise<void>;
   note: string;
   setNote: (note: string) => void;
+  cartItems: CartItem[];
+  onShippingFeeCalculated?: (fee: number) => void;
 }
 
 export default function ShippingInfo({
@@ -79,8 +85,87 @@ export default function ShippingInfo({
   fetchDistricts,
   fetchWards,
   note,
-  setNote
+  setNote,
+  cartItems,
+  onShippingFeeCalculated
 }: ShippingInfoProps) {
+  const [calculatingFee, setCalculatingFee] = useState(false)
+  const [shippingError, setShippingError] = useState<string | null>(null)
+
+  const calculatePackageDetails = useCallback(() => {
+    // Calculate total weight and dimensions based on cart items
+    const totalWeight = cartItems.reduce((sum, item) => sum + (item.weight || 0), 0);
+    const maxLength = Math.max(...cartItems.map(item => item.length || 0));
+    const maxWidth = Math.max(...cartItems.map(item => item.width || 0));
+    const maxHeight = Math.max(...cartItems.map(item => item.height || 0));
+
+    return {
+      weight: totalWeight,
+      length: maxLength,
+      width: maxWidth,
+      height: maxHeight,
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        weight: item.weight || 0,
+        length: item.length || 0,
+        width: item.width || 0,
+        height: item.height || 0
+      }))
+    };
+  }, [cartItems]);
+
+  // Calculate shipping fee when address is complete
+  useEffect(() => {
+    const calculateFee = async () => {
+      if (!addressForm.district || !addressForm.ward) return
+
+      try {
+        setCalculatingFee(true)
+        setShippingError(null)
+
+        const packageDetails = calculatePackageDetails()
+        const request: GHNShippingFeeRequest = {
+          service_type_id: 2, // Standard delivery
+          from_district_id: 1442, // Your shop's district ID
+          from_ward_code: "21211", // Your shop's ward code
+          to_district_id: parseInt(addressForm.district),
+          to_ward_code: addressForm.ward,
+          weight: packageDetails.weight,
+          length: packageDetails.length,
+          width: packageDetails.width,
+          height: packageDetails.height,
+          insurance_value: 0, // Set insurance value if needed
+          items: packageDetails.items
+        }
+
+        const response = await calculateShippingFee(request)
+        if (response.code === 200 && response.data) {
+          onShippingFeeCalculated?.(response.data.total)
+          // Update carriers with calculated fee
+          const updatedCarriers = carriers.map(carrier => {
+            if (carrier.id === 'ghn') {
+              return {
+                ...carrier,
+                price: response.data.total,
+                estimatedTime: '2-3 ngày'
+              }
+            }
+            return carrier
+          })
+          // Update carriers state here if needed
+        }
+      } catch (error) {
+        console.error('Error calculating shipping fee:', error)
+        setShippingError('Không thể tính phí vận chuyển. Vui lòng thử lại sau.')
+      } finally {
+        setCalculatingFee(false)
+      }
+    }
+
+    calculateFee()
+  }, [addressForm.district, addressForm.ward, cartItems, calculatePackageDetails, carriers, onShippingFeeCalculated])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center mb-4">
@@ -175,8 +260,8 @@ export default function ShippingInfo({
             id="address"
             value={addressForm.address}
             onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+            placeholder="Số nhà, tên đường"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            placeholder="Nhập địa chỉ chi tiết"
           />
         </div>
       </div>
@@ -189,9 +274,9 @@ export default function ShippingInfo({
           id="note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-          placeholder="Nhập ghi chú (không bắt buộc)"
+          placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."
           rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
         />
       </div>
 
@@ -199,25 +284,31 @@ export default function ShippingInfo({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Phương thức vận chuyển <span className="text-red-500">*</span>
         </label>
-        <div className="space-y-2">
-          {carriers.map((carrier) => (
-            <div
-              key={carrier.id}
-              className={`p-4 border rounded-md cursor-pointer ${
-                selectedCarrier === carrier.id ? 'border-red-500 bg-red-50' : 'border-gray-200'
-              }`}
-              onClick={() => setSelectedCarrier(carrier.id)}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{carrier.name}</div>
-                  <div className="text-sm text-gray-500">Dự kiến giao hàng: {carrier.estimatedTime}</div>
+        {calculatingFee ? (
+          <div className="text-gray-500 text-sm">Đang tính phí vận chuyển...</div>
+        ) : shippingError ? (
+          <div className="text-red-500 text-sm">{shippingError}</div>
+        ) : (
+          <div className="space-y-2">
+            {carriers.map((carrier) => (
+              <div
+                key={carrier.id}
+                className={`p-4 border rounded-md cursor-pointer ${
+                  selectedCarrier === carrier.id ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                }`}
+                onClick={() => setSelectedCarrier(carrier.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">{carrier.name}</div>
+                    <div className="text-sm text-gray-500">Dự kiến giao hàng: {carrier.estimatedTime}</div>
+                  </div>
+                  <div className="text-red-600 font-medium">{carrier.price.toLocaleString()}đ</div>
                 </div>
-                <div className="text-red-600 font-medium">{carrier.price.toLocaleString()}đ</div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

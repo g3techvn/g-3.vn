@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import ShippingInfo from './ShippingInfo'
 import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
+import { useCart } from '@/context/CartContext'
 
 interface AddressForm {
   city: string;
@@ -27,6 +28,7 @@ const carriers = [
 ]
 
 export default function ShippingForm() {
+  const { cartItems } = useCart()
   const [addressForm, setAddressForm] = useState<AddressForm>({
     city: '',
     district: '',
@@ -107,6 +109,7 @@ export default function ShippingForm() {
         fetchWards={fetchWards}
         note={note}
         setNote={setNote}
+        cartItems={cartItems}
       />
     </div>
   )

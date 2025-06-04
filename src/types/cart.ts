@@ -7,9 +7,13 @@ export interface CartItem {
   id: string;
   name: string;
   price: number;
-  quantity: number;
-  image_url: string;
   original_price?: number;
+  quantity: number;
+  image: string;
+  weight?: number; // Weight in grams
+  length?: number; // Length in cm
+  width?: number;  // Width in cm
+  height?: number; // Height in cm
 }
 
 export interface Voucher {

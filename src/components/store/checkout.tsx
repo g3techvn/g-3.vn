@@ -49,6 +49,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const [pdfLoading, setPdfLoading] = useState(false)
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [pdfRetryCount, setPdfRetryCount] = useState(0)
+  const [shippingFee, setShippingFee] = useState(30000) // Default shipping fee
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     phone: '',
@@ -390,9 +391,16 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                     handleFormChange('address', info.address)
                   }
                 }}
-                selectedCarrier=""
-                setSelectedCarrier={() => {}}
-                carriers={[]}
+                selectedCarrier={formData.paymentMethod}
+                setSelectedCarrier={(carrier) => handleFormChange('paymentMethod', carrier)}
+                carriers={[
+                  {
+                    id: 'ghn',
+                    name: 'Giao Hàng Nhanh',
+                    price: shippingFee,
+                    estimatedTime: '2-3 ngày'
+                  }
+                ]}
                 provinces={provinces}
                 districts={districts}
                 wards={wards}
@@ -407,6 +415,8 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 fetchWards={fetchWards}
                 note={formData.note}
                 setNote={(note) => handleFormChange('note', note)}
+                cartItems={cartItems}
+                onShippingFeeCalculated={setShippingFee}
               />
             </div>
 
@@ -462,7 +472,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 <OrderSummary 
                   items={cartItems}
                   totalPrice={totalPrice}
-                  shippingFee={30000}
+                  shippingFee={shippingFee}
                   selectedVoucher={selectedVoucher}
                   pointsToUse={pointsToUse * rewardPointsData.pointValue}
                 />

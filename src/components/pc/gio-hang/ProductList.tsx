@@ -4,7 +4,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Product } from '@/types';
-import { useCart, CartItem } from '@/context/CartContext';
+import { useCart } from '@/context/CartContext';
+import { CartItem } from '@/types/cart';
 import ProductSelectionModal from './ProductSelectionModal';
 
 interface ProductListProps {
@@ -63,7 +64,7 @@ export default function ProductList({
                   <div className="flex-shrink-0 mr-3">
                     <div className="w-14 h-14 rounded-md overflow-hidden">
                       <Image 
-                        src={item.image_url} 
+                        src={item.image} 
                         alt={item.name} 
                         width={56} 
                         height={56} 
@@ -75,9 +76,9 @@ export default function ProductList({
                     <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
                     <div className="flex items-center justify-between">
                       <div>
-                        {item.originalPrice && item.originalPrice > item.price && (
+                        {item.original_price && item.original_price > item.price && (
                           <div className="text-gray-500 text-xs line-through">
-                            {item.originalPrice.toLocaleString()}đ
+                            {item.original_price.toLocaleString()}đ
                           </div>
                         )}
                         <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ</div>

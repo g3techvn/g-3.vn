@@ -48,7 +48,12 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
               aria-label="Thêm vào giỏ hàng"
               onClick={(e) => {
                 e.preventDefault();
-                addToCart(product);
+                const cartItem = {
+                  ...product,
+                  quantity: 1,
+                  image: product.image_url || ''
+                };
+                addToCart(cartItem);
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

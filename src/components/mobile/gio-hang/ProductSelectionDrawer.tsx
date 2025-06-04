@@ -179,7 +179,12 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
                   key={product.id}
                   className="flex cursor-pointer pb-2 shadow-md rounded-lg flex-col gap-2  bg-gray-100 "
                   onClick={() => {
-                    addToCart(product);
+                    const cartItem = {
+                      ...product,
+                      quantity: 1,
+                      image: product.image_url || ''
+                    };
+                    addToCart(cartItem);
                     onOpenChange(false);
                   }}
                 >

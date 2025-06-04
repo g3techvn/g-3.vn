@@ -208,7 +208,12 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
                     key={product.id}
                     className="flex cursor-pointer flex-col gap-2 rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
                     onClick={() => {
-                      addToCart(product);
+                      const cartItem = {
+                        ...product,
+                        quantity: 1,
+                        image: product.image_url || ''
+                      };
+                      addToCart(cartItem);
                       onOpenChange(false);
                     }}
                   >

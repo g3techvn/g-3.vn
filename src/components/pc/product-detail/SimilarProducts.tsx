@@ -177,7 +177,12 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
                               aria-label="Thêm vào giỏ hàng"
                               onClick={(e) => {
                                 e.preventDefault();
-                                addToCart(product);
+                                const cartItem = {
+                                  ...product,
+                                  quantity: 1,
+                                  image: product.image_url || ''
+                                };
+                                addToCart(cartItem);
                               }}
                               whileHover={{ scale: 1.2 }}
                               whileTap={{ scale: 0.9 }}

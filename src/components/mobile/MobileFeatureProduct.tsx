@@ -110,7 +110,12 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+    const cartItem = {
+      ...product,
+      quantity: 1,
+      image: product.image_url || ''
+    };
+    addToCart(cartItem);
   }, [addToCart]);
 
   // Loading state

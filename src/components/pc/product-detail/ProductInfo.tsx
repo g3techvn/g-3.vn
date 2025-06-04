@@ -16,7 +16,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const handleAddToCart = () => {
     if (!isAddingToCart) {
       setIsAddingToCart(true);
-      addToCart(product);
+      const cartItem = {
+        ...product,
+        quantity: 1,
+        image: product.image_url || ''
+      };
+      addToCart(cartItem);
       
       // Show success message after adding to cart
       setTimeout(() => {

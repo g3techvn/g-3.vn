@@ -180,7 +180,12 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
           aria-label="Add to cart"
           onClick={(e) => {
             e.preventDefault();
-            addToCart(product);
+            const cartItem = {
+              ...product,
+              quantity: 1,
+              image: product.image_url || ''
+            };
+            addToCart(cartItem);
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}

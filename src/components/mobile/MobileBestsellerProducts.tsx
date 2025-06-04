@@ -49,7 +49,12 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
   const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+    const cartItem = {
+      ...product,
+      quantity: 1,
+      image: product.image_url || ''
+    };
+    addToCart(cartItem);
   }, [addToCart]);
 
   // Lấy tối đa 4 sản phẩm để hiển thị và sắp xếp theo rating - memoized
