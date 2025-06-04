@@ -58,6 +58,8 @@ export default function CategoryProductsPage() {
   const [loadingBrands, setLoadingBrands] = useState(true);
   const [brandError, setBrandError] = useState<string | null>(null);
   const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
+  const [isOrderMenuOpen, setIsOrderMenuOpen] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'>('price_desc');
 
   useEffect(() => {
     const fetchCategoryProducts = async () => {
@@ -138,8 +140,31 @@ export default function CategoryProductsPage() {
       return priceInRange && brandMatch && categoryMatch;
     });
     
-    // Sắp xếp sản phẩm đã lọc theo giá tăng dần
-    setFilteredProducts(filtered.sort((a, b) => a.price - b.price));
+    // Sắp xếp sản phẩm theo thứ tự hiện tại
+    const sortedProducts = sortProducts(filtered, currentOrder);
+    setFilteredProducts(sortedProducts);
+  };
+
+  const sortProducts = (products: Product[], order: typeof currentOrder) => {
+    const sorted = [...products];
+    switch (order) {
+      case 'price_asc':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price_desc':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'name_asc':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+      case 'name_desc':
+        return sorted.sort((a, b) => b.name.localeCompare(a.name, 'vi'));
+      default:
+        return sorted;
+    }
+  };
+
+  const handleOrderChange = (order: typeof currentOrder) => {
+    setCurrentOrder(order);
+    setFilteredProducts(prev => sortProducts(prev, order));
+    setIsOrderMenuOpen(false);
   };
 
   if (loading) {
@@ -214,40 +239,94 @@ export default function CategoryProductsPage() {
                     { label: categoryName || slug }
                   ]}
                 />
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setGridView('4')}
-                    className={`p-2 rounded-md ${
-                      gridView === '4' ? 'bg-gray-200' : 'hover:bg-gray-100'
-                    }`}
-                    aria-label="4 sản phẩm mỗi hàng"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setGridView('5')}
-                    className={`p-2 rounded-md ${
-                      gridView === '5' ? 'bg-gray-200' : 'hover:bg-gray-100'
-                    }`}
-                    aria-label="5 sản phẩm mỗi hàng"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setGridView('6')}
-                    className={`p-2 rounded-md ${
-                      gridView === '6' ? 'bg-gray-200' : 'hover:bg-gray-100'
-                    }`}
-                    aria-label="6 sản phẩm mỗi hàng"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM17 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                  </button>
+                <div className="flex items-center space-x-4">
+                  {/* Order Menu */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsOrderMenuOpen(!isOrderMenuOpen)}
+                      className="flex items-center space-x-1 text-gray-700 hover:text-gray-900"
+                    >
+                      <span className="text-sm">
+                        {currentOrder === 'price_asc' && 'Giá tăng dần'}
+                        {currentOrder === 'price_desc' && 'Giá giảm dần'}
+                        {currentOrder === 'name_asc' && 'Tên A-Z'}
+                        {currentOrder === 'name_desc' && 'Tên Z-A'}
+                      </span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    {isOrderMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                        <div className="py-1" role="menu" aria-orientation="vertical">
+                          <button
+                            onClick={() => handleOrderChange('price_asc')}
+                            className={`block px-4 py-2 text-sm w-full text-left ${currentOrder === 'price_asc' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
+                            role="menuitem"
+                          >
+                            Giá tăng dần
+                          </button>
+                          <button
+                            onClick={() => handleOrderChange('price_desc')}
+                            className={`block px-4 py-2 text-sm w-full text-left ${currentOrder === 'price_desc' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
+                            role="menuitem"
+                          >
+                            Giá giảm dần
+                          </button>
+                          <button
+                            onClick={() => handleOrderChange('name_asc')}
+                            className={`block px-4 py-2 text-sm w-full text-left ${currentOrder === 'name_asc' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
+                            role="menuitem"
+                          >
+                            Tên A-Z
+                          </button>
+                          <button
+                            onClick={() => handleOrderChange('name_desc')}
+                            className={`block px-4 py-2 text-sm w-full text-left ${currentOrder === 'name_desc' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
+                            role="menuitem"
+                          >
+                            Tên Z-A
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* Grid View Controls */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setGridView('4')}
+                      className={`p-2 rounded-md ${
+                        gridView === '4' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                      }`}
+                      aria-label="4 sản phẩm mỗi hàng"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setGridView('5')}
+                      className={`p-2 rounded-md ${
+                        gridView === '5' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                      }`}
+                      aria-label="5 sản phẩm mỗi hàng"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setGridView('6')}
+                      className={`p-2 rounded-md ${
+                        gridView === '6' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                      }`}
+                      aria-label="6 sản phẩm mỗi hàng"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM17 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM17 11a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

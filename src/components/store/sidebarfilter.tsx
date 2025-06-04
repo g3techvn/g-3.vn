@@ -30,7 +30,9 @@ interface Category {
 }
 
 export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFilterProps) {
-  const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice || 10000000 });
+  // Đảm bảo maxPrice luôn có giá trị hợp lệ
+  const effectiveMaxPrice = maxPrice || 10000000;
+  const [priceRange, setPriceRange] = useState({ min: 0, max: effectiveMaxPrice });
   const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
@@ -47,10 +49,13 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
 
   // Cập nhật lại priceRange khi maxPrice thay đổi
   useEffect(() => {
-    if (maxPrice > 0 && priceRange.max !== maxPrice) {
-      setPriceRange(prev => ({ min: prev.min, max: maxPrice }));
+    if (effectiveMaxPrice > 0) {
+      setPriceRange(prev => ({
+        min: Math.min(prev.min, effectiveMaxPrice),
+        max: effectiveMaxPrice
+      }));
     }
-  }, [maxPrice, priceRange.max]);
+  }, [effectiveMaxPrice]);
 
   // Lấy danh sách brands từ API
   useEffect(() => {
@@ -224,14 +229,17 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
               <Slider
                 range
                 min={0}
-                max={maxPrice}
+                max={effectiveMaxPrice}
                 step={500000}
                 value={[priceRange.min, priceRange.max]}
                 onChange={(val) => {
-                  if (Array.isArray(val) && val.length === 2) setPriceRange({ min: val[0], max: val[1] });
-                }}
-                onChangeComplete={(val) => {
-                  if (Array.isArray(val) && val.length === 2) setPriceRange({ min: val[0], max: val[1] });
+                  if (Array.isArray(val) && val.length === 2) {
+                    const [min, max] = val;
+                    setPriceRange({ 
+                      min: Math.min(min, effectiveMaxPrice),
+                      max: Math.min(max, effectiveMaxPrice)
+                    });
+                  }
                 }}
                 allowCross={false}
                 trackStyle={[{ backgroundColor: '#ef4444' }]}
