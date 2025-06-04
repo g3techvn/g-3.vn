@@ -6,6 +6,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
 import Checkout from './checkout'
+import ProductList from '@/components/pc/gio-hang/ProductList'
 
 export default function ShoppingCart({ isOpen = false, onClose }: { isOpen: boolean; onClose: () => void }) {
   // Use context to get cart details
@@ -72,7 +73,7 @@ export default function ShoppingCart({ isOpen = false, onClose }: { isOpen: bool
         className="cart-drawer"
         closeIcon={null} // Hide default close icon
         mask={true}
-        maskClosable={false}
+        maskClosable={true}
         styles={{
           body: {
             paddingBottom: 80,
@@ -116,72 +117,12 @@ export default function ShoppingCart({ isOpen = false, onClose }: { isOpen: bool
           </div>
         }
       >
-        {cartItems.length === 0 ? (
-          <div className="py-6 text-center">
-            <p className="text-gray-500">Giỏ hàng của bạn đang trống</p>
-          </div>
-        ) : (
-          <ul role="list" className="-my-6 divide-y divide-gray-200">
-            {cartItems.map((item) => (
-              <li key={item.id} className="flex py-6">
-                <div className="size-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
-                  <Image 
-                    src={item.image_url} 
-                    alt={item.name} 
-                    width={100} 
-                    height={100} 
-                    className="h-full w-full object-cover object-center"
-                  />
-                </div>
-
-                <div className="ml-4 flex flex-1 flex-col">
-                  <div>
-                    <div className="flex justify-between text-base font-medium text-gray-900">
-                      <h3>{item.name}</h3>
-                      <p className="ml-4">{item.price.toLocaleString()}₫</p>
-                    </div>
-                    <p className="mt-1 text-sm text-gray-500">{item.brand || 'Không rõ'}</p>
-                  </div>
-                  <div className="flex flex-1 items-end justify-between text-sm">
-                    {!editableMode ? (
-                      <p className="text-gray-600">SL: {item.quantity}</p>
-                    ) : (
-                      <div className="flex items-center border rounded overflow-hidden">
-                        <button 
-                          type="button" 
-                          className="px-2 py-1 border-r hover:bg-gray-100"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          -
-                        </button>
-                        <span className="px-3 py-1">{item.quantity}</span>
-                        <button 
-                          type="button" 
-                          className="px-2 py-1 border-l hover:bg-gray-100"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
-
-                    {editableMode && (
-                      <div className="flex">
-                        <button 
-                          type="button" 
-                          className="font-medium text-red-600 hover:text-red-500"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ProductList
+          loading={false}
+          cartItems={cartItems}
+          removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
+        />
       </Drawer>
       
       {/* The checkout drawer component */}

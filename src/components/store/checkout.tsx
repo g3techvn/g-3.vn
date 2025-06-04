@@ -970,16 +970,15 @@ export default function Checkout({
   };
 
   return (
-    <Drawer
+    <Modal
       title={TitleWithButtons}
-      placement="right"
-      onClose={closeAll}
       open={isOpen}
-      width={384}
-      className="checkout-drawer"
-      closeIcon={null} // Hide default close icon
+      onCancel={closeAll}
+      width={800}
+      className="checkout-modal"
       mask={true}
       maskClosable={false}
+      footer={null}
       styles={{
         body: {
           paddingBottom: 80,
@@ -989,60 +988,8 @@ export default function Checkout({
         header: {
           padding: '16px 24px'
         },
-        mask: { backgroundColor: 'transparent' } // Make mask transparent
+        mask: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
       }}
-      footer={
-        <div className="border-t border-gray-200 px-4 py-4">
-          <div className="mb-4">
-            <h4 className="font-medium text-gray-900 mb-2">Tóm tắt đơn hàng</h4>
-            {cartItems.length > 0 ? (
-              <div className="space-y-2">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.name} x {item.quantity}</span>
-                    <span>{(item.price * item.quantity).toLocaleString()}₫</span>
-                  </div>
-                ))}
-                <Divider className="my-2" />
-                <div className="flex justify-between font-medium">
-                  <span>Tổng cộng</span>
-                  <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
-                </div>
-                {formData.paymentMethod && currentStep === 2 && (
-                  <div className="text-sm text-gray-600 mt-1">
-                    Phương thức: {
-                      formData.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' :
-                      formData.paymentMethod === 'banking' ? 'Chuyển khoản ngân hàng' :
-                      'Ví MoMo'
-                    }
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Giỏ hàng trống</p>
-            )}
-          </div>
-          
-          <div className="flex space-x-3">
-            <button
-              type="button"
-              onClick={showOrderDetailsModal}
-              disabled={!isFormValid()}
-              className="flex-1 flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-xs hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Chi tiết đơn
-            </button>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={!isFormValid() || currentStep < 2}
-              className="flex-1 flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-3 text-sm font-medium text-white shadow-xs hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Đặt hàng
-            </button>
-          </div>
-        </div>
-      }
     >
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10">
@@ -1074,9 +1021,60 @@ export default function Checkout({
       <form className="checkout-form">
         {steps[currentStep].content}
       </form>
+
+      <div className="border-t border-gray-200 px-4 py-4 mt-4">
+        <div className="mb-4">
+          <h4 className="font-medium text-gray-900 mb-2">Tóm tắt đơn hàng</h4>
+          {cartItems.length > 0 ? (
+            <div className="space-y-2">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>{item.name} x {item.quantity}</span>
+                  <span>{(item.price * item.quantity).toLocaleString()}₫</span>
+                </div>
+              ))}
+              <Divider className="my-2" />
+              <div className="flex justify-between font-medium">
+                <span>Tổng cộng</span>
+                <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
+              </div>
+              {formData.paymentMethod && currentStep === 2 && (
+                <div className="text-sm text-gray-600 mt-1">
+                  Phương thức: {
+                    formData.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' :
+                    formData.paymentMethod === 'banking' ? 'Chuyển khoản ngân hàng' :
+                    'Ví MoMo'
+                  }
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Giỏ hàng trống</p>
+          )}
+        </div>
+        
+        <div className="flex space-x-3">
+          <button
+            type="button"
+            onClick={showOrderDetailsModal}
+            disabled={!isFormValid()}
+            className="flex-1 flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-xs hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Chi tiết đơn
+          </button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={!isFormValid() || currentStep < 2}
+            className="flex-1 flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-3 text-sm font-medium text-white shadow-xs hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Đặt hàng
+          </button>
+        </div>
+      </div>
       
       {/* Order details modal */}
       <OrderDetailsModal />
-    </Drawer>
+    </Modal>
   )
 }
