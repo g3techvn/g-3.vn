@@ -9,6 +9,7 @@ import { Rating } from '@/components/ui/Rating';
 import { Product, Brand } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/Button';
+import { ProductCard } from '@/components/pc/product/ProductCard';
 
 interface ProductOption {
   id: number;
@@ -129,7 +130,12 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
       image_url: combo.image,
       quantity: 1,
       brand: getBrandName(),
-      slug: combo.slug
+      slug: combo.slug,
+      description: combo.description || '',
+      category_id: '',
+      pd_cat_id: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
     addToCart(cartItem);
@@ -244,7 +250,14 @@ const ComboDetailModal = ({
       image_url: combo.image,
       quantity: 1,
       brand: combo.brand,
-      slug: combo.slug
+      brand_id: combo.brand_id || '',
+      rating: combo.rating,
+      slug: combo.slug || combo.id,
+      description: combo.description || '',
+      category_id: '',
+      pd_cat_id: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
     addToCart(cartItem);
@@ -428,17 +441,6 @@ export default function ComboProduct({
     }
   }, [comboItems, selectedOptions]);
 
-  // Handle adding multiple products to cart
-  const handleAddComboToCart = (products: Product[]) => {
-    products.forEach(product => {
-      // Make sure we are passing all needed data including slug
-      addToCart({
-        ...product,
-        slug: product.slug || product.id
-      });
-    });
-  };
-
   return (
     <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
@@ -489,29 +491,54 @@ export default function ComboProduct({
               </div>
 
               {/* First 2 products - takes 1 column each */}
-              {comboItems.slice(0, 2).map((combo) => (
+              {comboItems.slice(0, 2).map((combo, index) => (
                 <div key={combo.id} className="col-span-3 lg:col-span-1">
-                  <Link href={`/san-pham/${combo.slug}`}>
-                    <ComboCard
-                      combo={combo}
-                      selectedOptionId={selectedOptions[combo.id]}
-                      brandNames={brandNames}
-                    />
-                  </Link>
+                  <ProductCard 
+                    product={{
+                      id: combo.id,
+                      name: combo.name,
+                      price: combo.options[0].price,
+                      original_price: combo.options[0].originalPrice,
+                      discount_percentage: combo.options[0].discount,
+                      image_url: combo.image,
+                      brand: combo.brand,
+                      brand_id: combo.brand_id || '',
+                      rating: combo.rating,
+                      slug: combo.slug || combo.id,
+                      description: combo.description || '',
+                      category_id: '',
+                      pd_cat_id: '',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }}
+                  />
                 </div>
               ))}
             </div>
 
             {/* Row 2 with remaining products */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {comboItems.slice(2).map((combo) => (
-                <Link key={combo.id} href={`/san-pham/${combo.slug}`}>
-                  <ComboCard
-                    combo={combo}
-                    selectedOptionId={selectedOptions[combo.id]}
-                    brandNames={brandNames}
-                  />
-                </Link>
+              {comboItems.slice(2).map((combo, index) => (
+                <ProductCard 
+                  key={combo.id}
+                  product={{
+                    id: combo.id,
+                    name: combo.name,
+                    price: combo.options[0].price,
+                    original_price: combo.options[0].originalPrice,
+                    discount_percentage: combo.options[0].discount,
+                    image_url: combo.image,
+                    brand: combo.brand,
+                    brand_id: combo.brand_id || '',
+                    rating: combo.rating,
+                    slug: combo.slug || combo.id,
+                    description: combo.description || '',
+                    category_id: '',
+                    pd_cat_id: '',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  }}
+                />
               ))}
             </div>
           </>

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ProductCard } from '@/features/product/ProductCard';
 import { Product, Brand } from '@/types';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
+import { ProductCard } from '@/components/pc/product/ProductCard';
 // Đã comment import vì hiện tại chưa sử dụng
 // import { createBrowserClient } from '@/lib/supabase';
 
@@ -14,7 +14,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gridView, setGridView] = useState<'4' | '5' | '6'>('5');
-  const [maxPrice, setMaxPrice] = useState<number>(0); // Bắt đầu với 0 và cập nhật sau khi có dữ liệu
+  const [maxPrice, setMaxPrice] = useState<number>(0);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
   const [brandError, setBrandError] = useState<string | null>(null);
@@ -195,14 +195,8 @@ export default function ProductsPage() {
             </div>
           ) : filteredProducts.length > 0 ? (
             <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 ${gridView === '4' ? 'md:grid-cols-4' : gridView === '5' ? 'md:grid-cols-5' : 'md:grid-cols-6'}`}>
-              {/* Log debugging info */}
-              {(() => { console.log('Rendering with brands:', brands.length, 'brands available'); return null; })()}
               {filteredProducts.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  brands={brands} 
-                />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           ) : (
