@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingCartIcon, ChevronLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 interface ProductHeaderProps {
   publisher: string;
   brandSlug?: string;
+  brandImageUrl?: string;
   totalCartItems: number;
   onShareClick: () => void;
   onFeedbackClick: () => void;
@@ -13,6 +15,7 @@ interface ProductHeaderProps {
 export function ProductHeader({ 
   publisher, 
   brandSlug, 
+  brandImageUrl,
   totalCartItems, 
   onShareClick, 
   onFeedbackClick 
@@ -37,9 +40,21 @@ export function ProductHeader({
         </button>
         
         <div className="absolute left-0 right-0 top-0 h-14 flex items-center justify-center pointer-events-none">
-          <span className="font-bold text-lg text-red-700 tracking-wide pointer-events-none">
-            {publisher.toUpperCase()}
-          </span>
+          {brandImageUrl ? (
+            <div className="relative w-32 h-8">
+              <Image
+                src={brandImageUrl}
+                alt={publisher}
+                fill
+                className="object-contain"
+                sizes="128px"
+              />
+            </div>
+          ) : (
+            <span className="font-bold text-lg text-red-700 tracking-wide pointer-events-none">
+              {publisher.toUpperCase()}
+            </span>
+          )}
         </div>
         
         <div className="flex items-center gap-1 absolute right-2 top-1/2 -translate-y-1/2">

@@ -87,12 +87,25 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   const handleScroll = useCallback((brandId: string) => {
     if (scrollRefs.current[brandId]) {
       const container = scrollRefs.current[brandId];
-      const slideWidth = container.offsetWidth * 0.95; // 95% of container width
+      const containerWidth = container.offsetWidth;
       const scrollPosition = container.scrollLeft;
-      const newSlide = Math.round(scrollPosition / slideWidth);
+      const maxScroll = container.scrollWidth - containerWidth;
+      
+      // Calculate the number of columns
+      const totalColumns = Math.ceil(productsByBrand[brandId].length / 3);
+      
+      if (maxScroll <= 0) {
+        setCurrentSlides(prev => ({ ...prev, [brandId]: 0 }));
+        return;
+      }
+
+      // Calculate current slide based on scroll percentage
+      const scrollPercentage = scrollPosition / maxScroll;
+      const newSlide = Math.round(scrollPercentage * (totalColumns - 1));
+      
       setCurrentSlides(prev => ({ ...prev, [brandId]: newSlide }));
     }
-  }, []);
+  }, [productsByBrand]);
 
   const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
     e.preventDefault();

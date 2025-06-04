@@ -210,7 +210,12 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
           >
             Liên hệ
           </button>
-          <button className="bg-white text-red-600 rounded px-4 py-1.5 text-sm font-semibold border border-red-600">Chat</button>
+          <button 
+            className="bg-white text-red-600 rounded px-4 py-1.5 text-sm font-semibold border border-red-600"
+            onClick={() => router.push('/nhan-tin')}
+          >
+            Chat
+          </button>
         </div>
       </div>
       {/* Video của Shop row */}
