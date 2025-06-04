@@ -71,9 +71,14 @@ export default function ProductList({
                   {item.name}
                 </h3>
                 {item.original_price && (
-                  <p className="mt-1 text-sm text-gray-500 line-through">
-                    {item.original_price.toLocaleString()}đ
-                  </p>
+                  <div className="mt-1">
+                    <p className="text-sm text-gray-500 line-through">
+                      {item.original_price.toLocaleString()}đ
+                    </p>
+                    <p className="text-sm text-green-600">
+                      Tiết kiệm: {((item.original_price - item.price) * item.quantity).toLocaleString()}đ
+                    </p>
+                  </div>
                 )}
               </div>
               <button

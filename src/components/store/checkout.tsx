@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal, Button } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
 import { Voucher } from '@/types/cart'
+import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
 
 // Import components
 import BuyerInfo from './BuyerInfo'
@@ -105,6 +106,56 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     pointValue: 1000,
     minPointsToRedeem: 100,
     maxPointsPerOrder: 500
+  }
+
+  // State for new props
+  const [provinces, setProvinces] = useState<Province[]>([])
+  const [districts, setDistricts] = useState<District[]>([])
+  const [wards, setWards] = useState<Ward[]>([])
+  const [loadingProvinces, setLoadingProvinces] = useState(false)
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [loadingWards, setLoadingWards] = useState(false)
+
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        setLoadingProvinces(true)
+        const data = await getProvinces()
+        setProvinces(data)
+      } catch (error) {
+        console.error('Error fetching provinces:', error)
+      } finally {
+        setLoadingProvinces(false)
+      }
+    }
+    fetchProvinces()
+  }, [])
+
+  const fetchDistricts = async (provinceCode: number) => {
+    try {
+      setLoadingDistricts(true)
+      setDistricts([])
+      setWards([])
+      const data = await getDistricts(provinceCode)
+      setDistricts(data)
+    } catch (error) {
+      console.error('Error fetching districts:', error)
+    } finally {
+      setLoadingDistricts(false)
+    }
+  }
+
+  const fetchWards = async (districtCode: number) => {
+    try {
+      setLoadingWards(true)
+      setWards([])
+      const data = await getWards(districtCode)
+      setWards(data)
+    } catch (error) {
+      console.error('Error fetching wards:', error)
+    } finally {
+      setLoadingWards(false)
+    }
   }
 
   // Form validation
@@ -237,18 +288,18 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
               selectedCarrier=""
               setSelectedCarrier={() => {}}
               carriers={[]}
-              cities={[]}
-              districts={[]}
-              wards={[]}
-              loadingCities={false}
-              loadingDistricts={false}
-              loadingWards={false}
+              provinces={provinces}
+              districts={districts}
+              wards={wards}
+              loadingProvinces={loadingProvinces}
+              loadingDistricts={loadingDistricts}
+              loadingWards={loadingWards}
               showAddressDrawer={false}
               setShowAddressDrawer={() => {}}
               showShippingDrawer={false}
               setShowShippingDrawer={() => {}}
-              fetchDistricts={async () => {}}
-              fetchWards={async () => {}}
+              fetchDistricts={fetchDistricts}
+              fetchWards={fetchWards}
               note={formData.note}
               setNote={(note) => handleFormChange('note', note)}
             />

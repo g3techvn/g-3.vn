@@ -14,24 +14,48 @@ interface Carrier {
   estimatedTime: string;
 }
 
+interface Province {
+  code: number;
+  name: string;
+  division_type: string;
+  codename: string;
+  phone_code: number;
+}
+
+interface District {
+  code: number;
+  name: string;
+  division_type: string;
+  codename: string;
+  province_code: number;
+}
+
+interface Ward {
+  code: number;
+  name: string;
+  division_type: string;
+  codename: string;
+  district_code: number;
+}
+
 interface ShippingInfoProps {
   addressForm: AddressForm;
   setAddressForm: (info: AddressForm | ((prev: AddressForm) => AddressForm)) => void;
   selectedCarrier: string;
   setSelectedCarrier: (carrier: string) => void;
   carriers: Carrier[];
-  cities: { id: number; name: string }[];
-  districts: { id: number; name: string }[];
-  wards: { id: number; name: string }[];
-  loadingCities: boolean;
+  provinces: Province[];
+  districts: District[];
+  wards: Ward[];
+  loadingProvinces: boolean;
   loadingDistricts: boolean;
   loadingWards: boolean;
   showAddressDrawer: boolean;
   setShowAddressDrawer: (show: boolean) => void;
   showShippingDrawer: boolean;
   setShowShippingDrawer: (show: boolean) => void;
-  fetchDistricts: (cityId: number) => Promise<void>;
-  fetchWards: (districtId: number) => Promise<void>;
+  fetchDistricts: (provinceCode: number) => Promise<void>;
+  fetchWards: (districtCode: number) => Promise<void>;
   note: string;
   setNote: (note: string) => void;
 }
@@ -42,10 +66,10 @@ export default function ShippingInfo({
   selectedCarrier,
   setSelectedCarrier,
   carriers,
-  cities,
+  provinces,
   districts,
   wards,
-  loadingCities,
+  loadingProvinces,
   loadingDistricts,
   loadingWards,
   showAddressDrawer,
@@ -82,17 +106,17 @@ export default function ShippingInfo({
             id="city"
             value={addressForm.city}
             onChange={(e) => {
-              const cityId = Number(e.target.value)
-              setAddressForm({ ...addressForm, city: e.target.value })
-              fetchDistricts(cityId)
+              const provinceCode = Number(e.target.value)
+              setAddressForm({ ...addressForm, city: e.target.value, district: '', ward: '' })
+              fetchDistricts(provinceCode)
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            disabled={loadingCities}
+            disabled={loadingProvinces}
           >
             <option value="">Chọn tỉnh/thành phố</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
+            {provinces.map((province) => (
+              <option key={province.code} value={province.code}>
+                {province.name}
               </option>
             ))}
           </select>
@@ -106,16 +130,16 @@ export default function ShippingInfo({
             id="district"
             value={addressForm.district}
             onChange={(e) => {
-              const districtId = Number(e.target.value)
-              setAddressForm({ ...addressForm, district: e.target.value })
-              fetchWards(districtId)
+              const districtCode = Number(e.target.value)
+              setAddressForm({ ...addressForm, district: e.target.value, ward: '' })
+              fetchWards(districtCode)
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             disabled={loadingDistricts || !addressForm.city}
           >
             <option value="">Chọn quận/huyện</option>
             {districts.map((district) => (
-              <option key={district.id} value={district.id}>
+              <option key={district.code} value={district.code}>
                 {district.name}
               </option>
             ))}
@@ -135,7 +159,7 @@ export default function ShippingInfo({
           >
             <option value="">Chọn phường/xã</option>
             {wards.map((ward) => (
-              <option key={ward.id} value={ward.id}>
+              <option key={ward.code} value={ward.code}>
                 {ward.name}
               </option>
             ))}

@@ -18,6 +18,8 @@ export default function OrderSummary({
   totalPrice
 }: OrderSummaryProps) {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const originalSubtotal = items.reduce((sum, item) => sum + (item.original_price || item.price) * item.quantity, 0)
+  const totalSavings = originalSubtotal - subtotal
   const voucherDiscount = selectedVoucher?.discountAmount || 0
   const pointsDiscount = pointsToUse / 100 // Convert points to money
   const finalTotal = totalPrice + shippingFee - voucherDiscount - pointsDiscount
@@ -27,11 +29,27 @@ export default function OrderSummary({
       <h2 className="text-lg font-medium text-gray-900 mb-4">Tổng đơn hàng</h2>
 
       <div className="space-y-3">
+        {/* Original Price */}
+        {totalSavings > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Giá gốc</span>
+            <span className="text-gray-500 line-through">{originalSubtotal.toLocaleString()}đ</span>
+          </div>
+        )}
+
         {/* Subtotal */}
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">Tạm tính</span>
           <span className="text-gray-900">{subtotal.toLocaleString()}đ</span>
         </div>
+
+        {/* Total Savings */}
+        {totalSavings > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Tiết kiệm</span>
+            <span className="text-green-600">-{totalSavings.toLocaleString()}đ</span>
+          </div>
+        )}
 
         {/* Shipping Fee */}
         <div className="flex justify-between text-sm">
