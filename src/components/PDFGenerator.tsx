@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CartItem } from '@/types/cart';
+import { CartItem, Voucher } from '@/types/cart';
 import { COMPANY_INFO, BANK_INFO } from '@/constants';
 
 // Font data
@@ -16,6 +16,11 @@ interface BuyerInfo {
   fullName: string;
   phone: string;
   email?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  ward?: string;
+  note?: string;
 }
 
 interface PDFGeneratorProps {
@@ -23,6 +28,9 @@ interface PDFGeneratorProps {
   totalPrice: number;
   shipping: number;
   buyerInfo: BuyerInfo;
+  paymentMethod?: string;
+  voucher?: Voucher | null;
+  rewardPoints?: number;
   preview?: boolean;
 }
 
@@ -46,7 +54,7 @@ const generateVietQRUrl = (
   return `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodedDesc}&accountName=${encodedName}`;
 };
 
-export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo, preview = false }: PDFGeneratorProps) => {
+export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo, paymentMethod, voucher, rewardPoints, preview = false }: PDFGeneratorProps) => {
   try {
     // Load fonts
     const [normalFontBytes, mediumFontBytes] = await Promise.all([
@@ -258,12 +266,12 @@ export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo, 
       .replace(/\s+/g, '-');
     
     if (preview) {
-      // Open PDF in a new tab for preview
-      const pdfDataUri = doc.output('datauristring');
-      window.open(pdfDataUri, '_blank');
+      // Return the data URI for preview
+      return doc.output('datauristring');
     } else {
       // Save the PDF as before
       doc.save(`${safeCustomerName}-${invoiceNumber}.pdf`);
+      return null;
     }
   } catch (error) {
     console.error('Error generating PDF:', error);

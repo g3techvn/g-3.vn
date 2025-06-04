@@ -6,6 +6,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
 import { Voucher } from '@/types/cart'
 import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
+import { generatePDF } from '@/components/PDFGenerator'
 
 // Import components
 import BuyerInfo from './BuyerInfo'
@@ -43,6 +44,11 @@ interface CheckoutProps {
 export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart()
   const [loading, setLoading] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
+  const [pdfError, setPdfError] = useState<string | null>(null)
+  const [pdfRetryCount, setPdfRetryCount] = useState(0)
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     phone: '',
@@ -180,209 +186,428 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handlePreviewPDF = async () => {
+    try {
+      setPdfLoading(true)
+      setPdfError(null)
+      setPdfRetryCount(prev => prev + 1)
+      
+      const pdfDataUri = await generatePDF({
+        cartItems,
+        totalPrice,
+        shipping: 30000,
+        buyerInfo: {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          district: formData.district,
+          ward: formData.ward,
+          note: formData.note
+        },
+        paymentMethod: formData.paymentMethod,
+        voucher: selectedVoucher,
+        rewardPoints: useRewardPoints ? pointsToUse : 0,
+        preview: true
+      });
+      
+      if (!pdfDataUri) {
+        throw new Error('Không thể tạo PDF. Vui lòng thử lại sau.');
+      }
+      
+      setPdfPreviewUrl(pdfDataUri);
+    } catch (error) {
+      console.error('Error generating PDF preview:', error);
+      setPdfError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại sau.');
+    } finally {
+      setPdfLoading(false)
+    }
+  };
+
+  const handleClosePdfPreview = () => {
+    setPdfPreviewUrl(null)
+    setPdfError(null)
+    setPdfRetryCount(0)
+  };
+
+  const handleDownloadPDF = () => {
+    generatePDF({
+      cartItems,
+      totalPrice,
+      shipping: 30000,
+      buyerInfo: {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        district: formData.district,
+        ward: formData.ward,
+        note: formData.note
+      },
+      paymentMethod: formData.paymentMethod,
+      voucher: selectedVoucher,
+      rewardPoints: useRewardPoints ? pointsToUse : 0
+    });
+  };
+
   // Early return if not open
   if (!isOpen) return null
 
   return (
-    <Modal
-      title={
-        <div className="flex w-full justify-between items-center">
-          <h2 className="text-xl font-semibold">Thanh toán</h2>
-          <button
-            onClick={closeAll}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-      }
-      open={isOpen}
-      onCancel={closeAll}
-      width={1200}
-      className="checkout-modal"
-      mask={true}
-      maskClosable={false}
-      footer={null}
-      styles={{
-        body: {
-          paddingBottom: 80,
-          overflow: 'auto',
-          padding: '0 16px'
-        },
-        header: {
-          padding: '16px 24px'
-        },
-        mask: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
-      }}
-    >
-      {loading && (
-        <div className="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10">
-          <div className="flex flex-col items-center">
-            <LoadingOutlined style={{ fontSize: 24, color: '#dc3545', marginBottom: 8 }} />
-            <span className="text-gray-600">Đang tải dữ liệu...</span>
+    <>
+      <Modal
+        title={
+          <div className="flex w-full justify-between items-center">
+            <h2 className="text-xl font-semibold">Thanh toán</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePreviewPDF}
+                className="p-2 text-gray-500 hover:text-gray-700"
+                title="Xem trước PDF"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="p-2 text-gray-500 hover:text-gray-700"
+                title="Tải PDF"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </button>
+              <button
+                onClick={closeAll}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left column - Form sections */}
-        <div className="col-span-8 space-y-6">
-          <div className="bg-white p-4 rounded-lg">
-            <BuyerInfo 
-              user={null}
-              guestInfo={{
-                fullName: formData.fullName,
-                phone: formData.phone,
-                email: formData.email
-              }}
-              setGuestInfo={(info) => {
-                if (typeof info === 'function') {
-                  const newInfo = info({
-                    fullName: formData.fullName,
-                    phone: formData.phone,
-                    email: formData.email
-                  })
-                  handleFormChange('fullName', newInfo.fullName)
-                  handleFormChange('phone', newInfo.phone)
-                  handleFormChange('email', newInfo.email)
-                } else {
-                  handleFormChange('fullName', info.fullName)
-                  handleFormChange('phone', info.phone)
-                  handleFormChange('email', info.email)
-                }
-              }}
-              userPhone={formData.phone}
-              setUserPhone={(phone) => handleFormChange('phone', phone)}
-              errors={{ fullName: '', phone: '' }}
-              setErrors={() => {}}
-            />
+        }
+        open={isOpen}
+        onCancel={closeAll}
+        width={1200}
+        className="checkout-modal"
+        mask={true}
+        maskClosable={false}
+        footer={null}
+        styles={{
+          body: {
+            paddingBottom: 80,
+            overflow: 'auto',
+            padding: '0 16px'
+          },
+          header: {
+            padding: '16px 24px'
+          },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
+        }}
+      >
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10">
+            <div className="flex flex-col items-center">
+              <LoadingOutlined style={{ fontSize: 24, color: '#dc3545', marginBottom: 8 }} />
+              <span className="text-gray-600">Đang tải dữ liệu...</span>
+            </div>
           </div>
+        )}
 
-          <div className="bg-white p-4 rounded-lg">
-            <ShippingInfo 
-              addressForm={{
-                city: formData.city,
-                district: formData.district,
-                ward: formData.ward,
-                address: formData.address
-              }}
-              setAddressForm={(info) => {
-                if (typeof info === 'function') {
-                  const newInfo = info({
-                    city: formData.city,
-                    district: formData.district,
-                    ward: formData.ward,
-                    address: formData.address
-                  })
-                  handleFormChange('city', newInfo.city)
-                  handleFormChange('district', newInfo.district)
-                  handleFormChange('ward', newInfo.ward)
-                  handleFormChange('address', newInfo.address)
-                } else {
-                  handleFormChange('city', info.city)
-                  handleFormChange('district', info.district)
-                  handleFormChange('ward', info.ward)
-                  handleFormChange('address', info.address)
-                }
-              }}
-              selectedCarrier=""
-              setSelectedCarrier={() => {}}
-              carriers={[]}
-              provinces={provinces}
-              districts={districts}
-              wards={wards}
-              loadingProvinces={loadingProvinces}
-              loadingDistricts={loadingDistricts}
-              loadingWards={loadingWards}
-              showAddressDrawer={false}
-              setShowAddressDrawer={() => {}}
-              showShippingDrawer={false}
-              setShowShippingDrawer={() => {}}
-              fetchDistricts={fetchDistricts}
-              fetchWards={fetchWards}
-              note={formData.note}
-              setNote={(note) => handleFormChange('note', note)}
-            />
-          </div>
-
-          <div className="bg-white p-4 rounded-lg">
-            <PaymentMethodSelection 
-              showPaymentDrawer={showPaymentDrawer}
-              setShowPaymentDrawer={setShowPaymentDrawer}
-              selectedPayment={formData.paymentMethod}
-              setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
-              paymentMethods={paymentMethods}
-            />
-          </div>
-
-          <div className="bg-white p-4 rounded-lg">
-            <VoucherInfo 
-              showVoucherDrawer={showVoucherDrawer}
-              setShowVoucherDrawer={setShowVoucherDrawer}
-              voucherCode={formData.voucher}
-              setVoucherCode={(code) => handleFormChange('voucher', code)}
-              selectedVoucher={selectedVoucher}
-              setSelectedVoucher={setSelectedVoucher}
-              availableVouchers={availableVouchers}
-              totalPrice={totalPrice}
-            />
-          </div>
-
-          <div className="bg-white p-4 rounded-lg">
-            <RewardPoints 
-              isLoggedIn={true}
-              availablePoints={rewardPointsData.available}
-              useRewardPoints={useRewardPoints}
-              setUseRewardPoints={setUseRewardPoints}
-              pointsToUse={pointsToUse}
-              setPointsToUse={setPointsToUse}
-              maxPointsToUse={rewardPointsData.maxPointsPerOrder}
-            />
-          </div>
-        </div>
-
-        {/* Right column - Order summary */}
-        <div className="col-span-4">
-          <div className="sticky top-4">
-            <div className="bg-white p-4 rounded-lg mb-4">
-              <ProductList 
-                loading={loading}
-                items={cartItems}
-                onUpdateQuantity={updateQuantity}
-                onRemoveItem={removeFromCart}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left column - Form sections */}
+          <div className="col-span-8 space-y-6">
+            <div className="bg-white p-4 rounded-lg">
+              <BuyerInfo 
+                user={null}
+                guestInfo={{
+                  fullName: formData.fullName,
+                  phone: formData.phone,
+                  email: formData.email
+                }}
+                setGuestInfo={(info) => {
+                  if (typeof info === 'function') {
+                    const newInfo = info({
+                      fullName: formData.fullName,
+                      phone: formData.phone,
+                      email: formData.email
+                    })
+                    handleFormChange('fullName', newInfo.fullName)
+                    handleFormChange('phone', newInfo.phone)
+                    handleFormChange('email', newInfo.email)
+                  } else {
+                    handleFormChange('fullName', info.fullName)
+                    handleFormChange('phone', info.phone)
+                    handleFormChange('email', info.email)
+                  }
+                }}
+                userPhone={formData.phone}
+                setUserPhone={(phone) => handleFormChange('phone', phone)}
+                errors={{ fullName: '', phone: '' }}
+                setErrors={() => {}}
               />
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg">
-              <OrderSummary 
-                items={cartItems}
-                totalPrice={totalPrice}
-                shippingFee={30000}
-                selectedVoucher={selectedVoucher}
-                pointsToUse={pointsToUse * rewardPointsData.pointValue}
+              <ShippingInfo 
+                addressForm={{
+                  city: formData.city,
+                  district: formData.district,
+                  ward: formData.ward,
+                  address: formData.address
+                }}
+                setAddressForm={(info) => {
+                  if (typeof info === 'function') {
+                    const newInfo = info({
+                      city: formData.city,
+                      district: formData.district,
+                      ward: formData.ward,
+                      address: formData.address
+                    })
+                    handleFormChange('city', newInfo.city)
+                    handleFormChange('district', newInfo.district)
+                    handleFormChange('ward', newInfo.ward)
+                    handleFormChange('address', newInfo.address)
+                  } else {
+                    handleFormChange('city', info.city)
+                    handleFormChange('district', info.district)
+                    handleFormChange('ward', info.ward)
+                    handleFormChange('address', info.address)
+                  }
+                }}
+                selectedCarrier=""
+                setSelectedCarrier={() => {}}
+                carriers={[]}
+                provinces={provinces}
+                districts={districts}
+                wards={wards}
+                loadingProvinces={loadingProvinces}
+                loadingDistricts={loadingDistricts}
+                loadingWards={loadingWards}
+                showAddressDrawer={false}
+                setShowAddressDrawer={() => {}}
+                showShippingDrawer={false}
+                setShowShippingDrawer={() => {}}
+                fetchDistricts={fetchDistricts}
+                fetchWards={fetchWards}
+                note={formData.note}
+                setNote={(note) => handleFormChange('note', note)}
               />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg">
+              <PaymentMethodSelection 
+                showPaymentDrawer={showPaymentDrawer}
+                setShowPaymentDrawer={setShowPaymentDrawer}
+                selectedPayment={formData.paymentMethod}
+                setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
+                paymentMethods={paymentMethods}
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg">
+              <VoucherInfo 
+                showVoucherDrawer={showVoucherDrawer}
+                setShowVoucherDrawer={setShowVoucherDrawer}
+                voucherCode={formData.voucher}
+                setVoucherCode={(code) => handleFormChange('voucher', code)}
+                selectedVoucher={selectedVoucher}
+                setSelectedVoucher={setSelectedVoucher}
+                availableVouchers={availableVouchers}
+                totalPrice={totalPrice}
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg">
+              <RewardPoints 
+                isLoggedIn={true}
+                availablePoints={rewardPointsData.available}
+                useRewardPoints={useRewardPoints}
+                setUseRewardPoints={setUseRewardPoints}
+                pointsToUse={pointsToUse}
+                setPointsToUse={setPointsToUse}
+                maxPointsToUse={rewardPointsData.maxPointsPerOrder}
+              />
+            </div>
+          </div>
+
+          {/* Right column - Order summary */}
+          <div className="col-span-4">
+            <div className="sticky top-4">
+              <div className="bg-white p-4 rounded-lg mb-4">
+                <ProductList 
+                  loading={loading}
+                  items={cartItems}
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={removeFromCart}
+                />
+              </div>
               
-              <div className="mt-4">
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  onClick={handleSubmit}
-                  disabled={!isFormValid()}
-                  style={{ 
-                    backgroundColor: '#dc3545',
-                    borderColor: '#dc3545',
-                    height: '48px',
-                    fontSize: '16px'
-                  }}
-                >
-                  Đặt hàng
-                </Button>
+              <div className="bg-white p-4 rounded-lg">
+                <OrderSummary 
+                  items={cartItems}
+                  totalPrice={totalPrice}
+                  shippingFee={30000}
+                  selectedVoucher={selectedVoucher}
+                  pointsToUse={pointsToUse * rewardPointsData.pointValue}
+                />
+                
+                <div className="mt-4">
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={handleSubmit}
+                    disabled={!isFormValid()}
+                    style={{ 
+                      backgroundColor: '#dc3545',
+                      borderColor: '#dc3545',
+                      height: '48px',
+                      fontSize: '16px'
+                    }}
+                  >
+                    Đặt hàng
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+
+      {/* PDF Preview Modal */}
+      <Modal
+        title={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-red-600 mr-2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+              <span className="text-lg font-semibold">Xem trước PDF</span>
+            </div>
+            <button
+              onClick={handleClosePdfPreview}
+              className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        }
+        open={!!pdfPreviewUrl}
+        onCancel={handleClosePdfPreview}
+        width="90%"
+        style={{ top: 20 }}
+        bodyStyle={{ 
+          padding: '24px',
+          height: 'calc(100vh - 200px)',
+          overflow: 'hidden'
+        }}
+        footer={null}
+        className="pdf-preview-modal"
+        maskClosable={!pdfLoading}
+        keyboard={!pdfLoading}
+        transitionName="fade"
+      >
+        <div className="w-full h-full transition-all duration-300 ease-in-out">
+          {pdfLoading ? (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg animate-fade-in">
+              <div className="flex flex-col items-center">
+                <div className="relative">
+                  <div className="absolute inset-0 animate-ping">
+                    <LoadingOutlined style={{ fontSize: 32, color: '#dc3545', opacity: 0.3 }} />
+                  </div>
+                  <LoadingOutlined style={{ fontSize: 32, color: '#dc3545' }} />
+                </div>
+                <div className="mt-4 space-y-2 text-center">
+                  <span className="text-gray-600 block">Đang tạo PDF...</span>
+                  <span className="text-gray-400 text-sm block">Vui lòng đợi trong giây lát</span>
+                  <div className="w-48 h-1 bg-gray-200 rounded-full overflow-hidden mt-4">
+                    <div className="h-full bg-red-600 rounded-full animate-progress"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : pdfError ? (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg animate-fade-in">
+              <div className="text-center max-w-md px-4">
+                <div className="text-red-500 mb-4 animate-bounce">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 mx-auto">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 mb-2 text-lg font-medium">{pdfError}</p>
+                {pdfRetryCount > 1 && (
+                  <p className="text-gray-500 mb-4 text-sm">
+                    Đã thử lại {pdfRetryCount} lần. Vui lòng kiểm tra kết nối và thử lại.
+                  </p>
+                )}
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={handlePreviewPDF}
+                    className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center shadow-sm hover:shadow-md"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    Thử lại
+                  </button>
+                  <button
+                    onClick={handleClosePdfPreview}
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors shadow-sm hover:shadow-md"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-full bg-gray-100 rounded-lg overflow-hidden animate-fade-in">
+              <iframe
+                src={pdfPreviewUrl || undefined}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+              />
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      <style jsx global>{`
+        @keyframes progress {
+          0% { width: 0%; }
+          100% { width: 100%; }
+        }
+        .animate-progress {
+          animation: progress 2s ease-in-out infinite;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .fade-enter {
+          opacity: 0;
+        }
+        .fade-enter-active {
+          opacity: 1;
+          transition: opacity 300ms ease-in-out;
+        }
+        .fade-exit {
+          opacity: 1;
+        }
+        .fade-exit-active {
+          opacity: 0;
+          transition: opacity 300ms ease-in-out;
+        }
+      `}</style>
+    </>
   )
 }
