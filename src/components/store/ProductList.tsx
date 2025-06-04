@@ -66,20 +66,23 @@ export default function ProductList({
           {/* Product Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 truncate">
-                  {item.name}
-                </h3>
-                {item.original_price && (
-                  <div className="mt-1">
-                    <p className="text-sm text-gray-500 line-through">
-                      {item.original_price.toLocaleString()}đ
-                    </p>
-                    <p className="text-sm text-green-600">
-                      Tiết kiệm: {((item.original_price - item.price) * item.quantity).toLocaleString()}đ
-                    </p>
-                  </div>
-                )}
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900">{item.name}</h3>
+                <div className="mt-1">
+                  {item.original_price && item.original_price > item.price && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500 line-through">
+                        {item.original_price.toLocaleString()}đ
+                      </span>
+                      <span className="text-sm text-green-600">
+                        Tiết kiệm: {((item.original_price - item.price) * item.quantity).toLocaleString()}đ
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-red-600 font-medium">
+                    {item.price.toLocaleString()}đ
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => onRemoveItem(item.id)}

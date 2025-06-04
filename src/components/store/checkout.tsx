@@ -252,6 +252,17 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     });
   };
 
+  // Handle closing both checkout and cart
+  const handleClose = () => {
+    onClose() // Close checkout
+    closeAll() // Close cart
+  }
+
+  // Handle quantity update with synchronization
+  const handleQuantityUpdate = (itemId: string, newQuantity: number) => {
+    updateQuantity(itemId, newQuantity)
+  }
+
   // Early return if not open
   if (!isOpen) return null
 
@@ -282,7 +293,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 </svg>
               </button>
               <button
-                onClick={closeAll}
+                onClick={handleClose}
                 className="text-gray-500 hover:text-gray-700"
               >
                 ✕
@@ -291,7 +302,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
           </div>
         }
         open={isOpen}
-        onCancel={closeAll}
+        onCancel={handleClose}
         width={1200}
         className="checkout-modal"
         mask={true}
@@ -442,7 +453,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 <ProductList 
                   loading={loading}
                   items={cartItems}
-                  onUpdateQuantity={updateQuantity}
+                  onUpdateQuantity={handleQuantityUpdate}
                   onRemoveItem={removeFromCart}
                 />
               </div>
@@ -510,8 +521,8 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         }}
         footer={null}
         className="pdf-preview-modal"
-        maskClosable={!pdfLoading}
-        keyboard={!pdfLoading}
+        maskClosable={true}
+        keyboard={true}
         transitionName="fade"
       >
         <div className="w-full h-full transition-all duration-300 ease-in-out">

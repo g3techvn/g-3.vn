@@ -17,75 +17,56 @@ export default function OrderSummary({
   pointsToUse,
   totalPrice
 }: OrderSummaryProps) {
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const originalSubtotal = items.reduce((sum, item) => sum + (item.original_price || item.price) * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const originalSubtotal = items.reduce((sum, item) => 
+    sum + ((item.original_price || item.price) * item.quantity), 0)
   const totalSavings = originalSubtotal - subtotal
-  const voucherDiscount = selectedVoucher?.discountAmount || 0
+  const voucherDiscount = selectedVoucher ? selectedVoucher.discountAmount : 0
   const pointsDiscount = pointsToUse / 100 // Convert points to money
-  const finalTotal = totalPrice + shippingFee - voucherDiscount - pointsDiscount
+  const finalTotal = totalPrice - voucherDiscount - pointsDiscount + shippingFee
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Tổng đơn hàng</h2>
-
-      <div className="space-y-3">
-        {/* Original Price */}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium text-gray-900">Tổng đơn hàng</h3>
+      
+      <div className="space-y-2">
         {totalSavings > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Giá gốc</span>
-            <span className="text-gray-500 line-through">{originalSubtotal.toLocaleString()}đ</span>
-          </div>
+          <>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 line-through">Tổng giá gốc:</span>
+              <span className="text-gray-500 line-through">{originalSubtotal.toLocaleString()}đ</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-green-600">Tổng tiết kiệm:</span>
+              <span className="text-green-600">{totalSavings.toLocaleString()}đ</span>
+            </div>
+          </>
         )}
-
-        {/* Subtotal */}
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Tạm tính</span>
+          <span className="text-gray-500">Tạm tính:</span>
           <span className="text-gray-900">{subtotal.toLocaleString()}đ</span>
         </div>
-
-        {/* Total Savings */}
-        {totalSavings > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Tiết kiệm</span>
-            <span className="text-green-600">-{totalSavings.toLocaleString()}đ</span>
-          </div>
-        )}
-
-        {/* Shipping Fee */}
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Phí vận chuyển</span>
+          <span className="text-gray-500">Phí vận chuyển:</span>
           <span className="text-gray-900">{shippingFee.toLocaleString()}đ</span>
         </div>
-
-        {/* Voucher Discount */}
         {selectedVoucher && (
           <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Giảm giá voucher</span>
-            <span className="text-red-600">-{voucherDiscount.toLocaleString()}đ</span>
+            <span className="text-gray-500">Giảm giá voucher:</span>
+            <span className="text-green-600">-{voucherDiscount.toLocaleString()}đ</span>
           </div>
         )}
-
-        {/* Points Discount */}
         {pointsToUse > 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Giảm giá điểm thưởng</span>
-            <span className="text-red-600">-{pointsDiscount.toLocaleString()}đ</span>
+            <span className="text-gray-500">Điểm thưởng:</span>
+            <span className="text-green-600">-{pointsToUse.toLocaleString()}đ</span>
           </div>
         )}
-
-        {/* Divider */}
-        <div className="border-t border-gray-200 my-3" />
-
-        {/* Final Total */}
-        <div className="flex justify-between text-base font-medium">
-          <span className="text-gray-900">Tổng cộng</span>
-          <span className="text-red-600">{finalTotal.toLocaleString()}đ</span>
-        </div>
-
-        {/* Note */}
-        <div className="text-sm text-gray-500 mt-4">
-          <p>* Giá đã bao gồm VAT</p>
-          <p>* Phí vận chuyển có thể thay đổi tùy theo địa chỉ giao hàng</p>
+        <div className="border-t pt-2">
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-900">Tổng cộng:</span>
+            <span className="font-medium text-red-600">{finalTotal.toLocaleString()}đ</span>
+          </div>
         </div>
       </div>
     </div>
