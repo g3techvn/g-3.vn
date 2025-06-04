@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect, ChangeEvent, useMemo, useCallback } from 'react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
-import { X, Search, AlertCircle } from 'lucide-react';
+import { X, Search, AlertCircle, Star } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import debounce from 'lodash/debounce';
@@ -116,7 +116,7 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
         />
       )}
       <DialogContent 
-        className="max-w-4xl overflow-y-auto" 
+        className="max-w-4xl" 
         style={{ 
           position: 'absolute',
           top: '50%',
@@ -127,10 +127,11 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
           width: '1200px',
           maxWidth: '90vw',
           maxHeight: '80vh',
-          overflowY: 'auto'
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle>Chọn sản phẩm</DialogTitle>
             <button onClick={() => onOpenChange(false)}>
@@ -173,78 +174,88 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
           </div>
         </DialogHeader>
 
-        {loadingProducts ? (
-          // Loading skeleton
-          <div className="grid grid-cols-4 gap-4 p-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="flex animate-pulse flex-col gap-2 rounded-lg border p-2">
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-200" />
-                <div className="flex flex-col gap-1">
-                  <div className="h-4 w-3/4 rounded bg-gray-200" />
-                  <div className="h-4 w-1/2 rounded bg-gray-200" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : error ? (
-          // Error state
-          <div className="flex flex-col items-center justify-center gap-4 py-8">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <p className="text-center text-sm text-gray-500">{error}</p>
-            <button
-              onClick={handleRetry}
-              className="rounded-md bg-primary px-4 py-2 text-sm text-white transition-colors hover:bg-primary/90"
-            >
-              Thử lại
-            </button>
-          </div>
-        ) : (
-          <>
+        <div className="flex-1 overflow-y-auto mt-4">
+          {loadingProducts ? (
+            // Loading skeleton
             <div className="grid grid-cols-4 gap-4 p-4">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex cursor-pointer flex-col gap-2 rounded-lg border bg-white p-2 shadow-sm transition-all hover:shadow-md"
-                  onClick={() => {
-                    addToCart(product);
-                    onOpenChange(false);
-                  }}
-                >
-                  <div className="relative aspect-square overflow-hidden rounded-lg">
-                    <Image
-                      src={product.image_url || 'https://via.placeholder.com/200'}
-                      alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover"
-                      priority={false}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1 px-2">
-                    <p className="line-clamp-2 text-sm font-medium">{product.name}</p>
-                    <div className="mt-1">
-                      {product.original_price && product.original_price > product.price && (
-                        <div className="text-xs text-gray-500 line-through">
-                          {product.original_price.toLocaleString()}đ
-                        </div>
-                      )}
-                      <div className="text-sm font-medium text-red-600">{product.price.toLocaleString()}đ</div>
-                    </div>
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="flex animate-pulse flex-col gap-2 rounded-lg border p-2">
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-200" />
+                  <div className="flex flex-col gap-1">
+                    <div className="h-4 w-3/4 rounded bg-gray-200" />
+                    <div className="h-4 w-1/2 rounded bg-gray-200" />
                   </div>
                 </div>
               ))}
             </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-2 py-8">
-                <AlertCircle className="h-8 w-8 text-gray-400" />
-                <p className="text-center text-sm text-gray-500">
-                  Không tìm thấy sản phẩm phù hợp
-                </p>
+          ) : error ? (
+            // Error state
+            <div className="flex flex-col items-center justify-center gap-4 py-8">
+              <AlertCircle className="h-8 w-8 text-red-500" />
+              <p className="text-center text-sm text-gray-500">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="rounded-md bg-primary px-4 py-2 text-sm text-white transition-colors hover:bg-primary/90"
+              >
+                Thử lại
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-4 gap-4">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex cursor-pointer flex-col gap-2 rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
+                    onClick={() => {
+                      addToCart(product);
+                      onOpenChange(false);
+                    }}
+                  >
+                    <div className="relative aspect-square overflow-hidden rounded-lg">
+                      <Image
+                        src={product.image_url || 'https://via.placeholder.com/200'}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover"
+                        priority={false}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1 px-2 pb-2">
+                      <p className="line-clamp-2 text-sm font-medium">{product.name}</p>
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-center">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span className="ml-1 text-xs text-gray-600">{product.rating || 0}</span>
+                        </div>
+                        <span className="text-xs text-gray-400">|</span>
+                        <span className="text-xs text-gray-600">Đã bán {product.sold_count || 0}</span>
+                      </div>
+                      <div className="mt-1">
+                        {product.original_price && product.original_price > product.price && (
+                          <div className="text-xs text-gray-500 line-through">
+                            {product.original_price.toLocaleString()}đ
+                          </div>
+                        )}
+                        <div className="text-sm font-medium text-red-600">{product.price.toLocaleString()}đ</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </>
-        )}
+
+              {filteredProducts.length === 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 py-8">
+                  <AlertCircle className="h-8 w-8 text-gray-400" />
+                  <p className="text-center text-sm text-gray-500">
+                    Không tìm thấy sản phẩm phù hợp
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

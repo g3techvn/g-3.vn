@@ -14,6 +14,7 @@ export type Product = {
   brand?: string;
   brand_slug?: string;
   rating?: number;
+  sold_count?: number;
   created_at: string;
   updated_at: string;
   original_price?: number;
