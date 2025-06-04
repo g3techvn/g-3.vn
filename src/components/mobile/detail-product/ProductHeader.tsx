@@ -7,6 +7,7 @@ interface ProductHeaderProps {
   publisher: string;
   brandSlug?: string;
   brandImageUrl?: string;
+  brandImageSquareUrl?: string;
   totalCartItems: number;
   onShareClick: () => void;
   onFeedbackClick: () => void;
@@ -16,12 +17,16 @@ export function ProductHeader({
   publisher, 
   brandSlug, 
   brandImageUrl,
+  brandImageSquareUrl,
   totalCartItems, 
   onShareClick, 
   onFeedbackClick 
 }: ProductHeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Get the best available image URL
+  const imageUrl = brandImageSquareUrl || brandImageUrl;
 
   return (
     <div className="sticky top-0 z-20 bg-[#f5f5f5] border-b border-gray-200">
@@ -40,10 +45,10 @@ export function ProductHeader({
         </button>
         
         <div className="absolute left-0 right-0 top-0 h-14 flex items-center justify-center pointer-events-none">
-          {brandImageUrl ? (
+          {imageUrl ? (
             <div className="relative w-32 h-8">
               <Image
-                src={brandImageUrl}
+                src={imageUrl}
                 alt={publisher}
                 fill
                 className="object-contain"

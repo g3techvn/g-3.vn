@@ -96,7 +96,7 @@ export function ProductGallery({ productName, galleryItems, isLoadingGallery }: 
     <div>
       <motion.div 
         ref={containerRef}
-        className="bg-gray-100 border-2 border-gray-200 rounded-lg overflow-hidden relative"
+        className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden relative"
         style={{ aspectRatio: '16/9' }}
         onMouseEnter={() => galleryItems[selectedIndex]?.type === 'image' && setIsZoomed(true)}
         onMouseLeave={() => setIsZoomed(false)}
