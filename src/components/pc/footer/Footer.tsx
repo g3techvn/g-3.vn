@@ -88,7 +88,7 @@ export default function Footer() {
           <div className="flex flex-col gap-6">
             {/* Logo */}
             <div className="mb-2">
-              <img src="/images/logo-g3.svg" alt="Logo" className="h-12 w-auto" />
+              <Image src="/images/logo-g3.svg" alt="Logo" className="h-12 w-auto" width={144} height={48} />
             </div>
             {/* Social icons */}
             <div className="flex gap-4 mb-2">
@@ -199,8 +199,8 @@ export default function Footer() {
               Địa chỉ: Tầng 7, Tòa nhà Charmvit, số 117 Trần Duy Hưng, Phường Trung Hoà, Quận Cầu Giấy,Hà Nội
             </p>
             <div className="flex gap-2 mt-2 md:mt-0">
-             <img src="/images/dmca_protected.png" alt="DMCA" className="h-6" />
-             <img src="/images/bo-cong-thuong.png" alt="Đã thông báo" className="h-6" />
+             <Image src="/images/dmca_protected.png" alt="DMCA" className="h-6" width={72} height={24} />
+             <Image src="/images/bo-cong-thuong.png" alt="Đã thông báo" className="h-6" width={72} height={24} />
             
             </div>
           </div>
