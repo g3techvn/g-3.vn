@@ -215,11 +215,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       const allProducts = data.products || [];
-      const randomProducts = allProducts
-        .filter((p: Product) => p.id !== productId)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 5);
-      setSimilarProducts(randomProducts);
+      
+      // Get current product's brand
+      const currentProduct = allProducts.find((p: Product) => p.id === productId);
+      if (!currentProduct?.brand) {
+        setSimilarProducts([]);
+        return;
+      }
+
+      // Filter products with same brand and exclude current product
+      const sameBrandProducts = allProducts
+        .filter((p: Product) => 
+          p.id !== productId && 
+          p.brand && 
+          p.brand.toLowerCase() === currentProduct.brand.toLowerCase()
+        )
+        .slice(0, 6);
+
+      setSimilarProducts(sameBrandProducts);
     } catch (error) {
       console.error('Error fetching similar products:', error);
     } finally {

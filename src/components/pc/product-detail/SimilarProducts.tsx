@@ -60,7 +60,7 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
       
       <ScrollArea.Root className="w-full overflow-hidden">
         <ScrollArea.Viewport className="w-full">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {loading ? (
               // Loading skeleton with animations
               [...Array(5)].map((_, i) => (

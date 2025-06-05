@@ -5,7 +5,7 @@ import { Product, Brand } from '@/types';
 import { ProductCard } from '@/components/pc/product/ProductCard';
 import { motion, useInView } from 'framer-motion';
 
-const MAX_PRODUCTS = 8;
+const MAX_PRODUCTS = 12;
 
 export default function FeaturedProducts({ 
   autoSlideInterval = 5000, // Default 5 seconds
