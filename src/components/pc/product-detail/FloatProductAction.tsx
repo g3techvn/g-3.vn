@@ -76,6 +76,12 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
           </div>
         </div>
 
+        <div className="flex-1 text-center px-4">
+          <div className="font-medium text-gray-900 line-clamp-1">
+            {product.name}
+          </div>
+        </div>
+
         <div className="flex items-center space-x-3">
           <button
             onClick={handleAddToCart}
