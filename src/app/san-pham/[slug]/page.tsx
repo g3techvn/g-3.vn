@@ -17,6 +17,7 @@ import { ImageItem } from '@/types/supabase';
 import { ProductDetailDesktop } from '@/components/pc/product-detail/ProductDetailDesktop';
 import { Metadata } from 'next';
 import { generateMetadata } from '@/app/metadata';
+import { FloatProductAction } from '@/components/pc/product-detail/FloatProductAction';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -510,6 +511,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           overview={overview}
         />
       </div>
+
+      {/* Float Product Action */}
+      <FloatProductAction product={product} />
     </>
   );
 } 
