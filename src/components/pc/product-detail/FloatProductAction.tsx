@@ -50,7 +50,7 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
 
   return (
     <div
-      className={`fixed left-0 right-0 bottom-2 z-50 flex justify-center transition-all duration-300 ${show ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-8 pointer-events-none'} translate-x-[60px]`}
+      className={`fixed container mx-auto left-0 right-16 bottom-2 z-50 flex justify-center transition-all duration-300 ${show ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-8 pointer-events-none'} translate-x-16`}
       style={{ width: '100%' }}
     >
       <div className="container mx-auto bg-white border border-gray-200 shadow-lg py-2 rounded-md flex items-center justify-between px-4">
