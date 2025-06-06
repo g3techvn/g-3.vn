@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.75.5",
     "@tanstack/react-query-devtools": "^5.17.19",
+    "@types/styled-components": "^5.1.34",
     "antd": "^5.25.0",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
@@ -47,6 +48,7 @@
     "react-hook-form": "^7.56.3",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
+    "styled-components": "^6.1.18",
     "swiper": "^11.2.8",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.24.4"

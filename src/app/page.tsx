@@ -13,6 +13,7 @@ const ComboProduct = lazy(() => import('@/components/pc/product/ComboProduct'));
 const NewProducts = lazy(() => import('@/components/pc/product/NewProducts'));
 const BrandLogos = lazy(() => import('@/components/pc/home/BrandLogos'));
 const BlogPosts = lazy(() => import('@/components/pc/home/BlogPosts'));
+const SupportSection = lazy(() => import('@/components/pc/home/support'));
 const MobileHomeHeader = lazy(() => import('@/components/mobile/MobileHomeHeader'));
 const MobileHomeTabs = lazy(() => import('@/components/mobile/MobileHomeTabs'));
 const MobileFeatureProduct = lazy(() => import('@/components/mobile/MobileFeatureProduct'));
@@ -779,14 +780,14 @@ export default function Home() {
             </motion.div>
 
             {/* Category Grid */}
-            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
+            {/* <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
               <Suspense fallback={<LoadingFallback />}>
                 <CategoryGrid />
               </Suspense>
-            </motion.div>
+            </motion.div> */}
 
             {/* Featured Products */}
-            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="featured">
+            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="featured">
               <motion.div variants={slideUp}>
                 <Suspense fallback={<LoadingFallback />}>
                   {(visibleSections.featured || featuredProducts.length > 0) && (
@@ -794,6 +795,22 @@ export default function Home() {
                       products={featuredProducts} 
                       loading={loadingFeatured} 
                       error={featuredError}
+                      brands={brands}
+                    />
+                  )}
+                </Suspense>
+              </motion.div>
+            </motion.div> */}
+
+                   {/* New Products */}
+                   <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="new">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  {(visibleSections.new || newProducts.length > 0) && (
+                    <NewProducts 
+                      products={newProducts} 
+                      loading={loadingNew} 
+                      error={newError}
                       brands={brands}
                     />
                   )}
@@ -817,24 +834,10 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
-            {/* New Products */}
-            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="new">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  {(visibleSections.new || newProducts.length > 0) && (
-                    <NewProducts 
-                      products={newProducts} 
-                      loading={loadingNew} 
-                      error={newError}
-                      brands={brands}
-                    />
-                  )}
-                </Suspense>
-              </motion.div>
-            </motion.div>
+     
 
             {/* Brands */}
-            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="brands">
+            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="brands">
               <motion.div variants={slideUp}>
                 <Suspense fallback={<LoadingFallback />}>
                   <BrandLogos 
@@ -844,13 +847,21 @@ export default function Home() {
                   />
                 </Suspense>
               </motion.div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Blog Posts */}
-            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="blog">
+            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="blog">
               <motion.div variants={slideUp}>
                 <Suspense fallback={<LoadingFallback />}>
                   <BlogPosts />
+                </Suspense>
+              </motion.div>
+            </motion.div> */}
+            {/* Support Section */}
+            <motion.div variants={staggerContainer} className="scroll-trigger" id="support">
+              <motion.div variants={slideUp}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <SupportSection />
                 </Suspense>
               </motion.div>
             </motion.div>

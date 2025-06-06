@@ -40,7 +40,7 @@ export default function NewProducts({
       <div className="container mx-auto relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 uppercase">
-            Mới Cập Nhật
+            Mới lên kệ
           </h2>
           {!loading && products.length > 0 && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
