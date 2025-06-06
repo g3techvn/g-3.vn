@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as Dialog from '@radix-ui/react-dialog';
 
 type BenefitsObject = {
   benefits?: string[];
@@ -95,6 +96,9 @@ export function ProductDescription({
     }
   };
 
+  const [expanded, setExpanded] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Don't render if there are no tabs with content
   if (availableTabs.length === 0) {
     return null;
@@ -145,7 +149,37 @@ export function ProductDescription({
               >
                 <Tabs.Content value="overview" className="data-[state=inactive]:hidden">
                   {content ? (
-                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+                    <div>
+                      <div
+                        className="prose max-w-none line-clamp-3 overflow-hidden"
+                        dangerouslySetInnerHTML={{ __html: content }}
+                      />
+                      <div className="flex justify-center">
+                        <button
+                          className="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 font-semibold shadow"
+                          onClick={() => setIsModalOpen(true)}
+                        >
+                          Xem thêm
+                        </button>
+                      </div>
+                      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+                        <Dialog.Portal>
+                          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" />
+                          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl p-6 z-50 mx-auto">
+                            <Dialog.Title className="text-2xl font-bold mb-4 text-center">Thông tin chi tiết</Dialog.Title>
+                            <div 
+                              className="prose max-w-none mx-auto"
+                              dangerouslySetInnerHTML={{ __html: content }}
+                            />
+                            <Dialog.Close className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                              </svg>
+                            </Dialog.Close>
+                          </Dialog.Content>
+                        </Dialog.Portal>
+                      </Dialog.Root>
+                    </div>
                   ) : (
                     <p className="text-gray-600">
                       {overview}
