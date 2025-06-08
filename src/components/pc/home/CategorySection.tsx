@@ -56,7 +56,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, image, 
     return (
       <Link
         href={href}
-        className="group relative flex flex-col h-full min-h-[420px] rounded-xl overflow-hidden bg-white"
+        className="group relative flex flex-col h-full min-h-[420px] rounded-xl overflow-hidden bg-white mx-0"
       >
         <Image
           src={image}
@@ -66,7 +66,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, image, 
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 px-5 px-4 py-5 z-10 flex justify-between items-center">
+        <div className="absolute bottom-0 left-0 right-0 px-5 py-5 z-10 flex justify-between items-center">
           <div>
             <div className="text-2xl font-semibold text-white">
               {title}
@@ -84,14 +84,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, image, 
   return (
     <Link
       href={href}
-      className="group flex flex-col h-full rounded-xl overflow-hidden "
+      className="group flex flex-col h-full rounded-xl "
     >
       <div className="relative aspect-square  w-full">
         <Image
           src={image}
           alt={title}
           fill
-          className="object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-500 ease-in-out"
+          className="object-cover rounded-xl shadow-lg overflow-hidden  hover:shadow-xl transition-shadow duration-300 group-hover:scale-105 transition-transform duration-500 ease-in-out"
         />
       </div>
       <div className="flex-1 flex justify-between items-center px-5 px-4 py-5">
@@ -115,7 +115,7 @@ const CategorySection: React.FC = () => {
       title: "All Products",
       description: "Xem các sản phẩm của chúng tôi",
       image: "https://hyperwork.vn/cdn/shop/files/DSC03313.jpg?v=1738725813&width=1080",
-      href: "/"
+      href: "/san-pham"
     },
     {
       title: "Desks",
@@ -127,7 +127,7 @@ const CategorySection: React.FC = () => {
       title: "Chairs",
       description: "Ghế công thái học",
       image: "https://hyperwork.vn/cdn/shop/files/Capture_One_Catalog05971_11zon.svg?v=1741830770&width=1080",
-      href: "/"
+      href: "/categories/ghe-cong-thai-hoc"
     },
     {
       title: "Keyboards & Mice",
@@ -144,33 +144,35 @@ const CategorySection: React.FC = () => {
   ];
 
   return (
-    <section className="container mx-auto py-12">
+    <section className="relative py-12">
       <style jsx global>{swiperStyles}</style>
-      <div className="relative">
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={24}
-          slidesPerView={1}
-          navigation
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-            },
-            1024: {
-              slidesPerView: 4,
-            },
-          }}
-          className="category-swiper"
-        >
-          {categories.map((category, idx) => (
-            <SwiperSlide key={category.title} className={idx === 0 ? 'first-slide' : ''}>
-              <CategoryCard
-                {...category}
-                isFirst={idx === 0}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+      <div className="w-full mx-auto px-4 sm:px-6">
+        <div className="relative -mx-4 sm:-mx-6">
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={24}
+            slidesPerView={1.2}
+            navigation
+            breakpoints={{
+              640: {
+                slidesPerView: 2.2,
+              },
+              1024: {
+                slidesPerView: 4.2,
+              },
+            }}
+            className="category-swiper px-4 sm:px-6"
+          >
+            {categories.map((category, idx) => (
+              <SwiperSlide key={category.title} className={idx === 0 ? 'first-slide' : ''}>
+                <CategoryCard
+                  {...category}
+                  isFirst={idx === 0}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
     </section>
   );
