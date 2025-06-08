@@ -52,11 +52,10 @@ interface CategoryCardProps {
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, image, href, isFirst }) => {
   if (isFirst) {
-    // Card đầu: ảnh phủ full, không bo góc
     return (
       <Link
         href={href}
-        className="group relative flex flex-col h-full min-h-[420px] rounded-xl overflow-hidden bg-white"
+        className="group relative flex flex-col h-full min-h-[360px] rounded-xl overflow-hidden bg-white"
       >
         <Image
           src={image}
@@ -80,13 +79,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, image, 
       </Link>
     );
   }
-  // Card còn lại: ảnh bo góc rounded-xl
   return (
     <Link
       href={href}
-      className="group flex flex-col h-full rounded-xl overflow-hidden "
+      className="group flex flex-col h-full rounded-xl overflow-hidden"
     >
-      <div className="relative aspect-square  w-full">
+      <div className="relative w-full" style={{ paddingTop: '150%' }}>
         <Image
           src={image}
           alt={title}
