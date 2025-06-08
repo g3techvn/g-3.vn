@@ -7,6 +7,7 @@ import { useDomain } from '@/context/domain-context';
 
 // Lazy loaded components
 const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
+const CategorySection = lazy(() => import('@/components/pc/home/CategorySection'));
 const CategoryGrid = lazy(() => import('@/components/pc/home/CategoryGrid'));
 const FeaturedProducts = lazy(() => import('@/components/pc/product/FeaturedProducts'));
 const ComboProduct = lazy(() => import('@/components/pc/product/ComboProduct'));
@@ -779,8 +780,15 @@ export default function Home() {
               </Suspense>
             </motion.div>
 
+            {/* Category Section */}
+            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
+              <Suspense fallback={<LoadingFallback />}>
+                <CategorySection />
+              </Suspense>
+            </motion.div>
+
             {/* Category Grid */}
-            {/* <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
+            {/* <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories-grid">
               <Suspense fallback={<LoadingFallback />}>
                 <CategoryGrid />
               </Suspense>

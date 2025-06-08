@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { ArrowRight, User, ShoppingBag, Gift, ShoppingCart, Facebook, Youtube, Cake } from 'lucide-react';
+import Image from 'next/image';
 
 export default function RewardsPage() {
   return (
@@ -11,23 +12,25 @@ export default function RewardsPage() {
         <div className="bg-[#f9fafb] rounded-2xl p-8 flex items-center justify-between">
           <div className="space-y-4">
             <div className="text-[#F2994A] uppercase tracking-wider text-sm font-medium">G3-TECH REWARDS</div>
-            <h1 className="text-4xl font-bold">
-              Tích điểm đổi quà, mua sắm<br />
-              thêm vui
-            </h1>
-            <div className="flex gap-4">
-              <Button className="bg-black text-white rounded-full hover:bg-neutral-800">
-                Đăng nhập <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="rounded-full border-2 border-black hover:bg-black hover:text-white">
-                Bạn chưa có tài khoản? Đăng ký
-              </Button>
-            </div>
+                          <h1 className="text-4xl font-bold">
+                Tích điểm đổi quà, mua sắm<br />
+                thêm vui
+              </h1>
+              <div className="flex gap-4">
+                <Button className="bg-black text-white rounded-full hover:bg-neutral-800">
+                  Đăng nhập <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" className="rounded-full border-2 border-black hover:bg-black hover:text-white">
+                  Bạn chưa có tài khoản? Đăng ký
+                </Button>
+              </div>
           </div>
           <div className="relative">
-            <img
+            <Image
               src="/images/rewards-hero.png"
               alt="Rewards illustration"
+              width={300}
+              height={300}
               className="w-[300px] h-auto"
             />
           </div>
@@ -37,7 +40,7 @@ export default function RewardsPage() {
       {/* Section: Hướng dẫn tham gia chương trình Rewards */}
       <section className="container mx-auto  py-16">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-left mb-4">Đổi điểm nhận quà, dễ hơn "ăn kẹo"</h2>
+          <h2 className="text-4xl font-bold text-left mb-4">Đổi điểm nhận quà, dễ hơn &quot;ăn kẹo&quot;</h2>
           <p className="text-left text-gray-600 mb-12">Nhận phần thưởng chỉ trong vài bước đơn giản.</p>
           <div className="grid grid-cols-3 gap-6">
             {/* Bước 1 */}
@@ -85,8 +88,8 @@ export default function RewardsPage() {
       {/* Section: Cách nhận điểm thưởng */}
       <section className="container mx-auto py-16 bg-[#f9fafb]">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-4">Chỉ vài bước - Nhận hơn 2000 điểm thưởng!</h2>
-          <p className="text-center text-gray-600 mb-12">Theo dõi Fanpage, đăng ký Youtube, nhập sinh nhật - mỗi click nhận ngay 500 điểm.</p>
+          <h2 className="text-4xl font-bold text-center mb-4">Chỉ vài bước &ndash; Nhận hơn 2000 điểm thưởng!</h2>
+          <p className="text-center text-gray-600 mb-12">Theo dõi Fanpage, đăng ký Youtube, nhập sinh nhật &ndash; mỗi click nhận ngay 500 điểm.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Card 1 */}
@@ -139,7 +142,7 @@ export default function RewardsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
             {/* Bronze Card */}
             <div className="bg-[#FDF7F2] rounded-xl p-6">
-              <img src="https://G3-TECH.vn/cdn/shop/files/bronze_5569af24-9bed-4787-9485-5af1607cf987.svg?v=1747280761&width=488" alt="Bronze" className="w-full h-auto mb-4" />
+              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/bronze.svg?t=2025-06-07T04%3A55%3A17.811Z" alt="Bronze" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Bronze</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 500 điểm</li>
@@ -150,7 +153,7 @@ export default function RewardsPage() {
 
             {/* Silver Card */}
             <div className="bg-[#F9FAFB] rounded-xl p-6">
-              <img src="https://G3-TECH.vn/cdn/shop/files/silver_0f327e74-8cc6-40cd-951f-c56534821201.svg?v=1747281134&width=488" alt="Silver" className="w-full h-auto mb-4" />
+              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/silver.svg?t=2025-06-07T04%3A55%3A33.086Z" alt="Silver" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Silver</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 10,000 điểm</li>
@@ -163,7 +166,7 @@ export default function RewardsPage() {
 
             {/* Gold Card */}
             <div className="bg-[#FDF7F2] rounded-xl p-6">
-              <img src="https://G3-TECH.vn/cdn/shop/files/gold_e75cee2c-aabe-42db-b972-3c05ab13cdc4.svg?v=1747282083&width=488" alt="Gold" className="w-full h-auto mb-4" />
+              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/gold.svg?t=2025-06-07T04%3A55%3A38.214Z" alt="Gold" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Gold</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 20,000 điểm</li>
@@ -175,8 +178,8 @@ export default function RewardsPage() {
             </div>
 
             {/* Titan Card */}
-            <div className="  rounded-xl p-6">
-              <img src="https://G3-TECH.vn/cdn/shop/files/bronze11.svg?v=1747282888&width=488" alt="Titan" className="w-full h-auto mb-4" />
+            <div className="rounded-xl p-6">
+              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/titan.svg" alt="Titan" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Titan</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 30,000 điểm</li>
