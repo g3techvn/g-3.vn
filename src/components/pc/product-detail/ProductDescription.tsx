@@ -164,7 +164,7 @@ export function ProductDescription({
                       </div>
                       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
                         <Dialog.Portal>
-                          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" />
+                          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center" />
                           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl p-6 z-50 mx-auto">
                             <Dialog.Title className="text-2xl font-bold mb-4 text-center">Thông tin chi tiết</Dialog.Title>
                             <div 

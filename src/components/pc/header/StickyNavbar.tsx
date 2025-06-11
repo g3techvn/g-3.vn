@@ -143,7 +143,7 @@ export default function StickyNavbar() {
       {/* Main Navigation */}
       <div 
         className={cn(
-          "fixed left-0 top-0 z-[101] bg-white dark:bg-gray-900 shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col border-r border-gray-200 dark:border-gray-800",
+          "fixed left-0 top-0 z-[101] bg-white/30 backdrop-blur-md dark:bg-gray-900 shadow-lg transition-all duration-300 overflow-hidden h-screen flex flex-col border-r border-gray-200 dark:border-gray-800",
           isSticky ? "w-[250px]" : "w-[60px]"
         )}
         onMouseEnter={() => setIsSticky(true)}
@@ -152,7 +152,7 @@ export default function StickyNavbar() {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className={cn(
-            "bg-white dark:bg-gray-900 py-4 text-red-600 dark:text-red-500 font-medium transition-all duration-300 h-14 flex items-center border-b border-gray-200 dark:border-gray-800",
+            " dark:bg-gray-900 py-4 text-red-600 dark:text-red-500 font-medium transition-all duration-300 h-14 flex items-center border-b border-gray-200 dark:border-gray-800",
             isSticky ? "px-4" : "px-0 justify-center"
           )}>
             <span className={cn(
@@ -170,7 +170,7 @@ export default function StickyNavbar() {
           </div>
           
           {/* Categories List */}
-          <ul className="py-2 flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+          <ul className="py-2 flex-1 overflow-y-auto  dark:bg-gray-900">
             {loading ? (
               <li className="px-4 py-2 text-gray-400 dark:text-gray-500">Đang tải...</li>
             ) : error ? (
@@ -222,7 +222,7 @@ export default function StickyNavbar() {
           <div className="px-2">
             <a 
               href={`tel:${COMPANY_INFO.hotline}`}
-              className="flex flex-col text-red-600 dark:text-red-500 font-medium text-sm mb-3 border-2 border-red-600 dark:border-red-500 rounded-lg p-3 shadow-sm w-full bg-white dark:bg-gray-900/50"
+              className="flex flex-col text-red-600 dark:text-red-500 font-medium text-sm mb-3 border-2 border-red-600 dark:border-red-500 rounded-lg p-3 shadow-sm w-full bg-white/30 backdrop-blur-md dark:bg-gray-900/50"
             >
               <span className="inline-flex items-center justify-center mb-1">
                 <span className="bg-red-600 dark:bg-red-500 rounded-full p-1 mr-2">
@@ -267,9 +267,9 @@ export default function StickyNavbar() {
             </Link>
 
             {/* Theme Toggle Button */}
-            <div className="w-full flex justify-center mt-2">
+            {/* <div className="w-full flex justify-center mt-2">
               <ThemeToggle />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

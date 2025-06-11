@@ -53,7 +53,7 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
       className={`fixed container mx-auto left-0 right-16 bottom-2 z-50 flex justify-center transition-all duration-300 ${show ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-8 pointer-events-none'} translate-x-16`}
       style={{ width: '100%' }}
     >
-      <div className="container mx-auto bg-white border border-gray-200 shadow-lg py-2 rounded-md flex items-center justify-between px-4">
+      <div className="container mx-auto bg-white/30 backdrop-blur-md border border-gray-200 shadow-lg py-2 rounded-md flex items-center justify-between px-4">
         <div className="flex items-center space-x-4">
           <div className="relative w-12 h-12">
             <Image

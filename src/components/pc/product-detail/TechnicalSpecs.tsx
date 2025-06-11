@@ -15,7 +15,7 @@ export function TechnicalSpecs({ specifications }: TechnicalSpecsProps) {
   const visibleSpecs = expanded ? specifications : specifications.slice(0, 4);
   const hasMore = specifications.length > 4;
   return (
-    <div className="bg-gray-50 rounded-lg p-6 sticky top-20">
+    <div className="bg-gray-50 rounded-lg shadow-sm p-6 sticky top-20">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông số kỹ thuật</h3>
       <div>
         {visibleSpecs.map((spec, index) => (

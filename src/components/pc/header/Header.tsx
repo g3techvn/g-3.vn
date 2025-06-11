@@ -121,7 +121,7 @@ const Header: React.FC = () => {
       
       {/* Top Header Section */}
       <div 
-        className={`container mx-auto bg-white px-4 py-3 rounded-lg 
+        className={`container mx-auto bg-gray-100/30 backdrop-blur-md px-4 py-3 rounded-lg 
           ${isSticky ? 'fixed top-2 left-0 translate-x-16 right-16 z-50 shadow-md px-4 md:mx-auto mx-0' : ''}`}>
         <div className="flex items-center justify-between">
           {/* Logo */}
