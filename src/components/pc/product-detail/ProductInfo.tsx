@@ -66,7 +66,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       animate="visible"
       variants={staggerChildren}
     >
-      <motion.div variants={fadeIn}>
+      {/* <motion.div variants={fadeIn}>
         <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
         {product.brand && (
           <p className="text-lg text-gray-600 mt-2">Thương hiệu: {product.brand}</p>
@@ -101,7 +101,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             -{product.discount_percentage}%
           </motion.span>
         )}
-      </motion.div>
+      </motion.div> */}
 
       <motion.div 
         className="flex gap-4 relative"

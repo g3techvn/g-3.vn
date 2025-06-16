@@ -1,4 +1,4 @@
-import { Product, Brand } from '@/types';
+import { Product, Brand, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -34,27 +34,26 @@ interface Comment {
   };
 }
 
-interface MobileProductDetailProps {
+export interface MobileProductDetailProps {
   product: Product;
-  galleryImages?: string[];
-  videoInfo?: {
+  galleryImages: string[];
+  videoInfo: {
     videoUrl: string;
     thumbnail: string;
   };
-  comments?: Comment[];
-  ratingSummary?: {
+  comments: any[];
+  ratingSummary: {
     average: number;
     total: number;
-    stars: {
-      star: number;
-      count: number;
-    }[];
+    stars: { star: number; count: number; }[];
   };
-  technicalSpecs?: Array<{ name: string; value: string }>;
-  keyFeatures?: string[];
-  benefits?: string[];
-  instructions?: string[];
-  overview?: string;
+  technicalSpecs: { name: string; value: string; }[];
+  keyFeatures: string[];
+  benefits: string[];
+  instructions: string[];
+  overview: string;
+  selectedVariant: ProductVariant | null;
+  onSelectVariant: (variant: ProductVariant) => void;
 }
 
 // Gallery item types
@@ -72,7 +71,7 @@ type GalleryImage = {
 };
 type GalleryItem = GalleryVideo | GalleryImage;
 
-export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary, technicalSpecs = [], keyFeatures, benefits, instructions, overview }: MobileProductDetailProps) {
+export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary, technicalSpecs = [], keyFeatures, benefits, instructions, overview, selectedVariant, onSelectVariant }: MobileProductDetailProps) {
   const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
   

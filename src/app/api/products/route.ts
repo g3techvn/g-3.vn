@@ -70,7 +70,8 @@ export async function GET(request: Request) {
               )
             )
           `)
-          .eq('sector_id', domainSectorId);
+          .eq('sector_id', domainSectorId)
+          .eq('products.status', true);
         
         if (productSectorError) {
           console.error('Supabase product_sectors error:', productSectorError);
@@ -104,8 +105,26 @@ export async function GET(request: Request) {
           *,
           brands:brand_id (
             title
+          ),
+          variants:product_variants(
+            id,
+            product_id,
+            color,
+            size,
+            weight,
+            price,
+            original_price,
+            image_url,
+            gallery_url,
+            sku,
+            stock_quantity,
+            is_default,
+            created_at,
+            is_dropship,
+            gac_chan
           )
-        `);
+        `)
+        .eq('status', true);
       
       // Add filter conditions
       if (category_id) {
@@ -157,10 +176,11 @@ export async function GET(request: Request) {
       if (fetchedProducts && Array.isArray(fetchedProducts)) {
         for (const item of fetchedProducts) {
           if (item && typeof item === 'object' && 'id' in item && 'name' in item) {
-            // Add brand name to product
+            // Add brand name and variants to product
             products.push({
               ...item,
-              brand: (item as Product & { brands?: { title: string } }).brands?.title
+              brand: (item as Product & { brands?: { title: string } }).brands?.title,
+              variants: (item as any).variants || []
             });
           }
         }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product } from '@/types';
+import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import { ProductGallery } from './ProductGallery';
 import { ProductInfo } from './ProductInfo';
@@ -10,6 +10,8 @@ import { ReviewsSection } from './ReviewsSection';
 import { SimilarProducts } from './SimilarProducts';
 import * as Separator from '@radix-ui/react-separator';
 import { motion } from 'framer-motion';
+import { ProductVariants } from './ProductVariants';
+import { formatCurrency } from '@/utils/helpers';
 
 interface Comment {
   id: string;
@@ -30,7 +32,7 @@ interface Comment {
 // Define the benefits type to match what's used in ProductDescription
 type Benefits = string[] | { benefits: string[] } | string;
 
-interface ProductDetailDesktopProps {
+export interface ProductDetailDesktopProps {
   product: Product;
   galleryImages: string[];
   isLoadingGallery: boolean;
@@ -42,18 +44,17 @@ interface ProductDetailDesktopProps {
   ratingSummary: {
     average: number;
     total: number;
-    stars: {
-      star: number;
-      count: number;
-    }[];
+    stars: { star: number; count: number; }[];
   };
   similarProducts: Product[];
   loadingSimilar: boolean;
-  technicalSpecs?: Array<{ name: string; value: string }> | Array<{ title: string; value: string }>;
-  keyFeatures?: string[];
-  benefits?: Benefits;
-  instructions?: string[];
-  overview?: string;
+  technicalSpecs: Array<{ name?: string; title?: string; value: string; }>;
+  keyFeatures: string[];
+  benefits: Benefits;
+  instructions: string[];
+  overview: string;
+  selectedVariant: ProductVariant | null;
+  onSelectVariant: (variant: ProductVariant) => void;
 }
 
 export function ProductDetailDesktop({
@@ -65,21 +66,28 @@ export function ProductDetailDesktop({
   ratingSummary,
   similarProducts,
   loadingSimilar,
-  technicalSpecs = [],
+  technicalSpecs,
   keyFeatures,
   benefits,
   instructions,
-  overview
+  overview,
+  selectedVariant,
+  onSelectVariant
 }: ProductDetailDesktopProps) {
   
   // Create galleryItems based on product and fetched gallery images
   const galleryItems = [
-    ...(product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
+    ...(selectedVariant?.image_url ? [{ type: 'image' as const, url: selectedVariant.image_url }] : 
+       product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
     { type: 'video' as const, url: '', videoUrl: videoInfo.videoUrl, thumbnail: videoInfo.thumbnail },
     ...galleryImages
-      .filter(url => url !== product?.image_url)
+      .filter(url => url !== product?.image_url && url !== selectedVariant?.image_url)
       .map(url => ({ type: 'image' as const, url }))
   ];
+
+  // Get current price and original price based on selected variant
+  const currentPrice = selectedVariant?.price || product.price;
+  const originalPrice = selectedVariant?.original_price || product.original_price;
   
   // Navigation scroll handler
   const scrollToSection = (id: string) => {
@@ -107,8 +115,6 @@ export function ProductDetailDesktop({
         ]}
       />
       
-   
-
       <div className="mt-8" id="overview">
         {/* Product Content */}
         <motion.div 
@@ -138,7 +144,34 @@ export function ProductDetailDesktop({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <ProductInfo product={product} />
+            <div className="space-y-6">
+              {/* Product Name */}
+              <h1 className="text-3xl font-bold">{product.name}</h1>
+
+              {/* Price Section */}
+              <div className="flex items-center gap-4">
+                <span className="text-3xl font-bold text-primary">
+                  {formatCurrency(currentPrice)}
+                </span>
+                {originalPrice && originalPrice > currentPrice && (
+                  <span className="text-lg text-gray-500 line-through">
+                    {formatCurrency(originalPrice)}
+                  </span>
+                )}
+              </div>
+              
+              {/* Variants Selection */}
+              {product.variants && product.variants.length > 0 && (
+                <ProductVariants
+                  variants={product.variants}
+                  selectedVariant={selectedVariant}
+                  onSelectVariant={onSelectVariant}
+                />
+              )}
+
+              {/* Product Features & Info */}
+              <ProductInfo product={product} />
+            </div>
           </motion.div>
         </motion.div>
 

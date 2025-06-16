@@ -36,8 +36,28 @@ export async function GET(
     // Then get all products for this brand
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('*')
-      .eq('brand_id', brand.id);
+      .select(`
+        *,
+        variants:product_variants(
+          id,
+          product_id,
+          color,
+          size,
+          weight,
+          price,
+          original_price,
+          image_url,
+          gallery_url,
+          sku,
+          stock_quantity,
+          is_default,
+          created_at,
+          is_dropship,
+          gac_chan
+        )
+      `)
+      .eq('brand_id', brand.id)
+      .eq('status', true);
 
     if (productsError) {
       console.error('Supabase error:', productsError);

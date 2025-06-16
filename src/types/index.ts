@@ -1,5 +1,23 @@
 // Định nghĩa các types chính cho dự án
 
+export type ProductVariant = {
+  id: number;
+  product_id: number;
+  color: string;
+  size: string;
+  weight: number;
+  price: number;
+  original_price: number;
+  image_url: string;
+  gallery_url: string;
+  sku: string;
+  stock_quantity: number;
+  is_default: boolean;
+  created_at: string;
+  is_dropship: boolean;
+  gac_chan: boolean;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -26,6 +44,8 @@ export type Product = {
   thong_so_ky_thuat?: { [key: string]: { title: string; value: string } };
   tinh_nang?: string | string[];
   loi_ich?: string | string[];
+  status?: boolean;
+  variants?: ProductVariant[];
 };
 
 export type Category = {
@@ -108,4 +128,14 @@ export type BlogPost = {
   author_id: string;
   created_at: string;
   updated_at: string;
+};
+
+export type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  original_price?: number;
+  quantity: number;
+  image: string;
+  variant?: ProductVariant;
 }; 

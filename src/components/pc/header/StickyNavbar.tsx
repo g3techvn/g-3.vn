@@ -215,7 +215,7 @@ export default function StickyNavbar() {
         
         {/* Footer */}
         <div className={cn(
-          "bg-gray-50 dark:bg-gray-800/50 py-2 px-4 transition-all duration-300 absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800",
+          "py-2 px-4 transition-all duration-300 absolute bottom-0 left-0 right-0",
           !showText && "hidden"
         )}>
           {/* Hotline */}

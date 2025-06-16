@@ -2,7 +2,7 @@
 
 import React, { use, useCallback } from 'react';
 import { useState, useEffect } from 'react';
-import { Product } from '@/types';
+import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
 import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
@@ -18,6 +18,7 @@ import { ProductDetailDesktop } from '@/components/pc/product-detail/ProductDeta
 import { Metadata } from 'next';
 import { generateMetadata } from '@/app/metadata';
 import { FloatProductAction } from '@/components/pc/product-detail/FloatProductAction';
+import { ProductVariants } from '@/components/pc/product-detail/ProductVariants';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -73,6 +74,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const { slug } = use(params);
   const { addToCart } = useCart();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,8 +250,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         const response = await fetch(`/api/products/${slug}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log("Product data:", data.product); // Log product data to check content field
+        console.log("Product data:", data.product);
         setProduct(data.product);
+        
+        // Set default variant if available
+        if (data.product?.variants?.length > 0) {
+          const defaultVariant = data.product.variants.find((v: ProductVariant) => v.is_default) || data.product.variants[0];
+          setSelectedVariant(defaultVariant);
+        }
         
         // Set product detail sections data
         if (data.product) {
@@ -487,6 +495,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           benefits={benefits}
           instructions={instructions}
           overview={overview}
+          selectedVariant={selectedVariant}
+          onSelectVariant={setSelectedVariant}
         />
       </div>
 
@@ -509,11 +519,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           benefits={benefits}
           instructions={instructions}
           overview={overview}
+          selectedVariant={selectedVariant}
+          onSelectVariant={setSelectedVariant}
         />
       </div>
 
       {/* Float Product Action */}
-      <FloatProductAction product={product} />
+      <FloatProductAction 
+        product={product} 
+        selectedVariant={selectedVariant}
+      />
     </>
   );
 } 

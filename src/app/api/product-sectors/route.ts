@@ -58,7 +58,8 @@ export async function GET(request: Request) {
         product_id,
         products:product_id (*)
       `)
-      .eq('sector_id', targetSectorId);
+      .eq('sector_id', targetSectorId)
+      .eq('products.status', true);
     
     if (productSectorError) {
       console.error('Supabase product_sectors error:', productSectorError);

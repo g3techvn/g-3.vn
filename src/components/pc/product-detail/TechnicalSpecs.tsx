@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import * as Separator from '@radix-ui/react-separator';
 
 interface Specification {
-  title: string;
+  title?: string;
+  name?: string;
   value: string;
 }
 

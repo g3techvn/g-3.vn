@@ -1,52 +1,71 @@
 import React from 'react';
 import Image from 'next/image';
-import { Product } from '@/types';
+import { Product, ProductVariant, CartItem } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useEffect, useRef, useState } from 'react';
+import { formatCurrency } from '@/utils/helpers';
 
-interface FloatProductActionProps {
+export interface FloatProductActionProps {
   product: Product;
+  selectedVariant: ProductVariant | null;
 }
 
-export function FloatProductAction({ product }: FloatProductActionProps) {
+export function FloatProductAction({ product, selectedVariant }: FloatProductActionProps) {
   const { addToCart } = useCart();
   const [show, setShow] = useState(true);
   const lastScrollY = useRef(0);
   const lastTimestamp = useRef(Date.now());
   const SCROLL_SPEED_THRESHOLD = 200; // px per second
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const handleAddToCart = () => {
-    const cartItem = {
-      ...product,
-      quantity: 1,
-      image: product.image_url || ''
-    };
-    addToCart(cartItem);
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    try {
+      const cartItem: CartItem = {
+        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+        name: product.name,
+        price: selectedVariant?.price || product.price,
+        original_price: selectedVariant?.original_price || product.original_price,
+        quantity: 1,
+        image: selectedVariant?.image_url || product.image_url || '',
+        variant: selectedVariant || undefined
+      };
+      await addToCart(cartItem);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const now = Date.now();
-      const deltaY = Math.abs(currentScrollY - lastScrollY.current);
-      const deltaTime = now - lastTimestamp.current;
-      const speed = deltaTime > 0 ? (deltaY / (deltaTime / 1000)) : 0; // px/sec
+      const currentTimestamp = Date.now();
+      const timeDiff = currentTimestamp - lastTimestamp.current;
+      const scrollDiff = Math.abs(currentScrollY - lastScrollY.current);
+      const scrollSpeed = (scrollDiff / timeDiff) * 1000;
 
-      if (speed > SCROLL_SPEED_THRESHOLD) {
+      if (scrollSpeed > SCROLL_SPEED_THRESHOLD) {
         if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
           // Scrolling down fast
-          setShow(true);
+          setShow(false);
         } else if (currentScrollY < lastScrollY.current) {
           // Scrolling up fast
-          setShow(false);
+          setShow(true);
         }
       }
+
       lastScrollY.current = currentScrollY;
-      lastTimestamp.current = now;
+      lastTimestamp.current = currentTimestamp;
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const currentPrice = selectedVariant?.price || product.price;
+  const originalPrice = selectedVariant?.original_price || product.original_price;
 
   return (
     <div
@@ -57,7 +76,7 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
         <div className="flex items-center space-x-4">
           <div className="relative w-12 h-12">
             <Image
-              src={product.image_url || '/placeholder.png'}
+              src={selectedVariant?.image_url || product.image_url || '/placeholder.png'}
               alt={product.name}
               fill
               className="object-contain"
@@ -66,11 +85,11 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
           </div>
           <div>
             <div className="text-red-600 font-bold">
-              {product.price.toLocaleString()}đ
+              {formatCurrency(currentPrice)}
             </div>
-            {product.original_price && (
+            {originalPrice && originalPrice > currentPrice && (
               <div className="text-gray-500 line-through text-sm">
-                {product.original_price.toLocaleString()}đ
+                {formatCurrency(originalPrice)}
               </div>
             )}
           </div>
@@ -79,18 +98,20 @@ export function FloatProductAction({ product }: FloatProductActionProps) {
         <div className="flex-1 text-center px-4">
           <div className="font-medium text-gray-900 line-clamp-1">
             {product.name}
+            {selectedVariant && ` - ${selectedVariant.color}`}
           </div>
         </div>
 
         <div className="flex items-center space-x-3">
           <button
             onClick={handleAddToCart}
-            className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition-colors"
+            disabled={isAddingToCart}
+            className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
           >
-            Thêm vào giỏ
+            {isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ'}
           </button>
           <button
-            onClick={handleAddToCart}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
           >
             Mua ngay

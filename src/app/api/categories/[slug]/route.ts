@@ -41,8 +41,29 @@ export async function GET(request: Request) {
     
     let query = supabase
       .from('products')
-      .select('*, product_cats!inner(id, title, slug)')
-      .eq('product_cats.slug', slug);
+      .select(`
+        *,
+        product_cats!inner(id, title, slug),
+        variants:product_variants(
+          id,
+          product_id,
+          color,
+          size,
+          weight,
+          price,
+          original_price,
+          image_url,
+          gallery_url,
+          sku,
+          stock_quantity,
+          is_default,
+          created_at,
+          is_dropship,
+          gac_chan
+        )
+      `)
+      .eq('product_cats.slug', slug)
+      .eq('status', true);
     
     // If we have a sector ID, apply the filtering
     if (sectorId) {
