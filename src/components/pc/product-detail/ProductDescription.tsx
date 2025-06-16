@@ -78,23 +78,26 @@ export function ProductDescription({
   const [activeTab, setActiveTab] = React.useState(defaultTab);
 
   const tabContentVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    hidden: {
+      opacity: 0,
+      y: 20,
+    },
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1] as const,
+      },
     },
     exit: {
       opacity: 0,
-      y: -20,
+      y: 20,
       transition: {
-        duration: 0.2
-      }
-    }
-  };
+        duration: 0.2,
+      },
+    },
+  } as const;
 
   const [expanded, setExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);

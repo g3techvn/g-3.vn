@@ -14,7 +14,7 @@ export async function GET(
     // Query brand theo ID
     const { data: brand, error } = await supabase
       .from('brands')
-      .select('id, title, slug, created_at, image_url')
+      .select('id, title, slug, created_at, image_url, image_square_url')
       .eq('id', brandId)
       .single();
     

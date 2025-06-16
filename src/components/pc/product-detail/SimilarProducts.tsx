@@ -28,17 +28,20 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
+    hidden: { 
+      opacity: 0, 
+      y: 20 
+    },
+    visible: { 
+      opacity: 1, 
       y: 0,
       transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 24
       }
     }
-  };
+  } as const;
   
   return (
     <motion.div 

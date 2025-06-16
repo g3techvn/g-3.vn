@@ -170,7 +170,7 @@ export function ProductDetailDesktop({
               )}
 
               {/* Product Features & Info */}
-              <ProductInfo product={product} />
+              <ProductInfo product={product} selectedVariant={selectedVariant} />
             </div>
           </motion.div>
         </motion.div>

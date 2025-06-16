@@ -17,8 +17,9 @@ const BlogPosts = lazy(() => import('@/components/pc/home/BlogPosts'));
 const SupportSection = lazy(() => import('@/components/pc/home/support'));
 const MobileHomeHeader = lazy(() => import('@/components/mobile/MobileHomeHeader'));
 const MobileHomeTabs = lazy(() => import('@/components/mobile/MobileHomeTabs'));
-const MobileFeatureProduct = lazy(() => import('@/components/mobile/MobileFeatureProduct'));
-const MobileBestsellerProducts = lazy(() => import('@/components/mobile/MobileBestsellerProducts'));
+const MobileFeatureProduct = lazy(() => import('../components/mobile/MobileFeatureProduct'));
+const MobileBestsellerProducts = lazy(() => import('../components/mobile/MobileBestsellerProducts'));
+const HomeAdModal = lazy(() => import('../components/pc/common/HomeAdModal'));
 
 // Fallback loading component
 const LoadingFallback = () => (
@@ -60,7 +61,7 @@ const slideUp = {
   visible: { 
     y: 0, 
     opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 24 }
+    transition: { duration: 0.5 } 
   }
 };
 
@@ -724,6 +725,9 @@ export default function Home() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <HomeAdModal />
+      </Suspense>
       <PageLoadingOverlay isVisible={initialLoading} />
       
       {isMobile ? (

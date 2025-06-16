@@ -63,17 +63,20 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
 
   // Animation variants
   const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
+    hidden: { 
+      opacity: 0, 
+      y: 20 
+    },
+    visible: (i: number) => ({ 
+      opacity: 1, 
       y: 0,
       transition: {
-        delay: i * 0.05,
+        delay: i * 0.1,
         duration: 0.4,
-        ease: [0.43, 0.13, 0.23, 0.96]
+        ease: [0.4, 0, 0.2, 1] as const
       }
     })
-  };
+  } as const;
 
   return (
     <motion.div 

@@ -1,25 +1,40 @@
 import React, { useState } from 'react';
-import { Product } from '@/types';
+import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductInfoProps {
   product: Product;
+  selectedVariant: ProductVariant | null;
 }
 
-export function ProductInfo({ product }: ProductInfoProps) {
+export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
   const { addToCart } = useCart();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showVariantWarning, setShowVariantWarning] = useState(false);
 
   const handleAddToCart = () => {
+    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      setShowVariantWarning(true);
+      setTimeout(() => {
+        setShowVariantWarning(false);
+      }, 2000);
+      return;
+    }
+
     if (!isAddingToCart) {
       setIsAddingToCart(true);
       const cartItem = {
-        ...product,
+        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+        name: product.name,
+        price: selectedVariant?.price || product.price,
+        original_price: selectedVariant?.original_price || product.original_price,
         quantity: 1,
-        image: product.image_url || ''
+        image: selectedVariant?.image_url || product.image_url || '',
+        variant: selectedVariant || undefined
       };
       addToCart(cartItem);
       
@@ -39,14 +54,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   // Animation variants
   const fadeIn = {
     hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    }
+    visible: { opacity: 1, y: 0 }
   };
 
   const staggerChildren = {
@@ -103,6 +111,32 @@ export function ProductInfo({ product }: ProductInfoProps) {
         )}
       </motion.div> */}
 
+      {/* Success notification */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            className="absolute -top-12 left-0 right-0 bg-green-100 text-green-800 rounded-lg p-2 text-center font-medium"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            ✓ Đã thêm vào giỏ hàng
+          </motion.div>
+        )}
+        {showVariantWarning && (
+          <motion.div 
+            className="absolute -top-12 left-0 right-0 bg-yellow-100 text-yellow-800 rounded-lg p-2 text-center font-medium"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            Vui lòng chọn biến thể sản phẩm
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div 
         className="flex gap-4 relative"
         variants={fadeIn}
@@ -135,20 +169,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
           )}
           Thêm vào giỏ hàng
         </motion.button>
-        
-        {/* Success notification */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div 
-              className="absolute -top-12 left-0 right-0 bg-green-100 text-green-800 rounded-lg p-2 text-center font-medium"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              ✓ Đã thêm vào giỏ hàng
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
 
       {/* Policy Section */}
@@ -201,7 +221,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           >
             <WrenchScrewdriverIcon className="w-6 h-6 text-red-600 mt-0.5" />
             <div>
-              <span className="font-medium text-gray-800">Miễn phí lắp đặt tại Hà Nội và TP. Hồ Chí Minh</span>
+              <span className="font-medium text-gray-800">Hỗ trợ kỹ thuật trọn đời</span>
             </div>
           </motion.div>
         </motion.div>

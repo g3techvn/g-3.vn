@@ -67,7 +67,17 @@ export default function ProductList({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900">{item.name}</h3>
+                <h3 className="font-medium text-gray-900">
+                  {item.name}
+                  {item.variant && (
+                    <span className="text-gray-500 ml-1">
+                      - {item.variant.color}
+                      {item.variant.gac_chan !== undefined && (
+                        <span>{item.variant.gac_chan ? ' - Có kê chân' : ' - Không có kê chân'}</span>
+                      )}
+                    </span>
+                  )}
+                </h3>
                 <div className="mt-1">
                   {item.original_price && item.original_price > item.price && (
                     <div className="flex items-center gap-2">
