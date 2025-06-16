@@ -79,7 +79,12 @@ export function ProductDetailDesktop({
   const galleryItems = [
     ...(selectedVariant?.image_url ? [{ type: 'image' as const, url: selectedVariant.image_url }] : 
        product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
-    { type: 'video' as const, url: '', videoUrl: videoInfo.videoUrl, thumbnail: videoInfo.thumbnail },
+    ...(videoInfo.videoUrl && videoInfo.thumbnail ? [{ 
+      type: 'video' as const, 
+      url: '', 
+      videoUrl: videoInfo.videoUrl, 
+      thumbnail: videoInfo.thumbnail 
+    }] : []),
     ...galleryImages
       .filter(url => url !== product?.image_url && url !== selectedVariant?.image_url)
       .map(url => ({ type: 'image' as const, url }))

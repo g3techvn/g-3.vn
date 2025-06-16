@@ -202,18 +202,18 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   const currentComments = comments.length > 0 ? comments : defaultComments;
 
   // Video info - use videoInfo prop or fallback to default
-  const video: GalleryVideo = {
+  const video: GalleryVideo | null = videoInfo?.videoUrl && videoInfo?.thumbnail ? {
     type: 'video',
-    url: product.video_url || 'https://youtu.be/c2F2An3YU04?si=x4rVDMlPldHkkbYz',
-    embed: videoInfo?.videoUrl || 'https://www.youtube.com/embed/c2F2An3YU04',
-    thumbnail: videoInfo?.thumbnail || 'https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg',
+    url: product.video_url || '',
+    embed: videoInfo.videoUrl,
+    thumbnail: videoInfo.thumbnail,
     title: 'Video giới thiệu sản phẩm G3-TECH',
-  };
+  } : null;
 
   // Gallery: ảnh sản phẩm đầu tiên, sau đó video, sau đó các ảnh từ Supabase
   const galleryItems: GalleryItem[] = [
     ...(product.image_url ? [{ type: 'image' as const, src: product.image_url, alt: 'Ảnh sản phẩm' }] : []),
-    video,
+    ...(video ? [video] : []),
     ...localGalleryImages
       .filter((src) => src !== product.image_url)
       .map((src, idx) => ({ type: 'image' as const, src, alt: `Gallery image ${idx + 1}` })),

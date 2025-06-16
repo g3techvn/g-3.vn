@@ -191,12 +191,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       }
     }
     
-    // Fallback to default video if no valid video_url
-    return {
-      type: 'video' as const,
-      videoUrl: 'https://www.youtube.com/embed/c2F2An3YU04',
-      thumbnail: 'https://img.youtube.com/vi/c2F2An3YU04/hqdefault.jpg',
-    };
+    return null;
   };
   
   const video = getVideoInfo();
@@ -204,7 +199,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   // Create galleryItems based on product and fetched gallery images
   const galleryItems = [
     ...(product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
-    ...(product?.video_url ? [video] : []),
+    ...(video ? [video] : []),
     ...galleryImages
       .filter(url => url !== product?.image_url)
       .map(url => ({ type: 'image' as const, url }))
@@ -485,8 +480,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           product={product} 
           galleryImages={galleryImages}
           videoInfo={{
-            videoUrl: video.videoUrl,
-            thumbnail: video.thumbnail
+            videoUrl: video?.videoUrl || '',
+            thumbnail: video?.thumbnail || ''
           }}
           comments={comments}
           ratingSummary={ratingSummary}
@@ -507,8 +502,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           galleryImages={galleryImages}
           isLoadingGallery={isLoadingGallery}
           videoInfo={{
-            videoUrl: video.videoUrl,
-            thumbnail: video.thumbnail
+            videoUrl: video?.videoUrl || '',
+            thumbnail: video?.thumbnail || ''
           }}
           comments={comments}
           ratingSummary={ratingSummary}
