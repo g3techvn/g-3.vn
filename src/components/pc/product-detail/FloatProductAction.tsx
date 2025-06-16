@@ -103,18 +103,19 @@ export function FloatProductAction({ product, selectedVariant }: FloatProductAct
         </div>
 
         <div className="flex items-center space-x-3">
+         
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Mua ngay
+          </button>
           <button
             onClick={handleAddToCart}
             disabled={isAddingToCart}
             className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
           >
             {isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ'}
-          </button>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Mua ngay
           </button>
         </div>
       </div>

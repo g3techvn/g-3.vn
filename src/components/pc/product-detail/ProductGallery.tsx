@@ -38,7 +38,7 @@ export function ProductGallery({ productName, galleryItems, isLoadingGallery }: 
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (selectedIndex !== 0) return;
+    if (selectedIndex !== 0 || galleryItems[0]?.type !== 'video') return;
     // Handle YouTube Player API
     let currentPlayer: YTPlayer | null = null;
     function onPlayerReady(event: YTPlayerEvent) {
@@ -80,7 +80,7 @@ export function ProductGallery({ productName, galleryItems, isLoadingGallery }: 
     return () => {
       if (currentPlayer && currentPlayer.destroy) currentPlayer.destroy();
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, galleryItems]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current || galleryItems[selectedIndex]?.type === 'video') return;

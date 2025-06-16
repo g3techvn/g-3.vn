@@ -204,7 +204,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   // Create galleryItems based on product and fetched gallery images
   const galleryItems = [
     ...(product?.image_url ? [{ type: 'image' as const, url: product.image_url }] : []),
-    video,
+    ...(product?.video_url ? [video] : []),
     ...galleryImages
       .filter(url => url !== product?.image_url)
       .map(url => ({ type: 'image' as const, url }))
