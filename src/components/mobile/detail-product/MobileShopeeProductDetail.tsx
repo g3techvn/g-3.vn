@@ -41,7 +41,7 @@ export interface MobileProductDetailProps {
     videoUrl: string;
     thumbnail: string;
   };
-  comments: any[];
+  comments: Comment[];
   ratingSummary: {
     average: number;
     total: number;

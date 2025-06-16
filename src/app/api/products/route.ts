@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { Product } from '@/types';
+import { Product, ProductVariant } from '@/types';
 
 // Define type for the joined product_sectors query result
 interface ProductSectorJoin {
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
             products.push({
               ...item,
               brand: (item as Product & { brands?: { title: string } }).brands?.title,
-              variants: (item as any).variants || []
+              variants: (item as Product & { variants: ProductVariant[] }).variants || []
             });
           }
         }
