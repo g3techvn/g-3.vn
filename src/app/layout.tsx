@@ -2,7 +2,6 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Header from '@/components/pc/header/Header';
-import Footer from '@/components/pc/footer/Footer';
 import StickyNavbar from '@/components/pc/header/StickyNavbar';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import CartLayout from '@/components/layout/CartLayout';
@@ -11,6 +10,7 @@ import { Toaster } from 'react-hot-toast';
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { defaultMetadata } from './metadata';
+import Footer from '@/components/pc/footer/Footer';
 
 const inter = Inter({ 
   subsets: ['latin'],

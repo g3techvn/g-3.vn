@@ -1,8 +1,11 @@
+'use client';
+
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CallBox from './CallBox';
 import ZaloBox from './ZaloBox';
+import MapDrawer from './MapDrawer';
 import { COMPANY_INFO, SOCIAL_LINKS } from '../../../constants';
 
 // Type declarations for environment variables
@@ -78,7 +81,42 @@ function formatPhoneNumber(phoneNumber: string | number): string {
 
 const formattedPhoneNumber = formatPhoneNumber(COMPANY_INFO.hotline);
 
+const storeLocations = [
+  {
+    name: "G3 Tech - Phố Vọng",
+    address: "Số 128 Phố Vọng, Phương Liệt, Thanh Xuân, Hà Nội",
+    coordinates: {
+      lat: 20.995377,
+      lng: 105.845110
+    }
+  },
+  {
+    name: "G3 Tech - Nguyễn Văn Cừ",
+    address: "Số 4 ngách 12 ngõ 135 Nguyễn Văn Cừ, Ngọc Lâm, Long Biên, Hà Nội",
+    coordinates: {
+      lat: 21.044876,
+      lng: 105.870914
+    }
+  },
+  {
+    name: "G3 Tech - TP.HCM",
+    address: "Số 1/23 Huỳnh Lan Khanh, Phường 2, Tân Bình, TP.HCM",
+    coordinates: {
+      lat: 10.797180,
+      lng: 106.657372
+    }
+  }
+];
+
 export default function Footer() {
+  const [selectedLocation, setSelectedLocation] = React.useState<typeof storeLocations[0] | null>(null);
+  const [isMapOpen, setIsMapOpen] = React.useState(false);
+
+  const handleShowMap = (location: typeof storeLocations[0]) => {
+    setSelectedLocation(location);
+    setIsMapOpen(true);
+  };
+
   return (
     <footer className="bg-white text-gray-800">
       <div className="container mx-auto py-8 md:py-12 px-4 sm:px-6 lg:px-0">
@@ -138,14 +176,14 @@ export default function Footer() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm">Số 128 Phố Vọng, Phương Liệt, Thanh Xuân, Hà Nội (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                  <span className="text-sm">{storeLocations[0].address} (<button onClick={() => handleShowMap(storeLocations[0])} className="text-blue-600 underline">Chỉ đường</button>)</span>
                 </div>
                 <div className="flex items-start gap-2 mt-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm">Số 4 ngách 12 ngõ 135 Nguyễn Văn Cừ, Ngọc Lâm, Long Biên, Hà Nội (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                  <span className="text-sm">{storeLocations[1].address} (<button onClick={() => handleShowMap(storeLocations[1])} className="text-blue-600 underline">Chỉ đường</button>)</span>
                 </div>
               </div>
               <div>
@@ -155,7 +193,7 @@ export default function Footer() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm">Số 1/23 Huỳnh Lan Khanh, Phường 2, Tân Bình, TP.HCM (<a href="#" className="text-blue-600 underline">Chỉ đường</a>)</span>
+                  <span className="text-sm">{storeLocations[2].address} (<button onClick={() => handleShowMap(storeLocations[2])} className="text-blue-600 underline">Chỉ đường</button>)</span>
                 </div>
               </div>
             </div>
@@ -212,6 +250,15 @@ export default function Footer() {
         <CallBox />
         <ZaloBox />
       </div>
+
+      {/* Map Drawer */}
+      {selectedLocation && (
+        <MapDrawer
+          isOpen={isMapOpen}
+          onClose={() => setIsMapOpen(false)}
+          location={selectedLocation}
+        />
+      )}
     </footer>
   );
 } 
