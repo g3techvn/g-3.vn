@@ -19,6 +19,7 @@ import VoucherInfo from './VoucherInfo'
 import RewardPoints from './RewardPoints'
 import ProductList from './ProductList'
 import CollapsibleSection from './CollapsibleSection'
+import ProfileDrawer from './ProfileDrawer'
 
 // Define types
 interface FormData {
@@ -82,6 +83,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null)
   const [useRewardPoints, setUseRewardPoints] = useState(false)
   const [pointsToUse, setPointsToUse] = useState(0)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   // Mock data
   const paymentMethods = [
@@ -295,6 +297,15 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     closeAll() // Close cart
   }
 
+  // Profile drawer functions
+  const openProfile = () => {
+    setIsProfileOpen(true);
+  };
+
+  const closeProfile = () => {
+    setIsProfileOpen(false);
+  };
+
   // Handle quantity update with synchronization
   const handleQuantityUpdate = (itemId: string, newQuantity: number) => {
     updateQuantity(itemId, newQuantity)
@@ -310,6 +321,16 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
           <div className="flex w-full justify-between items-center">
             <h2 className="text-xl font-semibold">Thanh toán</h2>
             <div className="flex items-center gap-2">
+              {/* User Account Button */}
+              <button 
+                onClick={openProfile} 
+                className="p-2 text-gray-500 hover:text-red-600 focus:outline-none"
+                title="Tài khoản"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
               <button
                 onClick={handlePreviewPDF}
                 className="p-2 text-gray-500 hover:text-gray-700"
@@ -499,6 +520,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 setSelectedVoucher={setSelectedVoucher}
                 availableVouchers={availableVouchers}
                 totalPrice={totalPrice}
+                openProfile={openProfile}
               />
             </CollapsibleSection>
 
@@ -515,6 +537,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 pointsToUse={pointsToUse}
                 setPointsToUse={setPointsToUse}
                 maxPointsToUse={rewardPointsData.maxPointsPerOrder}
+                openProfile={openProfile}
               />
             </CollapsibleSection>
           </div>
@@ -642,6 +665,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
           )}
         </div>
       </Modal>
+
+      {/* Profile Drawer */}
+      <ProfileDrawer isOpen={isProfileOpen} onClose={closeProfile} />
 
       <style jsx global>{`
         @keyframes progress {

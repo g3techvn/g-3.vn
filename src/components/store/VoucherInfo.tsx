@@ -16,6 +16,7 @@ interface VoucherInfoProps {
   setSelectedVoucher: (voucher: Voucher | null) => void;
   availableVouchers: Voucher[];
   totalPrice: number;
+  openProfile?: () => void;
 }
 
 export default function VoucherInfo({
@@ -27,7 +28,8 @@ export default function VoucherInfo({
   selectedVoucher,
   setSelectedVoucher,
   availableVouchers,
-  totalPrice
+  totalPrice,
+  openProfile
 }: VoucherInfoProps) {
   if (!user) {
     return (
@@ -53,15 +55,15 @@ export default function VoucherInfo({
                 Đăng nhập để áp dụng voucher và nhận ưu đãi
               </div>
             </div>
-            <Link
-              href="/tai-khoan"
+            <button
+              onClick={openProfile}
               className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
               </svg>
               Đăng nhập
-            </Link>
+            </button>
           </div>
         </div>
       </div>

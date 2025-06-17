@@ -327,18 +327,18 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
   };
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={handleClose} className="relative z-[9999]">
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-white-500/75 transition-opacity duration-300 ease-in-out data-closed:opacity-0"
+        className="fixed inset-0 bg-black/50 transition-opacity duration-300 ease-in-out data-closed:opacity-0"
       />
 
-      <div className="fixed inset-0 overflow-hidden">
+      <div className="fixed inset-0 overflow-hidden z-[9999]">
         <div className="absolute inset-0 overflow-hidden">
           <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
             <DialogPanel
               transition
-              className="pointer-events-auto w-screen max-w-md transform transition duration-300 ease-in-out data-closed:translate-x-full"
+              className="pointer-events-auto w-screen max-w-md transform transition duration-300 ease-in-out data-closed:translate-x-full z-[9999]"
             >
               <div className="flex h-full flex-col overflow-y-scroll bg-white/30 backdrop-blur-md dark:bg-gray-900/50 shadow-xl">
                 <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
