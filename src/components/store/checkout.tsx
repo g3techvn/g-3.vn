@@ -144,6 +144,18 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     fetchProvinces()
   }, [])
 
+  // Auto-fill user information when user is logged in
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.fullName || prev.fullName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone, // Auto-fill phone if available
+      }))
+    }
+  }, [user])
+
   const fetchDistricts = async (provinceCode: number) => {
     try {
       setLoadingDistricts(true)
@@ -173,6 +185,12 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
   // Form validation
   const isBuyerInfoCompleted = () => {
+    // If user is logged in, buyer info is automatically completed from user profile
+    if (user) {
+      // Only require phone if user doesn't have it in profile
+      return user.phone ? true : !!formData.phone;
+    }
+    // If user is not logged in, require manual input
     const hasRequiredFields = !!(formData.fullName && formData.phone);
     return hasRequiredFields;
   };
@@ -206,7 +224,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
            isPaymentMethodCompleted();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isFormValid()) {
       let errorMessage = 'Vui lòng điền đầy đủ thông tin bắt buộc:\n'
@@ -216,9 +234,62 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       alert(errorMessage)
       return
     }
-    console.log('Checkout data:', formData)
-    alert('Đặt hàng thành công!')
-    closeAll()
+
+    setLoading(true)
+    
+    try {
+      const orderData = {
+        user_id: user?.id || null,
+        buyer_info: {
+          fullName: user?.fullName || formData.fullName,
+          phone: user?.phone || formData.phone,
+          email: user?.email || formData.email
+        },
+        shipping_info: {
+          address: formData.address,
+          ward: formData.ward,
+          district: formData.district,
+          city: formData.city,
+          note: formData.note
+        },
+        payment_method: formData.paymentMethod,
+        cart_items: cartItems,
+        voucher: selectedVoucher,
+        reward_points: useRewardPoints ? pointsToUse : 0,
+        total_price: totalPrice,
+        shipping_fee: shippingFee
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Có lỗi xảy ra khi tạo đơn hàng')
+      }
+
+      if (result.success) {
+        alert(`Đặt hàng thành công! Mã đơn hàng: #${result.order.id}`)
+        
+        // Clear cart after successful order
+        cartItems.forEach(item => removeFromCart(item.id))
+        
+        closeAll()
+      } else {
+        throw new Error('Có lỗi xảy ra khi tạo đơn hàng')
+      }
+    } catch (error) {
+      console.error('Order submission error:', error)
+      alert(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleFormChange = (field: keyof FormData, value: string | number) => {
@@ -236,9 +307,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
               totalPrice,
       shipping: 0,
       buyerInfo: {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
+          fullName: user?.fullName || formData.fullName,
+          phone: user?.phone || formData.phone,
+          email: user?.email || formData.email,
           address: formData.address,
           city: formData.city,
           district: formData.district,
@@ -276,9 +347,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       totalPrice,
       shipping: 0,
       buyerInfo: {
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
+        fullName: user?.fullName || formData.fullName,
+        phone: user?.phone || formData.phone,
+        email: user?.email || formData.email,
         address: formData.address,
         city: formData.city,
         district: formData.district,
@@ -380,7 +451,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
           <div className="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10">
             <div className="flex flex-col items-center">
               <LoadingOutlined style={{ fontSize: 24, color: '#dc3545', marginBottom: 8 }} />
-              <span className="text-gray-600">Đang tải dữ liệu...</span>
+              <span className="text-gray-600">Đang xử lý đơn hàng...</span>
             </div>
           </div>
         )}

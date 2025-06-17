@@ -6,6 +6,7 @@ interface User {
   id: string;
   email: string;
   fullName: string;
+  phone?: string;
   avatar?: string;
   role: string;
 }
@@ -36,6 +37,7 @@ const mapSupabaseUser = (supabaseUser: SupabaseUser): User => {
     id: supabaseUser.id,
     email: supabaseUser.email || '',
     fullName: supabaseUser.user_metadata?.full_name || 'Người dùng',
+    phone: supabaseUser.user_metadata?.phone,
     avatar: supabaseUser.user_metadata?.avatar_url,
     role: supabaseUser.app_metadata?.role || 'user',
   };

@@ -15,7 +15,7 @@ const SheetOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-[99998] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -45,7 +45,7 @@ const SheetContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed z-60 max-h-[85vh] overflow-auto bg-white shadow-lg duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "fixed z-[99999] max-h-[85vh] overflow-auto bg-white shadow-lg duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
           sideToClassMap[side],
           className
         )}
@@ -53,7 +53,7 @@ const SheetContent = React.forwardRef<
       >
         {children}
         {showCloseButton && (
-          <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100">
+          <SheetClose className="absolute right-4 top-4 z-[100000] rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100">
             <XMarkIcon className="h-5 w-5" />
             <span className="sr-only">Close</span>
           </SheetClose>

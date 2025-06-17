@@ -102,10 +102,21 @@ export type User = {
 
 export type Order = {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string | null;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'canceled';
+  subtotal: number;
+  shipping_fee: number;
+  voucher_code?: string | null;
+  voucher_discount: number;
+  points_used: number;
+  points_discount: number;
   total_price: number;
+  payment_method: string;
   shipping_address: string;
+  note?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -114,8 +125,13 @@ export type OrderItem = {
   id: string;
   order_id: string;
   product_id: string;
+  product_name: string;
+  variant_id?: string | null;
+  variant_details?: string | null;
   quantity: number;
-  price: number;
+  unit_price: number;
+  total_price: number;
+  product_image: string;
   created_at: string;
   updated_at: string;
 };

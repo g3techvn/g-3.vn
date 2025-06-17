@@ -17,6 +17,7 @@ import { ProductActions } from './ProductActions';
 import { ProductCartSheet } from './ProductCartSheet';
 import { TechnicalSpecs } from './TechnicalSpecs';
 import { ProductFeatures } from './ProductFeatures';
+import { ProductVariants } from './ProductVariants';
 
 interface Comment {
   id: string;
@@ -243,12 +244,14 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
     setIsCartDrawerOpen(true);
   };
   
-  const confirmAddToCart = (product: Product, quantity: number, selectedColor: string) => {
-    // Create a cart item from the product
+  const confirmAddToCart = (product: Product, quantity: number, selectedVariant?: ProductVariant | null) => {
+    // Create a cart item from the product with variant info
     const cartItem = {
       ...product,
       quantity: 1, // Each item will be added individually
-      image: product.image_url || '', // Use image_url as image
+      image: selectedVariant?.image_url || product.image_url || '', // Use variant image if available
+      price: selectedVariant?.price || product.price, // Use variant price if available
+      variant: selectedVariant || undefined,
     };
     
     // Add to cart multiple times based on quantity
@@ -300,12 +303,20 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
         price={product.price}
         originalPrice={product.original_price}
         publisher={publisher}
+        selectedVariant={selectedVariant}
       />
 
       {/* Product Info */}
       <ProductInfo 
         name={product.name}
         tags={tags}
+      />
+
+      {/* Product Variants */}
+      <ProductVariants 
+        variants={product.variants || []}
+        selectedVariant={selectedVariant}
+        onSelectVariant={onSelectVariant}
       />
 
       {/* Description */}
@@ -336,6 +347,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       {/* Bottom Actions */}
       <ProductActions
         productPrice={product.price}
+        selectedVariant={selectedVariant}
         onAddToCart={handleAddToCart}
         onBuyNow={handleBuyNow}
       />
@@ -345,6 +357,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
         isOpen={isCartDrawerOpen}
         onClose={() => setIsCartDrawerOpen(false)}
         product={product}
+        selectedVariant={selectedVariant}
         onAddToCart={confirmAddToCart}
       />
     </div>

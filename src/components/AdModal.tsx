@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -40,10 +40,10 @@ export default function AdModal({
     return () => clearTimeout(timer);
   }, [storageKey, expirationHours]);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsOpen(false);
     localStorage.setItem(storageKey, new Date().toISOString());
-  };
+  }, [storageKey]);
 
   // Handle escape key
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function AdModal({
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
+  }, [isOpen, closeModal]);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
