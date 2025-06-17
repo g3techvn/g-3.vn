@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Button } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/features/auth/AuthProvider'
 import { Voucher } from '@/types/cart'
 import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
 import { generatePDF } from '@/components/PDFGenerator'
@@ -50,6 +51,7 @@ interface ButtonWithTitleProps extends ButtonProps {
 
 export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null)
@@ -484,6 +486,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
               isCompleted={isVoucherCompleted()}
             >
               <VoucherInfo
+                user={user}
                 showVoucherDrawer={showVoucherDrawer}
                 setShowVoucherDrawer={setShowVoucherDrawer}
                 voucherCode={formData.voucher}
@@ -501,7 +504,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
               isCompleted={isRewardPointsCompleted()}
             >
               <RewardPoints
-                isLoggedIn={true}
+                isLoggedIn={!!user}
                 availablePoints={rewardPointsData.available}
                 useRewardPoints={useRewardPoints}
                 setUseRewardPoints={setUseRewardPoints}

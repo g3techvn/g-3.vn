@@ -288,6 +288,7 @@ export default function CartPage() {
         />
 
         <VoucherInfo 
+          user={user}
           showVoucherDrawer={showVoucherDrawer}
           setShowVoucherDrawer={setShowVoucherDrawer}
           voucherCode={voucherCode}

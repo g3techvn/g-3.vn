@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 interface RewardPointsProps {
   isLoggedIn: boolean;
   availablePoints: number;
@@ -21,20 +23,37 @@ export default function RewardPoints({
 }: RewardPointsProps) {
   if (!isLoggedIn) {
     return (
-      <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
-        <div className="flex items-center">
+      <div className="space-y-4">
+        <div className="flex items-center mb-4">
           <div className="flex-shrink-0 mr-3">
             <div className="w-10 h-10 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-400">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-red-600">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Đăng nhập để sử dụng điểm thưởng</div>
-            <div className="text-sm text-gray-500 mt-1">
-              Đăng nhập để tích lũy và sử dụng điểm thưởng cho đơn hàng này
+            <div className="font-medium">Điểm thưởng</div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="font-medium text-gray-900">Sử dụng điểm thưởng</div>
+              <div className="text-sm text-gray-500 mt-1">
+                Đăng nhập để tích lũy và sử dụng điểm thưởng
+              </div>
             </div>
+            <Link
+              href="/tai-khoan"
+              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              Đăng nhập
+            </Link>
           </div>
         </div>
       </div>
