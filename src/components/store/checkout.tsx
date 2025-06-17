@@ -71,7 +71,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     ward: '',
     wardCode: 0,
     note: '',
-    paymentMethod: 'cod',
+    paymentMethod: '',
     voucher: '',
     rewardPoints: 0
   })
@@ -207,7 +207,11 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!isFormValid()) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc')
+      let errorMessage = 'Vui lòng điền đầy đủ thông tin bắt buộc:\n'
+      if (!isBuyerInfoCompleted()) errorMessage += '- Thông tin người mua\n'
+      if (!isShippingInfoCompleted()) errorMessage += '- Địa chỉ giao hàng\n'
+      if (!isPaymentMethodCompleted()) errorMessage += '- Phương thức thanh toán\n'
+      alert(errorMessage)
       return
     }
     console.log('Checkout data:', formData)

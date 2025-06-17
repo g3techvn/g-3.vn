@@ -42,7 +42,7 @@ export default function PaymentMethodSelection({
 
       {/* Payment Method Selection */}
       <div 
-        className="p-4 rounded-lg border border-gray-200 cursor-pointer mb-4"
+        className={`p-4 rounded-lg border cursor-pointer mb-4 ${!selectedPayment ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200'}`}
         onClick={() => setShowPaymentDrawer(true)}
       >
         {selectedPayment ? (
@@ -77,13 +77,13 @@ export default function PaymentMethodSelection({
         ) : (
           <div className="flex items-center">
             <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-400">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-yellow-500">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
             <div className="ml-3">
-              <div className="font-medium text-gray-800">Chọn phương thức thanh toán</div>
-              <div className="text-sm text-gray-500">Bấm vào đây để chọn phương thức thanh toán</div>
+              <div className="font-medium text-yellow-700">⚠️ Chưa chọn phương thức thanh toán</div>
+              <div className="text-sm text-yellow-600">Vui lòng chọn phương thức thanh toán để tiếp tục</div>
             </div>
             <div className="ml-auto">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-400">
