@@ -45,9 +45,21 @@ export default function AdModal({
     localStorage.setItem(storageKey, new Date().toISOString());
   };
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        closeModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={closeModal}>
+      <Dialog as="div" className="relative z-[9999]" onClose={closeModal}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -57,10 +69,13 @@ export default function AdModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-white/30 backdrop-blur-md" />
+          <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-md cursor-pointer" 
+            onClick={closeModal}
+          />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto pointer-events-none">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition.Child
               as={Fragment}
@@ -71,18 +86,20 @@ export default function AdModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="absolute right-4 top-4">
-                  <button
-                    type="button"
-                    className="rounded-lg p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    onClick={closeModal}
-                  >
-                    <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all pointer-events-auto relative">
+                {/* Close button - positioned absolutely on top */}
+                <button
+                  type="button"
+                  className="absolute right-4 top-4 z-10 rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-md"
+                  onClick={closeModal}
+                >
+                  <span className="sr-only">Đóng</span>
+                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+                
+                <div className="relative">
+                  {children}
                 </div>
-                {children}
               </Dialog.Panel>
             </Transition.Child>
           </div>
