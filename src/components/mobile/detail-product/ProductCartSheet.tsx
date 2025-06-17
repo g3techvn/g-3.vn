@@ -35,7 +35,7 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
         [selectedVariant.id]: prev[selectedVariant.id] || 1
       }));
     }
-  }, [isOpen, selectedVariant]);
+  }, [isOpen, selectedVariant, tempItems]);
 
   // Reset temp items when sheet closes
   React.useEffect(() => {
@@ -349,7 +349,7 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
             {tempItems.length === 0 && getPreviewQuantity() > 0 && (
               <div className="text-center text-gray-500">
                 <p className="text-sm">Bạn đã cài đặt {getPreviewQuantity()} sản phẩm</p>
-                <p className="text-xs">Nhấn "Chọn" để thêm vào danh sách</p>
+                <p className="text-xs">Nhấn &quot;Chọn&quot; để thêm vào danh sách</p>
               </div>
             )}
           </div>
