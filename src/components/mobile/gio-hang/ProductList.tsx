@@ -101,9 +101,14 @@ export default function ProductList({
                     <div className="flex items-center justify-between">
                       <div>
                         {item.original_price && item.original_price > item.price && (
-                          <div className="text-gray-500 text-xs line-through">
-                            {item.original_price.toLocaleString()}đ
-                          </div>
+                          <>
+                            <div className="text-gray-500 text-xs line-through">
+                              {item.original_price.toLocaleString()}đ
+                            </div>
+                            <div className="text-green-600 text-xs">
+                              Tiết kiệm: {((item.original_price - item.price) * item.quantity).toLocaleString()}đ
+                            </div>
+                          </>
                         )}
                         <div className="text-red-600 font-medium">{item.price.toLocaleString()}đ</div>
                       </div>

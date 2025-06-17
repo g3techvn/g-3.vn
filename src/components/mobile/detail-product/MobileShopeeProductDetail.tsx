@@ -247,10 +247,12 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   const confirmAddToCart = (product: Product, quantity: number, selectedVariant?: ProductVariant | null) => {
     // Create a cart item from the product with variant info
     const cartItem = {
-      ...product,
+      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id, // Create unique ID for each variant
+      name: product.name,
+      price: selectedVariant?.price || product.price, // Use variant price if available
+      original_price: selectedVariant?.original_price || product.original_price,
       quantity: 1, // Each item will be added individually
       image: selectedVariant?.image_url || product.image_url || '', // Use variant image if available
-      price: selectedVariant?.price || product.price, // Use variant price if available
       variant: selectedVariant || undefined,
     };
     

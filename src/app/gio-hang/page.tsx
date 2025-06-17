@@ -305,6 +305,7 @@ export default function CartPage() {
           shipping={shipping}
           selectedVoucher={selectedVoucher}
           pointsDiscount={pointsDiscount}
+          cartItems={cartItems}
           useRewardPoints={useRewardPoints}
           setUseRewardPoints={setUseRewardPoints}
           pointsToUse={pointsToUse}

@@ -3,7 +3,7 @@
 import OrderSummary from './OrderSummary';
 import RewardPoints from './RewardPoints';
 import PaymentMethodSelection from './PaymentMethodSelection';
-import { Voucher } from '@/types/cart';
+import { Voucher, CartItem } from '@/types/cart';
 
 interface PaymentDetailsProps {
   user: {
@@ -14,6 +14,7 @@ interface PaymentDetailsProps {
   shipping: number;
   selectedVoucher: Voucher | null;
   pointsDiscount: number;
+  cartItems: CartItem[];
   useRewardPoints: boolean;
   setUseRewardPoints: (use: boolean) => void;
   pointsToUse: number;
@@ -42,6 +43,7 @@ export default function PaymentDetails({
   shipping,
   selectedVoucher,
   pointsDiscount,
+  cartItems,
   useRewardPoints,
   setUseRewardPoints,
   pointsToUse,
@@ -69,6 +71,7 @@ export default function PaymentDetails({
           totalPrice={totalPrice}
           selectedVoucher={selectedVoucher}
           pointsDiscount={pointsDiscount}
+          cartItems={cartItems}
         />
         
         <RewardPoints

@@ -1,18 +1,27 @@
 'use client';
 
-import { Voucher } from '@/types/cart';
+import { Voucher, CartItem } from '@/types/cart';
 
 interface OrderSummaryProps {
   totalPrice: number;
   selectedVoucher: Voucher | null;
   pointsDiscount: number;
+  cartItems: CartItem[];
 }
 
 export default function OrderSummary({
   totalPrice,
   selectedVoucher,
-  pointsDiscount
+  pointsDiscount,
+  cartItems
 }: OrderSummaryProps) {
+  // Calculate total savings from original prices
+  const totalSavings = cartItems.reduce((sum, item) => {
+    if (item.original_price && item.original_price > item.price) {
+      return sum + ((item.original_price - item.price) * item.quantity);
+    }
+    return sum;
+  }, 0);
   return (
     <div className="py-2">
       {/* Total Product Price */}
@@ -27,6 +36,11 @@ export default function OrderSummary({
         <div className="flex-1">
           <div className="text-red-600 font-medium ">{totalPrice.toLocaleString()}đ</div>
           <div className="text-gray-500 text-sm mt-1">Tổng tiền hàng</div>
+          {totalSavings > 0 && (
+            <div className="text-green-600 text-sm">
+              Tiết kiệm: {totalSavings.toLocaleString()}đ
+            </div>
+          )}
         </div>
       </div>
       

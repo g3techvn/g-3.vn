@@ -164,7 +164,7 @@ export default function ShippingInfo({
           styles={{
             body: {
               padding: '16px 24px',
-              paddingBottom: '100px'
+              paddingBottom: '120px'
             },
             mask: {
               background: 'rgba(0, 0, 0, 0.45)'
@@ -238,6 +238,31 @@ export default function ShippingInfo({
                 onChange={handleAddressChange}
               />
             </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setShowAddressDrawer(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  // Validate required fields
+                  if (addressForm.city && addressForm.district && addressForm.ward && addressForm.address.trim()) {
+                    setShowAddressDrawer(false);
+                  } else {
+                    // Could add a toast notification here for validation error
+                    console.log('Vui lòng điền đầy đủ thông tin địa chỉ');
+                  }
+                }}
+                disabled={!addressForm.city || !addressForm.district || !addressForm.ward || !addressForm.address.trim()}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
+              >
+                Xác nhận
+              </button>
+            </div>
           </div>
         </Drawer>
 
@@ -280,24 +305,6 @@ export default function ShippingInfo({
             ))}
           </div>
         </Drawer>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-2"></div>
-
-        {/* Delivery time */}
-        <div className="py-3 flex items-center">
-          <div className="flex-shrink-0 mr-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-800">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-              </svg>
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="text-red-600 font-medium mb-0.5">Ngày 24 Th05 - Ngày 25 Th05</div>
-            <div className="text-gray-500 text-sm">Thời gian nhận hàng dự kiến</div>
-          </div>
-        </div>
 
         {/* Divider */}
         <div className="border-t border-gray-100 my-2"></div>
