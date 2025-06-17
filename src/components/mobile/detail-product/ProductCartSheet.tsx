@@ -20,42 +20,115 @@ interface ProductCartSheetProps {
 
 export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, onAddToCart }: ProductCartSheetProps) {
   const [tempItems, setTempItems] = useState<TempCartItem[]>([]);
-  const [variantQuantities, setVariantQuantities] = useState<Record<number, number>>({});
   const [noVariantQuantity, setNoVariantQuantity] = useState(1); // For products without variants
   
-  // Add current selected variant to temp list when sheet opens
+  // For multi-selection of attributes
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedGacChans, setSelectedGacChans] = useState<boolean[]>([]);
+  const [selectedVariants, setSelectedVariants] = useState<ProductVariant[]>([]);
+  const [variantQuantities, setVariantQuantities] = useState<Record<number, number>>({});
+  
+  // Color map for display
+  const colorMap: { [key: string]: string } = {
+    'black': '#000000',
+    'gray': '#808080', 
+    'white': '#FFFFFF',
+    'red': '#FF0000',
+    'blue': '#0000FF',
+    'green': '#008000',
+    'yellow': '#FFFF00',
+    'purple': '#800080',
+    'pink': '#FFC0CB',
+    'orange': '#FFA500',
+    'brown': '#A52A2A',
+    'silver': '#C0C0C0',
+    'gold': '#FFD700',
+  };
+
+  // Get unique colors and gac_chan options
+  const uniqueColors = Array.from(new Set(product.variants?.map(v => v.color).filter(Boolean) || []));
+  const uniqueGacChans = Array.from(new Set(product.variants?.map(v => v.gac_chan).filter(v => v !== null && v !== undefined) || []));
+  const hasGacChanOption = uniqueGacChans.length > 0;
+
+  // Generate selected variants based on attribute selections
   React.useEffect(() => {
-    if (isOpen && selectedVariant) {
-      const existingItem = tempItems.find(item => item.variant.id === selectedVariant.id);
-      if (!existingItem) {
-        setTempItems([{ variant: selectedVariant, quantity: 1 }]);
-      }
-      // Initialize quantity for selected variant
-      setVariantQuantities(prev => ({
-        ...prev,
-        [selectedVariant.id]: prev[selectedVariant.id] || 1
-      }));
+    if (!product.variants) return;
+    
+    const variants: ProductVariant[] = [];
+    
+    // If no attributes selected, use all variants
+    if (selectedColors.length === 0 && selectedGacChans.length === 0) {
+      setSelectedVariants([]);
+      return;
     }
-  }, [isOpen, selectedVariant, tempItems]);
+    
+    // Generate combinations of selected attributes
+    if (selectedColors.length > 0 && hasGacChanOption && selectedGacChans.length > 0) {
+      // Both color and gac_chan selected
+      selectedColors.forEach(color => {
+        selectedGacChans.forEach(gacChan => {
+          const variant = product.variants?.find(v => v.color === color && v.gac_chan === gacChan);
+          if (variant) variants.push(variant);
+        });
+      });
+    } else if (selectedColors.length > 0) {
+      // Only colors selected
+      selectedColors.forEach(color => {
+        if (hasGacChanOption) {
+          // Find variants with this color
+          const colorVariants = product.variants?.filter(v => v.color === color) || [];
+          variants.push(...colorVariants);
+        } else {
+          const variant = product.variants?.find(v => v.color === color);
+          if (variant) variants.push(variant);
+        }
+      });
+    } else if (selectedGacChans.length > 0) {
+      // Only gac_chan selected
+      selectedGacChans.forEach(gacChan => {
+        const gacChanVariants = product.variants?.filter(v => v.gac_chan === gacChan) || [];
+        variants.push(...gacChanVariants);
+      });
+    }
+    
+    setSelectedVariants(variants);
+    
+    // Initialize quantities for selected variants
+    const newQuantities: Record<number, number> = {};
+    variants.forEach(variant => {
+      newQuantities[variant.id] = variantQuantities[variant.id] || 1;
+    });
+    setVariantQuantities(newQuantities);
+  }, [selectedColors, selectedGacChans, product.variants, hasGacChanOption]);
 
   // Reset temp items when sheet closes
   React.useEffect(() => {
     if (!isOpen) {
       setTempItems([]);
       setVariantQuantities({});
+      setSelectedColors([]);
+      setSelectedGacChans([]);
+      setSelectedVariants([]);
     }
   }, [isOpen]);
 
-  // Initialize quantities for all variants
-  React.useEffect(() => {
-    if (product.variants) {
-      const initialQuantities = product.variants.reduce((acc, variant) => {
-        acc[variant.id] = 1;
-        return acc;
-      }, {} as Record<number, number>);
-      setVariantQuantities(prev => ({ ...initialQuantities, ...prev }));
-    }
-  }, [product.variants]);
+  // Handle color selection (multi-select)
+  const toggleColor = (color: string) => {
+    setSelectedColors(prev => 
+      prev.includes(color) 
+        ? prev.filter(c => c !== color)
+        : [...prev, color]
+    );
+  };
+
+  // Handle gac_chan selection (multi-select)
+  const toggleGacChan = (gacChan: boolean) => {
+    setSelectedGacChans(prev => 
+      prev.includes(gacChan) 
+        ? prev.filter(g => g !== gacChan)
+        : [...prev, gacChan]
+    );
+  };
 
   const updateVariantQuantity = (variantId: number, quantity: number) => {
     setVariantQuantities(prev => ({
@@ -64,89 +137,34 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
     }));
   };
 
-  const addVariantToTemp = (variant: ProductVariant) => {
-    const quantity = variantQuantities[variant.id] || 1;
-    
-    setTempItems(prev => {
-      const existingIndex = prev.findIndex(item => item.variant.id === variant.id);
-      if (existingIndex >= 0) {
-        // Update existing item quantity
-        const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
-        return updated;
-      } else {
-        // Add new item
-        return [...prev, { variant, quantity }];
-      }
-    });
-  };
-
-  const updateTempItemQuantity = (variantId: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeTempItem(variantId);
-      return;
-    }
-    setTempItems(prev => 
-      prev.map(item => 
-        item.variant.id === variantId 
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
-  };
-
-  const removeTempItem = (variantId: number) => {
-    setTempItems(prev => prev.filter(item => item.variant.id !== variantId));
-  };
-
   const getTotalQuantity = () => {
-    return tempItems.reduce((sum, item) => sum + item.quantity, 0);
+    return selectedVariants.reduce((sum, variant) => sum + (variantQuantities[variant.id] || 0), 0);
   };
 
   const getTotalPrice = () => {
-    return tempItems.reduce((sum, item) => sum + (item.variant.price * item.quantity), 0);
+    return selectedVariants.reduce((sum, variant) => {
+      const quantity = variantQuantities[variant.id] || 0;
+      return sum + (variant.price * quantity);
+    }, 0);
   };
 
-  // Calculate preview total including pending selections
+  // Calculate preview total and quantity
   const getPreviewTotal = () => {
-    const tempTotal = getTotalPrice();
-    
     // For products without variants, use noVariantQuantity
     if (!product.variants || product.variants.length === 0) {
       return product.price * noVariantQuantity;
     }
     
-    const pendingTotal = Object.entries(variantQuantities).reduce((sum, [variantId, quantity]) => {
-      const variant = product.variants?.find(v => v.id === parseInt(variantId));
-      const isAlreadyInTemp = tempItems.find(item => item.variant.id === parseInt(variantId));
-      
-      if (variant && !isAlreadyInTemp && quantity > 0) {
-        return sum + (variant.price * quantity);
-      }
-      return sum;
-    }, 0);
-    
-    return tempTotal + pendingTotal;
+    return getTotalPrice();
   };
 
   const getPreviewQuantity = () => {
-    const tempQuantity = getTotalQuantity();
-    
     // For products without variants, use noVariantQuantity
     if (!product.variants || product.variants.length === 0) {
       return noVariantQuantity;
     }
     
-    const pendingQuantity = Object.entries(variantQuantities).reduce((sum, [variantId, quantity]) => {
-      const isAlreadyInTemp = tempItems.find(item => item.variant.id === parseInt(variantId));
-      
-      if (!isAlreadyInTemp && quantity > 0) {
-        return sum + quantity;
-      }
-      return sum;
-    }, 0);
-    
-    return tempQuantity + pendingQuantity;
+    return getTotalQuantity();
   };
 
   const handleConfirmAll = () => {
@@ -158,11 +176,19 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
       return;
     }
     
-    // Add each item in temp list to cart
-    tempItems.forEach(tempItem => {
-      onAddToCart(product, tempItem.quantity, tempItem.variant);
+    // Add each selected variant to cart
+    selectedVariants.forEach(variant => {
+      const quantity = variantQuantities[variant.id] || 1;
+      if (quantity > 0) {
+        onAddToCart(product, quantity, variant);
+      }
     });
-    setTempItems([]);
+    
+    // Reset selections
+    setSelectedColors([]);
+    setSelectedGacChans([]);
+    setSelectedVariants([]);
+    setVariantQuantities({});
     onClose();
   };
 
@@ -247,25 +273,96 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
           </div>
         )}
 
-        {/* Available Variants for Selection */}
-        {product.variants && product.variants.length > 1 && (
-          <div className="p-4 border-b border-gray-100">
-            <h4 className="text-sm font-medium mb-3">Chọn phân loại và số lượng</h4>
-            <div className="space-y-3">
-              {product.variants.map(variant => {
-                const existingItem = tempItems.find(item => item.variant.id === variant.id);
-                const currentQuantity = variantQuantities[variant.id] || 1;
-                
-                return (
-                  <div key={variant.id} className="p-3 bg-gray-50 rounded-lg">
-                    {/* Variant Info */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">{getVariantDisplayName(variant)}</div>
-                        <div className="text-sm text-red-600">{variant.price.toLocaleString('vi-VN')}₫</div>
-                        <div className="text-xs text-gray-500">Kho: {variant.stock_quantity}</div>
-                      </div>
-                      <div className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden">
+        {/* Multi-Attribute Selection */}
+        {product.variants && product.variants.length > 0 && (
+          <div className="p-4 border-b border-gray-100 space-y-4">
+            {/* Color Selection */}
+            {uniqueColors.length > 0 && (
+              <div className="space-y-3">
+                <span className="text-sm font-medium text-gray-900">Màu sắc (có thể chọn nhiều):</span>
+                <div className="flex flex-wrap gap-3">
+                  {uniqueColors.map((color) => {
+                    const colorCode = colorMap[color.toLowerCase()] || color;
+                    const isSelected = selectedColors.includes(color);
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => toggleColor(color)}
+                        className={`relative p-1 rounded-lg border-2 transition-all ${
+                          isSelected
+                            ? "border-blue-500"
+                            : "border-gray-300 hover:border-blue-300"
+                        }`}
+                        title={color}
+                      >
+                        <div 
+                          className="w-10 h-10 rounded-md"
+                          style={{ backgroundColor: colorCode }}
+                        />
+                        {isSelected && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedColors.length > 0 && (
+                  <div className="text-sm text-gray-600">
+                    Đã chọn: <span className="font-medium text-gray-900">{selectedColors.join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Gac Chan Selection */}
+            {hasGacChanOption && (
+              <div className="space-y-3">
+                <span className="text-sm font-medium text-gray-900">Gác chân (có thể chọn nhiều):</span>
+                <div className="flex gap-3">
+                  {[true, false].map((hasGacChan) => {
+                    const isSelected = selectedGacChans.includes(hasGacChan);
+                    return (
+                      <button
+                        key={hasGacChan ? 'with' : 'without'}
+                        onClick={() => toggleGacChan(hasGacChan)}
+                        className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
+                          isSelected
+                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            : "border-gray-300 hover:border-blue-300 text-gray-700"
+                        }`}
+                      >
+                        {hasGacChan ? 'Có kê chân' : 'Không có kê chân'}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedGacChans.length > 0 && (
+                  <div className="text-sm text-gray-600">
+                    Đã chọn: <span className="font-medium text-gray-900">
+                      {selectedGacChans.map(g => g ? 'Có kê chân' : 'Không có kê chân').join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Selected Variants List with Quantities */}
+        <div className="flex-1 overflow-y-auto">
+          {selectedVariants.length > 0 ? (
+            <div className="p-4">
+              <h4 className="text-sm font-medium mb-3">Danh sách sản phẩm đã chọn ({selectedVariants.length})</h4>
+              <div className="space-y-3">
+                {selectedVariants.map(variant => {
+                  const currentQuantity = variantQuantities[variant.id] || 1;
+                  return (
+                    <div key={variant.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden flex-shrink-0">
                         <Image 
                           src={variant.image_url || product.image_url || '/placeholder.png'}
                           alt={product.name}
@@ -274,113 +371,44 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
                           sizes="48px"
                         />
                       </div>
-                    </div>
-                    
-                    {/* Quantity Selection */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Số lượng:</span>
-                        <div className="flex items-center">
-                          <button 
-                            onClick={() => updateVariantQuantity(variant.id, currentQuantity - 1)}
-                            disabled={currentQuantity <= 1}
-                            className={`w-7 h-7 flex items-center justify-center border border-gray-300 rounded-l text-gray-600 ${
-                              currentQuantity <= 1 ? 'bg-gray-100 text-gray-400' : 'hover:bg-gray-100'
-                            }`}
-                          >
-                            <MinusIcon className="w-3 h-3" />
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            max="99"
-                            value={currentQuantity}
-                            onChange={(e) => updateVariantQuantity(variant.id, parseInt(e.target.value) || 1)}
-                            className="w-12 h-7 text-center border-t border-b border-gray-300 text-sm focus:outline-none"
-                          />
-                          <button 
-                            onClick={() => updateVariantQuantity(variant.id, currentQuantity + 1)}
-                            disabled={currentQuantity >= 99}
-                            className={`w-7 h-7 flex items-center justify-center border border-gray-300 rounded-r text-gray-600 ${
-                              currentQuantity >= 99 ? 'bg-gray-100 text-gray-400' : 'hover:bg-gray-100'
-                            }`}
-                          >
-                            <PlusIcon className="w-3 h-3" />
-                          </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{getVariantDisplayName(variant)}</div>
+                        <div className="text-sm text-red-600">{variant.price.toLocaleString('vi-VN')}₫ × {currentQuantity}</div>
+                        <div className="text-xs text-blue-600 font-medium">
+                          = {(variant.price * currentQuantity).toLocaleString('vi-VN')}₫
                         </div>
+                        <div className="text-xs text-gray-500">Kho: {variant.stock_quantity}</div>
                       </div>
-                      
-                      <button
-                        onClick={() => addVariantToTemp(variant)}
-                        className={`px-4 py-1.5 text-sm rounded font-medium ${
-                          existingItem 
-                            ? 'bg-green-100 text-green-700 border border-green-300' 
-                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                        }`}
-                      >
-                        {existingItem ? `Thêm ${currentQuantity}` : `Chọn ${currentQuantity}`}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        
-        {/* Temporary Items List */}
-        <div className="flex-1 overflow-y-auto">
-          {tempItems.length > 0 ? (
-            <div className="p-4">
-              <h4 className="text-sm font-medium mb-3">Danh sách đã chọn ({tempItems.length})</h4>
-              <div className="space-y-3">
-                {tempItems.map(tempItem => (
-                  <div key={tempItem.variant.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden flex-shrink-0">
-                      <Image 
-                        src={tempItem.variant.image_url || product.image_url || '/placeholder.png'}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">{getVariantDisplayName(tempItem.variant)}</div>
-                      <div className="text-sm text-red-600">{tempItem.variant.price.toLocaleString('vi-VN')}₫ × {tempItem.quantity}</div>
-                      <div className="text-xs text-blue-600 font-medium">
-                        = {(tempItem.variant.price * tempItem.quantity).toLocaleString('vi-VN')}₫
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => updateVariantQuantity(variant.id, currentQuantity - 1)}
+                          disabled={currentQuantity <= 1}
+                          className={`w-8 h-8 flex items-center justify-center border border-gray-300 rounded text-gray-600 ${
+                            currentQuantity <= 1 ? 'bg-gray-200 text-gray-400' : 'hover:bg-white'
+                          }`}
+                        >
+                          <MinusIcon className="w-4 h-4" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium">{currentQuantity}</span>
+                        <button 
+                          onClick={() => updateVariantQuantity(variant.id, currentQuantity + 1)}
+                          disabled={currentQuantity >= 99}
+                          className={`w-8 h-8 flex items-center justify-center border border-gray-300 rounded text-gray-600 ${
+                            currentQuantity >= 99 ? 'bg-gray-200 text-gray-400' : 'hover:bg-white'
+                          }`}
+                        >
+                          <PlusIcon className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => updateTempItemQuantity(tempItem.variant.id, tempItem.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-white"
-                      >
-                        <MinusIcon className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center text-sm font-medium">{tempItem.quantity}</span>
-                      <button 
-                        onClick={() => updateTempItemQuantity(tempItem.variant.id, tempItem.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-white"
-                      >
-                        <PlusIcon className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => removeTempItem(tempItem.variant.id)}
-                        className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
             <div className="p-4 text-center text-gray-500">
               <p className="text-sm">Chưa có sản phẩm nào được chọn</p>
-              <p className="text-xs mt-1">Chọn phân loại và số lượng ở trên</p>
+              <p className="text-xs mt-1">Chọn thuộc tính ở trên để xem các sản phẩm tương ứng</p>
             </div>
           )}
         </div>
@@ -402,7 +430,7 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
             </div>
             
             {/* Add to Cart Button */}
-            {((!product.variants || product.variants.length === 0) || tempItems.length > 0) && (
+            {((!product.variants || product.variants.length === 0) || selectedVariants.length > 0) && (
               <Button 
                 className="w-full bg-red-600 text-white h-12 text-base font-semibold shadow hover:bg-red-700 transition-colors rounded-lg"
                 onClick={handleConfirmAll}
@@ -414,10 +442,10 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
               </Button>
             )}
             
-            {product.variants && product.variants.length > 0 && tempItems.length === 0 && getPreviewQuantity() > 0 && (
+            {product.variants && product.variants.length > 0 && selectedVariants.length === 0 && (
               <div className="text-center text-gray-500">
-                <p className="text-sm">Bạn đã cài đặt {getPreviewQuantity()} sản phẩm</p>
-                <p className="text-xs">Nhấn &quot;Chọn&quot; để thêm vào danh sách</p>
+                <p className="text-sm">Chọn thuộc tính để xem sản phẩm</p>
+                <p className="text-xs">Bạn có thể chọn nhiều màu sắc và tùy chọn khác nhau</p>
               </div>
             )}
           </div>
