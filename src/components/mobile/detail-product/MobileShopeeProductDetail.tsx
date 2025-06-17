@@ -240,7 +240,40 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   };
 
   const handleAddToCart = () => {
-    // Open cart drawer
+    // If product has no variants, add directly to cart
+    if (!product.variants || product.variants.length === 0) {
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        original_price: product.original_price,
+        quantity: 1,
+        image: product.image_url || '',
+        variant: undefined,
+      };
+      
+      addToCart(cartItem);
+      
+      toast.success(`Đã thêm sản phẩm vào giỏ hàng!`, {
+        duration: 3000,
+        position: 'top-right',
+        style: {
+          background: '#fff',
+          color: '#333',
+          padding: '16px',
+          borderRadius: '10px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          fontSize: '14px',
+          fontWeight: '500',
+          maxWidth: '300px',
+          border: 'none',
+        },
+        icon: '🛒',
+      });
+      return;
+    }
+    
+    // If product has variants, open cart drawer
     setIsCartDrawerOpen(true);
   };
   

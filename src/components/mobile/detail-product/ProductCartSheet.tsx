@@ -21,6 +21,7 @@ interface ProductCartSheetProps {
 export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, onAddToCart }: ProductCartSheetProps) {
   const [tempItems, setTempItems] = useState<TempCartItem[]>([]);
   const [variantQuantities, setVariantQuantities] = useState<Record<number, number>>({});
+  const [noVariantQuantity, setNoVariantQuantity] = useState(1); // For products without variants
   
   // Add current selected variant to temp list when sheet opens
   React.useEffect(() => {
@@ -109,6 +110,12 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
   // Calculate preview total including pending selections
   const getPreviewTotal = () => {
     const tempTotal = getTotalPrice();
+    
+    // For products without variants, use noVariantQuantity
+    if (!product.variants || product.variants.length === 0) {
+      return product.price * noVariantQuantity;
+    }
+    
     const pendingTotal = Object.entries(variantQuantities).reduce((sum, [variantId, quantity]) => {
       const variant = product.variants?.find(v => v.id === parseInt(variantId));
       const isAlreadyInTemp = tempItems.find(item => item.variant.id === parseInt(variantId));
@@ -124,6 +131,12 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
 
   const getPreviewQuantity = () => {
     const tempQuantity = getTotalQuantity();
+    
+    // For products without variants, use noVariantQuantity
+    if (!product.variants || product.variants.length === 0) {
+      return noVariantQuantity;
+    }
+    
     const pendingQuantity = Object.entries(variantQuantities).reduce((sum, [variantId, quantity]) => {
       const isAlreadyInTemp = tempItems.find(item => item.variant.id === parseInt(variantId));
       
@@ -137,6 +150,14 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
   };
 
   const handleConfirmAll = () => {
+    // For products without variants, add directly
+    if (!product.variants || product.variants.length === 0) {
+      onAddToCart(product, noVariantQuantity, null);
+      setNoVariantQuantity(1);
+      onClose();
+      return;
+    }
+    
     // Add each item in temp list to cart
     tempItems.forEach(tempItem => {
       onAddToCart(product, tempItem.quantity, tempItem.variant);
@@ -182,6 +203,49 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
             </div>
           </div>
         </div>
+
+        {/* No Variants - Simple Quantity Selection */}
+        {(!product.variants || product.variants.length === 0) && (
+          <div className="p-4 border-b border-gray-100">
+            <h4 className="text-sm font-medium mb-3">Chọn số lượng</h4>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Số lượng:</span>
+                <div className="flex items-center">
+                  <button 
+                    onClick={() => setNoVariantQuantity(Math.max(1, noVariantQuantity - 1))}
+                    disabled={noVariantQuantity <= 1}
+                    className={`w-8 h-8 flex items-center justify-center border border-gray-300 rounded-l text-gray-600 ${
+                      noVariantQuantity <= 1 ? 'bg-gray-100 text-gray-400' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <MinusIcon className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="99"
+                    value={noVariantQuantity}
+                    onChange={(e) => setNoVariantQuantity(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
+                    className="w-16 h-8 text-center border-t border-b border-gray-300 text-sm focus:outline-none"
+                  />
+                  <button 
+                    onClick={() => setNoVariantQuantity(Math.min(99, noVariantQuantity + 1))}
+                    disabled={noVariantQuantity >= 99}
+                    className={`w-8 h-8 flex items-center justify-center border border-gray-300 rounded-r text-gray-600 ${
+                      noVariantQuantity >= 99 ? 'bg-gray-100 text-gray-400' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="text-sm text-red-600 font-medium">
+                = {(product.price * noVariantQuantity).toLocaleString('vi-VN')}₫
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Available Variants for Selection */}
         {product.variants && product.variants.length > 1 && (
@@ -337,16 +401,20 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
               )}
             </div>
             
-            {tempItems.length > 0 && (
+            {/* Add to Cart Button */}
+            {((!product.variants || product.variants.length === 0) || tempItems.length > 0) && (
               <Button 
                 className="w-full bg-red-600 text-white h-12 text-base font-semibold shadow hover:bg-red-700 transition-colors rounded-lg"
                 onClick={handleConfirmAll}
               >
-                Thêm {getTotalQuantity()} sản phẩm vào giỏ hàng
+                {(!product.variants || product.variants.length === 0) 
+                  ? `Thêm ${noVariantQuantity} sản phẩm vào giỏ hàng`
+                  : `Thêm ${getTotalQuantity()} sản phẩm vào giỏ hàng`
+                }
               </Button>
             )}
             
-            {tempItems.length === 0 && getPreviewQuantity() > 0 && (
+            {product.variants && product.variants.length > 0 && tempItems.length === 0 && getPreviewQuantity() > 0 && (
               <div className="text-center text-gray-500">
                 <p className="text-sm">Bạn đã cài đặt {getPreviewQuantity()} sản phẩm</p>
                 <p className="text-xs">Nhấn &quot;Chọn&quot; để thêm vào danh sách</p>
