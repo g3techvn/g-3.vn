@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext'
 import { Voucher } from '@/types/cart'
 import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
 import { generatePDF } from '@/components/PDFGenerator'
+import type { ButtonProps } from 'antd'
 
 // Import components
 import BuyerInfo from './BuyerInfo'
@@ -16,6 +17,7 @@ import OrderSummary from './OrderSummary'
 import VoucherInfo from './VoucherInfo'
 import RewardPoints from './RewardPoints'
 import ProductList from './ProductList'
+import CollapsibleSection from './CollapsibleSection'
 
 // Define types
 interface FormData {
@@ -24,12 +26,12 @@ interface FormData {
   email: string;
   address: string;
   city: string;
+  cityCode: number;
   district: string;
-  ward: string;
-  note: string;
-  provinceCode: number;
   districtCode: number;
+  ward: string;
   wardCode: number;
+  note: string;
   paymentMethod: string;
   voucher: string;
   rewardPoints: number;
@@ -41,6 +43,11 @@ interface CheckoutProps {
   closeAll: () => void;
 }
 
+interface ButtonWithTitleProps extends ButtonProps {
+  title?: string;
+  className?: string;
+}
+
 export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart()
   const [loading, setLoading] = useState(false)
@@ -49,19 +56,19 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const [pdfLoading, setPdfLoading] = useState(false)
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [pdfRetryCount, setPdfRetryCount] = useState(0)
-  const [shippingFee, setShippingFee] = useState(30000) // Default shipping fee
+  const [shippingFee] = useState(0) // Default shipping fee is 0
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     phone: '',
     email: '',
     address: '',
     city: '',
+    cityCode: 0,
     district: '',
-    ward: '',
-    note: '',
-    provinceCode: 0,
     districtCode: 0,
+    ward: '',
     wardCode: 0,
+    note: '',
     paymentMethod: 'cod',
     voucher: '',
     rewardPoints: 0
@@ -88,12 +95,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'
     },
-    {
-      id: 'momo',
-      name: 'Ví MoMo',
-      icon: 'momo',
-      description: 'Thanh toán qua ví MoMo'
-    }
+
   ]
 
   const availableVouchers: Voucher[] = [
@@ -166,11 +168,39 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   }
 
   // Form validation
+  const isBuyerInfoCompleted = () => {
+    const hasRequiredFields = !!(formData.fullName && formData.phone);
+    return hasRequiredFields;
+  };
+
+  const isShippingInfoCompleted = () => {
+    const hasRequiredFields = !!(
+      formData.address && 
+      formData.cityCode && 
+      formData.districtCode && 
+      formData.wardCode
+    );
+    return hasRequiredFields;
+  };
+
+  const isPaymentMethodCompleted = () => {
+    const hasRequiredFields = !!(formData.paymentMethod);
+    return hasRequiredFields;
+  };
+
+  const isVoucherCompleted = () => {
+    return true; // Optional field
+  };
+
+  const isRewardPointsCompleted = () => {
+    return true; // Optional field
+  };
+
   const isFormValid = () => {
-    return !!(formData.fullName && formData.phone && formData.address && 
-              formData.provinceCode && formData.districtCode && formData.wardCode &&
-              formData.paymentMethod)
-  }
+    return isBuyerInfoCompleted() && 
+           isShippingInfoCompleted() && 
+           isPaymentMethodCompleted();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -184,8 +214,8 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   }
 
   const handleFormChange = (field: keyof FormData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handlePreviewPDF = async () => {
     try {
@@ -195,9 +225,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       
       const pdfDataUri = await generatePDF({
         cartItems,
-        totalPrice,
-        shipping: 30000,
-        buyerInfo: {
+              totalPrice,
+      shipping: 0,
+      buyerInfo: {
           fullName: formData.fullName,
           phone: formData.phone,
           email: formData.email,
@@ -236,7 +266,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     generatePDF({
       cartItems,
       totalPrice,
-      shipping: 30000,
+      shipping: 0,
       buyerInfo: {
         fullName: formData.fullName,
         phone: formData.phone,
@@ -312,13 +342,17 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         styles={{
           body: {
             paddingBottom: 80,
-            overflow: 'auto',
-            padding: '0 16px'
+            overflow: 'visible',
+            padding: '16px',
+            backgroundColor: '#f3f4f6'
           },
           header: {
             padding: '16px 24px'
           },
-          mask: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+          content: {
+            overflow: 'visible'
+          }
         }}
       >
         {loading && (
@@ -332,73 +366,90 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
         <div className="grid grid-cols-12 gap-6">
           {/* Left column - Form sections */}
-          <div className="col-span-8 space-y-6">
-            <div className="bg-white p-4 rounded-lg">
-              <BuyerInfo 
-                user={null}
-                guestInfo={{
+          <div className="col-span-8 space-y-4">
+            <CollapsibleSection 
+              title="Thông tin người mua" 
+              stepNumber={1}
+              isCompleted={isBuyerInfoCompleted()}
+            >
+              <BuyerInfo
+                formData={{
                   fullName: formData.fullName,
                   phone: formData.phone,
                   email: formData.email
                 }}
-                setGuestInfo={(info) => {
+                setFormData={(info) => {
                   if (typeof info === 'function') {
-                    const newInfo = info({
-                      fullName: formData.fullName,
-                      phone: formData.phone,
-                      email: formData.email
-                    })
-                    handleFormChange('fullName', newInfo.fullName)
-                    handleFormChange('phone', newInfo.phone)
-                    handleFormChange('email', newInfo.email)
+                    setFormData(prev => {
+                      const newBuyerInfo = info({
+                        fullName: prev.fullName,
+                        phone: prev.phone,
+                        email: prev.email
+                      });
+                      return {
+                        ...prev,
+                        ...newBuyerInfo
+                      };
+                    });
                   } else {
-                    handleFormChange('fullName', info.fullName)
-                    handleFormChange('phone', info.phone)
-                    handleFormChange('email', info.email)
+                    setFormData(prev => ({
+                      ...prev,
+                      ...info
+                    }));
                   }
                 }}
-                userPhone={formData.phone}
-                setUserPhone={(phone) => handleFormChange('phone', phone)}
-                errors={{ fullName: '', phone: '' }}
-                setErrors={() => {}}
+                showDrawer={showMenu}
+                setShowDrawer={setShowMenu}
               />
-            </div>
+            </CollapsibleSection>
 
-            <div className="bg-white p-4 rounded-lg">
-              <ShippingInfo 
+            <CollapsibleSection 
+              title="Thông tin giao hàng" 
+              stepNumber={2}
+              isCompleted={isShippingInfoCompleted()}
+            >
+              <ShippingInfo
                 addressForm={{
                   city: formData.city,
+                  cityCode: formData.cityCode,
                   district: formData.district,
+                  districtCode: formData.districtCode,
                   ward: formData.ward,
+                  wardCode: formData.wardCode,
                   address: formData.address
                 }}
                 setAddressForm={(info) => {
                   if (typeof info === 'function') {
-                    const newInfo = info({
-                      city: formData.city,
-                      district: formData.district,
-                      ward: formData.ward,
-                      address: formData.address
-                    })
-                    handleFormChange('city', newInfo.city)
-                    handleFormChange('district', newInfo.district)
-                    handleFormChange('ward', newInfo.ward)
-                    handleFormChange('address', newInfo.address)
+                    setFormData(prev => {
+                      const newAddressForm = info({
+                        city: prev.city,
+                        cityCode: prev.cityCode,
+                        district: prev.district,
+                        districtCode: prev.districtCode,
+                        ward: prev.ward,
+                        wardCode: prev.wardCode,
+                        address: prev.address
+                      });
+                      return {
+                        ...prev,
+                        ...newAddressForm
+                      };
+                    });
                   } else {
-                    handleFormChange('city', info.city)
-                    handleFormChange('district', info.district)
-                    handleFormChange('ward', info.ward)
-                    handleFormChange('address', info.address)
+                    setFormData(prev => ({
+                      ...prev,
+                      ...info
+                    }));
                   }
                 }}
-                selectedCarrier={formData.paymentMethod}
-                setSelectedCarrier={(carrier) => handleFormChange('paymentMethod', carrier)}
+                selectedCarrier="g3tech"
+                setSelectedCarrier={() => {}}
                 carriers={[
                   {
-                    id: 'ghn',
-                    name: 'Giao Hàng Nhanh',
-                    price: shippingFee,
-                    estimatedTime: '2-3 ngày'
+                    id: 'g3tech',
+                    name: 'Giao hàng bởi G3-Tech',
+                    price: 0,
+                    estimatedTime: 'Freeship toàn quốc - Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày'
                   }
                 ]}
                 provinces={provinces}
@@ -416,22 +467,29 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 note={formData.note}
                 setNote={(note) => handleFormChange('note', note)}
                 cartItems={cartItems}
-                onShippingFeeCalculated={setShippingFee}
               />
-            </div>
+            </CollapsibleSection>
 
-            <div className="bg-white p-4 rounded-lg">
-              <PaymentMethodSelection 
+            <CollapsibleSection 
+              title="Phương thức thanh toán" 
+              stepNumber={3}
+              isCompleted={isPaymentMethodCompleted()}
+            >
+              <PaymentMethodSelection
                 showPaymentDrawer={showPaymentDrawer}
                 setShowPaymentDrawer={setShowPaymentDrawer}
                 selectedPayment={formData.paymentMethod}
                 setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
                 paymentMethods={paymentMethods}
               />
-            </div>
+            </CollapsibleSection>
 
-            <div className="bg-white p-4 rounded-lg">
-              <VoucherInfo 
+            <CollapsibleSection 
+              title="Mã giảm giá" 
+              stepNumber={4}
+              isCompleted={isVoucherCompleted()}
+            >
+              <VoucherInfo
                 showVoucherDrawer={showVoucherDrawer}
                 setShowVoucherDrawer={setShowVoucherDrawer}
                 voucherCode={formData.voucher}
@@ -441,10 +499,14 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 availableVouchers={availableVouchers}
                 totalPrice={totalPrice}
               />
-            </div>
+            </CollapsibleSection>
 
-            <div className="bg-white p-4 rounded-lg">
-              <RewardPoints 
+            <CollapsibleSection 
+              title="Điểm thưởng" 
+              stepNumber={5}
+              isCompleted={isRewardPointsCompleted()}
+            >
+              <RewardPoints
                 isLoggedIn={true}
                 availablePoints={rewardPointsData.available}
                 useRewardPoints={useRewardPoints}
@@ -453,48 +515,35 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 setPointsToUse={setPointsToUse}
                 maxPointsToUse={rewardPointsData.maxPointsPerOrder}
               />
-            </div>
+            </CollapsibleSection>
           </div>
 
           {/* Right column - Order summary */}
           <div className="col-span-4">
-            <div className="sticky top-4">
-              <div className="bg-white p-4 rounded-lg mb-4">
-                <ProductList 
-                  loading={loading}
-                  items={cartItems}
-                  onUpdateQuantity={handleQuantityUpdate}
-                  onRemoveItem={removeFromCart}
-                />
-              </div>
-              
-              <div className="bg-white p-4 rounded-lg">
-                <OrderSummary 
-                  items={cartItems}
-                  totalPrice={totalPrice}
-                  shippingFee={shippingFee}
-                  selectedVoucher={selectedVoucher}
-                  pointsToUse={pointsToUse * rewardPointsData.pointValue}
-                />
-                
-                <div className="mt-4">
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={handleSubmit}
-                    disabled={!isFormValid()}
-                    style={{ 
-                      backgroundColor: '#dc3545',
-                      borderColor: '#dc3545',
-                      height: '48px',
-                      fontSize: '16px'
-                    }}
-                  >
-                    Đặt hàng
-                  </Button>
-                </div>
-              </div>
+            <div className="bg-white p-4 rounded-lg sticky top-4">
+              <ProductList
+                items={cartItems}
+                loading={loading}
+                onUpdateQuantity={handleQuantityUpdate}
+                onRemoveItem={removeFromCart}
+              />
+              <OrderSummary
+                items={cartItems}
+                selectedVoucher={selectedVoucher}
+                pointsToUse={useRewardPoints ? pointsToUse : 0}
+                totalPrice={totalPrice}
+              />
+              <Button
+                type="primary"
+                danger
+                block
+                size="large"
+                onClick={handleSubmit}
+                disabled={!isFormValid()}
+                className="mt-4"
+              >
+                Đặt hàng
+              </Button>
             </div>
           </div>
         </div>
@@ -524,10 +573,12 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         onCancel={handleClosePdfPreview}
         width="90%"
         style={{ top: 20 }}
-        bodyStyle={{ 
-          padding: '24px',
-          height: 'calc(100vh - 200px)',
-          overflow: 'hidden'
+        styles={{ 
+          body: { 
+            padding: '24px',
+            height: 'calc(100vh - 200px)',
+            overflow: 'hidden'
+          }
         }}
         footer={null}
         className="pdf-preview-modal"

@@ -4,7 +4,6 @@ import { CartItem, Voucher } from '@/types/cart'
 
 interface OrderSummaryProps {
   items: CartItem[];
-  shippingFee: number;
   selectedVoucher: Voucher | null;
   pointsToUse: number;
   totalPrice: number;
@@ -12,7 +11,6 @@ interface OrderSummaryProps {
 
 export default function OrderSummary({
   items,
-  shippingFee,
   selectedVoucher,
   pointsToUse,
   totalPrice
@@ -23,7 +21,7 @@ export default function OrderSummary({
   const totalSavings = originalSubtotal - subtotal
   const voucherDiscount = selectedVoucher ? selectedVoucher.discountAmount : 0
   const pointsDiscount = pointsToUse / 100 // Convert points to money
-  const finalTotal = totalPrice - voucherDiscount - pointsDiscount + shippingFee
+  const finalTotal = totalPrice - voucherDiscount - pointsDiscount
 
   return (
     <div className="space-y-4">
@@ -48,7 +46,7 @@ export default function OrderSummary({
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">Phí vận chuyển:</span>
-          <span className="text-gray-900">{shippingFee.toLocaleString()}đ</span>
+          <span className="text-green-600">Miễn phí</span>
         </div>
         {selectedVoucher && (
           <div className="flex justify-between text-sm">

@@ -4,14 +4,12 @@ import { Voucher } from '@/types/cart';
 
 interface OrderSummaryProps {
   totalPrice: number;
-  shipping: number;
   selectedVoucher: Voucher | null;
   pointsDiscount: number;
 }
 
 export default function OrderSummary({
   totalPrice,
-  shipping,
   selectedVoucher,
   pointsDiscount
 }: OrderSummaryProps) {
@@ -43,12 +41,12 @@ export default function OrderSummary({
         </div>
         <div className="flex-1">
           <div>
-            <div className="text-red-600 font-medium">{shipping.toLocaleString()}đ</div>
+            <div className="text-green-600 font-medium">Miễn phí</div>
             <div className="text-gray-500 text-sm mt-1">Phí vận chuyển</div>
           </div>
-          <div className="text-yellow-600 text-sm mt-1">(Mua thêm 90.000đ để miễn phí vận chuyển)</div>
-          <div className="mt-2 inline-block border border-red-500 text-red-600 text-left rounded-md text-sm px-2 py-1">
-            Giảm 30k phí vận chuyển đơn từ 200k
+          <div className="text-green-600 text-sm mt-1">Freeship toàn quốc</div>
+          <div className="mt-2 inline-block border border-green-500 text-green-600 text-left rounded-md text-sm px-2 py-1">
+            Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày
           </div>
         </div>
       </div>

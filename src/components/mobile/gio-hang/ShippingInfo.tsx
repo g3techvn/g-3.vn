@@ -84,6 +84,7 @@ export default function ShippingInfo({
         </div>
         <span className="text-lg font-medium">Thông tin vận chuyển</span>
       </div>
+      <div className="text-green-600 text-sm mb-4">Freeship toàn quốc - Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày</div>
       
       <div className="bg-white p-4 rounded-md">
         {/* Address information */}

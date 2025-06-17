@@ -58,9 +58,7 @@ export default function PaymentMethodSelection({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
                 </svg>
               )}
-              {selectedPayment === 'momo' && (
-                <Image src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-MoMo-Square.png" alt="Momo" width={24} height={24} className="w-6 h-6 object-contain" />
-              )}
+
             </div>
             <div className="ml-3">
               <div className="font-medium text-gray-800">
@@ -136,9 +134,7 @@ export default function PaymentMethodSelection({
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
                     </svg>
                   )}
-                  {method.id === 'momo' && (
-                    <Image src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-MoMo-Square.png" alt="Momo" width={24} height={24} className="w-6 h-6 object-contain" />
-                  )}
+
                 </div>
                 <div className="ml-3">
                   <div className="font-medium text-gray-800">{method.name}</div>
@@ -156,7 +152,7 @@ export default function PaymentMethodSelection({
         </svg>
         Hỗ trợ đầy đủ các phương thức thanh toán như:
       </p>
-      <p className="text-yellow-600 font-medium mb-3">COD, chuyển khoản tài khoản ngân hàng và Momo</p>
+      <p className="text-yellow-600 font-medium mb-3">COD và chuyển khoản tài khoản ngân hàng</p>
       <p className="text-gray-500 text-xs mb-5">(*) Vui lòng chọn phương thức thanh toán trước khi đặt hàng</p>
       
       <p className="text-gray-500 text-xs">Bằng việc tiến hành đặt hàng, bạn đồng ý với điều kiện và điều khoản sử dụng của Công ty Cổ phần công nghệ G3</p>

@@ -67,7 +67,6 @@ export default function PaymentDetails({
       <div className="bg-white p-4 rounded-md">
         <OrderSummary
           totalPrice={totalPrice}
-          shipping={shipping}
           selectedVoucher={selectedVoucher}
           pointsDiscount={pointsDiscount}
         />

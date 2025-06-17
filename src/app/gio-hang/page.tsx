@@ -94,9 +94,7 @@ export default function CartPage() {
   // Shipping carrier state
   const [selectedCarrier, setSelectedCarrier] = useState('');
   const carriers = [
-    { id: 'ghtk', name: 'Giao hàng tiết kiệm', price: 30000, time: '2-3 ngày' },
-    { id: 'ghn', name: 'Giao hàng nhanh', price: 35000, time: '1-2 ngày' },
-    { id: 'vnpost', name: 'VN Post', price: 25000, time: '3-5 ngày' }
+    { id: 'g3tech', name: 'Giao hàng bởi G3-Tech', price: 0, time: '2-3 ngày' }
   ];
 
   // Location data state
@@ -162,12 +160,6 @@ export default function CartPage() {
       name: 'Chuyển khoản ngân hàng',
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'
-    },
-    {
-      id: 'momo',
-      name: 'Ví Momo',
-      icon: 'momo',
-      description: 'Thanh toán qua ví điện tử Momo'
     }
   ]);
 
@@ -227,7 +219,7 @@ export default function CartPage() {
   const pointsDiscount = useRewardPoints ? pointsToUse * rewardPoints.pointValue : 0;
 
   // Update total calculation to include points discount
-  const shipping = 30000;
+  const shipping = 0;
   const total = totalPrice + shipping - (selectedVoucher?.discountAmount || 0) - pointsDiscount;
 
   return (

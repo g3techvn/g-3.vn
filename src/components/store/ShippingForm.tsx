@@ -7,23 +7,20 @@ import { useCart } from '@/context/CartContext'
 
 interface AddressForm {
   city: string;
+  cityCode: number;
   district: string;
+  districtCode: number;
   ward: string;
+  wardCode: number;
   address: string;
 }
 
 const carriers = [
   {
-    id: 'standard',
-    name: 'Giao hàng tiêu chuẩn',
-    price: 30000,
+    id: 'g3tech',
+    name: 'Giao hàng bởi G3-Tech',
+    price: 0,
     estimatedTime: '2-3 ngày'
-  },
-  {
-    id: 'express',
-    name: 'Giao hàng nhanh',
-    price: 50000,
-    estimatedTime: '1-2 ngày'
   }
 ]
 
@@ -31,8 +28,11 @@ export default function ShippingForm() {
   const { cartItems } = useCart()
   const [addressForm, setAddressForm] = useState<AddressForm>({
     city: '',
+    cityCode: 0,
     district: '',
+    districtCode: 0,
     ward: '',
+    wardCode: 0,
     address: ''
   })
   const [selectedCarrier, setSelectedCarrier] = useState('')

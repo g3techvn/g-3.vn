@@ -23,8 +23,7 @@ export const SOCIAL_LINKS = [
 
 export const SHIPPING_PROVIDERS = [
   { name: "ViettelPost" },
-  { name: "GHTK" },
-  { name: "GHN" }
+  { name: "GHTK" }
 ] as const;
 
 export const PAYMENT_METHODS = [
@@ -32,7 +31,6 @@ export const PAYMENT_METHODS = [
   { name: "MasterCard" },
   { name: "JCB" },
   { name: "QR Pay" },
-  { name: "Momo" },
   { name: "ZaloPay" }
 ] as const;
 

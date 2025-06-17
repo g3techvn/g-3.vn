@@ -14,8 +14,6 @@ export default function PaymentPolicy() {
         <ul className="list-disc pl-6">
           <li>Thanh toán khi nhận hàng (COD)</li>
           <li>Chuyển khoản ngân hàng</li>
-          <li>Thanh toán qua ví điện tử</li>
-          <li>Thanh toán qua thẻ tín dụng</li>
         </ul>
 
         <h2 className="text-xl font-semibold mt-6 mb-4">2. Thông tin chuyển khoản</h2>

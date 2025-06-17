@@ -153,3 +153,25 @@ button:active, a:active {
     display: none;
   }
 }
+
+/* Collapsible section animations */
+.collapsible-content {
+  transition: max-height 0.3s ease-out;
+  overflow: hidden;
+}
+
+.collapsible-content.open {
+  max-height: 1000px; /* Adjust based on your content */
+}
+
+.collapsible-content.closed {
+  max-height: 0;
+}
+
+.collapsible-arrow {
+  transition: transform 0.3s ease;
+}
+
+.collapsible-arrow.open {
+  transform: rotate(180deg);
+}

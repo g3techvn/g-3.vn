@@ -1,45 +1,23 @@
 'use client'
 
+interface BuyerInfoForm {
+  fullName: string;
+  phone: string;
+  email: string;
+}
+
 interface BuyerInfoProps {
-  user: {
-    fullName: string;
-    email: string;
-  } | null;
-  guestInfo: {
-    fullName: string;
-    phone: string;
-    email: string;
-  };
-  setGuestInfo: (info: {
-    fullName: string;
-    phone: string;
-    email: string;
-  } | ((prev: {
-    fullName: string;
-    phone: string;
-    email: string;
-  }) => {
-    fullName: string;
-    phone: string;
-    email: string;
-  })) => void;
-  userPhone: string;
-  setUserPhone: (phone: string) => void;
-  errors: {
-    fullName: string;
-    phone: string;
-  };
-  setErrors: (errors: { fullName: string; phone: string }) => void;
+  formData: BuyerInfoForm;
+  setFormData: (info: BuyerInfoForm | ((prev: BuyerInfoForm) => BuyerInfoForm)) => void;
+  showDrawer: boolean;
+  setShowDrawer: (show: boolean) => void;
 }
 
 export default function BuyerInfo({
-  user,
-  guestInfo,
-  setGuestInfo,
-  userPhone,
-  setUserPhone,
-  errors,
-  setErrors
+  formData,
+  setFormData,
+  showDrawer,
+  setShowDrawer
 }: BuyerInfoProps) {
   return (
     <div className="space-y-4">
@@ -64,19 +42,13 @@ export default function BuyerInfo({
           <input
             type="text"
             id="fullName"
-            value={guestInfo.fullName}
+            value={formData.fullName}
             onChange={(e) => {
-              setGuestInfo({ ...guestInfo, fullName: e.target.value })
-              if (errors.fullName) {
-                setErrors({ ...errors, fullName: '' })
-              }
+              setFormData({ ...formData, fullName: e.target.value })
             }}
-            className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-red-500`}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập họ và tên"
           />
-          {errors.fullName && (
-            <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
-          )}
         </div>
 
         <div>
@@ -86,20 +58,13 @@ export default function BuyerInfo({
           <input
             type="tel"
             id="phone"
-            value={guestInfo.phone}
+            value={formData.phone}
             onChange={(e) => {
-              setGuestInfo({ ...guestInfo, phone: e.target.value })
-              setUserPhone(e.target.value)
-              if (errors.phone) {
-                setErrors({ ...errors, phone: '' })
-              }
+              setFormData({ ...formData, phone: e.target.value })
             }}
-            className={`w-full px-3 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-red-500`}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập số điện thoại"
           />
-          {errors.phone && (
-            <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-          )}
         </div>
 
         <div>
@@ -109,8 +74,8 @@ export default function BuyerInfo({
           <input
             type="email"
             id="email"
-            value={guestInfo.email}
-            onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập email"
           />
