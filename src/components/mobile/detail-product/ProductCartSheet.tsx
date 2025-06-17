@@ -99,7 +99,7 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
       newQuantities[variant.id] = variantQuantities[variant.id] || 1;
     });
     setVariantQuantities(newQuantities);
-  }, [selectedColors, selectedGacChans, product.variants, hasGacChanOption]);
+  }, [selectedColors, selectedGacChans, product.variants, hasGacChanOption, variantQuantities]);
 
   // Reset temp items when sheet closes
   React.useEffect(() => {
