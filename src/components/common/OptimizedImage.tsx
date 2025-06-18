@@ -16,6 +16,11 @@ interface OptimizedImageProps {
   // Enhanced options for performance
   enablePreload?: boolean;
   optimizeForSlowNetwork?: boolean;
+  // SEO enhancements
+  productName?: string;
+  category?: string;
+  brand?: string;
+  seoOptimized?: boolean;
 }
 
 export default function OptimizedImage({
@@ -32,6 +37,10 @@ export default function OptimizedImage({
   objectFit = 'cover',
   enablePreload = false,
   optimizeForSlowNetwork = true,
+  productName,
+  category,
+  brand,
+  seoOptimized = true,
 }: OptimizedImageProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -50,6 +59,27 @@ export default function OptimizedImage({
     : (priority ? (isMobile ? 80 : 90) : (isMobile ? 70 : 80));
   
   const imageQuality = quality || baseQuality;
+
+  // Generate SEO-optimized alt text
+  const generateSEOAlt = () => {
+    if (!seoOptimized) return alt;
+    
+    if (productName && category && brand) {
+      return `${productName} - ${category} ${brand} chất lượng cao | G3`;
+    }
+    if (productName && category) {
+      return `${productName} - ${category} chất lượng cao | G3`;
+    }
+    if (productName) {
+      return `${productName} - Sản phẩm công thái học | G3`;
+    }
+    if (category) {
+      return `${category} chất lượng cao | G3 - Công Thái Học`;
+    }
+    return alt || 'Sản phẩm G3 - Nội thất công thái học';
+  };
+
+  const optimizedAlt = generateSEOAlt();
 
   // Use smaller dimensions on mobile when width/height are provided
   const mobileScale = 0.75; // Scale factor for mobile
@@ -119,7 +149,7 @@ export default function OptimizedImage({
     >
       <Image
         src={optimizedSrc}
-        alt={alt}
+        alt={optimizedAlt}
         width={!fill ? calculatedWidth : undefined}
         height={!fill ? calculatedHeight : undefined}
         quality={imageQuality}

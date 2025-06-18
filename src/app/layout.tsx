@@ -12,6 +12,8 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { defaultMetadata } from './metadata';
 import Footer from '@/components/pc/footer/Footer';
 import WebVitalsTracker from '@/components/WebVitalsTracker';
+import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
+import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -53,6 +55,19 @@ export default function RootLayout({
         
         {/* Add Google Analytics */}
         <GoogleAnalytics />
+        
+        {/* Organization Schema for SEO */}
+        <OrganizationJsonLd 
+          contact={{
+            phone: COMPANY_INFO.hotline,
+            email: COMPANY_INFO.email,
+            address: COMPANY_INFO.address
+          }}
+          social={SOCIAL_LINKS.reduce((acc, link) => ({
+            ...acc,
+            [link.name.toLowerCase()]: link.href
+          }), {})}
+        />
       </head>
       <body className={`${inter.className} h-full`}>
         <Providers>

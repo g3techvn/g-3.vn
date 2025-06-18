@@ -1,20 +1,37 @@
 import type { Metadata } from 'next';
+import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
 
 // Base URL
-const siteUrl = 'https://g-3.vn';
+const siteUrl = COMPANY_INFO.website;
+
+// Enhanced keywords for better SEO
+const seoKeywords = [
+  'công thái học',
+  'nội thất văn phòng', 
+  'ghế ergonomic',
+  'bàn điều chỉnh độ cao',
+  'ghế làm việc',
+  'ghế gaming',
+  'ghế massage',
+  'nội thất công sở',
+  'furniture vietnam',
+  'sức khỏe văn phòng',
+  'thiết kế công thái học',
+  'ghế xoay văn phòng'
+];
 
 // Default metadata
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     template: '%s | G3 - Công Thái Học',
-    default: 'G3 - Công Thái Học',
+    default: 'G3 - Công Thái Học - Nội thất văn phòng với thiết kế công thái học',
   },
-  description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học chất lượng cao',
-  keywords: ['công thái học', 'nội thất văn phòng', 'ghế ergonomic', 'bàn điều chỉnh độ cao'],
+  description: `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao. ✓ Bảo hành 12 tháng ✓ Miễn phí giao hàng ✓ Tư vấn 24/7. Hotline: ${COMPANY_INFO.hotline}`,
+  keywords: seoKeywords,
   authors: [{ name: 'G3', url: siteUrl }],
-  creator: 'G3',
-  publisher: 'G3',
+  creator: COMPANY_INFO.name,
+  publisher: COMPANY_INFO.name,
   formatDetection: {
     email: false,
     address: false,
@@ -36,21 +53,21 @@ export const defaultMetadata: Metadata = {
     locale: 'vi_VN',
     url: siteUrl,
     siteName: 'G3 - Công Thái Học',
-    title: 'G3 - Công Thái Học',
-    description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học chất lượng cao',
+    title: 'G3 - Công Thái Học - Nội thất văn phòng với thiết kế công thái học',
+    description: `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao. ✓ Bảo hành 12 tháng ✓ Miễn phí giao hàng ✓ Tư vấn 24/7`,
     images: [
       {
         url: `${siteUrl}/logo.png`,
-        width: 800,
-        height: 600,
-        alt: 'G3 Logo',
+        width: 1200,
+        height: 630,
+        alt: 'G3 - Công Thái Học Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'G3 - Công Thái Học',
-    description: 'Cung cấp sản phẩm nội thất văn phòng với thiết kế công thái học chất lượng cao',
+    title: 'G3 - Công Thái Học - Nội thất văn phòng với thiết kế công thái học',
+    description: `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao`,
     images: [`${siteUrl}/logo.png`],
     creator: '@g3vietnam',
   },

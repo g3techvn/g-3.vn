@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
 import QuickView from './QuickView';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface ProductCardProps {
   product: Product;
@@ -88,12 +89,16 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
                 </svg>
               </button>
             </div>
-            <Image
+            <OptimizedImage
               src={product.image_url}
               alt={product.name}
               width={300}
               height={300}
               className="object-contain w-full h-full"
+              productName={product.name}
+              category={product.category_name}
+              brand={product.brand}
+              priority={false}
             />
           </div>
           <div className="flex-1 flex flex-col px-2 pt-2 pb-1">

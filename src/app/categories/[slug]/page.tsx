@@ -12,6 +12,8 @@ import { useParams } from 'next/navigation';
 import { ProductCard } from '@/components/pc/product/ProductCard';
 import CategoryGrid from '@/components/pc/home/CategoryGrid';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
+import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
+import { generateCategoryMeta } from '@/lib/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -198,8 +200,18 @@ export default function CategoryProductsPage() {
     );
   }
 
+  // Generate breadcrumb items for SEO
+  const breadcrumbItems = generateBreadcrumbItems(
+    `/categories/${slug}`,
+    undefined,
+    categoryName
+  );
+
   return (
     <>
+      {/* SEO Components */}
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      
       {/* Mobile Shopee Header */}
       <div className="md:hidden">
         <BrandShopeeHeader 

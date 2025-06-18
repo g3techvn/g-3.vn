@@ -19,6 +19,9 @@ import { Metadata } from 'next';
 import { generateMetadata } from '@/app/metadata';
 import { FloatProductAction } from '@/components/pc/product-detail/FloatProductAction';
 import { ProductVariants } from '@/components/pc/product-detail/ProductVariants';
+import { ProductJsonLd } from '@/components/SEO/ProductJsonLd';
+import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
+import { generateProductMeta } from '@/lib/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -472,8 +475,34 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     );
   }
 
+  // Generate breadcrumb items
+  const breadcrumbItems = generateBreadcrumbItems(
+    `/san-pham/${product.slug}`, 
+    product.name,
+    product.category_name
+  );
+
   return (
     <>
+      {/* SEO Components */}
+      <ProductJsonLd 
+        product={product}
+        brand={product.brand ? { 
+          id: product.brand_id, 
+          title: product.brand,
+          slug: product.brand_slug || '',
+          created_at: ''
+        } : undefined}
+        reviews={comments.map(comment => ({
+          id: comment.id,
+          author: comment.user.name,
+          rating: comment.rating,
+          datePublished: comment.date,
+          reviewBody: comment.content
+        }))}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      
       {/* Mobile View */}
       <div className="md:hidden">
         <MobileShopeeProductDetail 
