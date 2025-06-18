@@ -14,6 +14,7 @@ import Footer from '@/components/pc/footer/Footer';
 import WebVitalsTracker from '@/components/WebVitalsTracker';
 import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
 import { LocalBusinessJsonLd } from '@/components/SEO/LocalBusinessJsonLd';
+import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
 
 const inter = Inter({ 
@@ -56,6 +57,9 @@ export default function RootLayout({
         
         {/* Add Google Analytics */}
         <GoogleAnalytics />
+        
+        {/* Social Media Meta Tags */}
+        <SocialMetaTags />
         
         {/* Organization Schema for SEO */}
         <OrganizationJsonLd 

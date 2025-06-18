@@ -7,7 +7,7 @@ interface LocalBusinessJsonLdProps {
 }
 
 export function LocalBusinessJsonLd({ includeReviews = true }: LocalBusinessJsonLdProps) {
-  const businessSchema: any = {
+  const businessSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "@id": `${COMPANY_INFO.website}#localbusiness`,

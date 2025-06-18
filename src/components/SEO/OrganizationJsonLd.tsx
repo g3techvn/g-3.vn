@@ -29,7 +29,7 @@ export function OrganizationJsonLd({
   location = {}
 }: OrganizationJsonLdProps = {}) {
   
-  const organizationSchema: any = {
+  const organizationSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "G3 - Công Thái Học",

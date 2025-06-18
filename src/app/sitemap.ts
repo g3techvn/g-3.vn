@@ -98,9 +98,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const productsData = await productsResponse.json();
       const products = productsData.products || [];
       
-      productRoutes = products.map((product: any) => ({
+      productRoutes = products.map((product: Record<string, unknown>) => ({
         url: `${baseUrl}/san-pham/${product.slug || product.id}`,
-        lastModified: new Date(product.updated_at || product.created_at),
+        lastModified: new Date((product.updated_at || product.created_at) as string),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       }));
@@ -116,9 +116,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const categoriesData = await categoriesResponse.json();
       const categories = categoriesData.categories || [];
       
-      categoryRoutes = categories.map((category: any) => ({
+      categoryRoutes = categories.map((category: Record<string, unknown>) => ({
         url: `${baseUrl}/categories/${category.slug || category.id}`,
-        lastModified: new Date(category.updated_at || category.created_at),
+        lastModified: new Date((category.updated_at || category.created_at) as string),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
@@ -134,9 +134,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const brandsData = await brandsResponse.json();
       const brands = brandsData.brands || [];
       
-      brandRoutes = brands.map((brand: any) => ({
+      brandRoutes = brands.map((brand: Record<string, unknown>) => ({
         url: `${baseUrl}/brands/${brand.slug || brand.id}`,
-        lastModified: new Date(brand.updated_at || brand.created_at),
+        lastModified: new Date((brand.updated_at || brand.created_at) as string),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));

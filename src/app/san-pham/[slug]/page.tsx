@@ -22,6 +22,7 @@ import { ProductVariants } from '@/components/pc/product-detail/ProductVariants'
 import { ProductJsonLd } from '@/components/SEO/ProductJsonLd';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
 import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
+import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { generateProductMeta } from '@/lib/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
@@ -493,6 +494,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       {/* SEO Components */}
+      <SocialMetaTags
+        title={`${product.name} | ${product.brand || 'G3'} | G3 - Công Thái Học`}
+        description={`${product.name} - ${product.description?.slice(0, 100) || 'Sản phẩm công thái học chất lượng cao'} ✓ Giá tốt ✓ Bảo hành 12 tháng ✓ Miễn phí vận chuyển`}
+        image={product.image_url || `${process.env.NEXT_PUBLIC_SITE_URL}/images/header-img.jpg`}
+        url={`${process.env.NEXT_PUBLIC_SITE_URL}/san-pham/${product.slug}`}
+        type="product"
+        price={product.price.toString()}
+        availability="InStock"
+        brand={product.brand || 'G3'}
+        category={product.category_name || 'Nội thất văn phòng'}
+      />
       <ProductJsonLd 
         product={product}
         brand={product.brand ? { 

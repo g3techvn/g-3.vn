@@ -20,7 +20,7 @@ const seoKeywords = [
   'ghế xoay văn phòng'
 ];
 
-// Default metadata
+// Default metadata with enhanced Open Graph for Zalo & social media
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -57,23 +57,81 @@ export const defaultMetadata: Metadata = {
     description: `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao. ✓ Bảo hành 12 tháng ✓ Miễn phí giao hàng ✓ Tư vấn 24/7`,
     images: [
       {
+        url: `${siteUrl}/images/header-img.jpg`,
+        width: 1822,
+        height: 1025,
+        alt: 'G3 - Công Thái Học - Nội thất văn phòng chất lượng cao',
+      },
+      {
         url: `${siteUrl}/logo.png`,
-        width: 1200,
-        height: 630,
-        alt: 'G3 - Công Thái Học Logo',
+        width: 512,
+        height: 512,
+        alt: 'G3 Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@g3vietnam',
+    creator: '@g3vietnam',
     title: 'G3 - Công Thái Học - Nội thất văn phòng với thiết kế công thái học',
     description: `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao`,
-    images: [`${siteUrl}/logo.png`],
-    creator: '@g3vietnam',
+         images: [
+       {
+         url: `${siteUrl}/images/header-img.jpg`,
+         alt: 'G3 - Công Thái Học - Nội thất văn phòng chất lượng cao',
+         width: 1822,
+         height: 1025,
+       }
+     ],
+  },
+  // Additional meta tags for Zalo and other platforms
+  other: {
+    // Zalo specific meta tags
+    'zalo:app_id': process.env.NEXT_PUBLIC_ZALO_APP_ID || '',
+    'zalo:title': 'G3 - Công Thái Học - Nội thất văn phòng với thiết kế công thái học',
+    'zalo:description': `${COMPANY_INFO.name} - Chuyên cung cấp nội thất văn phòng với thiết kế công thái học chất lượng cao. ✓ Bảo hành 12 tháng ✓ Miễn phí giao hàng ✓ Tư vấn 24/7`,
+         'zalo:image': `${siteUrl}/images/header-img.jpg`,
+    'zalo:url': siteUrl,
+    
+    // Facebook specific meta tags
+    'fb:app_id': process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
+    'fb:admins': process.env.NEXT_PUBLIC_FACEBOOK_ADMIN_ID || '',
+    
+    // Additional Open Graph tags for better social sharing
+    'og:locale:alternate': 'en_US',
+    'og:rich_attachment': 'true',
+    'og:updated_time': new Date().toISOString(),
+    
+    // WhatsApp Business specific
+    'whatsapp:title': 'G3 - Công Thái Học',
+    'whatsapp:description': 'Nội thất văn phòng chất lượng cao với thiết kế công thái học',
+         'whatsapp:image': `${siteUrl}/images/header-img.jpg`,
+    
+    // Telegram specific
+    'telegram:channel': '@g3vietnam',
+    
+    // General mobile app meta tags
+    'apple-mobile-web-app-title': 'G3 Store',
+    'application-name': 'G3 Store',
+    'msapplication-TileColor': '#ffffff',
+    'msapplication-TileImage': `${siteUrl}/icons/ms-icon-144x144.png`,
+    'theme-color': '#ffffff',
+    
+    // Business contact info for rich snippets
+    'contact:phone_number': COMPANY_INFO.hotline,
+    'contact:email': COMPANY_INFO.email,
+    'contact:street_address': COMPANY_INFO.address,
+    'contact:locality': 'Hà Nội',
+    'contact:country': 'Vietnam',
   },
   verification: {
     google: 'google-site-verification',
     yandex: 'yandex-verification',
+    other: {
+      'zalo-site-verification': process.env.NEXT_PUBLIC_ZALO_VERIFICATION || '',
+      'facebook-domain-verification': process.env.NEXT_PUBLIC_FACEBOOK_DOMAIN_VERIFICATION || '',
+    }
   },
   alternates: {
     canonical: siteUrl,
@@ -81,19 +139,29 @@ export const defaultMetadata: Metadata = {
       'vi-VN': `${siteUrl}`,
     },
   },
+  category: 'furniture',
 };
 
-// Generate metadata for dynamic paths
+// Generate metadata for dynamic paths with enhanced social media support
 export function generateMetadata({
   title,
   description,
   image,
   url,
+  type = 'website',
+  productInfo,
 }: {
   title?: string;
   description?: string;
   image?: string;
   url?: string;
+  type?: 'website' | 'product' | 'article';
+  productInfo?: {
+    price?: string;
+    availability?: string;
+    brand?: string;
+    category?: string;
+  };
 }): Metadata {
   const metadata: Metadata = { ...defaultMetadata };
   
@@ -105,6 +173,10 @@ export function generateMetadata({
     if (metadata.twitter) {
       metadata.twitter.title = title;
     }
+    if (metadata.other) {
+      metadata.other['zalo:title'] = title;
+      metadata.other['whatsapp:title'] = title;
+    }
   }
   
   if (description) {
@@ -115,29 +187,73 @@ export function generateMetadata({
     if (metadata.twitter) {
       metadata.twitter.description = description;
     }
+    if (metadata.other) {
+      metadata.other['zalo:description'] = description;
+      metadata.other['whatsapp:description'] = description;
+    }
   }
   
   if (image && metadata.openGraph) {
+    const imageUrl = image.startsWith('http') ? image : `${siteUrl}${image}`;
+    
     metadata.openGraph.images = [
       {
-        url: image.startsWith('http') ? image : `${siteUrl}${image}`,
-        width: 800,
-        height: 600,
+        url: imageUrl,
+        width: 1200,
+        height: 630,
         alt: title || 'G3 Image',
       },
     ];
     
     if (metadata.twitter) {
-      metadata.twitter.images = [image.startsWith('http') ? image : `${siteUrl}${image}`];
+      metadata.twitter.images = [
+        {
+          url: imageUrl,
+          alt: title || 'G3 Image',
+          width: 1200,
+          height: 630,
+        }
+      ];
+    }
+    
+    if (metadata.other) {
+      metadata.other['zalo:image'] = imageUrl;
+      metadata.other['whatsapp:image'] = imageUrl;
     }
   }
   
   if (url && metadata.openGraph) {
-    metadata.openGraph.url = url.startsWith('http') ? url : `${siteUrl}${url}`;
+    const fullUrl = url.startsWith('http') ? url : `${siteUrl}${url}`;
+    metadata.openGraph.url = fullUrl;
     if (metadata.alternates) {
-      metadata.alternates.canonical = url.startsWith('http') ? url : `${siteUrl}${url}`;
+      metadata.alternates.canonical = fullUrl;
+    }
+    if (metadata.other) {
+      metadata.other['zalo:url'] = fullUrl;
+    }
+  }
+  
+  // Set Open Graph type  
+  if (metadata.openGraph) {
+    (metadata.openGraph as Record<string, unknown>).type = type;
+  }
+  
+  // Add product-specific meta tags
+  if (productInfo && metadata.other) {
+    if (productInfo.price) {
+      metadata.other['product:price:amount'] = productInfo.price;
+      metadata.other['product:price:currency'] = 'VND';
+    }
+    if (productInfo.availability) {
+      metadata.other['product:availability'] = productInfo.availability;
+    }
+    if (productInfo.brand) {
+      metadata.other['product:brand'] = productInfo.brand;
+    }
+    if (productInfo.category) {
+      metadata.other['product:category'] = productInfo.category;
     }
   }
   
   return metadata;
-} 
+}

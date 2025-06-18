@@ -1,5 +1,10 @@
 import { Product, Brand } from '@/types';
 
+interface ReviewItem {
+  rating: number;
+  [key: string]: unknown;
+}
+
 // Enhanced metadata generation for products
 export function generateProductMeta(product: Product, brand?: Brand) {
   const brandName = brand?.title || 'G3';
@@ -88,7 +93,7 @@ export function generateBrandMeta(brand: Brand, products: Product[]) {
 }
 
 // Generate JSON-LD structured data for products
-export function generateProductJsonLd(product: Product, brand?: Brand, reviews?: any[]) {
+export function generateProductJsonLd(product: Product, brand?: Brand, reviews?: ReviewItem[]) {
   const organizationName = "G3 - Công Thái Học";
   
   return {

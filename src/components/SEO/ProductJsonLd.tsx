@@ -31,7 +31,7 @@ export function ProductJsonLd({
   };
 
   // Generate product schema
-  const productSchema = {
+  const productSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.name,
@@ -139,7 +139,7 @@ export function ProductJsonLd({
 
   // Add original price if on sale
   if (product.original_price && product.original_price > product.price) {
-    productSchema.offers.priceSpecification = {
+    (productSchema.offers as Record<string, unknown>).priceSpecification = {
       "@type": "UnitPriceSpecification",
       "price": product.price,
       "priceCurrency": "VND",
