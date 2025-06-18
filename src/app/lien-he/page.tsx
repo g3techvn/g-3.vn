@@ -2,6 +2,8 @@
 
 import { ContactForm } from '@/components/ui/ContactForm';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { FAQJsonLd } from '@/components/SEO/FAQJsonLd';
+import { businessFAQs } from '@/lib/general-faqs';
 
 // Thông tin liên hệ từ .env
 const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || "0979983355";
@@ -18,6 +20,8 @@ const WORKING_HOURS = process.env.NEXT_PUBLIC_WORKING_HOURS || "9:00 - 20:00";
 export default function ContactPage() {
   return (
     <div className="bg-white">
+      {/* FAQ Schema for SEO */}
+      <FAQJsonLd faqs={businessFAQs} />
       {/* Hero section */}
       <div className="relative bg-gradient-to-r rounded-t-lg from-red-500 to-red-600">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">

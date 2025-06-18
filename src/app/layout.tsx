@@ -13,6 +13,7 @@ import { defaultMetadata } from './metadata';
 import Footer from '@/components/pc/footer/Footer';
 import WebVitalsTracker from '@/components/WebVitalsTracker';
 import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
+import { LocalBusinessJsonLd } from '@/components/SEO/LocalBusinessJsonLd';
 import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
 
 const inter = Inter({ 
@@ -68,6 +69,9 @@ export default function RootLayout({
             [link.name.toLowerCase()]: link.href
           }), {})}
         />
+        
+        {/* Local Business Schema for SEO */}
+        <LocalBusinessJsonLd includeReviews={true} />
       </head>
       <body className={`${inter.className} h-full`}>
         <Providers>

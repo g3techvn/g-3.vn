@@ -21,6 +21,7 @@ import { FloatProductAction } from '@/components/pc/product-detail/FloatProductA
 import { ProductVariants } from '@/components/pc/product-detail/ProductVariants';
 import { ProductJsonLd } from '@/components/SEO/ProductJsonLd';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
+import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
 import { generateProductMeta } from '@/lib/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
@@ -482,6 +483,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     product.category_name
   );
 
+  // Generate FAQ data for this product
+  const productFAQs = generateProductFAQs(
+    product.name,
+    product.category_name,
+    product.brand
+  );
+
   return (
     <>
       {/* SEO Components */}
@@ -502,6 +510,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }))}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      <FAQJsonLd faqs={productFAQs} />
       
       {/* Mobile View */}
       <div className="md:hidden">

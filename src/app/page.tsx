@@ -21,6 +21,10 @@ const MobileFeatureProduct = lazy(() => import('../components/mobile/MobileFeatu
 const MobileBestsellerProducts = lazy(() => import('../components/mobile/MobileBestsellerProducts'));
 const HomeAdModal = lazy(() => import('../components/pc/common/HomeAdModal'));
 
+// Non-lazy imports for SEO
+import { FAQJsonLd } from '@/components/SEO/FAQJsonLd';
+import { generalFAQs } from '@/lib/general-faqs';
+
 // Fallback loading component
 const LoadingFallback = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -725,6 +729,9 @@ export default function Home() {
 
   return (
     <>
+      {/* FAQ Schema for SEO */}
+      <FAQJsonLd faqs={generalFAQs} />
+      
       <Suspense fallback={null}>
         <HomeAdModal />
       </Suspense>
