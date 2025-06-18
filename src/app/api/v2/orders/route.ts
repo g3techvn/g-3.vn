@@ -1,11 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { CartItem } from '@/types/cart';
 import { CreateOrderSchema, validateRequestBody } from '@/lib/validation';
-import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
+import { getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
 import { 
   securityLogger, 
-  logRateLimitExceeded, 
   logValidationFailed, 
   logOrderCreated,
   logSuspiciousRequest 
@@ -15,14 +13,18 @@ import {
   getAuthBasedRateLimit, 
   detectSuspiciousActivity 
 } from '@/lib/auth-middleware';
+import { 
+  createVersionedResponse, 
+  DataTransformer 
+} from '@/lib/api-versioning';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
   const userAgent = request.headers.get('user-agent') || undefined;
   
   try {
-    // Log API access
-    securityLogger.logApiAccess(ip, '/api/orders', 'POST', userAgent);
+    // Log API access for v2
+    securityLogger.logApiAccess(ip, '/api/v2/orders', 'POST', userAgent);
     
     // Authenticate request
     const authContext = await authenticateRequest(request);
@@ -30,33 +32,11 @@ export async function POST(request: NextRequest) {
     // Check for suspicious activity
     const suspiciousReason = detectSuspiciousActivity(request, authContext);
     if (suspiciousReason) {
-      logSuspiciousRequest(ip, '/api/orders', suspiciousReason, userAgent);
-      return NextResponse.json(
+      logSuspiciousRequest(ip, '/api/v2/orders', suspiciousReason, userAgent);
+      return createVersionedResponse(
         { error: 'Request blocked due to suspicious activity' },
-        { status: 403, headers: getSecurityHeaders() }
-      );
-    }
-    
-    // Apply auth-based rate limiting
-    const rateConfig = getAuthBasedRateLimit(authContext);
-    const rateLimitResult = await rateLimit(request, rateConfig);
-    
-    if (!rateLimitResult.success) {
-      logRateLimitExceeded(ip, '/api/orders', userAgent);
-      return NextResponse.json(
-        { 
-          error: 'Too many requests. Please try again later.',
-          retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
-        },
-        { 
-          status: 429,
-          headers: {
-            ...getSecurityHeaders(),
-            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
-          }
-        }
+        'v2',
+        { status: 403 }
       );
     }
 
@@ -66,13 +46,14 @@ export async function POST(request: NextRequest) {
     const validation = validateRequestBody(CreateOrderSchema, body);
     
     if (!validation.success) {
-      logValidationFailed(ip, '/api/orders', validation.errors || [], userAgent);
-      return NextResponse.json(
+      logValidationFailed(ip, '/api/v2/orders', validation.errors || [], userAgent);
+      return createVersionedResponse(
         { 
           error: 'Validation failed',
           details: validation.errors 
         },
-        { status: 400, headers: getSecurityHeaders() }
+        'v2',
+        { status: 400 }
       );
     }
 
@@ -118,7 +99,7 @@ export async function POST(request: NextRequest) {
         customer_phone: buyer_info.phone,
         customer_email: buyer_info.email || null,
         shipping_address,
-        shipping_fee,
+        shipping_fee: shipping_fee || 0,
         voucher_code: voucher?.code || null,
         voucher_discount,
         points_used: reward_points || 0,
@@ -133,9 +114,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
-      console.error('Order creation error:', orderError);
-      return NextResponse.json(
+      securityLogger.logError('Order creation error', new Error(orderError.message), {
+        ip,
+        userAgent,
+        endpoint: '/api/v2/orders'
+      });
+      return createVersionedResponse(
         { error: `Failed to create order: ${orderError.message}` },
+        'v2',
         { status: 500 }
       );
     }
@@ -163,11 +149,11 @@ export async function POST(request: NextRequest) {
       .select();
 
     if (orderItemsError) {
-      console.error('Order items creation error:', orderItemsError);
       // Try to delete the order if order items creation failed
       await supabase.from('orders').delete().eq('id', orderData.id);
-      return NextResponse.json(
+      return createVersionedResponse(
         { error: `Failed to create order items: ${orderItemsError.message}` },
+        'v2',
         { status: 500 }
       );
     }
@@ -212,38 +198,51 @@ export async function POST(request: NextRequest) {
     // Log successful order creation
     logOrderCreated(ip, orderData.id.toString(), authContext.user?.id, userAgent);
     
-    return NextResponse.json({
-      success: true,
-      order: {
-        ...orderData,
-        items: orderItemsData
-      }
-    }, {
-      headers: getSecurityHeaders()
+    // Transform to v2 format
+    const orderV2 = DataTransformer.transformOrderV1ToV2({
+      ...orderData,
+      items: orderItemsData
     });
+
+    return createVersionedResponse({
+      success: true,
+      order: orderV2,
+      metadata: {
+        version: 'v2',
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - new Date(orderData.created_at).getTime()
+      }
+    }, 'v2');
 
   } catch (error) {
     securityLogger.logError('Error creating order', error as Error, {
       ip,
       userAgent,
-      endpoint: '/api/orders'
+      endpoint: '/api/v2/orders'
     });
     
-    return NextResponse.json(
+    return createVersionedResponse(
       { error: 'Internal server error' },
-      { status: 500, headers: getSecurityHeaders() }
+      'v2',
+      { status: 500 }
     );
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const ip = getClientIP(request);
+  const userAgent = request.headers.get('user-agent') || undefined;
+  
   try {
+    securityLogger.logApiAccess(ip, '/api/v2/orders', 'GET', userAgent);
+    
     const { searchParams } = new URL(request.url);
     const user_id = searchParams.get('user_id');
 
     if (!user_id) {
-      return NextResponse.json(
+      return createVersionedResponse(
         { error: 'User ID is required' },
+        'v2',
         { status: 400 }
       );
     }
@@ -262,18 +261,35 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json(
-        { error: `Failed to fetch orders: ${error.message}` },
+      return createVersionedResponse(
+        { error: 'Failed to fetch orders' },
+        'v2',
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ orders });
+    // Transform to v2 format
+    const ordersV2 = orders?.map(order => DataTransformer.transformOrderV1ToV2(order)) || [];
+
+    return createVersionedResponse({
+      orders: ordersV2,
+      total: ordersV2.length,
+      metadata: {
+        version: 'v2',
+        timestamp: new Date().toISOString()
+      }
+    }, 'v2');
 
   } catch (error) {
-    console.error('Error fetching orders:', error);
-    return NextResponse.json(
+    securityLogger.logError('Error fetching orders', error as Error, {
+      ip,
+      userAgent,
+      endpoint: '/api/v2/orders'
+    });
+    
+    return createVersionedResponse(
       { error: 'Internal server error' },
+      'v2',
       { status: 500 }
     );
   }

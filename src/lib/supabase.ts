@@ -1,7 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://static.g-3.vn';
-const supabaseAnonKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NjU4Mjk2MCwiZXhwIjo0OTAyMjU2NTYwLCJyb2xlIjoiYW5vbiJ9.DvVf-ysuXFXycIAaIdSRx6NXw8A6g1FclqpuI_hdX3c';
+// Lấy URL và key từ biến môi trường
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Kiểm tra biến môi trường
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.'
+  );
+}
 
 // Tạo client cho server components/API routes
 export const createServerClient = () => {
