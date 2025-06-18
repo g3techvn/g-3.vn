@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   reactStrictMode: true,
   compiler: {
@@ -8,10 +12,10 @@ const nextConfig = {
   },
   images: {
     domains: ['localhost', 'api.g-3.vn', 'g-3.vn', 'cdn.g-3.vn', 'static.g-3.vn'],
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [480, 640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512],
-    minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days for better caching
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     unoptimized: false,
@@ -36,12 +40,7 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: [
-      'framer-motion', 
-      'lodash', 
-      'react-hook-form',
-      '@radix-ui/react-icons'
-    ],
+    optimizePackageImports: ['antd', 'lodash'],
     optimizeServerReact: true,
     serverMinification: true,
   },
@@ -113,7 +112,16 @@ const nextConfig = {
         ]
       },
       {
-        source: '/_next/image',
+        source: '/icons/:path*',
+        headers: [
+          {
+            key: 'Cache-Control', 
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/:path*',
         headers: [
           {
             key: 'Cache-Control',
@@ -122,7 +130,28 @@ const nextConfig = {
         ]
       }
     ]
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          antd: {
+            test: /[\\/]node_modules[\\/]antd[\\/]/,
+            name: 'antd',
+            chunks: 'all',
+          }
+        }
+      };
+    }
+    
+    return config;
   }
 }
 
-module.exports = nextConfig 
+module.exports = withBundleAnalyzer(nextConfig); 

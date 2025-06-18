@@ -1,8 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, Spin, Progress, Statistic, Alert } from 'antd';
-import { TrophyOutlined, WarningOutlined, DashboardOutlined } from '@ant-design/icons';
+import { Card, Spin, Progress, Statistic, Alert, Button, DatePicker, Select, Row, Col } from 'antd';
+import { TrophyOutlined, WarningOutlined, DashboardOutlined, ReloadOutlined, DownloadOutlined, LineChartOutlined } from '@ant-design/icons';
+import { Line, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface PerformanceMetrics {
   totalEntries: number;
@@ -35,6 +59,8 @@ export default function PerformanceDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [selectedMetric, setSelectedMetric] = useState('LCP');
 
   const fetchMetrics = async () => {
     try {
@@ -94,6 +120,145 @@ export default function PerformanceDashboard() {
     return '#f5222d'; // Red
   };
 
+  const generateTrendChart = () => {
+    if (!metrics || !metrics.metrics[selectedMetric]) return null;
+
+    const metricData = metrics.metrics[selectedMetric];
+    const data = {
+      labels: ['P50', 'P75', 'P90', 'P95', 'P99'],
+      datasets: [
+        {
+          label: `${selectedMetric} Percentiles`,
+          data: metricData.percentiles ? [
+            metricData.percentiles.p50,
+            metricData.percentiles.p75,
+            metricData.percentiles.p90,
+            metricData.percentiles.p95,
+            metricData.percentiles.p99
+          ] : [],
+          borderColor: getScoreColor(
+            metricData.ratings.good,
+            metricData.ratings['needs-improvement'],
+            metricData.ratings.poor
+          ),
+          backgroundColor: getScoreColor(
+            metricData.ratings.good,
+            metricData.ratings['needs-improvement'],
+            metricData.ratings.poor
+          ) + '20',
+          tension: 0.4
+        }
+      ]
+    };
+
+    return (
+      <Line 
+        data={data}
+        options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top' as const,
+            },
+            title: {
+              display: true,
+              text: `${selectedMetric} Performance Distribution`
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Time (ms)'
+              }
+            }
+          }
+        }}
+      />
+    );
+  };
+
+  const generateRatingChart = () => {
+    if (!metrics) return null;
+
+    const coreMetrics = ['LCP', 'FCP', 'CLS', 'TTFB', 'INP'];
+    const goodData = coreMetrics.map(metric => 
+      metrics.metrics[metric]?.ratings.good || 0
+    );
+    const needsWorkData = coreMetrics.map(metric => 
+      metrics.metrics[metric]?.ratings['needs-improvement'] || 0
+    );
+    const poorData = coreMetrics.map(metric => 
+      metrics.metrics[metric]?.ratings.poor || 0
+    );
+
+    const data = {
+      labels: coreMetrics,
+      datasets: [
+        {
+          label: 'Good',
+          data: goodData,
+          backgroundColor: '#52c41a',
+        },
+        {
+          label: 'Needs Improvement',
+          data: needsWorkData,
+          backgroundColor: '#faad14',
+        },
+        {
+          label: 'Poor',
+          data: poorData,
+          backgroundColor: '#f5222d',
+        }
+      ]
+    };
+
+    return (
+      <Bar 
+        data={data}
+        options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top' as const,
+            },
+            title: {
+              display: true,
+              text: 'Core Web Vitals Score Distribution'
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+            },
+            y: {
+              stacked: true,
+              title: {
+                display: true,
+                text: 'Number of Measurements'
+              }
+            }
+          }
+        }}
+      />
+    );
+  };
+
+  const exportData = () => {
+    if (!metrics) return;
+
+    const dataStr = JSON.stringify(metrics, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `performance-metrics-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -111,12 +276,13 @@ export default function PerformanceDashboard() {
           type="error"
           showIcon
           action={
-            <button 
+            <Button 
               onClick={fetchMetrics}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              type="primary"
+              icon={<ReloadOutlined />}
             >
               Retry
-            </button>
+            </Button>
           }
         />
       </div>
@@ -141,167 +307,179 @@ export default function PerformanceDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <DashboardOutlined />
-            Performance Dashboard
-          </h1>
-          <div className="flex justify-between items-center mt-2">
-            <p className="text-gray-600">
-              Monitoring {metrics.totalEntries} metrics from{' '}
-              {new Date(metrics.timeRange.from).toLocaleString()} to{' '}
-              {new Date(metrics.timeRange.to).toLocaleString()}
-            </p>
-            {lastUpdated && (
-              <p className="text-sm text-gray-500">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                <DashboardOutlined />
+                Performance Dashboard
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Monitoring {metrics.totalEntries} metrics from{' '}
+                {new Date(metrics.timeRange.from).toLocaleString()} to{' '}
+                {new Date(metrics.timeRange.to).toLocaleString()}
               </p>
-            )}
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                onClick={exportData}
+                icon={<DownloadOutlined />}
+              >
+                Export Data
+              </Button>
+              <Button
+                onClick={fetchMetrics}
+                type="primary"
+                icon={<ReloadOutlined />}
+                loading={loading}
+              >
+                Refresh
+              </Button>
+            </div>
           </div>
+          
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 mt-2">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+              {autoRefresh && ' (Auto-refresh enabled)'}
+            </p>
+          )}
         </div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <Statistic
-              title="Total Metrics"
-              value={metrics.totalEntries}
-              prefix={<DashboardOutlined />}
-            />
-          </Card>
+        <Row gutter={[16, 16]} className="mb-6">
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Total Metrics"
+                value={metrics.totalEntries}
+                prefix={<DashboardOutlined />}
+              />
+            </Card>
+          </Col>
           
-          <Card>
-            <Statistic
-              title="Core Web Vitals"
-              value={Object.keys(metrics.metrics).filter(m => 
-                ['LCP', 'FCP', 'CLS', 'TTFB', 'INP'].includes(m)
-              ).length}
-              suffix="/ 5"
-              prefix={<TrophyOutlined />}
-            />
-          </Card>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Core Web Vitals"
+                value={Object.keys(metrics.metrics).filter(m => 
+                  ['LCP', 'FCP', 'CLS', 'TTFB', 'INP'].includes(m)
+                ).length}
+                suffix="/ 5"
+                prefix={<TrophyOutlined />}
+              />
+            </Card>
+          </Col>
           
-          <Card>
-            <Statistic
-              title="Slow Resources"
-              value={metrics.metrics.SLOW_RESOURCE?.count || 0}
-              prefix={<WarningOutlined />}
-              valueStyle={{ color: '#f5222d' }}
-            />
-          </Card>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Slow Resources"
+                value={metrics.metrics.SLOW_RESOURCE?.count || 0}
+                prefix={<WarningOutlined />}
+                valueStyle={{ color: '#f5222d' }}
+              />
+            </Card>
+          </Col>
           
-          <Card>
-            <Statistic
-              title="Long Tasks"
-              value={metrics.metrics.LONG_TASK?.count || 0}
-              prefix={<WarningOutlined />}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </div>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Long Tasks"
+                value={metrics.metrics.LONG_TASK?.count || 0}
+                prefix={<WarningOutlined />}
+                valueStyle={{ color: '#faad14' }}
+              />
+            </Card>
+          </Col>
+        </Row>
 
-        {/* Metrics Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {Object.entries(metrics.metrics).map(([metricName, data]) => {
-            const { good, 'needs-improvement': needsWork, poor } = data.ratings;
-            const total = good + needsWork + poor;
-            const goodPercent = total > 0 ? (good / total) * 100 : 0;
-            const p95 = data.percentiles?.p95 || 0;
-            const status = getMetricStatus(metricName, p95);
+        {/* Charts Section */}
+        <Row gutter={[16, 16]} className="mb-6">
+          <Col xs={24} lg={12}>
+            <Card 
+              title="Core Web Vitals Distribution"
+              extra={<LineChartOutlined />}
+            >
+              {generateRatingChart()}
+            </Card>
+          </Col>
+          
+          <Col xs={24} lg={12}>
+            <Card 
+              title="Performance Percentiles"
+              extra={
+                <Select
+                  value={selectedMetric}
+                  onChange={setSelectedMetric}
+                  style={{ width: 100 }}
+                >
+                  {Object.keys(metrics.metrics).map(metric => (
+                    <Select.Option key={metric} value={metric}>
+                      {metric}
+                    </Select.Option>
+                  ))}
+                </Select>
+              }
+            >
+              {generateTrendChart()}
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Detailed Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(metrics.metrics).map(([metricName, metricData]) => {
+            const avgValue = metricData.percentiles?.p50 || 0;
+            const status = getMetricStatus(metricName, avgValue);
             
             return (
-              <Card 
+              <Card
                 key={metricName}
-                title={
+                className={`border-l-4 ${
+                  status === 'good' ? 'border-l-green-500' :
+                  status === 'warning' ? 'border-l-yellow-500' : 'border-l-red-500'
+                }`}
+              >
+                <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">{metricName}</span>
+                    <h3 className="font-semibold text-lg">{metricName}</h3>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                       status === 'good' ? 'bg-green-100 text-green-800' :
-                      status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                      status === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {status.toUpperCase()}
                     </span>
                   </div>
-                }
-                className="hover:shadow-lg transition-shadow"
-              >
-                <div className="space-y-4">
-                  {/* Rating Distribution */}
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">Rating Distribution</span>
-                      <span className="text-sm text-gray-500">{data.count} samples</span>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">P50:</span> {metricData.percentiles?.p50?.toFixed(1) || 'N/A'}ms
                     </div>
-                    <Progress
-                      percent={goodPercent}
-                      strokeColor={getScoreColor(good, needsWork, poor)}
-                      format={() => `${Math.round(goodPercent)}% Good`}
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>Good: {good}</span>
-                      <span>Needs Work: {needsWork}</span>
-                      <span>Poor: {poor}</span>
+                    <div>
+                      <span className="text-gray-500">P95:</span> {metricData.percentiles?.p95?.toFixed(1) || 'N/A'}ms
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Count:</span> {metricData.count}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Good:</span> {metricData.ratings.good}
                     </div>
                   </div>
-
-                  {/* Percentiles */}
-                  {data.percentiles && (
-                    <div>
-                      <div className="text-sm font-medium mb-2">Performance Percentiles</div>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="font-medium">P50</div>
-                          <div>{Math.round(data.percentiles.p50)}ms</div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="font-medium">P90</div>
-                          <div>{Math.round(data.percentiles.p90)}ms</div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="font-medium">P95</div>
-                          <div className={`font-bold ${
-                            status === 'good' ? 'text-green-600' :
-                            status === 'warning' ? 'text-yellow-600' :
-                            'text-red-600'
-                          }`}>
-                            {Math.round(data.percentiles.p95)}ms
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Recommendations */}
-                  {metricName === 'SLOW_RESOURCE' && poor > 0 && (
-                    <Alert
-                      message="High Priority"
-                      description={`${poor} slow resources detected. Consider image optimization and CDN usage.`}
-                      type="warning"
-                    />
-                  )}
                   
-                  {metricName === 'LCP' && p95 > 2500 && (
-                    <Alert
-                      message="Optimization Needed"
-                      description="LCP above 2.5s. Optimize images and reduce render blocking resources."
-                      type="error"
-                    />
-                  )}
+                  <Progress
+                    percent={Math.round((metricData.ratings.good / metricData.count) * 100)}
+                    strokeColor={getScoreColor(
+                      metricData.ratings.good,
+                      metricData.ratings['needs-improvement'],
+                      metricData.ratings.poor
+                    )}
+                    size="small"
+                  />
                 </div>
               </Card>
             );
           })}
-        </div>
-
-        {/* Refresh Button */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={fetchMetrics}
-            disabled={loading}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
-          >
-            {loading ? 'Refreshing...' : 'Refresh Metrics'}
-          </button>
         </div>
       </div>
     </div>
