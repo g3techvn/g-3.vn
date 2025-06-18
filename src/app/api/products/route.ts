@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { Product, ProductVariant } from '@/types';
+import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
+import { securityLogger } from '@/lib/logger';
 
 // Define type for the joined product_sectors query result
 interface ProductSectorJoin {
@@ -8,8 +10,28 @@ interface ProductSectorJoin {
   products: Product;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const ip = getClientIP(request);
+  
   try {
+    // Apply rate limiting
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.PUBLIC);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { 
+          status: 429, 
+          headers: {
+            ...getSecurityHeaders(),
+            'Retry-After': Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString()
+          }
+        }
+      );
+    }
+
+    // Log API access
+    securityLogger.logApiAccess(ip, '/api/products', 'GET');
+
     // Get domain and query parameters from request
     const { searchParams } = new URL(request.url);
     
@@ -202,9 +224,9 @@ export async function GET(request: Request) {
           }
           
           if (order === 'asc') {
-            return aValue > bValue ? 1 : -1;
+            return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
           } else {
-            return aValue < bValue ? 1 : -1;
+            return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
           }
         });
       }
@@ -215,14 +237,23 @@ export async function GET(request: Request) {
       );
     }
     
-    console.log(`Query successful, returning ${sortedProducts.length} products`);
-    return NextResponse.json({ products: sortedProducts });
+    // Secure logging - don't log sensitive parameters
+    securityLogger.logApiAccess(ip, '/api/products', 'GET', undefined);
+    
+    return NextResponse.json(
+      { products: sortedProducts },
+      { headers: getSecurityHeaders() }
+    );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in products API:', error);
+    securityLogger.logError('Error in products API', error as Error, {
+      ip,
+      endpoint: '/api/products'
+    });
+    
     return NextResponse.json(
-      { error: `An error occurred while processing the request: ${errorMessage}` },
-      { status: 500 }
+      { error: `Đã xảy ra lỗi khi xử lý yêu cầu: ${errorMessage}` },
+      { status: 500, headers: getSecurityHeaders() }
     );
   }
 } 
