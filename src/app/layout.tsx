@@ -11,6 +11,7 @@ import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { defaultMetadata } from './metadata';
 import Footer from '@/components/pc/footer/Footer';
+import WebVitalsTracker from '@/components/WebVitalsTracker';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -92,6 +93,9 @@ export default function RootLayout({
             }}
           />
         </Providers>
+        
+        {/* Web Vitals Tracking */}
+        <WebVitalsTracker />
         
         {/* Register Service Worker */}
         <Script

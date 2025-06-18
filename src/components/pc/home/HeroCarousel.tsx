@@ -102,6 +102,8 @@ export default function HeroCarousel() {
                             width={800}
                             height={475}
                             priority={index === currentSlide}
+                            enablePreload={index === currentSlide}
+                            optimizeForSlowNetwork={true}
                             className="h-[95%] w-auto object-contain rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 768px) 100vw, 800px"
                             objectFit="contain"
