@@ -61,21 +61,7 @@ export default function RootLayout({
         {/* Social Media Meta Tags */}
         <SocialMetaTags />
         
-        {/* Organization Schema for SEO */}
-        <OrganizationJsonLd 
-          contact={{
-            phone: COMPANY_INFO.hotline,
-            email: COMPANY_INFO.email,
-            address: COMPANY_INFO.address
-          }}
-          social={SOCIAL_LINKS.reduce((acc, link) => ({
-            ...acc,
-            [link.name.toLowerCase()]: link.href
-          }), {})}
-        />
-        
-        {/* Local Business Schema for SEO */}
-        <LocalBusinessJsonLd includeReviews={true} />
+        {/* Schema metadata will be rendered in body */}
       </head>
       <body className={`${inter.className} h-full`}>
         <Providers>
@@ -116,6 +102,20 @@ export default function RootLayout({
             }}
           />
         </Providers>
+        
+        {/* SEO Schema */}
+        <OrganizationJsonLd 
+          contact={{
+            phone: COMPANY_INFO.hotline,
+            email: COMPANY_INFO.email,
+            address: COMPANY_INFO.address
+          }}
+          social={SOCIAL_LINKS.reduce((acc, link) => ({
+            ...acc,
+            [link.name.toLowerCase()]: link.href
+          }), {})}
+        />
+        <LocalBusinessJsonLd includeReviews={true} />
         
         {/* Web Vitals Tracking */}
         <WebVitalsTracker />

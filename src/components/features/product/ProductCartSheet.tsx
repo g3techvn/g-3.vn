@@ -94,12 +94,14 @@ export function ProductCartSheet({ isOpen, onClose, product, selectedVariant, on
     setSelectedVariants(variants);
     
     // Initialize quantities for selected variants
-    const newQuantities: Record<number, number> = {};
-    variants.forEach(variant => {
-      newQuantities[variant.id] = variantQuantities[variant.id] || 1;
+    setVariantQuantities(prev => {
+      const newQuantities: Record<number, number> = {};
+      variants.forEach(variant => {
+        newQuantities[variant.id] = prev[variant.id] || 1;
+      });
+      return newQuantities;
     });
-    setVariantQuantities(newQuantities);
-  }, [selectedColors, selectedGacChans, product.variants, hasGacChanOption, variantQuantities]);
+  }, [selectedColors, selectedGacChans, product.variants, hasGacChanOption]);
 
   // Reset temp items when sheet closes
   React.useEffect(() => {

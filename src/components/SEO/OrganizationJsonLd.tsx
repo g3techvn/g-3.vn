@@ -1,5 +1,3 @@
-'use client';
-
 interface ContactInfo {
   phone?: string;
   email?: string;
@@ -27,7 +25,7 @@ export function OrganizationJsonLd({
   contact = {},
   social = {},
   location = {}
-}: OrganizationJsonLdProps = {}) {
+}: OrganizationJsonLdProps) {
   
   const organizationSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
