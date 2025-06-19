@@ -16,8 +16,8 @@ export interface AuthContext {
 const PROTECTED_ROUTES = [
   '/api/orders',
   '/api/user',
-  '/tai-khoan',
-  '/gio-hang'
+  '/tai-khoan'
+  // Removed '/gio-hang' - cart should be accessible to guest users
 ];
 
 // Routes that require admin role
