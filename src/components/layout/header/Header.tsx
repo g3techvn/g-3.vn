@@ -371,19 +371,19 @@ const Header: React.FC = () => {
             {/* Social Media Links - Desktop Only */}
             <div className="hidden md:flex items-center space-x-2">
               <Link href={SOCIAL_LINKS[1].href} aria-label="Facebook" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
-              <Image src="/images/icon/facebook-round-color-icon.svg" alt="Facebook" width={20} height={20} className="h-5 w-5" />
+              <Image src="/assets/icons/social/facebook-round-color-icon.svg" alt="Facebook" width={20} height={20} className="h-5 w-5" />
               </Link>
             
               <Link href={SOCIAL_LINKS[2].href} aria-label="Tiktok" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
-                <Image src="/images/icon/tiktok-circle.svg" alt="Tiktok" width={20} height={20} className="h-6 w-6" />   
+                <Image src="/assets/icons/social/tiktok-circle.svg" alt="Tiktok" width={20} height={20} className="h-6 w-6" />   
               </Link>
              
               <Link href={SOCIAL_LINKS[3].href} aria-label="Youtube" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
-                <Image src="/images/icon/youtube-music-icon.svg" alt="Tiktok" width={20} height={20} className="h-5 w-5" />   
+                <Image src="/assets/icons/social/youtube-music-icon.svg" alt="Youtube" width={20} height={20} className="h-5 w-5" />   
               </Link>
 
               <Link href={SOCIAL_LINKS[0].href} aria-label="Shopee" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
-                <Image src="/images/icon/shopee-icon.svg" alt="Shopee" width={20} height={20} className="h-5 w-5" />
+                <Image src="/assets/icons/social/shopee-icon.svg" alt="Shopee" width={20} height={20} className="h-5 w-5" />
               </Link>
             </div>
 

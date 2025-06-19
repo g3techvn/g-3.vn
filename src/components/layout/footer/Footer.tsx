@@ -132,25 +132,25 @@ export default function Footer() {
             <div className="flex gap-4 mb-2">
               <Link href={SOCIAL_LINKS[1].href} aria-label="Facebook" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
                 <div className="rounded-full border-2 border-gray-300 p-1">
-                  <Image src="/images/icon/facebook-round-color-icon.svg" alt="Facebook" width={24} height={24} className="h-6 w-6" />
+                  <Image src="/assets/icons/social/facebook-round-color-icon.svg" alt="Facebook" width={24} height={24} className="h-6 w-6" />
                 </div>
               </Link>
             
               <Link href={SOCIAL_LINKS[2].href} aria-label="Tiktok" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
                 <div className="rounded-full border-2 border-gray-300 p-1">
-                  <Image src="/images/icon/tiktok-circle.svg" alt="Tiktok" width={24} height={24} className="h-6 w-6" />   
+                  <Image src="/assets/icons/social/tiktok-circle.svg" alt="Tiktok" width={24} height={24} className="h-6 w-6" />   
                 </div>
               </Link>
              
               <Link href={SOCIAL_LINKS[3].href} aria-label="Youtube" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
                 <div className="rounded-full border-2 border-gray-300 p-1">
-                  <Image src="/images/icon/youtube-music-icon.svg" alt="Youtube" width={24} height={24} className="h-6 w-6" />   
+                  <Image src="/assets/icons/social/youtube-music-icon.svg" alt="Youtube" width={24} height={24} className="h-6 w-6" />   
                 </div>
               </Link>
 
               <Link href={SOCIAL_LINKS[0].href} aria-label="Shopee" className="text-gray-600 hover:text-red-600" target="_blank" rel="noopener noreferrer">
                 <div className="rounded-full border-2 border-gray-300 p-1">
-                  <Image src="/images/icon/shopee-icon.svg" alt="Shopee" width={24} height={24} className="h-6 w-6" />
+                  <Image src="/assets/icons/social/shopee-icon.svg" alt="Shopee" width={24} height={24} className="h-6 w-6" />
                 </div>
               </Link>
             </div>
