@@ -58,7 +58,7 @@ export function LocalBusinessJsonLd({ includeReviews = true }: LocalBusinessJson
     ],
     "priceRange": "₫₫",
     "currenciesAccepted": "VND",
-    "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer", "ZaloPay", "QR Code"],
+    "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer", "QR Code"],
     "areaServed": {
       "@type": "Country",
       "name": "Vietnam"

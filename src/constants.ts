@@ -30,8 +30,7 @@ export const PAYMENT_METHODS = [
   { name: "Visa" },
   { name: "MasterCard" },
   { name: "JCB" },
-  { name: "QR Pay" },
-  { name: "ZaloPay" }
+  { name: "QR Pay" }
 ] as const;
 
 export const QUICK_LINKS = [

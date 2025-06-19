@@ -27,7 +27,7 @@ export const generalFAQs: FAQItem[] = [
   },
   {
     question: "Chính sách thanh toán của G3 như thế nào?",
-    answer: "G3 hỗ trợ đa dạng hình thức thanh toán: COD (thanh toán khi nhận hàng), chuyển khoản ngân hàng, thẻ tín dụng/ghi nợ, ZaloPay, QR Code. Khách hàng có thể chọn hình thức phù hợp nhất."
+    answer: "G3 hỗ trợ đa dạng hình thức thanh toán: COD (thanh toán khi nhận hàng), chuyển khoản ngân hàng, thẻ tín dụng/ghi nợ, QR Code. Khách hàng có thể chọn hình thức phù hợp nhất."
   }
 ];
 

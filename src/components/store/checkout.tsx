@@ -94,12 +94,11 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       description: 'Thanh toán tiền mặt khi nhận hàng'
     },
     {
-      id: 'bank',
+      id: 'bank_transfer',
       name: 'Chuyển khoản ngân hàng',
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'
-    },
-
+    }
   ]
 
   const availableVouchers: Voucher[] = [

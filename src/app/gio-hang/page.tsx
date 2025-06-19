@@ -156,7 +156,7 @@ export default function CartPage() {
       description: 'Thanh toán bằng tiền mặt khi nhận hàng'
     },
     {
-      id: 'bank',
+      id: 'bank_transfer',
       name: 'Chuyển khoản ngân hàng',
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'

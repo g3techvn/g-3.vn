@@ -56,7 +56,7 @@ export const CreateOrderSchema = z.object({
   user_id: z.string().optional(),
   buyer_info: BuyerInfoSchema,
   shipping_info: ShippingInfoSchema,
-  payment_method: z.enum(['cod', 'bank_transfer', 'momo', 'zalopay'], {
+  payment_method: z.enum(['cod', 'bank_transfer'], {
     errorMap: () => ({ message: 'Phương thức thanh toán không hợp lệ' })
   }),
   cart_items: z.array(CartItemSchema)
