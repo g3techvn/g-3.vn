@@ -5,7 +5,7 @@ import {
   authenticateRequest, 
   requireAuth, 
   requireAdmin 
-} from '@/lib/auth-middleware';
+} from '@/lib/auth/auth-middleware';
 
 // This middleware runs on every request
 export async function middleware(request: NextRequest) {

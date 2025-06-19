@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { CartItem } from '@/types/cart';
-import { CreateOrderSchema, validateRequestBody } from '@/lib/validation';
+import { CreateOrderSchema, validateRequestBody } from '@/lib/validation/validation';
 import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
 import { 
   securityLogger, 
@@ -14,7 +14,7 @@ import {
   authenticateRequest, 
   getAuthBasedRateLimit, 
   detectSuspiciousActivity 
-} from '@/lib/auth-middleware';
+} from '@/lib/auth/auth-middleware';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);

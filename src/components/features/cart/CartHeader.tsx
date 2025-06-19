@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useState } from 'react';
-import AccountModal from '../AccountModal';
+import AccountModal from '../auth/AccountModal';
 
 interface CartHeaderProps {
   showMenu: boolean;

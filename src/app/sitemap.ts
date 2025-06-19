@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 import { COMPANY_INFO } from '@/constants';
 
+// Export revalidate to control ISR
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = COMPANY_INFO.website;
   
@@ -88,9 +91,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    // Fetch products dynamically
+    // Fetch products with caching for static generation
     const productsResponse = await fetch(`${baseUrl}/api/products`, {
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
     
     let productRoutes: MetadataRoute.Sitemap = [];
@@ -106,9 +109,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }));
     }
 
-    // Fetch categories dynamically
+    // Fetch categories with caching for static generation
     const categoriesResponse = await fetch(`${baseUrl}/api/categories`, {
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
     
     let categoryRoutes: MetadataRoute.Sitemap = [];
@@ -124,9 +127,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }));
     }
 
-    // Fetch brands dynamically
+    // Fetch brands with caching for static generation
     const brandsResponse = await fetch(`${baseUrl}/api/brands`, {
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
     
     let brandRoutes: MetadataRoute.Sitemap = [];

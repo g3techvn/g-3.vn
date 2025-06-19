@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api/api';
 
 // Thời gian cache (30 phút)
 const STALE_TIME = 30 * 60 * 1000;

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { CreateOrderSchema, validateRequestBody } from '@/lib/validation';
+import { CreateOrderSchema, validateRequestBody } from '@/lib/validation/validation';
 import { getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
 import { 
   securityLogger, 
@@ -12,11 +12,11 @@ import {
   authenticateRequest, 
   getAuthBasedRateLimit, 
   detectSuspiciousActivity 
-} from '@/lib/auth-middleware';
+} from '@/lib/auth/auth-middleware';
 import { 
   createVersionedResponse, 
   DataTransformer 
-} from '@/lib/api-versioning';
+} from '@/lib/api/api-versioning';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);

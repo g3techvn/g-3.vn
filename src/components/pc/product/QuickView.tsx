@@ -4,7 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { Product, ProductVariant } from '@/types'
 import { useCart } from '@/context/CartContext'
-import { ProductVariants } from '../product-detail/ProductVariants'
+import { ProductVariants } from '../../features/product/ProductVariants'
 
 interface QuickViewProps {
   product: Product

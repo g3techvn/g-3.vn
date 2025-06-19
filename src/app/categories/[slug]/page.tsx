@@ -13,7 +13,7 @@ import { ProductCard } from '@/components/pc/product/ProductCard';
 import CategoryGrid from '@/components/pc/home/CategoryGrid';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
-import { generateCategoryMeta } from '@/lib/seo-utils';
+import { generateCategoryMeta } from '@/lib/utils/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {

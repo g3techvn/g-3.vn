@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
-import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
+import { MobileShopeeProductDetail } from '@/components/features/product/MobileShopeeProductDetail';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
@@ -14,16 +14,16 @@ import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ImageItem } from '@/types/supabase';
-import { ProductDetailDesktop } from '@/components/pc/product-detail/ProductDetailDesktop';
+import { ProductDetailDesktop } from '@/components/features/product/ProductDetailDesktop';
 import { Metadata } from 'next';
 import { generateMetadata } from '@/app/metadata';
-import { FloatProductAction } from '@/components/pc/product-detail/FloatProductAction';
-import { ProductVariants } from '@/components/pc/product-detail/ProductVariants';
+import { FloatProductAction } from '@/components/features/product/FloatProductAction';
+import { ProductVariants } from '@/components/features/product/ProductVariants';
 import { ProductJsonLd } from '@/components/SEO/ProductJsonLd';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
 import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
 import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
-import { generateProductMeta } from '@/lib/seo-utils';
+import { generateProductMeta } from '@/lib/utils/seo-utils';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {

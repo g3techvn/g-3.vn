@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProducts } from '@/hooks/useProducts';
 import { Product } from '@/types';
-import AccountModal from './AccountModal';
+import AccountModal from '../features/auth/AccountModal';
 
 const MobileHomeHeader: React.FC = () => {
   const isVisible = useHeaderVisibility();

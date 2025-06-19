@@ -10,13 +10,13 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { Drawer } from 'antd';
 
 // Import new components
-import CartHeader from '@/components/mobile/gio-hang/CartHeader';
-import ProductList from '@/components/mobile/gio-hang/ProductList';
-import BuyerInfo from '@/components/mobile/gio-hang/BuyerInfo';
-import ShippingInfo from '@/components/mobile/gio-hang/ShippingInfo';
-import VoucherInfo from '@/components/mobile/gio-hang/VoucherInfo';
-import PaymentDetails from '@/components/mobile/gio-hang/PaymentDetails';
-import BottomBar from '@/components/mobile/gio-hang/BottomBar';
+import CartHeader from '@/components/features/cart/CartHeader';
+import ProductList from '@/components/features/cart/ProductList';
+import BuyerInfo from '@/components/features/cart/BuyerInfo';
+import ShippingInfo from '@/components/features/cart/ShippingInfo';
+import VoucherInfo from '@/components/features/cart/VoucherInfo';
+import PaymentDetails from '@/components/features/cart/PaymentDetails';
+import BottomBar from '@/components/features/cart/BottomBar';
 
 interface LocationData {
   code: number;

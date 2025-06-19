@@ -57,7 +57,7 @@ export interface MobileProductDetailProps {
   onSelectVariant: (variant: ProductVariant) => void;
 }
 
-// Gallery item types
+// Gallery item types - match ProductGallery interface
 type GalleryVideo = {
   type: 'video';
   url: string;
@@ -67,8 +67,8 @@ type GalleryVideo = {
 };
 type GalleryImage = {
   type: 'image';
-  src: string;
-  alt: string;
+  url: string;
+  alt?: string;
 };
 type GalleryItem = GalleryVideo | GalleryImage;
 
@@ -213,11 +213,11 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
 
   // Gallery: ảnh sản phẩm đầu tiên, sau đó video, sau đó các ảnh từ Supabase
   const galleryItems: GalleryItem[] = [
-    ...(product.image_url ? [{ type: 'image' as const, src: product.image_url, alt: 'Ảnh sản phẩm' }] : []),
+    ...(product.image_url ? [{ type: 'image' as const, url: product.image_url, alt: 'Ảnh sản phẩm' }] : []),
     ...(video ? [video] : []),
     ...localGalleryImages
       .filter((src) => src !== product.image_url)
-      .map((src, idx) => ({ type: 'image' as const, src, alt: `Gallery image ${idx + 1}` })),
+      .map((src, idx) => ({ type: 'image' as const, url: src, alt: `Gallery image ${idx + 1}` })),
   ];
 
   const handleShare = () => {
@@ -329,8 +329,9 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
 
       {/* Gallery */}
       <ProductGallery 
+        productName={product.name}
         galleryItems={galleryItems}
-        isLoading={isLoadingGallery}
+        isLoadingGallery={isLoadingGallery}
       />
 
       {/* Price */}
@@ -343,8 +344,8 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
 
       {/* Product Info */}
       <ProductInfo 
-        name={product.name}
-        tags={tags}
+        product={product}
+        selectedVariant={selectedVariant}
       />
 
       {/* Product Variants */}
@@ -357,7 +358,13 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       {/* Description */}
       <div>
         {/* Product Description */}
-        <ProductDescription description={product.description || overview} />
+        <ProductDescription 
+          keyFeatures={keyFeatures}
+          benefits={benefits}
+          instructions={instructions}
+          overview={product.description || overview}
+          content={product.content}
+        />
         
         {/* Product Features */}
         <ProductFeatures 

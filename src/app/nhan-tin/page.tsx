@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import LoginModal from '@/components/mobile/LoginModal';
+import LoginModal from '@/components/features/auth/LoginModal';
 
 interface Message {
   id: number;

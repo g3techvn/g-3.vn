@@ -6,7 +6,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
 import Checkout from './checkout'
-import ProductList from '@/components/pc/gio-hang/ProductList'
+import ProductList from '@/components/features/cart/ProductList'
 
 export default function ShoppingCart({ isOpen = false, onClose }: { isOpen: boolean; onClose: () => void }) {
   // Use context to get cart details
