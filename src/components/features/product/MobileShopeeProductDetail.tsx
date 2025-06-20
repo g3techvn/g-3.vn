@@ -340,6 +340,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
         originalPrice={product.original_price}
         publisher={publisher}
         selectedVariant={selectedVariant}
+        productId={product.id.toString()}
       />
 
       {/* Product Info */}
