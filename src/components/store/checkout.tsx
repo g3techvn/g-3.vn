@@ -85,33 +85,57 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const [pointsToUse, setPointsToUse] = useState(0)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
-  // Mock data
-  const paymentMethods = [
+  // Payment methods state
+  const [paymentMethods, setPaymentMethods] = useState([
     {
       id: 'cod',
+      code: 'cod',
       name: 'Thanh toán khi nhận hàng',
       icon: 'cod',
       description: 'Thanh toán tiền mặt khi nhận hàng'
     },
     {
       id: 'bank_transfer',
+      code: 'bank_transfer',
       name: 'Chuyển khoản ngân hàng',
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'
     }
-  ]
-
-  const availableVouchers: Voucher[] = [
+  ])
+  const [shippingCarriers, setShippingCarriers] = useState([
     {
-      id: '1',
-      code: 'WELCOME10',
-      title: 'Giảm 10% cho đơn hàng đầu tiên',
-      description: 'Áp dụng cho đơn hàng đầu tiên',
-      discountAmount: 100000,
-      minOrderValue: 500000,
-      expiryDate: new Date('2024-12-31').toISOString()
+      id: 'free',
+      code: 'FREE',
+      name: 'Miễn phí giao hàng',
+      base_fee: 0,
+      estimated_delivery_days: 1
     }
-  ]
+  ])
+
+  const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([])
+  
+  // Fetch vouchers from API
+  const fetchVouchers = async () => {
+    try {
+      const url = user ? `/api/vouchers?user_id=${user.id}` : '/api/vouchers'
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      if (response.ok && data.vouchers) {
+        setAvailableVouchers(data.vouchers.map((v: any) => ({
+          id: v.id,
+          code: v.code,
+          title: v.title,
+          description: v.description,
+          discountAmount: v.discount_amount,
+          minOrderValue: v.min_order_value,
+          expiryDate: v.valid_to
+        })))
+      }
+    } catch (error) {
+      console.error('Error fetching vouchers:', error)
+    }
+  }
 
   const rewardPointsData = {
     available: 1000,
@@ -140,8 +164,48 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         setLoadingProvinces(false)
       }
     }
+
+    const fetchPaymentMethods = async () => {
+      try {
+        const response = await fetch('/api/payment-methods')
+        const data = await response.json()
+        
+        if (response.ok && data.paymentMethods) {
+          setPaymentMethods(data.paymentMethods.map((pm: any) => ({
+            id: pm.code,
+            code: pm.code,
+            name: pm.name,
+            icon: pm.icon,
+            description: pm.description
+          })))
+        }
+      } catch (error) {
+        console.error('Error fetching payment methods:', error)
+      }
+    }
+
+    const fetchShippingCarriers = async () => {
+      try {
+        const response = await fetch('/api/shipping-carriers')
+        const data = await response.json()
+        
+        if (response.ok && data.shippingCarriers) {
+          setShippingCarriers(data.shippingCarriers)
+        }
+      } catch (error) {
+        console.error('Error fetching shipping carriers:', error)
+      }
+    }
+
     fetchProvinces()
+    fetchPaymentMethods()
+    fetchShippingCarriers()
   }, [])
+
+  // Fetch vouchers when user changes
+  useEffect(() => {
+    fetchVouchers()
+  }, [user])
 
   // Auto-fill user information when user is logged in
   useEffect(() => {

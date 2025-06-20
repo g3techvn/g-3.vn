@@ -53,7 +53,7 @@ export const VoucherSchema = z.object({
 
 // Validation schema cho orders
 export const CreateOrderSchema = z.object({
-  user_id: z.string().optional(),
+  user_id: z.string().nullable().optional(),
   buyer_info: BuyerInfoSchema,
   shipping_info: ShippingInfoSchema,
   payment_method: z.enum(['cod', 'bank_transfer'], {
@@ -62,7 +62,7 @@ export const CreateOrderSchema = z.object({
   cart_items: z.array(CartItemSchema)
     .min(1, 'Giỏ hàng không được để trống')
     .max(50, 'Giỏ hàng không được vượt quá 50 sản phẩm'),
-  voucher: VoucherSchema,
+  voucher: VoucherSchema.nullable(),
   reward_points: z.number()
     .int('Điểm thưởng phải là số nguyên')
     .min(0, 'Điểm thưởng không thể âm')

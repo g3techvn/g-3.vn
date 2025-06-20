@@ -14,9 +14,9 @@ export interface AuthContext {
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
-  '/api/orders',
   '/api/user',
   '/tai-khoan'
+  // Removed '/api/orders' - to allow guest checkout
   // Removed '/gio-hang' - cart should be accessible to guest users
 ];
 

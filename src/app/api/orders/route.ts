@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { CartItem } from '@/types/cart';
 import { CreateOrderSchema, validateRequestBody } from '@/lib/validation/validation';
 import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
@@ -109,25 +110,23 @@ export async function POST(request: NextRequest) {
 
     const final_total = Math.max(0, total_price + (shipping_fee || 0) - voucher_discount - points_discount);
 
-    // Create order
-    const { data: orderData, error: orderError } = await supabase
+    // Create order using service role client to bypass RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { data: orderData, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         user_id: user_id || null, // Allow null for guest orders
-        customer_name: buyer_info.fullName,
-        customer_phone: buyer_info.phone,
-        customer_email: buyer_info.email || null,
-        shipping_address,
-        shipping_fee,
-        voucher_code: voucher?.code || null,
-        voucher_discount,
-        points_used: reward_points || 0,
-        points_discount,
-        payment_method,
-        subtotal: total_price,
+        full_name: buyer_info.fullName, // Match database schema
+        phone: buyer_info.phone,
+        email: buyer_info.email || null,
+        address: shipping_address,
+        note: shipping_info.notes || null,
         total_price: final_total,
-        status: 'pending',
-        note: shipping_info.notes || null
+        status: 'pending'
       })
       .select()
       .single();
@@ -143,21 +142,15 @@ export async function POST(request: NextRequest) {
     // Create order items
     const orderItems = cart_items.map((item) => ({
       order_id: orderData.id,
-      product_id: item.id,
+      product_id: parseInt(item.id), // Convert to number for database
       product_name: item.name,
-      variant_id: item.variant?.id || null,
-      variant_details: item.variant ? JSON.stringify({
-        color: item.variant.color,
-        size: item.variant.size,
-        gac_chan: item.variant.gac_chan
-      }) : null,
       quantity: item.quantity,
-      unit_price: item.price,
+      price: item.price, // Match database schema
       total_price: item.price * item.quantity,
       product_image: item.image || ''
     }));
 
-    const { data: orderItemsData, error: orderItemsError } = await supabase
+    const { data: orderItemsData, error: orderItemsError } = await supabaseAdmin
       .from('order_items')
       .insert(orderItems)
       .select();
@@ -165,7 +158,7 @@ export async function POST(request: NextRequest) {
     if (orderItemsError) {
       console.error('Order items creation error:', orderItemsError);
       // Try to delete the order if order items creation failed
-      await supabase.from('orders').delete().eq('id', orderData.id);
+      await supabaseAdmin.from('orders').delete().eq('id', orderData.id);
       return NextResponse.json(
         { error: `Failed to create order items: ${orderItemsError.message}` },
         { status: 500 }
@@ -173,10 +166,43 @@ export async function POST(request: NextRequest) {
     }
 
     // Update voucher usage if applicable
-    if (voucher && user_id) {
-      // Note: voucher.id might not exist from validation schema, need to get from database
-      // This is a simplified version - in real app, you'd lookup voucher by code first
-      console.log(`Voucher ${voucher.code} used for order ${orderData.id}`);
+    if (voucher && voucher.code) {
+      try {
+        // First, get the voucher from database to get its ID
+        const { data: voucherData, error: voucherError } = await supabase
+          .from('vouchers')
+          .select('id')
+          .eq('code', voucher.code)
+          .single();
+
+        if (voucherData && !voucherError) {
+          // Update voucher used count
+          const { data: currentVoucher } = await supabase
+            .from('vouchers')
+            .select('used_count')
+            .eq('id', voucherData.id)
+            .single();
+
+          await supabase
+            .from('vouchers')
+            .update({ used_count: (currentVoucher?.used_count || 0) + 1 })
+            .eq('id', voucherData.id);
+
+          // Record voucher usage if user is logged in
+          if (user_id) {
+            await supabase
+              .from('voucher_usages')
+              .insert({
+                voucher_id: voucherData.id,
+                user_id,
+                order_id: orderData.id,
+                discount_amount: voucher_discount
+              });
+          }
+        }
+      } catch (error) {
+        console.error('Error updating voucher usage:', error);
+      }
     }
 
     // Update user reward points if applicable
