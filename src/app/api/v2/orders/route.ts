@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         subtotal: total_price,
         total_price: final_total,
         status: 'pending',
-        note: shipping_info.notes || null
+        note: shipping_info.note || null
       })
       .select()
       .single();

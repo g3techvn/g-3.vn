@@ -16,6 +16,7 @@ import {
   getAuthBasedRateLimit, 
   detectSuspiciousActivity 
 } from '@/lib/auth/auth-middleware';
+import { generateOrderToken } from '@/lib/order-tokens';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
         phone: buyer_info.phone,
         email: buyer_info.email || null,
         address: shipping_address,
-        note: shipping_info.notes || null,
+        note: shipping_info.note || null,
         total_price: final_total,
         status: 'pending'
       })
@@ -235,14 +236,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate secure access token for thank you page
+    const accessToken = generateOrderToken(String(orderData.id));
+
     // Log successful order creation
-    logOrderCreated(ip, orderData.id.toString(), authContext.user?.id, userAgent);
+    logOrderCreated(ip, String(orderData.id), authContext.user?.id || undefined, userAgent);
     
     return NextResponse.json({
       success: true,
       order: {
         ...orderData,
-        items: orderItemsData
+        items: orderItemsData,
+        accessToken // Include token for secure access
       }
     }, {
       headers: getSecurityHeaders()
@@ -266,35 +271,73 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const user_id = searchParams.get('user_id');
-
-    if (!user_id) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
+    const token = searchParams.get('token'); // Secure token for thank you page
 
     const supabase = createServerClient();
 
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        order_items (
-          *
-        )
-      `)
-      .eq('user_id', user_id)
-      .order('created_at', { ascending: false });
+    // If token is provided, validate and fetch order (for thank you page)
+    if (token) {
+      const { validateOrderToken } = await import('@/lib/order-tokens');
+      const validation = validateOrderToken(token);
+      
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: validation.error || 'Invalid access token' },
+          { status: 403 }
+        );
+      }
 
-    if (error) {
-      return NextResponse.json(
-        { error: `Failed to fetch orders: ${error.message}` },
-        { status: 500 }
-      );
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *
+          )
+        `)
+        .eq('id', validation.orderId);
+
+      if (error) {
+        return NextResponse.json(
+          { error: `Failed to fetch order: ${error.message}` },
+          { status: 500 }
+        );
+      }
+
+      // Mark token as used to prevent reuse
+      const { markTokenAsUsed } = await import('@/lib/order-tokens');
+      markTokenAsUsed(token);
+
+      return NextResponse.json({ orders });
     }
 
-    return NextResponse.json({ orders });
+    // If user_id is provided, fetch user's orders
+    if (user_id) {
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *
+          )
+        `)
+        .eq('user_id', user_id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return NextResponse.json(
+          { error: `Failed to fetch orders: ${error.message}` },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ orders });
+    }
+
+    return NextResponse.json(
+      { error: 'Either User ID or Order ID is required' },
+      { status: 400 }
+    );
 
   } catch (error) {
     console.error('Error fetching orders:', error);

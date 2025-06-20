@@ -340,7 +340,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               transition
               className="pointer-events-auto w-screen max-w-md transform transition duration-300 ease-in-out data-closed:translate-x-full z-[9999]"
             >
-              <div className="flex h-full flex-col overflow-y-scroll bg-white/30 backdrop-blur-md dark:bg-gray-900/50 shadow-xl">
+              <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-gray-900 shadow-xl">
                 <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                   <div className="flex items-start justify-between">
                     <DialogTitle className="text-lg font-medium text-gray-900">

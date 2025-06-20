@@ -8,30 +8,33 @@ export const BuyerInfoSchema = z.object({
     .regex(/^[a-zA-ZÀ-ỹ\s]+$/, 'Họ tên chỉ được chứa chữ cái và dấu cách'),
   phone: z.string()
     .regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ'),
-  email: z.string().email('Email không hợp lệ').optional(),
+  email: z.union([
+    z.string().email('Email không hợp lệ'),
+    z.string().length(0)
+  ]).optional().transform(val => val === '' ? undefined : val),
 });
 
 // Validation schema cho thông tin giao hàng
 export const ShippingInfoSchema = z.object({
   address: z.string()
-    .min(10, 'Địa chỉ phải có ít nhất 10 ký tự')
+    .min(5, 'Địa chỉ phải có ít nhất 5 ký tự') // Reduced from 10 to 5
     .max(200, 'Địa chỉ không được vượt quá 200 ký tự'),
   ward: z.string().min(1, 'Vui lòng chọn phường/xã'),
   district: z.string().min(1, 'Vui lòng chọn quận/huyện'),
   city: z.string().min(1, 'Vui lòng chọn tỉnh/thành phố'),
-  notes: z.string().max(500, 'Ghi chú không được vượt quá 500 ký tự').optional(),
+  note: z.string().optional().transform(val => val === '' ? undefined : val),
 });
 
 // Validation schema cho cart item
 export const CartItemSchema = z.object({
-  id: z.string().min(1, 'ID sản phẩm không được để trống'),
+  id: z.union([z.string(), z.number()]).transform(val => String(val)),
   name: z.string().min(1, 'Tên sản phẩm không được để trống'),
   price: z.number().positive('Giá sản phẩm phải lớn hơn 0'),
   quantity: z.number()
     .int('Số lượng phải là số nguyên')
     .min(1, 'Số lượng phải ít nhất là 1')
     .max(100, 'Số lượng không được vượt quá 100'),
-  image: z.string().url('URL hình ảnh không hợp lệ').optional(),
+  image: z.string().optional(), // Removed .url() validation as some items might not have valid URLs
   variant: z.object({
     id: z.number(),
     color: z.string().optional(),
@@ -40,15 +43,20 @@ export const CartItemSchema = z.object({
   }).optional(),
 });
 
-// Validation schema cho voucher
+// Validation schema cho voucher - made more flexible
 export const VoucherSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
   code: z.string().min(1, 'Mã voucher không được để trống'),
+  title: z.string().optional(),
+  description: z.string().optional(),
   discountAmount: z.number()
     .min(0, 'Số tiền giảm giá không thể âm')
     .max(10000000, 'Số tiền giảm giá quá lớn'),
   discountType: z.enum(['fixed', 'percentage'], {
     errorMap: () => ({ message: 'Loại giảm giá không hợp lệ' })
-  }),
+  }).optional().default('fixed'),
+  minOrderValue: z.number().optional(),
+  expiryDate: z.string().optional(),
 }).optional();
 
 // Validation schema cho orders

@@ -9,6 +9,7 @@ import { Voucher } from '@/types/cart'
 import { generatePDF } from '@/components/PDFGenerator'
 import { useToast } from '@/components/ui/Toast'
 import LocationSelector from '@/components/features/cart/LocationSelector'
+import ValidationDebugger from '@/components/debug/ValidationDebugger'
 import type { ButtonProps } from 'antd'
 
 // Import components
@@ -351,6 +352,8 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         shipping_fee: shippingFee
       }
 
+
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -366,12 +369,14 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       }
 
       if (result.success) {
-        alert(`Đặt hàng thành công! Mã đơn hàng: #${result.order.id}`)
-        
         // Clear cart after successful order
         cartItems.forEach(item => removeFromCart(item.id))
         
+        // Close checkout modal
         closeAll()
+        
+        // Redirect to thank you page with secure token
+        window.location.href = `/cam-on?token=${result.order.accessToken}`
       } else {
         throw new Error('Có lỗi xảy ra khi tạo đơn hàng')
       }
@@ -828,6 +833,31 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
       {/* Profile Drawer */}
       <ProfileDrawer isOpen={isProfileOpen} onClose={closeProfile} />
+      
+      {/* Validation Debugger */}
+      <ValidationDebugger
+        orderData={{
+          user_id: user?.id || null,
+          buyer_info: {
+            fullName: user?.fullName || formData.fullName,
+            phone: user?.phone || formData.phone,
+            email: user?.email || formData.email
+          },
+          shipping_info: {
+            address: formData.address,
+            ward: formData.ward,
+            district: formData.district,
+            city: formData.city,
+            note: formData.note
+          },
+          payment_method: formData.paymentMethod,
+          cart_items: cartItems,
+          voucher: selectedVoucher,
+          reward_points: useRewardPoints ? pointsToUse : 0,
+          total_price: totalPrice,
+          shipping_fee: shippingFee
+        }}
+      />
       
       {/* Toast Component */}
       <ToastComponent />
