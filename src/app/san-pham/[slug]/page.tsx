@@ -522,7 +522,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }))}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
-      <FAQJsonLd faqs={productFAQs} />
+      <FAQJsonLd faqs={productFAQs} type="Question" />
       
       {/* Mobile View */}
       <div className="md:hidden">

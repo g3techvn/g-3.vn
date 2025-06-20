@@ -21,7 +21,7 @@ export default function ContactPage() {
   return (
     <div className="bg-white">
       {/* FAQ Schema for SEO */}
-      <FAQJsonLd faqs={businessFAQs} />
+      <FAQJsonLd faqs={businessFAQs} type="Question" />
       {/* Hero section */}
       <div className="relative bg-gradient-to-r rounded-t-lg from-red-500 to-red-600">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">

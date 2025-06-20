@@ -730,7 +730,7 @@ export default function Home() {
   return (
     <>
       {/* FAQ Schema for SEO */}
-      <FAQJsonLd faqs={generalFAQs} />
+      <FAQJsonLd faqs={generalFAQs} type="FAQPage" />
       
       <Suspense fallback={null}>
         <HomeAdModal />

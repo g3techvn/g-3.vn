@@ -7,31 +7,60 @@ interface FAQItem {
 
 interface FAQJsonLdProps {
   faqs: FAQItem[];
+  type?: 'FAQPage' | 'Question'; // Add type to control schema
 }
 
-export function FAQJsonLd({ faqs }: FAQJsonLdProps) {
+export function FAQJsonLd({ faqs, type = 'Question' }: FAQJsonLdProps) {
   if (!faqs || faqs.length === 0) return null;
 
-  const faqSchema = {
+  // For FAQPage (only use on main pages like homepage)
+  if (type === 'FAQPage') {
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    };
+
+    return (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify(faqSchema, null, 2) 
+        }}
+      />
+    );
+  }
+
+  // For Question schema (use on product pages and other specific pages)
+  const questionSchemas = faqs.map(faq => ({
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }));
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ 
-        __html: JSON.stringify(faqSchema, null, 2) 
-      }}
-    />
+    <>
+      {questionSchemas.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ 
+            __html: JSON.stringify(schema, null, 2) 
+          }}
+        />
+      ))}
+    </>
   );
 }
 
