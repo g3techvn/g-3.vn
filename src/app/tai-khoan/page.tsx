@@ -72,7 +72,7 @@ export default function AccountPage() {
       setLoading(false);
     }
   };
-  
+
   const handleSignOut = async () => {
     try {
       const { error } = await signOut();

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
-import { MobileShopeeProductDetail } from '@/components/features/product/MobileShopeeProductDetail';
+import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
@@ -14,11 +14,11 @@ import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ImageItem } from '@/types/supabase';
-import { ProductDetailDesktop } from '@/components/features/product/ProductDetailDesktop';
+import { ProductDetailDesktop } from '@/components/pc/product-detail/ProductDetailDesktop';
 import { Metadata } from 'next';
 import { generateMetadata } from '@/app/metadata';
-import { FloatProductAction } from '@/components/features/product/FloatProductAction';
-import { ProductVariants } from '@/components/features/product/ProductVariants';
+import { FloatProductAction } from '@/components/pc/product-detail/FloatProductAction';
+import { ProductVariants } from '@/components/pc/product-detail/ProductVariants';
 import { ProductJsonLd } from '@/components/SEO/ProductJsonLd';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
 import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
@@ -291,9 +291,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 'value' in data.product.thong_so_ky_thuat[0]) {
               // Map to ensure title property exists
               setTechnicalSpecs(
-                data.product.thong_so_ky_thuat.map((spec: { title?: string; name?: string; value: string }) => ({
+                data.product.thong_so_ky_thuat.map((spec: { title?: string; name?: string; value: any }) => ({
                   title: spec.title || spec.name || '',
-                  value: spec.value
+                  value: typeof spec.value === 'string' ? spec.value : String(spec.value)
                 }))
               );
             } else {
@@ -310,7 +310,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             setTechnicalSpecs(
               Object.entries(data.product.thong_so_ky_thuat).map(([key, value]) => ({
                 title: key,
-                value: value as string
+                value: typeof value === 'string' ? value : String(value)
               }))
             );
           } else if (typeof data.product.thong_so_ky_thuat === 'string') {
@@ -522,7 +522,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }))}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
-      <FAQJsonLd faqs={productFAQs} type="Question" />
+      <FAQJsonLd faqs={productFAQs} />
       
       {/* Mobile View */}
       <div className="md:hidden">
@@ -535,7 +535,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }}
           comments={comments}
           ratingSummary={ratingSummary}
-          technicalSpecs={technicalSpecs.map(spec => ({ name: spec.title, value: spec.value }))}
+          technicalSpecs={technicalSpecs}
           keyFeatures={keyFeatures}
           benefits={benefits}
           instructions={instructions}
@@ -559,7 +559,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           ratingSummary={ratingSummary}
           similarProducts={similarProducts}
           loadingSimilar={loadingSimilar}
-          technicalSpecs={technicalSpecs.map(spec => ({ name: spec.title, value: spec.value }))}
+          technicalSpecs={technicalSpecs}
           keyFeatures={keyFeatures}
           benefits={benefits}
           instructions={instructions}

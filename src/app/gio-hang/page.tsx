@@ -85,7 +85,7 @@ interface FormData {
 }
 
 export default function CartPage() {
-  const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user } = useAuth();
   const { showToast, ToastComponent } = useToast();
   const [loading, setLoading] = useState(false);
@@ -129,12 +129,12 @@ export default function CartPage() {
   // Add reward points state
   const [useRewardPoints, setUseRewardPoints] = useState(false);
   const [pointsToUse, setPointsToUse] = useState(0);
-  const rewardPointsData = {
-    available: 1000,
+  const [rewardPointsData, setRewardPointsData] = useState({
+    available: 0,
     pointValue: 1000,
     minPointsToRedeem: 100,
     maxPointsPerOrder: 500
-  };
+  });
 
   // Add payment method state
   const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
@@ -231,24 +231,112 @@ export default function CartPage() {
     }
   }
 
+  // Fetch payment methods from API
+  const fetchPaymentMethods = async () => {
+    try {
+      const response = await fetch('/api/payment-methods')
+      const data = await response.json()
+      
+      if (response.ok && data.paymentMethods) {
+        setPaymentMethods(data.paymentMethods.map((pm: any) => ({
+          id: pm.code,
+          code: pm.code,
+          name: pm.name,
+          icon: pm.icon,
+          description: pm.description
+        })))
+      }
+    } catch (error) {
+      console.error('Error fetching payment methods:', error)
+    }
+  }
+
+  // Fetch shipping carriers from API
+  const fetchShippingCarriers = async () => {
+    try {
+      const response = await fetch('/api/shipping-carriers')
+      const data = await response.json()
+      
+      if (response.ok && data.shippingCarriers) {
+        // Store shipping carriers if needed for display
+        console.log('Shipping carriers:', data.shippingCarriers)
+      }
+    } catch (error) {
+      console.error('Error fetching shipping carriers:', error)
+    }
+  }
+
+  // Fetch reward points data from API (or simulate if API doesn't exist yet)
+  const fetchRewardPoints = async () => {
+    if (!user) {
+      setRewardPointsData(prev => ({ ...prev, available: 0 }));
+      return;
+    }
+
+    try {
+      // TODO: Replace with actual API call when available
+      // const response = await fetch(`/api/user/reward-points?user_id=${user.id}`)
+      // const data = await response.json()
+      
+      // For now, simulate reward points based on user (this should be replaced with real API)
+      const simulatedPoints = Math.floor(Math.random() * 2000) + 500; // Random points between 500-2500
+      
+      setRewardPointsData(prev => ({
+        ...prev,
+        available: simulatedPoints
+      }));
+      
+      console.log('Reward points loaded:', simulatedPoints);
+    } catch (error) {
+      console.error('Error fetching reward points:', error)
+      setRewardPointsData(prev => ({ ...prev, available: 0 }));
+    }
+  }
+
   // Fetch data on mount
   useEffect(() => {
+    fetchPaymentMethods()
+    fetchShippingCarriers()
+  }, [])
+
+  // Fetch vouchers and reward points when user changes
+  useEffect(() => {
     fetchVouchers();
+    fetchRewardPoints();
   }, [user]);
+
+  // Auto-fill user information when user is logged in
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.fullName || prev.fullName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone, // Auto-fill phone if available
+      }))
+    }
+  }, [user])
 
   // Completion check functions like checkout
   const isBuyerInfoCompleted = () => {
+    // If user is logged in, buyer info is automatically completed from user profile
     if (user) {
-      return formData.phone.trim() !== '';
+      // Only require phone if user doesn't have it in profile
+      return user.phone ? true : !!formData.phone;
     }
-    return formData.fullName.trim() !== '' && formData.phone.trim() !== '';
+    // If user is not logged in, require manual input
+    const hasRequiredFields = !!(formData.fullName && formData.phone);
+    return hasRequiredFields;
   };
 
   const isShippingInfoCompleted = () => {
-    return formData.address.trim() !== '' && 
-           formData.city.trim() !== '' && 
-           formData.district.trim() !== '' && 
-           formData.ward.trim() !== '';
+    const hasRequiredFields = !!(
+      formData.address && 
+      formData.cityCode && 
+      formData.districtCode && 
+      formData.wardCode
+    );
+    return hasRequiredFields;
   };
 
   const isPaymentMethodCompleted = () => {
@@ -283,10 +371,66 @@ export default function CartPage() {
 
     setLoading(true);
     try {
-      // Your checkout logic here
-      showToast('Đặt hàng thành công!', 'success');
+      const orderData = {
+        user_id: user?.id || null,
+        buyer_info: {
+          fullName: user?.fullName || formData.fullName,
+          phone: user?.phone || formData.phone,
+          email: user?.email || formData.email
+        },
+        shipping_info: {
+          address: formData.address,
+          ward: formData.ward,
+          district: formData.district,
+          city: formData.city,
+          note: formData.note
+        },
+        payment_method: formData.paymentMethod,
+        cart_items: cartItems,
+        voucher: selectedVoucher,
+        reward_points: useRewardPoints ? pointsToUse : 0,
+        total_price: totalPrice,
+        shipping_fee: shippingFee
+      };
+
+      // Log order data for debugging
+      console.log('Submitting order data:', orderData);
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Log detailed validation errors for debugging
+        console.error('Order validation failed:', result);
+        
+        // Show detailed error message if available
+        let errorMessage = result.error || 'Có lỗi xảy ra khi tạo đơn hàng';
+        if (result.details && Array.isArray(result.details)) {
+          errorMessage += '\n\nChi tiết lỗi:\n' + result.details.join('\n');
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      if (result.success) {
+        // Clear cart after successful order
+        clearCart();
+        
+        // Redirect to thank you page with secure token
+        window.location.href = `/cam-on?token=${result.order.accessToken}`;
+      } else {
+        throw new Error('Có lỗi xảy ra khi tạo đơn hàng');
+      }
     } catch (error) {
-      showToast('Có lỗi xảy ra khi đặt hàng', 'error');
+      console.error('Order submission error:', error);
+      showToast(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
     } finally {
       setLoading(false);
     }
@@ -522,16 +666,16 @@ export default function CartPage() {
 
       {/* Mobile Layout - Keep existing design */}
       <div className="md:hidden">
-        <div className="px-4 pb-20 max-w-full overflow-hidden">        
-          <ProductList 
-            loading={loading}
-            cartItems={cartItems}
-            removeFromCart={removeFromCart}
-            updateQuantity={updateQuantity}
-          />
+      <div className="px-4 pb-20 max-w-full overflow-hidden">        
+        <ProductList 
+          loading={loading}
+          cartItems={cartItems}
+          removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
+        />
 
-                     <BuyerInfo 
-             user={user}
+        <BuyerInfo 
+          user={user}
              guestInfo={{
                fullName: formData.fullName,
                phone: formData.phone,
@@ -573,102 +717,105 @@ export default function CartPage() {
                phone: ''
              }}
              setErrors={() => {}}
-           />
+        />
 
-          {/* Location Selection */}
-          <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
-            
-            <LocationSelector
-              selectedProvinceCode={selectedLocation.provinceCode}
-              selectedDistrictCode={selectedLocation.districtCode}
-              selectedWardCode={selectedLocation.wardCode}
-              onProvinceChange={handleLocationChange.province}
-              onDistrictChange={handleLocationChange.district}
-              onWardChange={handleLocationChange.ward}
-            />
-            
-            {/* Address input */}
-            <div className="mt-4">
+        {/* Location Selection */}
+        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
+          
+          <LocationSelector
+            selectedProvinceCode={selectedLocation.provinceCode}
+            selectedDistrictCode={selectedLocation.districtCode}
+            selectedWardCode={selectedLocation.wardCode}
+            onProvinceChange={handleLocationChange.province}
+            onDistrictChange={handleLocationChange.district}
+            onWardChange={handleLocationChange.ward}
+          />
+          
+          {/* Address input */}
+          <div className="mt-4">
               <label htmlFor="address-mobile" className="block text-sm font-medium text-gray-700 mb-1">
-                Địa chỉ cụ thể <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+              Địa chỉ cụ thể <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
                 id="address-mobile"
                 value={formData.address}
                 onChange={(e) => handleFormChange('address', e.target.value)}
-                placeholder="Số nhà, tên đường..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-            </div>
+              placeholder="Số nhà, tên đường..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+            />
+          </div>
 
-            {/* Shipping carrier selection */}
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phương thức vận chuyển
-              </label>
+          {/* Shipping carrier selection */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phương thức vận chuyển
+            </label>
               <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="font-medium text-gray-900">Giao hàng bởi G3-Tech</div>
-                <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600">
                   Miễn phí • 2-3 ngày
-                </div>
-              </div>
-            </div>
-
-            {/* Note */}
-            <div className="mt-4">
-              <label htmlFor="note-mobile" className="block text-sm font-medium text-gray-700 mb-1">
-                Ghi chú đơn hàng
-              </label>
-              <textarea
-                id="note-mobile"
-                value={formData.note}
-                onChange={(e) => handleFormChange('note', e.target.value)}
-                placeholder="Ghi chú cho đơn hàng (tùy chọn)"
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
+                    </div>
             </div>
           </div>
 
-          <VoucherInfo 
-            user={user}
-            showVoucherDrawer={showVoucherDrawer}
-            setShowVoucherDrawer={setShowVoucherDrawer}
-            voucherCode={formData.voucher}
-            setVoucherCode={(code) => handleFormChange('voucher', code)}
-            selectedVoucher={selectedVoucher}
-            setSelectedVoucher={setSelectedVoucher}
-            availableVouchers={availableVouchers}
-            totalPrice={totalPrice}
-            showToast={showToast}
-          />
-
-          <PaymentDetails 
-            user={user}
-            totalPrice={totalPrice}
-            shipping={shippingFee}
-            selectedVoucher={selectedVoucher}
-            pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
-            cartItems={cartItems}
-            useRewardPoints={useRewardPoints}
-            setUseRewardPoints={setUseRewardPoints}
-            pointsToUse={pointsToUse}
-            setPointsToUse={setPointsToUse}
-            rewardPoints={rewardPointsData}
-            showPaymentDrawer={showPaymentDrawer}
-            setShowPaymentDrawer={setShowPaymentDrawer}
-            selectedPayment={formData.paymentMethod}
-            setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
-            paymentMethods={paymentMethods}
-          />
+          {/* Note */}
+          <div className="mt-4">
+              <label htmlFor="note-mobile" className="block text-sm font-medium text-gray-700 mb-1">
+              Ghi chú đơn hàng
+            </label>
+            <textarea
+                id="note-mobile"
+                value={formData.note}
+                onChange={(e) => handleFormChange('note', e.target.value)}
+              placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+            />
+          </div>
         </div>
 
-        <BottomBar 
-          cartItemCount={cartItems.length}
-          total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
+        <VoucherInfo 
+          user={user}
+          showVoucherDrawer={showVoucherDrawer}
+          setShowVoucherDrawer={setShowVoucherDrawer}
+            voucherCode={formData.voucher}
+            setVoucherCode={(code) => handleFormChange('voucher', code)}
+          selectedVoucher={selectedVoucher}
+          setSelectedVoucher={setSelectedVoucher}
+          availableVouchers={availableVouchers}
+          totalPrice={totalPrice}
+            showToast={showToast}
         />
+
+        <PaymentDetails 
+          user={user}
+          totalPrice={totalPrice}
+            shipping={shippingFee}
+          selectedVoucher={selectedVoucher}
+            pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
+          cartItems={cartItems}
+          useRewardPoints={useRewardPoints}
+          setUseRewardPoints={setUseRewardPoints}
+          pointsToUse={pointsToUse}
+          setPointsToUse={setPointsToUse}
+            rewardPoints={rewardPointsData}
+          showPaymentDrawer={showPaymentDrawer}
+          setShowPaymentDrawer={setShowPaymentDrawer}
+            selectedPayment={formData.paymentMethod}
+            setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
+          paymentMethods={paymentMethods}
+        />
+      </div>
+
+      <BottomBar 
+        cartItemCount={cartItems.length}
+        total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
+        onCheckout={handleSubmit}
+        isValid={isFormValid()}
+        loading={loading}
+      />
       </div>
       
       <ToastComponent />

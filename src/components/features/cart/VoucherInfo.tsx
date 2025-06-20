@@ -195,8 +195,8 @@ export default function VoucherInfo({
               Đăng nhập
             </Link>
           </div>
-                  )}
-        </div>
+        )}
+      </div>
     </>
   );
 } 

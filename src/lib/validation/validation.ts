@@ -7,7 +7,7 @@ export const BuyerInfoSchema = z.object({
     .max(50, 'Họ tên không được vượt quá 50 ký tự')
     .regex(/^[a-zA-ZÀ-ỹ\s]+$/, 'Họ tên chỉ được chứa chữ cái và dấu cách'),
   phone: z.string()
-    .regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ'),
+    .regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ (VD: 0901234567 hoặc +84901234567)'),
   email: z.union([
     z.string().email('Email không hợp lệ'),
     z.string().length(0)
@@ -30,17 +30,26 @@ export const CartItemSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(val => String(val)),
   name: z.string().min(1, 'Tên sản phẩm không được để trống'),
   price: z.number().positive('Giá sản phẩm phải lớn hơn 0'),
+  original_price: z.number().optional(),
   quantity: z.number()
     .int('Số lượng phải là số nguyên')
     .min(1, 'Số lượng phải ít nhất là 1')
     .max(100, 'Số lượng không được vượt quá 100'),
-  image: z.string().optional(), // Removed .url() validation as some items might not have valid URLs
+  image: z.string().optional(),
   variant: z.object({
     id: z.number(),
-    color: z.string().optional(),
-    size: z.string().optional(),
-    gac_chan: z.boolean().optional(),
+    color: z.string().nullable().optional(),
+    size: z.string().nullable().optional(),
+    gac_chan: z.boolean().nullable().optional(),
+    price: z.number().optional(),
+    original_price: z.number().optional(),
+    image_url: z.string().optional(),
   }).optional(),
+  // Additional optional fields that might exist in cart items
+  weight: z.number().optional(),
+  length: z.number().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
 });
 
 // Validation schema cho voucher - made more flexible
@@ -70,7 +79,7 @@ export const CreateOrderSchema = z.object({
   cart_items: z.array(CartItemSchema)
     .min(1, 'Giỏ hàng không được để trống')
     .max(50, 'Giỏ hàng không được vượt quá 50 sản phẩm'),
-  voucher: VoucherSchema.nullable(),
+  voucher: VoucherSchema.nullable().optional(),
   reward_points: z.number()
     .int('Điểm thưởng phải là số nguyên')
     .min(0, 'Điểm thưởng không thể âm')

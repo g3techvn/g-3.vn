@@ -46,8 +46,8 @@ function LoginContent() {
         return;
       }
 
-      toast.success('Đăng nhập thành công!');
-      router.push(redirectTo);
+        toast.success('Đăng nhập thành công!');
+        router.push(redirectTo);
     } catch (error: any) {
       toast.error('Có lỗi xảy ra khi đăng nhập');
     } finally {
@@ -78,7 +78,7 @@ function LoginContent() {
         return;
       }
 
-      toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+        toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
       setIsSignInMode(true);
     } catch (error: any) {
       toast.error('Có lỗi xảy ra khi đăng ký');

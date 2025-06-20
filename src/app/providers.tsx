@@ -44,16 +44,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClientRef.current}>
         <DomainProvider>
           <AuthProvider>
-            <ThemeProvider>
-              <AntdRegistry>
-                {mounted && (
-                  <Suspense fallback={null}>
-                    <PageViewTracker />
-                  </Suspense>
+              <ThemeProvider>
+                <AntdRegistry>
+                  {mounted && (
+                      <Suspense fallback={null}>
+                        <PageViewTracker />
+                      </Suspense>
                 )}
-                {children}
-              </AntdRegistry>
-            </ThemeProvider>
+                      {children}
+                </AntdRegistry>
+              </ThemeProvider>
           </AuthProvider>
         </DomainProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}

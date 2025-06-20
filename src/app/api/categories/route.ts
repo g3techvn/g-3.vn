@@ -109,7 +109,7 @@ export async function GET(request: Request) {
           const catId = product.pd_cat_id;
           if (catId) {
             categoryProductCounts.set(catId, (categoryProductCounts.get(catId) || 0) + 1);
-          }
+    }
         }
       });
       

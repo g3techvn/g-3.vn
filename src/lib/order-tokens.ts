@@ -1,66 +1,67 @@
-import { createHash, randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 
-interface OrderToken {
-  orderId: string;
-  token: string;
-  expiresAt: Date;
-  used: boolean;
-}
-
-// In-memory store for tokens (in production, use Redis or database)
-const orderTokens = new Map<string, OrderToken>();
-
-// Clean up expired tokens every 5 minutes
-setInterval(() => {
-  const now = new Date();
-  for (const [token, data] of orderTokens.entries()) {
-    if (data.expiresAt < now) {
-      orderTokens.delete(token);
-    }
-  }
-}, 5 * 60 * 1000);
-
+// Use stateless token approach instead of in-memory storage
 export function generateOrderToken(orderId: string): string {
-  // Generate cryptographically secure random token
-  const token = randomBytes(32).toString('hex');
+  const secret = process.env.ORDER_ACCESS_SECRET || 'fallback-secret-key-change-in-production';
+  const timestamp = Date.now();
+  const expiresAt = timestamp + (24 * 60 * 60 * 1000); // 24 hours
   
-  // Token expires in 24 hours
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  // Create a payload with order ID and expiration
+  const payload = `${orderId}:${expiresAt}`;
   
-  orderTokens.set(token, {
-    orderId,
-    token,
-    expiresAt,
-    used: false
-  });
+  // Create HMAC signature
+  const signature = createHash('sha256')
+    .update(payload + secret)
+    .digest('hex')
+    .substring(0, 16);
+  
+  // Combine payload and signature, encode as base64
+  const token = Buffer.from(`${payload}:${signature}`).toString('base64url');
   
   return token;
 }
 
 export function validateOrderToken(token: string): { valid: boolean; orderId?: string; error?: string } {
-  const tokenData = orderTokens.get(token);
-  
-  if (!tokenData) {
-    return { valid: false, error: 'Token không tồn tại hoặc đã hết hạn' };
+  try {
+    const secret = process.env.ORDER_ACCESS_SECRET || 'fallback-secret-key-change-in-production';
+    
+    // Decode token
+    const decoded = Buffer.from(token, 'base64url').toString();
+    const parts = decoded.split(':');
+    
+    if (parts.length !== 3) {
+      return { valid: false, error: 'Token không hợp lệ' };
+    }
+    
+    const [orderId, expiresAtStr, signature] = parts;
+    const expiresAt = parseInt(expiresAtStr);
+    
+    // Check expiration
+    if (Date.now() > expiresAt) {
+      return { valid: false, error: 'Token đã hết hạn' };
+    }
+    
+    // Verify signature
+    const payload = `${orderId}:${expiresAtStr}`;
+    const expectedSignature = createHash('sha256')
+      .update(payload + secret)
+      .digest('hex')
+      .substring(0, 16);
+    
+    if (signature !== expectedSignature) {
+      return { valid: false, error: 'Token không hợp lệ' };
+    }
+    
+    return { valid: true, orderId };
+    
+  } catch (error) {
+    return { valid: false, error: 'Token không hợp lệ' };
   }
-  
-  if (tokenData.expiresAt < new Date()) {
-    orderTokens.delete(token);
-    return { valid: false, error: 'Token đã hết hạn' };
-  }
-  
-  if (tokenData.used) {
-    return { valid: false, error: 'Token đã được sử dụng' };
-  }
-  
-  return { valid: true, orderId: tokenData.orderId };
 }
 
 export function markTokenAsUsed(token: string): void {
-  const tokenData = orderTokens.get(token);
-  if (tokenData) {
-    tokenData.used = true;
-  }
+  // With stateless tokens, we don't need to mark as used
+  // If you need one-time use, implement a blacklist in database
 }
 
 export function createSecureOrderHash(orderId: string, userInfo: any): string {

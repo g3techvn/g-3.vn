@@ -140,12 +140,39 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     }
   }
 
-  const rewardPointsData = {
-    available: 1000,
+  // Fetch reward points data from API (or simulate if API doesn't exist yet)
+  const fetchRewardPoints = async () => {
+    if (!user) {
+      setRewardPointsData(prev => ({ ...prev, available: 0 }));
+      return;
+    }
+
+    try {
+      // TODO: Replace with actual API call when available
+      // const response = await fetch(`/api/user/reward-points?user_id=${user.id}`)
+      // const data = await response.json()
+      
+      // For now, simulate reward points based on user (this should be replaced with real API)
+      const simulatedPoints = Math.floor(Math.random() * 2000) + 500; // Random points between 500-2500
+      
+      setRewardPointsData(prev => ({
+        ...prev,
+        available: simulatedPoints
+      }));
+      
+      console.log('Reward points loaded in checkout:', simulatedPoints);
+    } catch (error) {
+      console.error('Error fetching reward points:', error)
+      setRewardPointsData(prev => ({ ...prev, available: 0 }));
+    }
+  }
+
+  const [rewardPointsData, setRewardPointsData] = useState({
+    available: 0,
     pointValue: 1000,
     minPointsToRedeem: 100,
     maxPointsPerOrder: 500
-  }
+  });
 
   // Location selection state
   interface LocationSelection {
@@ -256,9 +283,10 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     fetchShippingCarriers()
   }, [])
 
-  // Fetch vouchers when user changes
+  // Fetch vouchers and reward points when user changes
   useEffect(() => {
     fetchVouchers()
+    fetchRewardPoints()
   }, [user])
 
   // Auto-fill user information when user is logged in
@@ -352,6 +380,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
         shipping_fee: shippingFee
       }
 
+      // Log order data for debugging
+      console.log('Submitting order data:', orderData);
+
 
 
       const response = await fetch('/api/orders', {
@@ -365,7 +396,16 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Có lỗi xảy ra khi tạo đơn hàng')
+        // Log detailed validation errors for debugging
+        console.error('Order validation failed:', result);
+        
+        // Show detailed error message if available
+        let errorMessage = result.error || 'Có lỗi xảy ra khi tạo đơn hàng';
+        if (result.details && Array.isArray(result.details)) {
+          errorMessage += '\n\nChi tiết lỗi:\n' + result.details.join('\n');
+        }
+        
+        throw new Error(errorMessage)
       }
 
       if (result.success) {
