@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
+import { useSoldCounts } from '@/hooks/useSoldCounts';
 
 // Random banner images from Unsplash
 const bannerImages = [
@@ -30,6 +31,10 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
+  
+  // Get sold counts for all products
+  const productIds = products.map(p => p.id.toString());
+  const { getSoldCount } = useSoldCounts(productIds);
 
   // Function to get random banner image - memoized for each product
   const getRandomBanner = useCallback(() => {
@@ -197,7 +202,7 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
                           {(product.rating || 4.9).toFixed(1)}
                         </span>
                         <span>•</span>
-                        <span>Đã bán {Math.floor(Math.random()*100+1)}</span>
+                        <span>Đã bán {getSoldCount(product.id.toString())}</span>
                       </div>
                       <button 
                         className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
