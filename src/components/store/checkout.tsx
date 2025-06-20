@@ -6,13 +6,14 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { Voucher } from '@/types/cart'
-import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces'
 import { generatePDF } from '@/components/PDFGenerator'
+import { useToast } from '@/components/ui/Toast'
+import LocationSelector from '@/components/features/cart/LocationSelector'
 import type { ButtonProps } from 'antd'
 
 // Import components
 import BuyerInfo from './BuyerInfo'
-import ShippingInfo from './ShippingInfo'
+
 import PaymentMethodSelection from './PaymentMethodSelection'
 import OrderSummary from './OrderSummary'
 import VoucherInfo from './VoucherInfo'
@@ -53,6 +54,7 @@ interface ButtonWithTitleProps extends ButtonProps {
 export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart()
   const { user } = useAuth()
+  const { showToast, ToastComponent } = useToast()
   const [loading, setLoading] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null)
@@ -144,27 +146,79 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     maxPointsPerOrder: 500
   }
 
-  // State for new props
-  const [provinces, setProvinces] = useState<Province[]>([])
-  const [districts, setDistricts] = useState<District[]>([])
-  const [wards, setWards] = useState<Ward[]>([])
-  const [loadingProvinces, setLoadingProvinces] = useState(false)
-  const [loadingDistricts, setLoadingDistricts] = useState(false)
-  const [loadingWards, setLoadingWards] = useState(false)
+  // Location selection state
+  interface LocationSelection {
+    provinceCode: number;
+    provinceName: string;
+    districtCode: number;
+    districtName: string;
+    wardCode: number;
+    wardName: string;
+  }
+  
+  const [selectedLocation, setSelectedLocation] = useState<LocationSelection>({
+    provinceCode: 0,
+    provinceName: '',
+    districtCode: 0,
+    districtName: '',
+    wardCode: 0,
+    wardName: ''
+  })
+
+  // Handle location selection changes
+  const handleLocationChange = {
+    province: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        provinceCode: code,
+        provinceName: name,
+        districtCode: 0,
+        districtName: '',
+        wardCode: 0,
+        wardName: ''
+      }));
+      // Update form data
+      setFormData(prev => ({
+        ...prev,
+        city: name,
+        cityCode: code,
+        district: '',
+        districtCode: 0,
+        ward: '',
+        wardCode: 0
+      }));
+    },
+    district: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        districtCode: code,
+        districtName: name,
+        wardCode: 0,
+        wardName: ''
+      }));
+      setFormData(prev => ({
+        ...prev,
+        district: name,
+        districtCode: code,
+        ward: '',
+        wardCode: 0
+      }));
+    },
+    ward: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        wardCode: code,
+        wardName: name
+      }));
+      setFormData(prev => ({
+        ...prev,
+        ward: name,
+        wardCode: code
+      }));
+    }
+  };
 
   useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        setLoadingProvinces(true)
-        const data = await getProvinces()
-        setProvinces(data)
-      } catch (error) {
-        console.error('Error fetching provinces:', error)
-      } finally {
-        setLoadingProvinces(false)
-      }
-    }
-
     const fetchPaymentMethods = async () => {
       try {
         const response = await fetch('/api/payment-methods')
@@ -197,7 +251,6 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       }
     }
 
-    fetchProvinces()
     fetchPaymentMethods()
     fetchShippingCarriers()
   }, [])
@@ -219,32 +272,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     }
   }, [user])
 
-  const fetchDistricts = async (provinceCode: number) => {
-    try {
-      setLoadingDistricts(true)
-      setDistricts([])
-      setWards([])
-      const data = await getDistricts(provinceCode)
-      setDistricts(data)
-    } catch (error) {
-      console.error('Error fetching districts:', error)
-    } finally {
-      setLoadingDistricts(false)
-    }
-  }
 
-  const fetchWards = async (districtCode: number) => {
-    try {
-      setLoadingWards(true)
-      setWards([])
-      const data = await getWards(districtCode)
-      setWards(data)
-    } catch (error) {
-      console.error('Error fetching wards:', error)
-    } finally {
-      setLoadingWards(false)
-    }
-  }
 
   // Form validation
   const isBuyerInfoCompleted = () => {
@@ -563,66 +591,64 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
               stepNumber={2}
               isCompleted={isShippingInfoCompleted()}
             >
-              <ShippingInfo
-                addressForm={{
-                  city: formData.city,
-                  cityCode: formData.cityCode,
-                  district: formData.district,
-                  districtCode: formData.districtCode,
-                  ward: formData.ward,
-                  wardCode: formData.wardCode,
-                  address: formData.address
-                }}
-                setAddressForm={(info) => {
-                  if (typeof info === 'function') {
-                    setFormData(prev => {
-                      const newAddressForm = info({
-                        city: prev.city,
-                        cityCode: prev.cityCode,
-                        district: prev.district,
-                        districtCode: prev.districtCode,
-                        ward: prev.ward,
-                        wardCode: prev.wardCode,
-                        address: prev.address
-                      });
-                      return {
-                        ...prev,
-                        ...newAddressForm
-                      };
-                    });
-                  } else {
-                    setFormData(prev => ({
-                      ...prev,
-                      ...info
-                    }));
-                  }
-                }}
-                selectedCarrier="g3tech"
-                setSelectedCarrier={() => {}}
-                carriers={[
-                  {
-                    id: 'g3tech',
-                    name: 'Giao hàng bởi G3-Tech',
-                    price: 0,
-                    estimatedTime: 'Freeship toàn quốc - Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày'
-                  }
-                ]}
-                provinces={provinces}
-                districts={districts}
-                wards={wards}
-                loadingProvinces={loadingProvinces}
-                loadingDistricts={loadingDistricts}
-                loadingWards={loadingWards}
-                showAddressDrawer={false}
-                setShowAddressDrawer={() => {}}
-                showShippingDrawer={false}
-                setShowShippingDrawer={() => {}}
-                fetchDistricts={fetchDistricts}
-                fetchWards={fetchWards}
-                note={formData.note}
-                setNote={(note) => handleFormChange('note', note)}
-                cartItems={cartItems}
-              />
+              {/* Location Selection */}
+              <div className="space-y-4">
+                <LocationSelector
+                  selectedProvinceCode={selectedLocation.provinceCode}
+                  selectedDistrictCode={selectedLocation.districtCode}
+                  selectedWardCode={selectedLocation.wardCode}
+                  onProvinceChange={handleLocationChange.province}
+                  onDistrictChange={handleLocationChange.district}
+                  onWardChange={handleLocationChange.ward}
+                />
+                
+                {/* Address input */}
+                <div>
+                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                    Địa chỉ cụ thể <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleFormChange('address', e.target.value)}
+                    placeholder="Số nhà, tên đường..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  />
+                </div>
+
+                {/* Shipping carrier info */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-green-900">Giao hàng bởi G3-Tech</h4>
+                      <p className="text-sm text-green-700 mt-1">
+                        <span className="font-medium">Freeship toàn quốc</span> - Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Note */}
+                <div>
+                  <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
+                    Ghi chú đơn hàng
+                  </label>
+                  <textarea
+                    id="note"
+                    value={formData.note}
+                    onChange={(e) => handleFormChange('note', e.target.value)}
+                    placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                  />
+                </div>
+              </div>
             </CollapsibleSection>
 
             <CollapsibleSection 
@@ -802,6 +828,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
       {/* Profile Drawer */}
       <ProfileDrawer isOpen={isProfileOpen} onClose={closeProfile} />
+      
+      {/* Toast Component */}
+      <ToastComponent />
 
       <style jsx global>{`
         @keyframes progress {

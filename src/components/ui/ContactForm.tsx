@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from './Checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { RadioGroup, RadioGroupItem } from './RadioGroup';
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction } from './Toast';
+import { useToast } from './Toast';
 
 // Define the form schema with Zod
 const contactFormSchema = z.object({
@@ -37,7 +37,7 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export function ContactForm() {
-  const [showSuccessToast, setShowSuccessToast] = React.useState(false);
+  const { showToast, ToastComponent } = useToast();
   const [openDialog, setOpenDialog] = React.useState(false);
 
   const {
@@ -64,7 +64,7 @@ export function ContactForm() {
       setOpenDialog(false);
       
       // Hiển thị thông báo thành công
-      setShowSuccessToast(true);
+      showToast('Gửi liên hệ thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.', 'success');
       
       // Reset form
       reset();
@@ -74,7 +74,7 @@ export function ContactForm() {
   };
 
   return (
-    <ToastProvider>
+    <>
       <div className="mx-auto p-4 max-w-2xl">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="space-y-6">
@@ -242,19 +242,7 @@ export function ContactForm() {
         </form>
       </div>
       
-      {showSuccessToast && (
-        <Toast
-          open={showSuccessToast}
-          onOpenChange={setShowSuccessToast}
-        >
-          <ToastTitle>Gửi tin nhắn thành công!</ToastTitle>
-          <ToastDescription>
-            Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.
-          </ToastDescription>
-          <ToastAction altText="Đóng">Đóng</ToastAction>
-        </Toast>
-      )}
-      <ToastViewport />
-    </ToastProvider>
+      <ToastComponent />
+    </>
   );
 } 

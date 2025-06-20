@@ -11,7 +11,16 @@
     "analyze": "cross-env ANALYZE=true next build",
     "audit:performance": "node performance-audit.js",
     "seo:audit": "node scripts/seo-audit.js",
-    "seo:validate": "npm run build && npm run seo:audit"
+    "seo:validate": "npm run build && npm run seo:audit",
+    "test:provinces-api": "node scripts/test-provinces-api.js",
+    "setup:location-data": "node scripts/setup-location-data.js",
+    "setup:location-db": "node scripts/setup-location-database.js",
+    "sync:location-db": "node scripts/setup-location-database.js sync",
+    "verify:location-db": "node scripts/setup-location-database.js verify",
+    "sync:location-api": "node scripts/sync-location-data.js",
+    "verify:location-api": "node scripts/sync-location-data.js verify",
+    "sync:remaining-wards": "node scripts/sync-remaining-wards.js",
+    "analyze:ward-coverage": "node scripts/sync-remaining-wards.js analyze"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.18.2",

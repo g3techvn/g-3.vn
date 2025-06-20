@@ -8,28 +8,25 @@ import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { Drawer } from 'antd';
+import LocationSelector from '@/components/features/cart/LocationSelector';
+import { useToast } from '@/components/ui/Toast';
 
 // Import new components
 import CartHeader from '@/components/features/cart/CartHeader';
 import ProductList from '@/components/features/cart/ProductList';
 import BuyerInfo from '@/components/features/cart/BuyerInfo';
-import ShippingInfo from '@/components/features/cart/ShippingInfo';
+
 import VoucherInfo from '@/components/features/cart/VoucherInfo';
 import PaymentDetails from '@/components/features/cart/PaymentDetails';
 import BottomBar from '@/components/features/cart/BottomBar';
 
-interface LocationData {
-  code: number;
-  name: string;
-  districts?: LocationData[];
-  wards?: LocationData[];
-}
-
-interface LocationResponse {
-  code: number;
-  name: string;
-  districts: LocationData[];
-  wards: LocationData[];
+interface LocationSelection {
+  provinceCode: number;
+  provinceName: string;
+  districtCode: number;
+  districtName: string;
+  wardCode: number;
+  wardName: string;
 }
 
 // Add voucher state and types
@@ -62,6 +59,7 @@ interface PaymentMethod {
 export default function CartPage() {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
+  const { showToast, ToastComponent } = useToast();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showAddressDrawer, setShowAddressDrawer] = useState(false);
@@ -97,15 +95,15 @@ export default function CartPage() {
     { id: 'g3tech', name: 'Giao hàng bởi G3-Tech', price: 0, time: '2-3 ngày' }
   ];
 
-  // Location data state
-  const [cities, setCities] = useState<Array<{code: number, name: string}>>([]);
-  const [districts, setDistricts] = useState<Array<{code: number, name: string}>>([]);
-  const [wards, setWards] = useState<Array<{code: number, name: string}>>([]);
-
-  // Loading states for location data
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingWards, setLoadingWards] = useState(false);
+  // Location selection state
+  const [selectedLocation, setSelectedLocation] = useState<LocationSelection>({
+    provinceCode: 0,
+    provinceName: '',
+    districtCode: 0,
+    districtName: '',
+    wardCode: 0,
+    wardName: ''
+  });
 
   // Add state for note
   const [note, setNote] = useState('');
@@ -163,56 +161,51 @@ export default function CartPage() {
     }
   ]);
 
-  // Fetch cities on component mount
-  useEffect(() => {
-    const fetchCities = async () => {
-      setLoadingCities(true);
-      try {
-        const response = await fetch('https://provinces.open-api.vn/api/p/');
-        const data: LocationData[] = await response.json();
-        setCities(data.map((city) => ({
-          code: city.code,
-          name: city.name
-        })));
-      } catch (error) {
-        console.error('Error fetching cities:', error);
-      }
-      setLoadingCities(false);
-    };
-
-    fetchCities();
-  }, []);
-
-  // Fetch districts when city changes
-  const fetchDistricts = async (cityCode: number) => {
-    setLoadingDistricts(true);
-    try {
-      const response = await fetch(`https://provinces.open-api.vn/api/p/${cityCode}?depth=2`);
-      const data: LocationResponse = await response.json();
-      setDistricts(data.districts.map((district) => ({
-        code: district.code,
-        name: district.name
-      })));
-    } catch (error) {
-      console.error('Error fetching districts:', error);
+  // Handle location selection changes
+  const handleLocationChange = {
+    province: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        provinceCode: code,
+        provinceName: name,
+        districtCode: 0,
+        districtName: '',
+        wardCode: 0,
+        wardName: ''
+      }));
+      // Update address form for compatibility with ShippingInfo
+      setAddressForm(prev => ({
+        ...prev,
+        city: name,
+        district: '',
+        ward: ''
+      }));
+    },
+    district: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        districtCode: code,
+        districtName: name,
+        wardCode: 0,
+        wardName: ''
+      }));
+      setAddressForm(prev => ({
+        ...prev,
+        district: name,
+        ward: ''
+      }));
+    },
+    ward: (code: number, name: string) => {
+      setSelectedLocation(prev => ({
+        ...prev,
+        wardCode: code,
+        wardName: name
+      }));
+      setAddressForm(prev => ({
+        ...prev,
+        ward: name
+      }));
     }
-    setLoadingDistricts(false);
-  };
-
-  // Fetch wards when district changes
-  const fetchWards = async (districtCode: number) => {
-    setLoadingWards(true);
-    try {
-      const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-      const data: LocationResponse = await response.json();
-      setWards(data.wards.map((ward) => ({
-        code: ward.code,
-        name: ward.name
-      })));
-    } catch (error) {
-      console.error('Error fetching wards:', error);
-    }
-    setLoadingWards(false);
   };
 
   // Calculate points discount
@@ -247,7 +240,7 @@ export default function CartPage() {
         }})}
       />
 
-      <div className="px-4 pb-20 max-w-full overflow-hidden">
+      <div className="px-4 pb-20 max-w-full overflow-hidden">        
         <ProductList 
           loading={loading}
           cartItems={cartItems}
@@ -265,27 +258,76 @@ export default function CartPage() {
           setErrors={setErrors}
         />
 
-        <ShippingInfo 
-          addressForm={addressForm}
-          setAddressForm={setAddressForm}
-          selectedCarrier={selectedCarrier}
-          setSelectedCarrier={setSelectedCarrier}
-          carriers={carriers}
-          cities={cities}
-          districts={districts}
-          wards={wards}
-          loadingCities={loadingCities}
-          loadingDistricts={loadingDistricts}
-          loadingWards={loadingWards}
-          showAddressDrawer={showAddressDrawer}
-          setShowAddressDrawer={setShowAddressDrawer}
-          showShippingDrawer={showShippingDrawer}
-          setShowShippingDrawer={setShowShippingDrawer}
-          fetchDistricts={fetchDistricts}
-          fetchWards={fetchWards}
-          note={note}
-          setNote={setNote}
-        />
+        {/* Location Selection */}
+        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
+          
+          <LocationSelector
+            selectedProvinceCode={selectedLocation.provinceCode}
+            selectedDistrictCode={selectedLocation.districtCode}
+            selectedWardCode={selectedLocation.wardCode}
+            onProvinceChange={handleLocationChange.province}
+            onDistrictChange={handleLocationChange.district}
+            onWardChange={handleLocationChange.ward}
+          />
+          
+          {/* Address input */}
+          <div className="mt-4">
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ cụ thể <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="address"
+              value={addressForm.address}
+              onChange={(e) => setAddressForm(prev => ({ ...prev, address: e.target.value }))}
+              placeholder="Số nhà, tên đường..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+            />
+          </div>
+
+          {/* Shipping carrier selection */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phương thức vận chuyển
+            </label>
+            <div className="space-y-2">
+              {carriers.map((carrier) => (
+                <label key={carrier.id} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="carrier"
+                    value={carrier.id}
+                    checked={selectedCarrier === carrier.id}
+                    onChange={(e) => setSelectedCarrier(e.target.value)}
+                    className="mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{carrier.name}</div>
+                    <div className="text-sm text-gray-600">
+                      {carrier.price === 0 ? 'Miễn phí' : `${carrier.price.toLocaleString('vi-VN')}đ`} • {carrier.time}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Note */}
+          <div className="mt-4">
+            <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
+              Ghi chú đơn hàng
+            </label>
+            <textarea
+              id="note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+            />
+          </div>
+        </div>
 
         <VoucherInfo 
           user={user}
@@ -323,6 +365,8 @@ export default function CartPage() {
         cartItemCount={cartItems.length}
         total={total}
       />
+      
+      <ToastComponent />
     </div>
   );
 } 

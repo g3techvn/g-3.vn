@@ -1,0 +1,33 @@
+{
+  "totalProvinces": 63,
+  "totalDistricts": 691,
+  "totalWards": 0,
+  "topProvinces": [
+    {
+      "name": "Thành phố Hà Nội",
+      "code": 1,
+      "districts": 30
+    },
+    {
+      "name": "Tỉnh Hà Giang",
+      "code": 2,
+      "districts": 11
+    },
+    {
+      "name": "Tỉnh Cao Bằng",
+      "code": 4,
+      "districts": 10
+    },
+    {
+      "name": "Tỉnh Bắc Kạn",
+      "code": 6,
+      "districts": 8
+    },
+    {
+      "name": "Tỉnh Tuyên Quang",
+      "code": 8,
+      "districts": 7
+    }
+  ],
+  "generatedAt": "2025-06-20T07:52:16.571Z"
+}

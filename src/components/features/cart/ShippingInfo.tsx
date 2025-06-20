@@ -181,8 +181,11 @@ export default function ShippingInfo({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
                 value={cities.find(city => city.name === addressForm.city)?.code || ''}
                 onChange={handleCityChange}
+                disabled={loadingCities}
               >
-                <option value="">Chọn Tỉnh/Thành phố</option>
+                <option value="">
+                  {loadingCities ? 'Đang tải tỉnh thành...' : 'Chọn Tỉnh/Thành phố'}
+                </option>
                 {cities.map(city => (
                   <option key={city.code} value={city.code}>{city.name}</option>
                 ))}
