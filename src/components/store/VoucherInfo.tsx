@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Voucher } from '@/types/cart'
+import { useToast } from '@/components/ui/Toast'
 
 interface VoucherInfoProps {
   user: {
@@ -17,6 +18,7 @@ interface VoucherInfoProps {
   availableVouchers: Voucher[];
   totalPrice: number;
   openProfile?: () => void;
+  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export default function VoucherInfo({
@@ -29,8 +31,12 @@ export default function VoucherInfo({
   setSelectedVoucher,
   availableVouchers,
   totalPrice,
-  openProfile
+  openProfile,
+  showToast: externalShowToast
 }: VoucherInfoProps) {
+  const { showToast: internalShowToast } = useToast();
+  const showToast = externalShowToast || internalShowToast;
+
   if (!user) {
     return (
       <div className="space-y-4">
@@ -66,6 +72,7 @@ export default function VoucherInfo({
             </button>
           </div>
         </div>
+
       </div>
     )
   }
@@ -107,8 +114,9 @@ export default function VoucherInfo({
                 const foundVoucher = availableVouchers.find(v => v.code === voucherCode);
                 if (foundVoucher) {
                   setSelectedVoucher(foundVoucher);
+                  showToast('Áp dụng voucher thành công!', 'success');
                 } else {
-                  alert('Mã voucher không hợp lệ hoặc đã hết hạn');
+                  showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'error');
                 }
                 setVoucherCode('');
               }}
@@ -124,15 +132,16 @@ export default function VoucherInfo({
             Voucher có sẵn ({availableVouchers.length})
           </div>
           <div className="space-y-3">
-            {availableVouchers.map((voucher) => (
+            {availableVouchers.map((voucher, index) => (
               <div
-                key={voucher.id}
+                key={voucher.id || `voucher-${index}`}
                 className={`p-4 rounded-lg border ${selectedVoucher?.id === voucher.id ? 'border-red-500 bg-red-50' : 'border-gray-200'} cursor-pointer`}
                 onClick={() => {
                   if (totalPrice >= voucher.minOrderValue) {
                     setSelectedVoucher(voucher);
+                    showToast('Áp dụng voucher thành công!', 'success');
                   } else {
-                    alert(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`);
+                    showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'warning');
                   }
                 }}
               >
@@ -155,7 +164,10 @@ export default function VoucherInfo({
             <div className="flex items-center justify-between mb-2">
               <div className="font-medium text-red-600">Voucher đã chọn</div>
               <button
-                onClick={() => setSelectedVoucher(null)}
+                onClick={() => {
+                  setSelectedVoucher(null);
+                  showToast('Đã hủy voucher', 'info');
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">

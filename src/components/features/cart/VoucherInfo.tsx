@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Drawer } from 'antd';
 import { Voucher } from '@/types/cart';
+import { useToast } from '@/components/ui/Toast';
 
 interface VoucherInfoProps {
   user: {
@@ -17,6 +18,7 @@ interface VoucherInfoProps {
   setSelectedVoucher: (voucher: Voucher | null) => void;
   availableVouchers: Voucher[];
   totalPrice: number;
+  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export default function VoucherInfo({
@@ -28,8 +30,12 @@ export default function VoucherInfo({
   selectedVoucher,
   setSelectedVoucher,
   availableVouchers,
-  totalPrice
+  totalPrice,
+  showToast: externalShowToast
 }: VoucherInfoProps) {
+  const { showToast: internalShowToast } = useToast();
+  const showToast = externalShowToast || internalShowToast;
+
   return (
     <>
       <div className="flex items-center mb-3 mt-6">
@@ -116,8 +122,9 @@ export default function VoucherInfo({
                         if (foundVoucher) {
                           setSelectedVoucher(foundVoucher);
                           setShowVoucherDrawer(false);
+                          showToast('Áp dụng voucher thành công!', 'success');
                         } else {
-                          alert('Mã voucher không hợp lệ hoặc đã hết hạn');
+                          showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'error');
                         }
                         setVoucherCode('');
                       }}
@@ -133,16 +140,17 @@ export default function VoucherInfo({
                     Voucher có sẵn ({availableVouchers.length})
                   </div>
                   <div className="space-y-3">
-                    {availableVouchers.map((voucher) => (
+                    {availableVouchers.map((voucher, index) => (
                       <div
-                        key={voucher.id}
+                        key={voucher.id || `voucher-${index}`}
                         className={`p-4 rounded-lg border ${selectedVoucher?.id === voucher.id ? 'border-red-500 bg-red-50' : 'border-gray-200'} cursor-pointer`}
                         onClick={() => {
                           if (totalPrice >= voucher.minOrderValue) {
                             setSelectedVoucher(voucher);
                             setShowVoucherDrawer(false);
+                            showToast('Áp dụng voucher thành công!', 'success');
                           } else {
-                            alert(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`);
+                            showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'warning');
                           }
                         }}
                       >
@@ -187,8 +195,8 @@ export default function VoucherInfo({
               Đăng nhập
             </Link>
           </div>
-        )}
-      </div>
+                  )}
+        </div>
     </>
   );
 } 

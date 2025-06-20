@@ -125,15 +125,15 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       const data = await response.json()
       
       if (response.ok && data.vouchers) {
-        setAvailableVouchers(data.vouchers.map((v: any) => ({
-          id: v.id,
-          code: v.code,
-          title: v.title,
-          description: v.description,
-          discountAmount: v.discount_amount,
-          minOrderValue: v.min_order_value,
-          expiryDate: v.valid_to
-        })))
+        setAvailableVouchers(data.vouchers.map((v: any, index: number) => ({
+          id: v.id || `voucher-${index}`,
+          code: v.code || '',
+          title: v.title || '',
+          description: v.description || '',
+          discountAmount: v.discount_amount || 0,
+          minOrderValue: v.min_order_value || 0,
+          expiryDate: v.valid_to || new Date().toISOString()
+        })).filter((voucher: any) => voucher.id && voucher.code))
       }
     } catch (error) {
       console.error('Error fetching vouchers:', error)

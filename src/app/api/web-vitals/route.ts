@@ -55,13 +55,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data: WebVitalRequest = await request.json();
+    // Try to read the request body with additional error handling
+    let data: WebVitalRequest;
+    try {
+      const text = await request.text();
+      if (!text || text.trim() === '') {
+        return NextResponse.json(
+          { error: 'Empty request body' },
+          { status: 400 }
+        );
+      }
+      data = JSON.parse(text);
+    } catch (parseError) {
+      securityLogger.logError('JSON parse error in web-vitals', parseError as Error, {
+        ip,
+        endpoint: '/api/web-vitals',
+        contentLength
+      });
+      return NextResponse.json(
+        { error: 'Invalid JSON format' },
+        { status: 400 }
+      );
+    }
+
     const { url, userAgent, connectionType, deviceMemory, metric } = data;
 
     // Validate metric data
     if (!metric || !metric.name || typeof metric.value !== 'number') {
       return NextResponse.json(
         { error: 'Invalid metric data' },
+        { status: 400 }
+      );
+    }
+
+    // Additional validation for metric names
+    const validMetricNames = ['CLS', 'FID', 'FCP', 'LCP', 'TTFB', 'INP', 'SLOW_RESOURCE', 'LONG_TASK', 'PAGE_HIDDEN'];
+    if (!validMetricNames.includes(metric.name)) {
+      return NextResponse.json(
+        { error: `Invalid metric name: ${metric.name}` },
         { status: 400 }
       );
     }

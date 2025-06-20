@@ -7,7 +7,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { Drawer } from 'antd';
+import { Drawer, Button } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import LocationSelector from '@/components/features/cart/LocationSelector';
 import { useToast } from '@/components/ui/Toast';
 
@@ -15,10 +16,19 @@ import { useToast } from '@/components/ui/Toast';
 import CartHeader from '@/components/features/cart/CartHeader';
 import ProductList from '@/components/features/cart/ProductList';
 import BuyerInfo from '@/components/features/cart/BuyerInfo';
-
 import VoucherInfo from '@/components/features/cart/VoucherInfo';
 import PaymentDetails from '@/components/features/cart/PaymentDetails';
 import BottomBar from '@/components/features/cart/BottomBar';
+
+// Import store components exactly like checkout modal
+import BuyerInfoStore from '@/components/store/BuyerInfo';
+import PaymentMethodSelection from '@/components/store/PaymentMethodSelection';
+import OrderSummary from '@/components/store/OrderSummary';
+import VoucherInfoStore from '@/components/store/VoucherInfo';
+import RewardPoints from '@/components/store/RewardPoints';
+import ProductListStore from '@/components/store/ProductList';
+import CollapsibleSection from '@/components/store/CollapsibleSection';
+import ProfileDrawer from '@/components/store/ProfileDrawer';
 
 interface LocationSelection {
   provinceCode: number;
@@ -56,44 +66,50 @@ interface PaymentMethod {
   description: string;
 }
 
+// Define form data interface like checkout
+interface FormData {
+  fullName: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  cityCode: number;
+  district: string;
+  districtCode: number;
+  ward: string;
+  wardCode: number;
+  note: string;
+  paymentMethod: string;
+  voucher: string;
+  rewardPoints: number;
+}
+
 export default function CartPage() {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
   const { showToast, ToastComponent } = useToast();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [showAddressDrawer, setShowAddressDrawer] = useState(false);
-  const [showShippingDrawer, setShowShippingDrawer] = useState(false);
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [shippingFee] = useState(0); // Default shipping fee is 0
   
-  // Guest user form state
-  const [guestInfo, setGuestInfo] = useState({
+  // Form data state like checkout
+  const [formData, setFormData] = useState<FormData>({
     fullName: '',
     phone: '',
-    email: ''
-  });
-  
-  // Phone input for logged-in users
-  const [userPhone, setUserPhone] = useState('');
-  
-  // Form validation state
-  const [errors, setErrors] = useState({
-    fullName: '',
-    phone: ''
-  });
-
-  // Address state
-  const [addressForm, setAddressForm] = useState({
+    email: '',
+    address: '',
     city: '',
+    cityCode: 0,
     district: '',
+    districtCode: 0,
     ward: '',
-    address: ''
+    wardCode: 0,
+    note: '',
+    paymentMethod: '',
+    voucher: '',
+    rewardPoints: 0
   });
-
-  // Shipping carrier state
-  const [selectedCarrier, setSelectedCarrier] = useState('');
-  const carriers = [
-    { id: 'g3tech', name: 'Giao hàng bởi G3-Tech', price: 0, time: '2-3 ngày' }
-  ];
 
   // Location selection state
   const [selectedLocation, setSelectedLocation] = useState<LocationSelection>({
@@ -105,56 +121,34 @@ export default function CartPage() {
     wardName: ''
   });
 
-  // Add state for note
-  const [note, setNote] = useState('');
-
   // Add voucher state
   const [showVoucherDrawer, setShowVoucherDrawer] = useState(false);
-  const [voucherCode, setVoucherCode] = useState('');
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
-  const [availableVouchers] = useState<Voucher[]>([
-    {
-      id: '1',
-      code: 'WELCOME10',
-      title: 'Giảm 10K cho đơn hàng từ 100K',
-      description: 'Áp dụng cho tất cả sản phẩm',
-      discountAmount: 10000,
-      minOrderValue: 100000,
-      expiryDate: '2024-12-31'
-    },
-    {
-      id: '2',
-      code: 'FREESHIP30',
-      title: 'Giảm 30K phí vận chuyển',
-      description: 'Áp dụng cho đơn hàng từ 200K',
-      discountAmount: 30000,
-      minOrderValue: 200000,
-      expiryDate: '2024-12-31'
-    }
-  ]);
+  const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
 
   // Add reward points state
   const [useRewardPoints, setUseRewardPoints] = useState(false);
   const [pointsToUse, setPointsToUse] = useState(0);
-  const [rewardPoints] = useState<RewardPoints>({
-    available: 150,
-    pointValue: 100, // 100 VND per point
-    minPointsToRedeem: 50,
+  const rewardPointsData = {
+    available: 1000,
+    pointValue: 1000,
+    minPointsToRedeem: 100,
     maxPointsPerOrder: 500
-  });
+  };
 
   // Add payment method state
-  const [selectedPayment, setSelectedPayment] = useState<string>('');
   const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
-  const [paymentMethods] = useState<PaymentMethod[]>([
+  const [paymentMethods, setPaymentMethods] = useState([
     {
       id: 'cod',
+      code: 'cod',
       name: 'Thanh toán khi nhận hàng',
-      icon: 'cash',
-      description: 'Thanh toán bằng tiền mặt khi nhận hàng'
+      icon: 'cod',
+      description: 'Thanh toán tiền mặt khi nhận hàng'
     },
     {
       id: 'bank_transfer',
+      code: 'bank_transfer',
       name: 'Chuyển khoản ngân hàng',
       icon: 'bank',
       description: 'Chuyển khoản qua tài khoản ngân hàng'
@@ -173,12 +167,15 @@ export default function CartPage() {
         wardCode: 0,
         wardName: ''
       }));
-      // Update address form for compatibility with ShippingInfo
-      setAddressForm(prev => ({
+      // Update form data
+      setFormData(prev => ({
         ...prev,
         city: name,
+        cityCode: code,
         district: '',
-        ward: ''
+        districtCode: 0,
+        ward: '',
+        wardCode: 0
       }));
     },
     district: (code: number, name: string) => {
@@ -189,10 +186,12 @@ export default function CartPage() {
         wardCode: 0,
         wardName: ''
       }));
-      setAddressForm(prev => ({
+      setFormData(prev => ({
         ...prev,
         district: name,
-        ward: ''
+        districtCode: code,
+        ward: '',
+        wardCode: 0
       }));
     },
     ward: (code: number, name: string) => {
@@ -201,172 +200,506 @@ export default function CartPage() {
         wardCode: code,
         wardName: name
       }));
-      setAddressForm(prev => ({
+      setFormData(prev => ({
         ...prev,
-        ward: name
+        ward: name,
+        wardCode: code
       }));
     }
   };
 
-  // Calculate points discount
-  const pointsDiscount = useRewardPoints ? pointsToUse * rewardPoints.pointValue : 0;
+  // Fetch vouchers from API
+  const fetchVouchers = async () => {
+    try {
+      const url = user ? `/api/vouchers?user_id=${user.id}` : '/api/vouchers'
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      if (response.ok && data.vouchers) {
+        setAvailableVouchers(data.vouchers.map((v: any, index: number) => ({
+          id: v.id || `voucher-${index}`, // Fallback if id is missing
+          code: v.code || '',
+          title: v.title || '',
+          description: v.description || '',
+          discountAmount: v.discount_amount || 0,
+          minOrderValue: v.min_order_value || 0,
+          expiryDate: v.valid_to || new Date().toISOString()
+        })).filter((v: Voucher) => v.id && v.code)) // Only include vouchers with valid id and code
+      }
+    } catch (error) {
+      console.error('Error fetching vouchers:', error)
+    }
+  }
 
-  // Update total calculation to include points discount
-  const shipping = 0;
-  const total = totalPrice + shipping - (selectedVoucher?.discountAmount || 0) - pointsDiscount;
+  // Fetch data on mount
+  useEffect(() => {
+    fetchVouchers();
+  }, [user]);
+
+  // Completion check functions like checkout
+  const isBuyerInfoCompleted = () => {
+    if (user) {
+      return formData.phone.trim() !== '';
+    }
+    return formData.fullName.trim() !== '' && formData.phone.trim() !== '';
+  };
+
+  const isShippingInfoCompleted = () => {
+    return formData.address.trim() !== '' && 
+           formData.city.trim() !== '' && 
+           formData.district.trim() !== '' && 
+           formData.ward.trim() !== '';
+  };
+
+  const isPaymentMethodCompleted = () => {
+    return formData.paymentMethod !== '';
+  };
+
+  const isVoucherCompleted = () => {
+    return true; // Voucher is optional
+  };
+
+  const isRewardPointsCompleted = () => {
+    return true; // Reward points are optional
+  };
+
+  const isFormValid = () => {
+    return isBuyerInfoCompleted() && isShippingInfoCompleted() && isPaymentMethodCompleted();
+  };
+
+  const handleFormChange = (field: keyof FormData, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleQuantityUpdate = (itemId: string, newQuantity: number) => {
+    updateQuantity(itemId, newQuantity);
+  };
+
+  const handleSubmit = async () => {
+    if (!isFormValid()) {
+      showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Your checkout logic here
+      showToast('Đặt hàng thành công!', 'success');
+    } catch (error) {
+      showToast('Có lỗi xảy ra khi đặt hàng', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <CartHeader 
         showMenu={showMenu}
         setShowMenu={setShowMenu}
-        handlePreviewPDF={() => generatePDF({ cartItems, totalPrice, shipping, buyerInfo: user ? {
+        handlePreviewPDF={() => generatePDF({ cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName,
-          phone: userPhone,
+          phone: formData.phone,
           email: user.email
         } : {
-          fullName: guestInfo.fullName,
-          phone: guestInfo.phone,
-          email: guestInfo.email || undefined
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email || undefined
         }, preview: true })}
-        handleDownloadPDF={() => generatePDF({ cartItems, totalPrice, shipping, buyerInfo: user ? {
+        handleDownloadPDF={() => generatePDF({ cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName,
-          phone: userPhone,
+          phone: formData.phone,
           email: user.email
         } : {
-          fullName: guestInfo.fullName,
-          phone: guestInfo.phone,
-          email: guestInfo.email || undefined
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email || undefined
         }})}
       />
 
-      <div className="px-4 pb-20 max-w-full overflow-hidden">        
-        <ProductList 
-          loading={loading}
-          cartItems={cartItems}
-          removeFromCart={removeFromCart}
-          updateQuantity={updateQuantity}
-        />
-
-        <BuyerInfo 
-          user={user}
-          guestInfo={guestInfo}
-          setGuestInfo={setGuestInfo}
-          userPhone={userPhone}
-          setUserPhone={setUserPhone}
-          errors={errors}
-          setErrors={setErrors}
-        />
-
-        {/* Location Selection */}
-        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
+      {/* PC Layout - Exact same as checkout modal */}
+      <div className="hidden md:block">
+        <div className="bg-gray-100 min-h-screen">
+          {loading && (
+            <div className="fixed inset-0 bg-white bg-opacity-80 flex justify-center items-center z-50">
+              <div className="flex flex-col items-center">
+                <LoadingOutlined style={{ fontSize: 24, color: '#dc3545', marginBottom: 8 }} />
+                <span className="text-gray-600">Đang xử lý đơn hàng...</span>
+              </div>
+            </div>
+          )}
           
-          <LocationSelector
-            selectedProvinceCode={selectedLocation.provinceCode}
-            selectedDistrictCode={selectedLocation.districtCode}
-            selectedWardCode={selectedLocation.wardCode}
-            onProvinceChange={handleLocationChange.province}
-            onDistrictChange={handleLocationChange.district}
-            onWardChange={handleLocationChange.ward}
-          />
-          
-          {/* Address input */}
-          <div className="mt-4">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-              Địa chỉ cụ thể <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="address"
-              value={addressForm.address}
-              onChange={(e) => setAddressForm(prev => ({ ...prev, address: e.target.value }))}
-              placeholder="Số nhà, tên đường..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            />
-          </div>
-
-          {/* Shipping carrier selection */}
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phương thức vận chuyển
-            </label>
-            <div className="space-y-2">
-              {carriers.map((carrier) => (
-                <label key={carrier.id} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="carrier"
-                    value={carrier.id}
-                    checked={selectedCarrier === carrier.id}
-                    onChange={(e) => setSelectedCarrier(e.target.value)}
-                    className="mr-3"
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Left column - Form sections */}
+              <div className="col-span-8 space-y-4">
+                <CollapsibleSection 
+                  title="Thông tin người mua" 
+                  stepNumber={1}
+                  isCompleted={isBuyerInfoCompleted()}
+                >
+                  <BuyerInfoStore
+                    formData={{
+                      fullName: formData.fullName,
+                      phone: formData.phone,
+                      email: formData.email
+                    }}
+                    setFormData={(info) => {
+                      if (typeof info === 'function') {
+                        setFormData(prev => {
+                          const newBuyerInfo = info({
+                            fullName: prev.fullName,
+                            phone: prev.phone,
+                            email: prev.email
+                          });
+                          return {
+                            ...prev,
+                            ...newBuyerInfo
+                          };
+                        });
+                      } else {
+                        setFormData(prev => ({
+                          ...prev,
+                          ...info
+                        }));
+                      }
+                    }}
+                    showDrawer={showProfileDrawer}
+                    setShowDrawer={setShowProfileDrawer}
                   />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{carrier.name}</div>
-                    <div className="text-sm text-gray-600">
-                      {carrier.price === 0 ? 'Miễn phí' : `${carrier.price.toLocaleString('vi-VN')}đ`} • {carrier.time}
+                </CollapsibleSection>
+
+                <CollapsibleSection 
+                  title="Thông tin giao hàng" 
+                  stepNumber={2}
+                  isCompleted={isShippingInfoCompleted()}
+                >
+                  {/* Location Selection */}
+                  <div className="space-y-4">
+                    <LocationSelector
+                      selectedProvinceCode={selectedLocation.provinceCode}
+                      selectedDistrictCode={selectedLocation.districtCode}
+                      selectedWardCode={selectedLocation.wardCode}
+                      onProvinceChange={handleLocationChange.province}
+                      onDistrictChange={handleLocationChange.district}
+                      onWardChange={handleLocationChange.ward}
+                    />
+                    
+                    {/* Address input */}
+                    <div>
+                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                        Địa chỉ cụ thể <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => handleFormChange('address', e.target.value)}
+                        placeholder="Số nhà, tên đường..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                      />
+                    </div>
+
+                    {/* Shipping carrier info */}
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-green-900">Giao hàng bởi G3-Tech</h4>
+                          <p className="text-sm text-green-700 mt-1">
+                            <span className="font-medium">Freeship toàn quốc</span> - Nội thành HN, HCM trong ngày, liên tỉnh 2-3 ngày
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Note */}
+                    <div>
+                      <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
+                        Ghi chú đơn hàng
+                      </label>
+                      <textarea
+                        id="note"
+                        value={formData.note}
+                        onChange={(e) => handleFormChange('note', e.target.value)}
+                        placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                      />
                     </div>
                   </div>
-                </label>
-              ))}
+                </CollapsibleSection>
+
+                <CollapsibleSection 
+                  title="Phương thức thanh toán" 
+                  stepNumber={3}
+                  isCompleted={isPaymentMethodCompleted()}
+                >
+                  <PaymentMethodSelection
+                    showPaymentDrawer={showPaymentDrawer}
+                    setShowPaymentDrawer={setShowPaymentDrawer}
+                    selectedPayment={formData.paymentMethod}
+                    setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
+                    paymentMethods={paymentMethods}
+                  />
+                </CollapsibleSection>
+
+                <CollapsibleSection 
+                  title="Mã giảm giá" 
+                  stepNumber={4}
+                  isCompleted={isVoucherCompleted()}
+                >
+                  <VoucherInfoStore
+                    user={user}
+                    showVoucherDrawer={showVoucherDrawer}
+                    setShowVoucherDrawer={setShowVoucherDrawer}
+                    voucherCode={formData.voucher}
+                    setVoucherCode={(code) => handleFormChange('voucher', code)}
+                    selectedVoucher={selectedVoucher}
+                    setSelectedVoucher={setSelectedVoucher}
+                    availableVouchers={availableVouchers}
+                    totalPrice={totalPrice}
+                    openProfile={() => setShowProfileDrawer(true)}
+                    showToast={showToast}
+                  />
+                </CollapsibleSection>
+
+                <CollapsibleSection 
+                  title="Điểm thưởng" 
+                  stepNumber={5}
+                  isCompleted={isRewardPointsCompleted()}
+                >
+                  <RewardPoints
+                    isLoggedIn={!!user}
+                    availablePoints={rewardPointsData.available}
+                    useRewardPoints={useRewardPoints}
+                    setUseRewardPoints={setUseRewardPoints}
+                    pointsToUse={pointsToUse}
+                    setPointsToUse={setPointsToUse}
+                    maxPointsToUse={rewardPointsData.maxPointsPerOrder}
+                    openProfile={() => setShowProfileDrawer(true)}
+                  />
+                </CollapsibleSection>
+              </div>
+
+              {/* Right column - Order summary */}
+              <div className="col-span-4">
+                <div className="bg-white p-4 rounded-lg sticky top-4">
+                  <ProductListStore
+                    items={cartItems}
+                    loading={loading}
+                    onUpdateQuantity={handleQuantityUpdate}
+                    onRemoveItem={removeFromCart}
+                  />
+                  <OrderSummary
+                    items={cartItems}
+                    selectedVoucher={selectedVoucher}
+                    pointsToUse={useRewardPoints ? pointsToUse : 0}
+                    totalPrice={totalPrice}
+                  />
+                  <Button
+                    type="primary"
+                    danger
+                    block
+                    size="large"
+                    onClick={handleSubmit}
+                    disabled={!isFormValid()}
+                    loading={loading}
+                    className="mt-4"
+                  >
+                    Đặt hàng
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Layout - Keep existing design */}
+      <div className="md:hidden">
+        <div className="px-4 pb-20 max-w-full overflow-hidden">        
+          <ProductList 
+            loading={loading}
+            cartItems={cartItems}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
+          />
+
+                     <BuyerInfo 
+             user={user}
+             guestInfo={{
+               fullName: formData.fullName,
+               phone: formData.phone,
+               email: formData.email
+             }}
+             setGuestInfo={(info) => {
+               if (typeof info === 'function') {
+                 setFormData(prev => {
+                   const currentInfo = {
+                     fullName: prev.fullName,
+                     phone: prev.phone,
+                     email: prev.email
+                   };
+                   const newInfo = info(currentInfo);
+                   return {
+                     ...prev,
+                     fullName: newInfo.fullName,
+                     phone: newInfo.phone,
+                     email: newInfo.email
+                   };
+                 });
+               } else {
+                 setFormData(prev => ({
+                   ...prev,
+                   fullName: info.fullName,
+                   phone: info.phone,
+                   email: info.email
+                 }));
+               }
+             }}
+             userPhone={formData.phone}
+             setUserPhone={(phone) => {
+               if (typeof phone === 'string') {
+                 handleFormChange('phone', phone);
+               }
+             }}
+             errors={{
+               fullName: '',
+               phone: ''
+             }}
+             setErrors={() => {}}
+           />
+
+          {/* Location Selection */}
+          <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
+            
+            <LocationSelector
+              selectedProvinceCode={selectedLocation.provinceCode}
+              selectedDistrictCode={selectedLocation.districtCode}
+              selectedWardCode={selectedLocation.wardCode}
+              onProvinceChange={handleLocationChange.province}
+              onDistrictChange={handleLocationChange.district}
+              onWardChange={handleLocationChange.ward}
+            />
+            
+            {/* Address input */}
+            <div className="mt-4">
+              <label htmlFor="address-mobile" className="block text-sm font-medium text-gray-700 mb-1">
+                Địa chỉ cụ thể <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="address-mobile"
+                value={formData.address}
+                onChange={(e) => handleFormChange('address', e.target.value)}
+                placeholder="Số nhà, tên đường..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+            </div>
+
+            {/* Shipping carrier selection */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phương thức vận chuyển
+              </label>
+              <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="font-medium text-gray-900">Giao hàng bởi G3-Tech</div>
+                <div className="text-sm text-gray-600">
+                  Miễn phí • 2-3 ngày
+                </div>
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="mt-4">
+              <label htmlFor="note-mobile" className="block text-sm font-medium text-gray-700 mb-1">
+                Ghi chú đơn hàng
+              </label>
+              <textarea
+                id="note-mobile"
+                value={formData.note}
+                onChange={(e) => handleFormChange('note', e.target.value)}
+                placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
             </div>
           </div>
 
-          {/* Note */}
-          <div className="mt-4">
-            <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
-              Ghi chú đơn hàng
-            </label>
-            <textarea
-              id="note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Ghi chú cho đơn hàng (tùy chọn)"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            />
-          </div>
+          <VoucherInfo 
+            user={user}
+            showVoucherDrawer={showVoucherDrawer}
+            setShowVoucherDrawer={setShowVoucherDrawer}
+            voucherCode={formData.voucher}
+            setVoucherCode={(code) => handleFormChange('voucher', code)}
+            selectedVoucher={selectedVoucher}
+            setSelectedVoucher={setSelectedVoucher}
+            availableVouchers={availableVouchers}
+            totalPrice={totalPrice}
+            showToast={showToast}
+          />
+
+          <PaymentDetails 
+            user={user}
+            totalPrice={totalPrice}
+            shipping={shippingFee}
+            selectedVoucher={selectedVoucher}
+            pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
+            cartItems={cartItems}
+            useRewardPoints={useRewardPoints}
+            setUseRewardPoints={setUseRewardPoints}
+            pointsToUse={pointsToUse}
+            setPointsToUse={setPointsToUse}
+            rewardPoints={rewardPointsData}
+            showPaymentDrawer={showPaymentDrawer}
+            setShowPaymentDrawer={setShowPaymentDrawer}
+            selectedPayment={formData.paymentMethod}
+            setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
+            paymentMethods={paymentMethods}
+          />
         </div>
 
-        <VoucherInfo 
-          user={user}
-          showVoucherDrawer={showVoucherDrawer}
-          setShowVoucherDrawer={setShowVoucherDrawer}
-          voucherCode={voucherCode}
-          setVoucherCode={setVoucherCode}
-          selectedVoucher={selectedVoucher}
-          setSelectedVoucher={setSelectedVoucher}
-          availableVouchers={availableVouchers}
-          totalPrice={totalPrice}
-        />
-
-        <PaymentDetails 
-          user={user}
-          totalPrice={totalPrice}
-          shipping={shipping}
-          selectedVoucher={selectedVoucher}
-          pointsDiscount={pointsDiscount}
-          cartItems={cartItems}
-          useRewardPoints={useRewardPoints}
-          setUseRewardPoints={setUseRewardPoints}
-          pointsToUse={pointsToUse}
-          setPointsToUse={setPointsToUse}
-          rewardPoints={rewardPoints}
-          showPaymentDrawer={showPaymentDrawer}
-          setShowPaymentDrawer={setShowPaymentDrawer}
-          selectedPayment={selectedPayment}
-          setSelectedPayment={setSelectedPayment}
-          paymentMethods={paymentMethods}
+        <BottomBar 
+          cartItemCount={cartItems.length}
+          total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
         />
       </div>
-
-      <BottomBar 
-        cartItemCount={cartItems.length}
-        total={total}
-      />
       
       <ToastComponent />
+
+      {/* Profile Drawer */}
+      <ProfileDrawer 
+        isOpen={showProfileDrawer} 
+        onClose={() => setShowProfileDrawer(false)} 
+      />
+
+      {/* Add CSS for collapsible sections */}
+      <style jsx global>{`
+        .collapsible-arrow {
+          transition: transform 0.3s ease;
+        }
+        .collapsible-arrow.open {
+          transform: rotate(180deg);
+        }
+        .collapsible-content {
+          transition: all 0.3s ease;
+        }
+        .collapsible-content.closed {
+          max-height: 0;
+          overflow: hidden;
+          padding: 0;
+        }
+        .collapsible-content.open {
+          max-height: none;
+          overflow: visible;
+        }
+      `}</style>
     </div>
   );
 } 

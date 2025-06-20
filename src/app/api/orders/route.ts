@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     // Create order items
     const orderItems = cart_items.map((item) => ({
       order_id: orderData.id,
-      product_id: parseInt(item.id), // Convert to number for database
+      product_id: typeof item.id === 'string' ? parseInt(item.id) : item.id, // Convert to number for database
       product_name: item.name,
       quantity: item.quantity,
       price: item.price, // Match database schema

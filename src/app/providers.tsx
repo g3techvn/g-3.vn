@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { DomainProvider } from '@/context/domain-context';
-import { CartProvider } from '@/features/cart/CartProvider';
+
 import { ThemeProvider } from '@/context/ThemeContext';
 import { useState, useRef } from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
@@ -44,24 +44,20 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClientRef.current}>
         <DomainProvider>
           <AuthProvider>
-            <CartProvider>
-              <ThemeProvider>
-                <AntdRegistry>
-                  {mounted && (
-                    <>
-                      <Suspense fallback={null}>
-                        <PageViewTracker />
-                      </Suspense>
-                      {children}
-                    </>
-                  )}
-                </AntdRegistry>
-              </ThemeProvider>
-            </CartProvider>
+            <ThemeProvider>
+              <AntdRegistry>
+                {mounted && (
+                  <Suspense fallback={null}>
+                    <PageViewTracker />
+                  </Suspense>
+                )}
+                {children}
+              </AntdRegistry>
+            </ThemeProvider>
           </AuthProvider>
         </DomainProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+        {process.env.NODE_ENV === 'development' && mounted && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </div>
   );

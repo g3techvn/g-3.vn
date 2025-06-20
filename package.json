@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:no-cache": "rm -rf .next && next dev",
+    "dev:fresh": "rm -rf .next && rm -rf node_modules/.cache && next dev",
+    "clear-cache": "rm -rf .next && rm -rf node_modules/.cache",
+    "reset": "rm -rf .next && rm -rf node_modules/.cache && rm -rf .turbo && npm install",
     "build": "next build",
     "postbuild": "next-sitemap",
     "start": "next start",

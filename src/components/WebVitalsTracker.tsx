@@ -15,30 +15,51 @@ interface WebVitalMetric {
 
 function sendToAnalytics(metric: WebVitalMetric) {
   try {
-    // Send to our custom API
-    fetch('/api/web-vitals', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType,
-        deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
-        metric: {
-          name: metric.name,
-          value: metric.value,
-          id: metric.id,
-          rating: metric.rating,
-          delta: metric.delta,
-          navigationType: metric.navigationType
+    // Validate metric data before sending
+    if (!metric || !metric.name || typeof metric.value !== 'number') {
+      console.warn('Invalid metric data:', metric);
+      return;
+    }
+
+    const payload = {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType,
+      deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+      metric: {
+        name: metric.name,
+        value: metric.value,
+        id: metric.id,
+        rating: metric.rating,
+        delta: metric.delta,
+        navigationType: metric.navigationType
+      }
+    };
+
+    const payloadString = JSON.stringify(payload);
+
+    // Use sendBeacon for reliability when page is unloading, otherwise use fetch
+    if (document.visibilityState === 'hidden' && 'sendBeacon' in navigator) {
+      // sendBeacon is more reliable for data sent during page unload
+      navigator.sendBeacon('/api/web-vitals', new Blob([payloadString], {
+        type: 'application/json'
+      }));
+    } else {
+      // Use fetch for normal cases
+      fetch('/api/web-vitals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: payloadString,
+        keepalive: true // Keep connection alive even if page unloads
+      }).catch(error => {
+        // Fail silently for analytics - only log if it's not an abort error
+        if (error.name !== 'AbortError') {
+          console.warn('Failed to send web vital metric:', error);
         }
-      }),
-    }).catch(error => {
-      // Fail silently for analytics
-      console.warn('Failed to send web vital metric:', error);
-    });
+      });
+    }
 
     // Also send to Google Analytics if available
     if (typeof window !== 'undefined' && window.gtag) {

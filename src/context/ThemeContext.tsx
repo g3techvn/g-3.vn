@@ -53,7 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Avoid hydration mismatch by not rendering until mounted
   if (!mounted) {
-    return null;
+    return <>{children}</>;
   }
 
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import * as Dialog from '@radix-ui/react-dialog';
 import { createBrowserClient } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createBrowserClient();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +32,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setError(error.message);
       } else if (data.user) {
         onClose();
+        router.push('/gio-hang');
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -44,7 +47,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}/gio-hang`
         }
       });
       if (error) throw error;
@@ -59,7 +62,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}/gio-hang`
         }
       });
       if (error) throw error;

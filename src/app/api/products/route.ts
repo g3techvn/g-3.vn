@@ -4,6 +4,14 @@ import { Product, ProductVariant } from '@/types';
 import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
 import { securityLogger } from '@/lib/logger';
 
+// Simple in-memory cache for products (use Redis in production)
+let productsCache: Map<string, {
+  data: Product[];
+  timestamp: number;
+}> = new Map();
+
+const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
+
 // Define type for the joined product_sectors query result
 interface ProductSectorJoin {
   product_id: string;
@@ -53,6 +61,27 @@ export async function GET(request: NextRequest) {
       sector_id, 
       use_domain
     });
+    
+    // Create cache key based on query parameters
+    const cacheKey = JSON.stringify({
+      g3Domain,
+      category_id,
+      brand_id,
+      sort,
+      sector_id,
+      use_domain
+    });
+    
+    // Check cache first
+    const now = Date.now();
+    const cached = productsCache.get(cacheKey);
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+      console.log('API Products - Returning cached data');
+      return NextResponse.json(
+        { products: cached.data },
+        { headers: getSecurityHeaders() }
+      );
+    }
     
     // Initialize Supabase client
     const supabase = createServerClient();
@@ -235,6 +264,22 @@ export async function GET(request: NextRequest) {
       sortedProducts.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
+    }
+    
+    // Cache the result
+    productsCache.set(cacheKey, {
+      data: sortedProducts,
+      timestamp: now
+    });
+    
+    // Clean old cache entries (keep only last 100 entries)
+    if (productsCache.size > 100) {
+      const entries = Array.from(productsCache.entries());
+      entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+      productsCache.clear();
+      entries.slice(0, 50).forEach(([key, value]) => {
+        productsCache.set(key, value);
+      });
     }
     
     // Secure logging - don't log sensitive parameters

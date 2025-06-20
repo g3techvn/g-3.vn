@@ -6,11 +6,13 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/features/auth/AuthProvider'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type View = 'login' | 'register' | 'profile';
 
 export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { user, loading, signIn, signUp, signOut } = useAuth()
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -40,8 +42,8 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
     if (result.error) {
       setError(result.error.message)
     } else {
-      setView('profile');
       onClose();
+      router.push('/gio-hang');
     }
   }
   
@@ -63,8 +65,8 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
     if (result.error) {
       setError(result.error.message)
     } else {
-      setView('profile');
       onClose();
+      router.push('/gio-hang');
     }
   }
   
@@ -112,7 +114,19 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
             <ul className="space-y-2">
               <li>
                 <Link 
-                  href="/account" 
+                  href="/tai-khoan" 
+                  className="flex items-center text-gray-700 hover:text-red-600"
+                  onClick={handleClose}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  Tổng quan tài khoản
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/tai-khoan/thong-tin" 
                   className="flex items-center text-gray-700 hover:text-red-600"
                   onClick={handleClose}
                 >
@@ -124,7 +138,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               </li>
               <li>
                 <Link 
-                  href="/orders" 
+                  href="/tai-khoan/don-hang" 
                   className="flex items-center text-gray-700 hover:text-red-600"
                   onClick={handleClose}
                 >
@@ -136,27 +150,14 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               </li>
               <li>
                 <Link 
-                  href="/wishlist" 
+                  href="/uu-dai" 
                   className="flex items-center text-gray-700 hover:text-red-600"
                   onClick={handleClose}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
-                  Sản phẩm yêu thích
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/address" 
-                  className="flex items-center text-gray-700 hover:text-red-600"
-                  onClick={handleClose}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Sổ địa chỉ
+                  Ưu đãi & Voucher
                 </Link>
               </li>
             </ul>

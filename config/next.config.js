@@ -43,9 +43,59 @@ const nextConfig = {
     optimizePackageImports: ['antd', 'lodash'],
     optimizeServerReact: true,
     serverMinification: true,
+    // Disable cache in development
+    ...(process.env.NODE_ENV === 'development' && {
+      isrMemoryCacheSize: 0,
+    }),
   },
+  // Disable cache completely in development
+  ...(process.env.NODE_ENV === 'development' && {
+    onDemandEntries: {
+      maxInactiveAge: 25 * 1000,
+      pagesBufferLength: 2,
+    },
+  }),
   headers: async () => {
+    const headers = []
+    
+    // Disable cache in development
+    if (process.env.NODE_ENV === 'development') {
+      headers.push({
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+          {
+            key: 'Surrogate-Control',
+            value: 'no-store',
+          },
+        ],
+      })
+      
+      // Disable cache for static files in development
+      headers.push({
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
+          },
+        ],
+      })
+    }
+    
     return [
+      ...headers,
       {
         source: '/:path*',
         headers: [

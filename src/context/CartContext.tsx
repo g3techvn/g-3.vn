@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react'
 import { Product } from '@/types'
-import { useAuth } from '@/features/auth/AuthProvider'
+
 import { CartItem } from '@/types/cart'
 
 interface CartContextType {
@@ -27,7 +27,6 @@ const CART_STORAGE_KEY = 'g3tech_cart_items'
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const { user } = useAuth()
 
   // Load cart items from localStorage on initial mount
   useEffect(() => {

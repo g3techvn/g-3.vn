@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
+// Simple in-memory cache for categories (use Redis in production)
+let categoriesCache: {
+  data: any[] | null;
+  timestamp: number;
+  sectorId: string | null;
+} = {
+  data: null,
+  timestamp: 0,
+  sectorId: null
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export async function GET(request: Request) {
   try {
     // Get domain from environment variable
@@ -12,7 +25,16 @@ export async function GET(request: Request) {
     
     console.log('API Categories - Using domain:', g3Domain);
     
-    // Khởi tạo Supabase client
+    // Check cache first
+    const now = Date.now();
+    const cacheKey = sector_id || g3Domain;
+    if (categoriesCache.data && 
+        categoriesCache.sectorId === cacheKey &&
+        (now - categoriesCache.timestamp) < CACHE_DURATION) {
+      console.log('API Categories - Returning cached data');
+      return NextResponse.json({ product_cats: categoriesCache.data });
+    }
+    
     const supabase = createServerClient();
     
     // Get sector ID for this domain if not directly provided
@@ -37,13 +59,33 @@ export async function GET(request: Request) {
       }
     }
     
-    // Fetch product IDs that belong to the sector
-    let productIds: string[] = [];
-    if (sectorId) {
+    if (!sectorId) {
+      console.log('API Categories - No sector found for domain');
+      return NextResponse.json({ product_cats: [] });
+    }
+
+    // Optimized single query using joins to get categories with product counts
+    const { data: categoryData, error } = await supabase
+      .rpc('get_categories_with_product_count', {
+        input_sector_id: sectorId
+      });
+
+    if (error) {
+      console.log('API Categories - RPC not available, falling back to manual query');
+      
+      // Fallback to optimized manual query
       const { data: productSectors, error: psError } = await supabase
         .from('product_sectors')
-        .select('product_id')
-        .eq('sector_id', sectorId);
+        .select(`
+          product_id,
+          products!inner (
+            id,
+            pd_cat_id,
+            status
+          )
+        `)
+        .eq('sector_id', sectorId)
+        .eq('products.status', true);
         
       if (psError) {
         console.error('API Categories - Error fetching product_sectors:', psError);
@@ -53,58 +95,70 @@ export async function GET(request: Request) {
         );
       }
       
-      if (productSectors && productSectors.length > 0) {
-        productIds = productSectors.map(ps => ps.product_id);
-        console.log(`API Categories - Found ${productIds.length} products for sector ID: ${sectorId}`);
-      } else {
-        console.log(`API Categories - No products found for sector ID: ${sectorId}`);
+      if (!productSectors || productSectors.length === 0) {
+        console.log('API Categories - No products found for sector');
+        categoriesCache = { data: [], timestamp: now, sectorId: cacheKey };
         return NextResponse.json({ product_cats: [] });
       }
-    }
-    
-    // Get all categories
-    const query = supabase.from('product_cats').select('*');
-    
-    // Execute query to get all categories
-    const { data: allProductCats, error } = await query;
-    
-    if (error) {
-      console.error('API Categories - Supabase error:', error);
-      return NextResponse.json(
-        { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
-        { status: 500 }
-      );
-    }
-    
-    // If we have product IDs for a sector, filter categories to only include those with products in the sector
-    let filteredProductCats = allProductCats;
-    if (productIds.length > 0) {
-      // Get products that belong to the sector
-      const { data: products, error: productsError } = await supabase
-        .from('products')
-        .select('pd_cat_id')
-        .in('id', productIds);
+      
+      // Count products per category
+      const categoryProductCounts = new Map<string, number>();
+      productSectors.forEach(item => {
+        if (item.products && typeof item.products === 'object' && 'pd_cat_id' in item.products) {
+          const product = item.products as any;
+          const catId = product.pd_cat_id;
+          if (catId) {
+            categoryProductCounts.set(catId, (categoryProductCounts.get(catId) || 0) + 1);
+          }
+        }
+      });
+      
+      // Get categories that have products
+      const categoryIds = Array.from(categoryProductCounts.keys());
+      if (categoryIds.length === 0) {
+        categoriesCache = { data: [], timestamp: now, sectorId: cacheKey };
+        return NextResponse.json({ product_cats: [] });
+      }
+      
+      const { data: categories, error: catError } = await supabase
+        .from('product_cats')
+        .select('*')
+        .in('id', categoryIds);
         
-      if (productsError) {
-        console.error('API Categories - Error fetching products:', productsError);
+      if (catError) {
+        console.error('API Categories - Error fetching categories:', catError);
         return NextResponse.json(
-          { error: `Lỗi khi truy vấn products: ${productsError.message}` },
+          { error: `Lỗi khi truy vấn categories: ${catError.message}` },
           { status: 500 }
         );
       }
       
-      if (products && products.length > 0) {
-        // Get unique category IDs from products
-        const categoryIds = new Set(products.map(p => p.pd_cat_id).filter(Boolean));
-        
-        // Filter categories to only include those with products in the sector
-        filteredProductCats = allProductCats.filter(cat => categoryIds.has(cat.id));
-        console.log(`API Categories - Filtered to ${filteredProductCats.length} categories with products in sector`);
-      }
+      // Add product counts to categories and sort by count
+      const categoriesWithCounts = (categories || [])
+        .map(cat => ({
+          ...cat,
+          product_count: categoryProductCounts.get(cat.id) || 0
+        }))
+        .filter(cat => cat.product_count > 0)
+        .sort((a, b) => b.product_count - a.product_count);
+      
+      console.log(`API Categories - Found ${categoriesWithCounts.length} categories with products`);
+      
+      // Cache the result
+      categoriesCache = { 
+        data: categoriesWithCounts, 
+        timestamp: now, 
+        sectorId: cacheKey 
+      };
+      
+      return NextResponse.json({ product_cats: categoriesWithCounts });
     }
     
-    console.log(`API Categories - Query successful, returning ${filteredProductCats.length} product categories`);
-    return NextResponse.json({ product_cats: filteredProductCats });
+    // If RPC worked, use that data
+    console.log(`API Categories - RPC returned ${categoryData?.length || 0} categories`);
+    categoriesCache = { data: categoryData || [], timestamp: now, sectorId: cacheKey };
+    return NextResponse.json({ product_cats: categoryData || [] });
+    
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('API Categories - Error in categories API:', error);
