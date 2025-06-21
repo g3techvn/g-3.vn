@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { generateProductAltTag } from '@/lib/utils/seo-utils';
 
 interface OptimizedImageProps {
   src: string;
@@ -21,6 +22,10 @@ interface OptimizedImageProps {
   category?: string;
   brand?: string;
   seoOptimized?: boolean;
+  imageType?: 'main' | 'gallery' | 'thumbnail' | 'detail';
+  features?: string[];
+  color?: string;
+  material?: string;
 }
 
 export default function OptimizedImage({
@@ -41,6 +46,10 @@ export default function OptimizedImage({
   category,
   brand,
   seoOptimized = true,
+  imageType = 'main',
+  features,
+  color,
+  material,
 }: OptimizedImageProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -60,26 +69,29 @@ export default function OptimizedImage({
   
   const imageQuality = quality || baseQuality;
 
-  // Generate SEO-optimized alt text
-  const generateSEOAlt = () => {
+  // Generate SEO-optimized alt text using advanced utilities
+  const optimizedAlt = (() => {
     if (!seoOptimized) return alt;
     
-    if (productName && category && brand) {
-      return `${productName} - ${category} ${brand} chất lượng cao | G3`;
-    }
-    if (productName && category) {
-      return `${productName} - ${category} chất lượng cao | G3`;
-    }
+    // Use advanced SEO utilities if product data is available
     if (productName) {
-      return `${productName} - Sản phẩm công thái học | G3`;
+      return generateProductAltTag({
+        name: productName,
+        category,
+        brand,
+        features,
+        color,
+        material,
+      }, imageType);
     }
+    
+    // Fallback to basic alt text generation
     if (category) {
       return `${category} chất lượng cao | G3 - Công Thái Học`;
     }
+    
     return alt || 'Sản phẩm G3 - Nội thất công thái học';
-  };
-
-  const optimizedAlt = generateSEOAlt();
+  })();
 
   // Use smaller dimensions on mobile when width/height are provided
   const mobileScale = 0.75; // Scale factor for mobile

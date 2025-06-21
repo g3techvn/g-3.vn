@@ -124,6 +124,60 @@ export const defaultMetadata: Metadata = {
     'contact:street_address': COMPANY_INFO.address,
     'contact:locality': 'Hà Nội',
     'contact:country': 'Vietnam',
+    
+    // Enhanced SEO meta tags
+    'geo.region': 'VN-HN',
+    'geo.placename': 'Hà Nội',
+    'geo.position': '21.0285;105.8542',
+    'ICBM': '21.0285, 105.8542',
+    
+    // Business schema meta tags
+    'business:contact_data:street_address': COMPANY_INFO.address,
+    'business:contact_data:locality': 'Hà Nội',
+    'business:contact_data:region': 'Hà Nội',
+    'business:contact_data:postal_code': '100000',
+    'business:contact_data:country_name': 'Vietnam',
+    'business:contact_data:email': COMPANY_INFO.email,
+    'business:contact_data:phone_number': COMPANY_INFO.hotline,
+    'business:contact_data:website': siteUrl,
+    
+    // E-commerce specific meta tags
+    'product:retailer': 'G3 Vietnam',
+    'product:condition': 'new',
+    'product:availability': 'in stock',
+    'product:price:currency': 'VND',
+    'product:shipping_cost:currency': 'VND',
+    'product:shipping_cost:amount': '0',
+    
+    // Performance & Security hints
+    'dns-prefetch': 'true',
+    'preconnect': 'true',
+    'prefetch': 'true',
+    'preload': 'true',
+    
+    // Mobile & PWA optimization
+    'mobile-web-app-capable': 'yes',
+    'mobile-web-app-status-bar-style': 'default',
+    'mobile-web-app-title': 'G3 Store',
+    'format-detection': 'telephone=no, email=no, address=no',
+    
+    // Search engine specific
+    'googlebot': 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+    'bingbot': 'index,follow',
+    'slurp': 'index,follow',
+    'duckduckbot': 'index,follow',
+    
+    // Content classification
+    'rating': 'general',
+    'distribution': 'global',
+    'revisit-after': '7 days',
+    'expires': 'never',
+    'pragma': 'no-cache',
+    'cache-control': 'no-cache',
+    
+    // Social media meta tags
+    'pinterest': 'nopin',
+    'pinterest-rich-pin': 'true',
   },
   verification: {
     google: 'google-site-verification',
@@ -137,9 +191,31 @@ export const defaultMetadata: Metadata = {
     canonical: siteUrl,
     languages: {
       'vi-VN': `${siteUrl}`,
+      'en-US': `${siteUrl}?lang=en`,
+      'x-default': siteUrl,
+    },
+    types: {
+      'application/rss+xml': `${siteUrl}/feed.xml`,
+      'application/atom+xml': `${siteUrl}/atom.xml`,
     },
   },
   category: 'furniture',
+  classification: 'business',
+  referrer: 'origin-when-cross-origin',
+  generator: 'Next.js',
+  applicationName: 'G3 Store',
+  manifest: `${siteUrl}/manifest.json`,
+  appleWebApp: {
+    capable: true,
+    title: 'G3 Store',
+    statusBarStyle: 'default',
+    startupImage: [
+      {
+        url: `${siteUrl}/icons/apple-touch-icon.png`,
+        media: '(device-width: 768px) and (device-height: 1024px)',
+      },
+    ],
+  },
 };
 
 // Generate metadata for dynamic paths with enhanced social media support
