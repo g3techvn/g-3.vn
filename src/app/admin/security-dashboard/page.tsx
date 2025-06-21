@@ -28,6 +28,11 @@ export default function SecurityDashboard() {
     activeThreats: 0,
     lastHourRequests: 0,
   });
+  const [fallbackStatus, setFallbackStatus] = useState({
+    redis: { available: true, status: 'connected' },
+    memory: { active: false, size: 0, status: 'normal' },
+    recommendation: 'Redis is working normally',
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,6 +109,65 @@ export default function SecurityDashboard() {
           <div className="text-red-800">{error}</div>
         </div>
       )}
+
+      {/* Redis Fallback Status */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">🔄 Redis Fallback Status</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <h3 className="font-medium text-gray-700">Redis Status</h3>
+              <div className="flex items-center space-x-2">
+                <Badge variant={fallbackStatus.redis.available ? "success" : "error"}>
+                  {fallbackStatus.redis.status}
+                </Badge>
+                {!fallbackStatus.redis.available && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={async () => {
+                      const response = await fetch('/api/security/fallback-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'reconnect-redis' }),
+                      });
+                      if (response.ok) {
+                        // Refresh status
+                        window.location.reload();
+                      }
+                    }}
+                  >
+                    Reconnect
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-gray-700">Memory Fallback</h3>
+              <div className="flex items-center space-x-2">
+                <Badge variant={fallbackStatus.memory.active ? "warning" : "default"}>
+                  {fallbackStatus.memory.active ? 'Active' : 'Inactive'}
+                </Badge>
+                {fallbackStatus.memory.active && (
+                  <span className="text-sm text-gray-600">
+                    {fallbackStatus.memory.size} keys
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-gray-700">Recommendation</h3>
+              <p className="text-sm text-gray-600">
+                {fallbackStatus.recommendation}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Security Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
