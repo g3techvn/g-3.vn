@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getClientIP } from '@/lib/rate-limit';
 import { securityLogger } from '@/lib/logger';
 
+import { createClient } from '@supabase/supabase-js';
+
 interface WebVitalMetric {
   name: 'CLS' | 'FID' | 'FCP' | 'LCP' | 'TTFB' | 'INP';
   value: number;
@@ -40,6 +42,68 @@ interface WebVitalLog {
 // Extend global to include webVitalsData
 declare global {
   var webVitalsData: WebVitalLog[] | undefined;
+}
+
+// Helper function to extract device and browser info from user agent
+function extractDeviceInfo(userAgent: string) {
+  const ua = userAgent.toLowerCase();
+  
+  // Device type detection
+  let deviceType = 'desktop';
+  if (/mobile|android|iphone|ipod|blackberry|windows phone/i.test(ua)) {
+    deviceType = 'mobile';
+  } else if (/tablet|ipad/i.test(ua)) {
+    deviceType = 'tablet';
+  }
+  
+  // Browser detection
+  let browserName = 'unknown';
+  let browserVersion = '';
+  
+  if (ua.includes('chrome') && !ua.includes('edg')) {
+    browserName = 'chrome';
+    const match = ua.match(/chrome\/(\d+)/);
+    browserVersion = match ? match[1] : '';
+  } else if (ua.includes('firefox')) {
+    browserName = 'firefox';
+    const match = ua.match(/firefox\/(\d+)/);
+    browserVersion = match ? match[1] : '';
+  } else if (ua.includes('safari') && !ua.includes('chrome')) {
+    browserName = 'safari';
+    const match = ua.match(/version\/(\d+)/);
+    browserVersion = match ? match[1] : '';
+  } else if (ua.includes('edg')) {
+    browserName = 'edge';
+    const match = ua.match(/edg\/(\d+)/);
+    browserVersion = match ? match[1] : '';
+  }
+  
+  // Screen resolution (if available in user agent)
+  let screenResolution = '';
+  if (typeof window !== 'undefined' && window.screen) {
+    screenResolution = `${window.screen.width}x${window.screen.height}`;
+  }
+  
+  return {
+    deviceType,
+    browserName,
+    browserVersion,
+    screenResolution
+  };
+}
+
+// Create server client with service role key for admin operations
+function createServerClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  return createClient(supabaseUrl, supabaseKey);
+}
+
+// Create admin client with service role key (bypasses RLS)
+function createAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  return createClient(supabaseUrl, supabaseServiceKey);
 }
 
 export async function POST(request: NextRequest) {
@@ -97,39 +161,81 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log web vital metric for analysis
-    const webVitalLog = {
-      timestamp: new Date().toISOString(),
-      ip,
-      url,
-      userAgent,
-      connectionType,
-      deviceMemory,
-      metric: {
-        name: metric.name,
-        value: metric.value,
-        id: metric.id,
-        rating: metric.rating,
-        delta: metric.delta,
-        navigationType: metric.navigationType
-      }
+    // Extract additional device/browser info
+    const userAgentString = userAgent || '';
+    const deviceInfo = extractDeviceInfo(userAgentString);
+    const urlObj = new URL(url);
+    
+    // Prepare data for database storage
+    const webVitalData = {
+      metric_name: metric.name,
+      value: metric.value,
+      rating: metric.rating,
+      url: url,
+      pathname: urlObj.pathname,
+      user_agent: userAgentString,
+      ip_address: ip,
+      device_type: deviceInfo.deviceType,
+      browser_name: deviceInfo.browserName,
+      browser_version: deviceInfo.browserVersion,
+      screen_resolution: deviceInfo.screenResolution,
+      connection_type: connectionType,
+      device_memory: deviceMemory,
+      navigation_type: metric.navigationType,
+      delta: metric.delta,
+      entries: metric.entries ? JSON.stringify(metric.entries) : null,
+      session_id: request.headers.get('x-session-id') || null,
     };
 
-    // In production, you would save this to a database
-    // For now, we'll use the security logger
-    securityLogger.logInfo('Web Vital Metric', webVitalLog);
+    // Save to database
+    const supabase = createServerClient();
+    const { error: dbError } = await supabase
+      .from('web_vitals_metrics')
+      .insert(webVitalData);
 
-    // Store in memory for basic analytics (replace with database in production)
-    if (typeof global !== 'undefined') {
-      if (!global.webVitalsData) {
-        global.webVitalsData = [];
-      }
-      global.webVitalsData.push(webVitalLog);
+    if (dbError) {
+      securityLogger.logError('Failed to save web vital to database', dbError, {
+        ip,
+        metric: metric.name,
+        value: metric.value
+      });
       
-      // Keep only last 1000 entries to prevent memory issues
-      if (global.webVitalsData.length > 1000) {
-        global.webVitalsData = global.webVitalsData.slice(-1000);
+      // Fallback to in-memory storage if database fails
+      const webVitalLog = {
+        timestamp: new Date().toISOString(),
+        ip,
+        url,
+        userAgent,
+        connectionType,
+        deviceMemory,
+        metric: {
+          name: metric.name,
+          value: metric.value,
+          id: metric.id,
+          rating: metric.rating,
+          delta: metric.delta,
+          navigationType: metric.navigationType
+        }
+      };
+      
+      if (typeof global !== 'undefined') {
+        if (!global.webVitalsData) {
+          global.webVitalsData = [];
+        }
+        global.webVitalsData.push(webVitalLog);
+        
+        // Keep only last 1000 entries to prevent memory issues
+        if (global.webVitalsData.length > 1000) {
+          global.webVitalsData = global.webVitalsData.slice(-1000);
+        }
       }
+    } else {
+      securityLogger.logInfo('Web Vital Metric saved to database', {
+        metric: metric.name,
+        value: metric.value,
+        rating: metric.rating,
+        url: urlObj.pathname
+      });
     }
 
     return NextResponse.json({ 
@@ -155,20 +261,55 @@ export async function GET(request: NextRequest) {
   const ip = getClientIP(request);
   
   try {
-    // Simple auth check - in production use proper authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || authHeader !== 'Bearer admin-key') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // Simple auth check - skip in development
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    if (!isDevelopment) {
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader || authHeader !== 'Bearer admin-key') {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
-    // Get metrics from memory storage
-    const metrics = global.webVitalsData || [];
+    const { searchParams } = new URL(request.url);
+    const days = parseInt(searchParams.get('days') || '7', 10);
+    const metricName = searchParams.get('metric');
+    const pathname = searchParams.get('pathname');
     
-    // Calculate basic aggregations
-    const aggregated = metrics.reduce((acc: Record<string, {
+    // Get metrics from database using admin client to bypass RLS
+    const supabase = createAdminClient();
+    
+    let query = supabase
+      .from('web_vitals_metrics')
+      .select('*')
+      .gte('created_at', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString());
+    
+    if (metricName) {
+      query = query.eq('metric_name', metricName);
+    }
+    
+    if (pathname) {
+      query = query.eq('pathname', pathname);
+    }
+    
+    const { data: metrics, error: dbError } = await query.order('created_at', { ascending: false });
+    
+    if (dbError) {
+      securityLogger.logError('Failed to fetch web vitals from database', dbError, { ip });
+      
+      // Fallback to memory storage
+      const memoryMetrics = global.webVitalsData || [];
+      return NextResponse.json({
+        source: 'memory',
+        total: memoryMetrics.length,
+        metrics: memoryMetrics.slice(0, 100)
+      });
+    }
+    
+    // Calculate basic aggregations from database data
+    const aggregated = (metrics || []).reduce((acc: Record<string, {
       count: number;
       values: number[];
       ratings: { good: number; 'needs-improvement': number; poor: number };
@@ -179,8 +320,8 @@ export async function GET(request: NextRequest) {
         p95: number;
         p99: number;
       };
-    }>, entry: WebVitalLog) => {
-      const metricName = entry.metric.name;
+    }>, entry: any) => {
+      const metricName = entry.metric_name;
       if (!acc[metricName]) {
         acc[metricName] = {
           count: 0,
@@ -190,8 +331,8 @@ export async function GET(request: NextRequest) {
       }
       
       acc[metricName].count++;
-      acc[metricName].values.push(entry.metric.value);
-      const rating = entry.metric.rating as 'good' | 'needs-improvement' | 'poor';
+      acc[metricName].values.push(entry.value);
+      const rating = entry.rating as 'good' | 'needs-improvement' | 'poor';
       if (rating in acc[metricName].ratings) {
         acc[metricName].ratings[rating]++;
       }
@@ -219,12 +360,24 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      totalEntries: metrics.length,
+      source: 'database',
+      totalEntries: metrics?.length || 0,
       timeRange: {
-        from: metrics.length > 0 ? metrics[0].timestamp : null,
-        to: metrics.length > 0 ? metrics[metrics.length - 1].timestamp : null
+        from: metrics && metrics.length > 0 ? metrics[metrics.length - 1].created_at : null,
+        to: metrics && metrics.length > 0 ? metrics[0].created_at : null,
+        days: days
       },
-      metrics: aggregated
+      filters: {
+        metric: metricName,
+        pathname: pathname
+      },
+      metrics: aggregated,
+      // Additional insights
+      insights: {
+        topPages: getTopPages(metrics || []),
+        deviceBreakdown: getDeviceBreakdown(metrics || []),
+        browserBreakdown: getBrowserBreakdown(metrics || [])
+      }
     });
 
   } catch (error) {
@@ -238,4 +391,43 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Helper functions for additional insights
+function getTopPages(metrics: any[]) {
+  const pageStats = metrics.reduce((acc: Record<string, { count: number; avgValue: number; totalValue: number }>, entry) => {
+    const pathname = entry.pathname || entry.url;
+    if (!acc[pathname]) {
+      acc[pathname] = { count: 0, avgValue: 0, totalValue: 0 };
+    }
+    acc[pathname].count++;
+    acc[pathname].totalValue += entry.value;
+    acc[pathname].avgValue = acc[pathname].totalValue / acc[pathname].count;
+    return acc;
+  }, {});
+  
+  return Object.entries(pageStats)
+    .sort(([,a], [,b]) => b.count - a.count)
+    .slice(0, 10)
+    .map(([pathname, stats]) => ({ pathname, ...stats }));
+}
+
+function getDeviceBreakdown(metrics: any[]) {
+  const deviceStats = metrics.reduce((acc: Record<string, number>, entry) => {
+    const deviceType = entry.device_type || 'unknown';
+    acc[deviceType] = (acc[deviceType] || 0) + 1;
+    return acc;
+  }, {});
+  
+  return Object.entries(deviceStats).map(([device, count]) => ({ device, count }));
+}
+
+function getBrowserBreakdown(metrics: any[]) {
+  const browserStats = metrics.reduce((acc: Record<string, number>, entry) => {
+    const browser = entry.browser_name || 'unknown';
+    acc[browser] = (acc[browser] || 0) + 1;
+    return acc;
+  }, {});
+  
+  return Object.entries(browserStats).map(([browser, count]) => ({ browser, count }));
 } 

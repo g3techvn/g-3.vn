@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Drawer } from 'antd'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import Drawer from 'antd/es/drawer'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'

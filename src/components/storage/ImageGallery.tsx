@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Spin, message, Select, Input, Button, Switch, Divider } from 'antd';
+import Spin from 'antd/es/spin';
+import message from 'antd/es/message';
+import Select from 'antd/es/select';
+import Input from 'antd/es/input';
+import Button from 'antd/es/button';
+import Switch from 'antd/es/switch';
+import Divider from 'antd/es/divider';
 import { SortAscendingOutlined, SortDescendingOutlined, FolderOutlined } from '@ant-design/icons';
 import { useSupabaseStorage } from '@/hooks/useSupabaseStorage';
 import { ImageItem } from '@/types/supabase';

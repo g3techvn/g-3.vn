@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Button } from 'antd'
+// ✅ Optimized Antd imports for tree-shaking
+import Modal from 'antd/es/modal'
+import Button from 'antd/es/button'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/features/auth/AuthProvider'
@@ -10,7 +12,7 @@ import { generatePDF } from '@/components/PDFGenerator'
 import { useToast } from '@/components/ui/Toast'
 import LocationSelector from '@/components/features/cart/LocationSelector'
 import ValidationDebugger from '@/components/debug/ValidationDebugger'
-import type { ButtonProps } from 'antd'
+import type { ButtonProps } from 'antd/es/button'
 
 // Import components
 import BuyerInfo from './BuyerInfo'

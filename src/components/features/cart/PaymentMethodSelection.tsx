@@ -1,7 +1,8 @@
 'use client';
 
-import { Drawer } from 'antd';
+import Drawer from 'antd/es/drawer';
 import Image from 'next/image';
+import { useCart } from '@/context/CartContext';
 
 interface PaymentMethod {
   id: string;

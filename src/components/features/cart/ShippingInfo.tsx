@@ -1,8 +1,12 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/features/auth/AuthProvider';
+// ✅ Optimized Antd import for tree-shaking
+import Drawer from 'antd/es/drawer';
+import { LoadingOutlined } from '@ant-design/icons';
 import { ShippingInfoProps } from '@/types/cart';
 import { Dispatch, SetStateAction } from 'react';
-import { Drawer } from 'antd';
 
 interface ExtendedShippingInfoProps extends ShippingInfoProps {
   setAddressForm: Dispatch<SetStateAction<{

@@ -1,7 +1,10 @@
 'use client';
 
+import React, { useState, useEffect, memo } from 'react';
+// ✅ Optimized Antd import for tree-shaking
+import Drawer from 'antd/es/drawer';
+import { TagsOutlined, PercentageOutlined, GiftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
-import { Drawer } from 'antd';
 import { Voucher } from '@/types/cart';
 import { useToast } from '@/components/ui/Toast';
 

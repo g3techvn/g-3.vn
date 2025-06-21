@@ -1,11 +1,14 @@
 'use client';
 
 /// <reference types="@types/google.maps" />
-import * as React from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import Image from 'next/image';
-import { Drawer } from 'antd';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPinIcon, PhoneIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
+// ✅ Optimized Antd import for tree-shaking
+import Drawer from 'antd/es/drawer';
 import { COMPANY_INFO } from '../../../constants';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 // Add Google Maps types
 declare global {
