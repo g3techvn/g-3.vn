@@ -1,0 +1,92 @@
+{
+  "summary": {
+    "total": 9,
+    "passed": 1,
+    "failed": 8,
+    "successRate": "11.1",
+    "duration": "0.03",
+    "timestamp": "2025-06-21T07:46:22.400Z"
+  },
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "darwin",
+    "baseUrl": "http://localhost:3000",
+    "redisConfigured": false
+  },
+  "tests": [
+    {
+      "test": "Redis Configuration",
+      "passed": false,
+      "details": "Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN",
+      "timestamp": "2025-06-21T07:46:22.368Z"
+    },
+    {
+      "test": "Rate Limiting Setup",
+      "passed": false,
+      "details": "Redis not configured",
+      "timestamp": "2025-06-21T07:46:22.370Z"
+    },
+    {
+      "test": "Security Headers",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.394Z"
+    },
+    {
+      "test": "CORS Configuration",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.396Z"
+    },
+    {
+      "test": "Content Security Policy",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.397Z"
+    },
+    {
+      "test": "API Input Validation",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.398Z"
+    },
+    {
+      "test": "Authentication Protection",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.399Z"
+    },
+    {
+      "test": "IP Validation Logic",
+      "passed": true,
+      "details": "IP validation regex works correctly",
+      "timestamp": "2025-06-21T07:46:22.399Z"
+    },
+    {
+      "test": "JWT Token Validation",
+      "passed": false,
+      "details": "Error: fetch failed",
+      "timestamp": "2025-06-21T07:46:22.400Z"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "category": "Security",
+      "issue": "Missing security headers",
+      "solution": "Ensure all security headers are properly configured in middleware"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Security",
+      "issue": "CSP not configured",
+      "solution": "Implement Content Security Policy headers to prevent XSS attacks"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Security",
+      "issue": "CORS not properly configured",
+      "solution": "Review and configure CORS headers for proper cross-origin requests"
+    }
+  ]
+}

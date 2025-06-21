@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSecurityHeaders } from '@/lib/rate-limit';
+import { getEnhancedSecurityHeaders, enhancedRateLimit } from '@/lib/security/redis-rate-limit';
+import { createAPISecurityMiddleware, enhanceResponseSecurity } from '@/lib/security/api-security';
+import { createAuthMiddleware } from '@/lib/auth/enhanced-auth';
 import { 
   authenticateRequest, 
   requireAuth, 
@@ -97,7 +99,7 @@ export async function middleware(request: NextRequest) {
     const rewriteResponse = NextResponse.rewrite(newUrl);
     
     // Add security headers to rewrite response too
-    const securityHeaders = getSecurityHeaders();
+    const securityHeaders = getEnhancedSecurityHeaders();
     Object.entries(securityHeaders).forEach(([key, value]) => {
       rewriteResponse.headers.set(key, value);
     });
@@ -109,7 +111,7 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   
   // Add security headers to all responses
-  const securityHeaders = getSecurityHeaders();
+  const securityHeaders = getEnhancedSecurityHeaders();
   Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
