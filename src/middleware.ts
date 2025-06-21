@@ -7,17 +7,50 @@ import {
   requireAdmin 
 } from '@/lib/auth/auth-middleware';
 
+// ✅ Cache domain info to avoid repeated calculations
+let cachedDomainInfo: { domain: string; timestamp: number } | null = null;
+const DOMAIN_CACHE_TTL = 60 * 1000; // Cache for 1 minute
+
+// ✅ Optimize domain detection with caching
+function getCachedDomain(): string {
+  const now = Date.now();
+  
+  // Return cached domain if still valid
+  if (cachedDomainInfo && (now - cachedDomainInfo.timestamp) < DOMAIN_CACHE_TTL) {
+    return cachedDomainInfo.domain;
+  }
+  
+  // Update cache
+  const g3Domain = process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
+  cachedDomainInfo = {
+    domain: g3Domain,
+    timestamp: now
+  };
+  
+  return g3Domain;
+}
+
+// ✅ Reduce logging frequency
+let lastLogTime = 0;
+const LOG_THROTTLE_MS = 5000; // Only log once every 5 seconds
+
+function throttledLog(message: string) {
+  const now = Date.now();
+  if (now - lastLogTime > LOG_THROTTLE_MS) {
+    console.log(message);
+    lastLogTime = now;
+  }
+}
+
 // This middleware runs on every request
 export async function middleware(request: NextRequest) {
-  // Get the hostname (domain or subdomain) - for info only
-  const host = request.headers.get('host') || '';
-  const domain = host.split(':')[0]; // Remove port if present
+  // ✅ Get cached domain info
+  const g3Domain = getCachedDomain();
   
-  // Use environment variable for domain instead of actual request domain
-  const g3Domain = process.env.NEXT_PUBLIC_G3_URL || 'g-3.vn';
-  
-  // You can log domain information for debugging
-  console.log('Middleware - Using domain:', g3Domain);
+  // ✅ Only log domain info occasionally (throttled)
+  if (process.env.NODE_ENV === 'development') {
+    throttledLog(`Middleware - Using domain: ${g3Domain}`);
+  }
   
   // Handle authentication and authorization
   const authContext = await authenticateRequest(request);
@@ -37,15 +70,22 @@ export async function middleware(request: NextRequest) {
   // Get the current URL
   const url = new URL(request.url);
   
-  // For API calls that should include domain information
-  // but don't already have it, add it as a query parameter
-  if (url.pathname.startsWith('/api/') && 
-      !url.searchParams.has('domain') &&
-      !url.searchParams.has('use_domain')) {
+  // ✅ Optimize API parameter injection - only for specific endpoints
+  const shouldInjectDomain = (
+    url.pathname.startsWith('/api/') && 
+    !url.searchParams.has('domain') &&
+    !url.searchParams.has('use_domain') &&
+    // ✅ Only inject for endpoints that actually need domain filtering
+    (url.pathname === '/api/products' || 
+     url.pathname === '/api/categories' ||
+     url.pathname.startsWith('/api/sectors'))
+  );
+  
+  if (shouldInjectDomain) {
     // Clone the URL to modify it
     const newUrl = new URL(url);
     
-    // Add domain as a query parameter - using the environment variable
+    // Add domain as a query parameter - using the cached domain
     newUrl.searchParams.set('domain', g3Domain);
     
     // If it's a direct product API call, enable domain-based filtering
@@ -95,7 +135,7 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-// Configure which routes the middleware should run on
+// ✅ Optimize matcher to exclude more static resources
 export const config = {
   matcher: [
     /*
@@ -104,7 +144,8 @@ export const config = {
      * - _next/image (image optimization files)  
      * - favicon.ico (favicon file)
      * - public folder files
+     * - API routes that don't need domain injection
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/brands/id|api/web-vitals|api/images).*)'
   ]
 }; 

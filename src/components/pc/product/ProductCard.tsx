@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import QuickView from './QuickView';
 import OptimizedImage from '@/components/common/OptimizedImage';
 import { useSoldCounts } from '@/hooks/useSoldCounts';
+import { useBrandData } from '@/hooks/useBrandData';
 
 interface ProductCardProps {
   product: Product;
@@ -25,28 +26,21 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
   const { getSoldCount } = useSoldCounts([product.id.toString()]);
   const soldCount = getSoldCount(product.id.toString());
 
+  // ✅ Use cached brand data instead of manual fetch
+  const { data: brandData, isLoading: brandLoading } = useBrandData(product.brand_id);
+  
+  // Update brandImage when cached data changes
   useEffect(() => {
-    const fetchBrandImage = async () => {
-      if (product.brand_id) {
-        try {
-          const response = await fetch(`/api/brands/id/${product.brand_id}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch brand');
-          }
-          const data = await response.json();
-          const imageUrl = data.brand?.image_square_url || data.brand?.image_url;
-          if (imageUrl) {
-            setBrandImage(imageUrl);
-            setImageError(false);
-          }
-        } catch (error) {
-          console.error('Error fetching brand image:', error);
-          setImageError(true);
-        }
+    if (brandData) {
+      const imageUrl = brandData.image_square_url || brandData.image_url;
+      if (imageUrl) {
+        setBrandImage(imageUrl);
+        setImageError(false);
+      } else {
+        setImageError(true);
       }
-    };
-    fetchBrandImage();
-  }, [product.brand_id]);
+    }
+  }, [brandData]);
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault();

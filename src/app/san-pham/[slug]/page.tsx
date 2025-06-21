@@ -24,6 +24,20 @@ import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/Brea
 import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
 import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { generateProductMeta } from '@/lib/utils/seo-utils';
+import dynamic from 'next/dynamic';
+
+// ✅ Lazy load SEO components for better initial performance
+const LazyProductJsonLd = dynamic(() => import('@/components/SEO/ProductJsonLd').then(mod => ({ default: mod.ProductJsonLd })), {
+  ssr: false // SEO structured data can load after initial render
+});
+
+const LazyBreadcrumbJsonLd = dynamic(() => import('@/components/SEO/BreadcrumbJsonLd').then(mod => ({ default: mod.BreadcrumbJsonLd })), {
+  ssr: false
+});
+
+const LazyFAQJsonLd = dynamic(() => import('@/components/SEO/FAQJsonLd').then(mod => ({ default: mod.FAQJsonLd })), {
+  ssr: false
+});
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -505,7 +519,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         brand={product.brand || 'G3'}
         category={product.category_name || 'Nội thất văn phòng'}
       />
-      <ProductJsonLd 
+      <LazyProductJsonLd 
         product={product}
         brand={product.brand ? { 
           id: product.brand_id, 
@@ -521,8 +535,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           reviewBody: comment.content
         }))}
       />
-      <BreadcrumbJsonLd items={breadcrumbItems} />
-      <FAQJsonLd faqs={productFAQs} />
+      <LazyBreadcrumbJsonLd items={breadcrumbItems} />
+      <LazyFAQJsonLd faqs={productFAQs} />
       
       {/* Mobile View */}
       <div className="md:hidden">
