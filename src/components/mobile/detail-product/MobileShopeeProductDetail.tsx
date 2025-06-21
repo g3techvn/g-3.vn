@@ -172,7 +172,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   useEffect(() => {
     if (brandData) {
       setBrandInfo(brandData);
-    }
+        }
   }, [brandData]);
 
   // Fetch gallery images only if not provided as props

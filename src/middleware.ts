@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
   // ✅ Optimize API parameter injection - only for specific endpoints
   const shouldInjectDomain = (
     url.pathname.startsWith('/api/') && 
-    !url.searchParams.has('domain') &&
+      !url.searchParams.has('domain') &&
     !url.searchParams.has('use_domain') &&
     // ✅ Only inject for endpoints that actually need domain filtering
     (url.pathname === '/api/products' || 

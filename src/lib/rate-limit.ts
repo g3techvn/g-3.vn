@@ -39,10 +39,19 @@ export async function rateLimit(
   const clientIP = getClientIP(request);
   const key = `ratelimit:${clientIP}`;
   
-  // Clean up expired entries
-  for (const [k, v] of requests.entries()) {
-    if (v.resetTime <= now) {
-      requests.delete(k);
+  // ✅ Optimized cleanup - chỉ cleanup khi cần thiết
+  if (requests.size > 1000 || Math.random() < 0.1) { // 10% chance hoặc khi quá nhiều entries
+    let cleanupCount = 0;
+    for (const [k, v] of requests.entries()) {
+      if (v.resetTime <= now) {
+        requests.delete(k);
+        cleanupCount++;
+      }
+      
+      // ✅ Giới hạn cleanup mỗi lần để tránh CPU spike
+      if (cleanupCount > 50) {
+        break;
+      }
     }
   }
   

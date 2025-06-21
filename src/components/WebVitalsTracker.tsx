@@ -86,19 +86,27 @@ export default function WebVitalsTracker() {
     // Track INP (Interaction to Next Paint) - newer metric
     onINP(sendToAnalytics);
 
+    // ✅ Throttling để giảm CPU usage
+    let resourceTrackingCount = 0;
+    let longTaskTrackingCount = 0;
+    const MAX_TRACKING_PER_SESSION = 20; // Giới hạn tracking
+
     // Custom performance observer for additional metrics
     if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
       try {
-        // Track resource loading times
+        // Track resource loading times - ✅ với throttling
         const resourceObserver = new PerformanceObserver((list) => {
+          if (resourceTrackingCount >= MAX_TRACKING_PER_SESSION) return;
+          
           list.getEntries().forEach((entry) => {
-            // Track slow resources (>500ms)
-            if (entry.duration > 500) {
+            // ✅ Tăng threshold để giảm tracking
+            if (entry.duration > 1000 && resourceTrackingCount < MAX_TRACKING_PER_SESSION) { // Tăng từ 500ms lên 1000ms
+              resourceTrackingCount++;
               sendToAnalytics({
                 name: 'SLOW_RESOURCE',
                 value: entry.duration,
                 id: `${entry.name}-${Date.now()}`,
-                rating: entry.duration > 1000 ? 'poor' : 'needs-improvement',
+                rating: entry.duration > 2000 ? 'poor' : 'needs-improvement', // Tăng threshold
                 delta: entry.duration,
                 navigationType: 'resource'
               });
@@ -108,17 +116,23 @@ export default function WebVitalsTracker() {
         
         resourceObserver.observe({ entryTypes: ['resource'] });
 
-        // Track long tasks (blocking main thread)
+        // Track long tasks - ✅ với throttling
         const longTaskObserver = new PerformanceObserver((list) => {
+          if (longTaskTrackingCount >= MAX_TRACKING_PER_SESSION) return;
+          
           list.getEntries().forEach((entry) => {
-            sendToAnalytics({
-              name: 'LONG_TASK',
-              value: entry.duration,
-              id: `longtask-${Date.now()}`,
-              rating: entry.duration > 100 ? 'poor' : 'needs-improvement',
-              delta: entry.duration,
-              navigationType: 'longtask'
-            });
+            // ✅ Tăng threshold và thêm throttling
+            if (entry.duration > 200 && longTaskTrackingCount < MAX_TRACKING_PER_SESSION) { // Tăng từ 100ms lên 200ms
+              longTaskTrackingCount++;
+              sendToAnalytics({
+                name: 'LONG_TASK',
+                value: entry.duration,
+                id: `longtask-${Date.now()}`,
+                rating: entry.duration > 300 ? 'poor' : 'needs-improvement', // Tăng threshold
+                delta: entry.duration,
+                navigationType: 'longtask'
+              });
+            }
           });
         });
         

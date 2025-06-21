@@ -9,24 +9,57 @@ import { Redis } from '@upstash/redis';
 class MemoryStore {
   private store: Map<string, { value: any; expiry?: number }> = new Map();
   private cleanupInterval: NodeJS.Timeout;
+  private readonly MAX_SIZE = 1000; // ✅ GIỚI HẠN SIZE
+  private readonly CLEANUP_INTERVAL = 15 * 60 * 1000; // ✅ 15 PHÚT thay vì 5 phút
 
   constructor() {
-    // Cleanup expired keys every 5 minutes
+    // ✅ Cleanup expired keys every 15 minutes (giảm từ 5 phút)
     this.cleanupInterval = setInterval(() => {
       this.cleanup();
-    }, 5 * 60 * 1000);
+    }, this.CLEANUP_INTERVAL);
   }
 
   private cleanup() {
     const now = Date.now();
+    let deletedCount = 0;
+    
+    // ✅ Early exit nếu store nhỏ
+    if (this.store.size < 100) {
+      return;
+    }
+    
+    // ✅ Cleanup expired keys
     for (const [key, data] of this.store.entries()) {
       if (data.expiry && data.expiry < now) {
         this.store.delete(key);
+        deletedCount++;
       }
+      
+      // ✅ Break early để tránh CPU spike
+      if (deletedCount > 100) {
+        break;
+      }
+    }
+    
+    // ✅ Nếu store vẫn quá lớn, xóa 50% oldest entries
+    if (this.store.size > this.MAX_SIZE) {
+      const entries = Array.from(this.store.entries());
+      const toDelete = Math.floor(entries.length * 0.5);
+      
+      for (let i = 0; i < toDelete; i++) {
+        this.store.delete(entries[i][0]);
+      }
+      
+      console.log(`🧹 Memory store cleanup: removed ${toDelete} entries, size now: ${this.store.size}`);
     }
   }
 
   set(key: string, value: any, ttlSeconds?: number): void {
+    // ✅ Cleanup on demand nếu store gần đầy
+    if (this.store.size >= this.MAX_SIZE) {
+      this.cleanup();
+    }
+    
     const expiry = ttlSeconds ? Date.now() + (ttlSeconds * 1000) : undefined;
     this.store.set(key, { value, expiry });
   }

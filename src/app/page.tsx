@@ -643,21 +643,45 @@ export default function Home() {
 
   // Handle scroll animations
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const scrollElements = document.querySelectorAll('.scroll-trigger');
-      
-      scrollElements.forEach(element => {
-        const rect = element.getBoundingClientRect();
-        const isInView = (rect.top <= window.innerHeight * 0.75) && (rect.bottom >= 0);
-        
-        if (isInView) {
-          element.classList.add('scroll-animate');
-        }
-      });
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollElements = document.querySelectorAll('.scroll-trigger');
+          
+          // ✅ Early exit nếu không có elements
+          if (scrollElements.length === 0) {
+            ticking = false;
+            return;
+          }
+          
+          const viewportHeight = window.innerHeight;
+          
+          scrollElements.forEach(element => {
+            // ✅ Skip elements đã animate
+            if (element.classList.contains('scroll-animate')) {
+              return;
+            }
+            
+            const rect = element.getBoundingClientRect();
+            const isInView = (rect.top <= viewportHeight * 0.75) && (rect.bottom >= 0);
+            
+            if (isInView) {
+              element.classList.add('scroll-animate');
+            }
+          });
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     
-    window.addEventListener('scroll', handleScroll);
-    // Trigger once on load
+    // ✅ Use passive listener cho better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Trigger once on load với delay
     setTimeout(handleScroll, 500);
     
     return () => window.removeEventListener('scroll', handleScroll);

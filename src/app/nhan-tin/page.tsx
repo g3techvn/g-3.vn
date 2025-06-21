@@ -435,12 +435,15 @@ export default function MessagesPage() {
     if (!userInfo) return;
     
     const intervalId = setInterval(() => {
+      // ✅ Kiểm tra page visibility trước khi update
+      if (document.hidden) return;
+      
       const session = loadChatSession();
       if (session) {
         session.expiry = Date.now() + SESSION_DURATION;
         localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
       }
-    }, 5 * 60 * 1000); // Update every 5 minutes
+    }, 10 * 60 * 1000); // ✅ Tăng từ 5 phút lên 10 phút để giảm CPU usage
     
     return () => clearInterval(intervalId);
   }, [userInfo]);
@@ -577,25 +580,36 @@ export default function MessagesPage() {
                             // Create new welcome messages for the new consultant
                             const newMessages = createWelcomeMessages(consultant, userInfo.name);
                             
-                            // Show messages with delay
+                            // ✅ Batch message updates thay vì individual setTimeout
                             setMessages([newMessages[0]]); // Show first message immediately
                             
-                            // Add remaining messages with delay
-                            newMessages.slice(1).forEach((message, index) => {
-                              setTimeout(() => {
-                                setMessages(prev => [...prev, message]);
-                                
-                                // Update session after each message
-                                const session = loadChatSession();
-                                if (session) {
-                                  session.messages = [...newMessages.slice(0, index + 2)];
-                                  session.expiry = Date.now() + SESSION_DURATION;
-                                  localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+                            // ✅ Single timeout thay vì multiple timeouts
+                            if (newMessages.length > 1) {
+                              let messageIndex = 1;
+                              const addNextMessage = () => {
+                                if (messageIndex < newMessages.length) {
+                                  setMessages(prev => [...prev, newMessages[messageIndex]]);
+                                  messageIndex++;
+                                  
+                                  // ✅ Schedule next message
+                                  if (messageIndex < newMessages.length) {
+                                    setTimeout(addNextMessage, 3000);
+                                  } else {
+                                    // ✅ Single localStorage write khi hoàn thành
+                                    const session = loadChatSession();
+                                    if (session) {
+                                      session.messages = newMessages;
+                                      session.expiry = Date.now() + SESSION_DURATION;
+                                      localStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(session));
+                                    }
+                                  }
                                 }
-                              }, 3000 * (index + 1)); // 3 seconds delay
-                            });
+                              };
+                              
+                              setTimeout(addNextMessage, 3000);
+                            }
                             
-                            // Update session with just the first message
+                            // ✅ Update session với first message only
                             const session = loadChatSession();
                             if (session) {
                               session.messages = [newMessages[0]];

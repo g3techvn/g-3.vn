@@ -264,7 +264,7 @@ export function extractKeywords(content: string, additionalKeywords: string[] = 
     .map(([word]) => word);
   
   return [...new Set([...additionalKeywords, ...topKeywords])];
-}
+} 
 
 /**
  * Advanced SEO Utilities for G3 E-commerce Platform

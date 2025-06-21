@@ -106,10 +106,10 @@ export function DomainProvider({ children }: { children: ReactNode }) {
         
         // ✅ Check localhost status
         if (typeof window !== 'undefined') {
-          const host = window.location.host;
+        const host = window.location.host;
           const hostname = host.split(':')[0];
-          const localhost = hostname === 'localhost' || hostname === '127.0.0.1';
-          setIsLocalhost(localhost);
+        const localhost = hostname === 'localhost' || hostname === '127.0.0.1';
+        setIsLocalhost(localhost);
         }
         
         // ✅ Fetch sector with timeout and retry
@@ -126,13 +126,13 @@ export function DomainProvider({ children }: { children: ReactNode }) {
           clearTimeout(timeoutId);
           
           if (response.ok) {
-            const data = await response.json();
-            if (data.sectors && data.sectors.length > 0) {
+        const data = await response.json();
+        if (data.sectors && data.sectors.length > 0) {
               sectorIdResult = data.sectors[0].id;
             }
-          } else {
+        } else {
             console.warn(`Sector API returned ${response.status} for domain: ${currentDomain}`);
-          }
+        }
         } catch (fetchError) {
           console.warn('Failed to fetch sector, using cached or default values:', fetchError);
           // Don't throw error, continue with null sector
