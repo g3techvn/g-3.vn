@@ -55,57 +55,59 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
 
   return (
     <>
-      <Link href={`/san-pham/${product.slug || product.id}`} className={`block ${className}`}>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden">
-          <div 
-            className="aspect-square w-full relative group"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            {product.original_price && product.original_price > product.price && (
-              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">
-                -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
-              </div>
-            )}
-            {brandImage && !imageError && (
-              <div className="absolute top-2 right-2 bg-white rounded-lg shadow-md z-10">
-                <Image
-                  src={brandImage}
-                  alt={product.brand || ''}
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-cover rounded-lg"
-                  onError={() => setImageError(true)}
-                />
-              </div>
-            )}
-            <div 
-              className={`absolute inset-0 backdrop-blur-[2px] bg-black/20 flex items-center justify-center transition-all duration-300 ${
-                isHovered ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <button 
-                onClick={handleQuickView}
-                className="transform transition-all duration-300 bg-white/80 backdrop-blur-sm p-3 rounded-full hover:bg-white hover:scale-110 hover:shadow-lg"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-              </button>
+      <div className={`bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden ${className}`}>
+        <div 
+          className="aspect-square w-full relative group"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {product.original_price && product.original_price > product.price && (
+            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">
+              -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
             </div>
+          )}
+          {brandImage && !imageError && (
+            <div className="absolute top-2 right-2 bg-white rounded-lg shadow-md z-10">
+              <Image
+                src={brandImage}
+                alt={product.brand || ''}
+                width={24}
+                height={24}
+                className="w-6 h-6 object-cover rounded-lg"
+                onError={() => setImageError(true)}
+              />
+            </div>
+          )}
+          <div 
+            className={`absolute inset-0 backdrop-blur-[2px] bg-black/20 flex items-center justify-center transition-all duration-300 z-10 ${
+              isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            <button 
+              onClick={handleQuickView}
+              className="transform transition-all duration-300 bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white hover:scale-110 hover:shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </button>
+          </div>
+          <Link href={`/san-pham/${product.slug || product.id}`}>
             <OptimizedImage
               src={product.image_url}
               alt={product.name}
               width={300}
               height={300}
-              className="object-contain w-full h-full"
+              className="object-contain w-full h-full cursor-pointer"
               productName={product.name}
               category={product.category_name}
               brand={product.brand}
               priority={false}
             />
-          </div>
+          </Link>
+        </div>
+        <Link href={`/san-pham/${product.slug || product.id}`} className="block">
           <div className="flex-1 flex flex-col px-2 pt-2 pb-1">
             <div className="h-10 font-medium text-sm text-gray-900 line-clamp-2 mb-1">{product.name}</div>
             <div className="flex items-end gap-2 mb-1 mt-auto">
@@ -142,8 +144,8 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
               </button>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
       <QuickView 
         product={product}
         isOpen={isQuickViewOpen}
