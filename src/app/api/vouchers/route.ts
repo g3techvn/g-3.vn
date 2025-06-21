@@ -58,22 +58,47 @@ export async function GET(request: NextRequest) {
       // Check which vouchers this user has already used
       const { data: usedVouchers } = await supabase
         .from('voucher_usages')
-        .select('voucher_id')
+        .select('voucher_id, voucher_code, used_at')
         .eq('user_id', user_id);
 
       const usedVoucherIds = usedVouchers?.map(uv => uv.voucher_id) || [];
+      const usedVoucherCodes = usedVouchers?.map(uv => uv.voucher_code) || [];
       
       availableVouchers = vouchers.filter(voucher => {
-        // Check usage limit
+        // Check global usage limit
         if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
           return false;
         }
         
-        // Check if user already used this voucher (if it's single-use)
-        if (usedVoucherIds.includes(voucher.id)) {
+        // Check if user already used this voucher
+        if (usedVoucherIds.includes(voucher.id) || usedVoucherCodes.includes(voucher.code)) {
           return false;
         }
         
+        // Check if voucher is still valid
+        if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
+          return false;
+        }
+        
+        // Check if voucher has started
+        if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
+          return false;
+        }
+        
+        return true;
+      });
+    } else {
+      // For guest users, only filter by global limits and validity
+      availableVouchers = vouchers.filter(voucher => {
+        if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
+          return false;
+        }
+        if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
+          return false;
+        }
+        if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
+          return false;
+        }
         return true;
       });
     }

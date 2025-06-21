@@ -140,7 +140,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     }
   }
 
-  // Fetch reward points data from API (or simulate if API doesn't exist yet)
+  // Fetch reward points data from API
   const fetchRewardPoints = async () => {
     if (!user) {
       setRewardPointsData(prev => ({ ...prev, available: 0 }));
@@ -148,19 +148,23 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     }
 
     try {
-      // TODO: Replace with actual API call when available
-      // const response = await fetch(`/api/user/reward-points?user_id=${user.id}`)
-      // const data = await response.json()
+      const response = await fetch(`/api/user/rewards?user_id=${user.id}`)
+      const data = await response.json()
       
-      // For now, simulate reward points based on user (this should be replaced with real API)
-      const simulatedPoints = Math.floor(Math.random() * 2000) + 500; // Random points between 500-2500
-      
-      setRewardPointsData(prev => ({
-        ...prev,
-        available: simulatedPoints
-      }));
-      
-      console.log('Reward points loaded in checkout:', simulatedPoints);
+      if (response.ok && data.points) {
+        setRewardPointsData(prev => ({
+          ...prev,
+          available: data.points.available,
+          pointValue: data.points.pointValue,
+          minPointsToRedeem: data.points.minPointsToRedeem,
+          maxPointsPerOrder: data.points.maxPointsPerOrder
+        }));
+        
+        console.log('Reward points loaded in checkout:', data.points);
+      } else {
+        // Fallback to default values if API fails
+        setRewardPointsData(prev => ({ ...prev, available: 0 }));
+      }
     } catch (error) {
       console.error('Error fetching reward points:', error)
       setRewardPointsData(prev => ({ ...prev, available: 0 }));

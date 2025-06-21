@@ -208,31 +208,58 @@ export async function POST(request: NextRequest) {
 
     // Update user reward points if applicable
     if (user_id) {
-      // Deduct used points
-      if (reward_points && reward_points > 0) {
-        await supabase
-          .from('user_rewards')
-          .insert({
-            user_id,
-            order_id: orderData.id,
-            points_used: reward_points,
-            transaction_type: 'redeem',
-            description: `Sử dụng ${reward_points} điểm cho đơn hàng #${orderData.id}`
-          });
-      }
+      try {
+        // Calculate current user points balance from transactions
+        const { data: allTransactions } = await supabase
+          .from('reward_transactions')
+          .select('type, points')
+          .eq('user_id', user_id);
 
-      // Add earned points (e.g., 1% of total)
-      const earned_points = Math.floor(final_total * 0.01);
-      if (earned_points > 0) {
-        await supabase
-          .from('user_rewards')
-          .insert({
-            user_id,
-            order_id: orderData.id,
-            points_earned: earned_points,
-            transaction_type: 'earn',
-            description: `Tích điểm từ đơn hàng #${orderData.id}`
+        let availablePoints = 0;
+        if (allTransactions) {
+          allTransactions.forEach((t) => {
+            if (t.type === 'earn') {
+              availablePoints += t.points;
+            } else if (t.type === 'redeem') {
+              availablePoints -= t.points;
+            }
           });
+        }
+
+        // Deduct used points
+        if (reward_points && reward_points > 0) {
+          if (reward_points > availablePoints) {
+            console.error('Insufficient reward points');
+            // Could throw error or just proceed without using points
+          } else {
+            await supabase
+              .from('reward_transactions')
+              .insert({
+                user_id,
+                type: 'redeem',
+                points: reward_points,
+                reason: `Sử dụng ${reward_points} điểm cho đơn hàng #${orderData.id}`,
+                related_order_id: orderData.id
+              });
+          }
+        }
+
+        // Add earned points (1 point per 1000 VND spent)
+        const earned_points = Math.floor(final_total / 1000);
+        if (earned_points > 0) {
+          await supabase
+            .from('reward_transactions')
+            .insert({
+              user_id,
+              type: 'earn',
+              points: earned_points,
+              reason: `Tích điểm từ đơn hàng #${orderData.id} (${final_total.toLocaleString()}đ)`,
+              related_order_id: orderData.id
+            });
+        }
+      } catch (error) {
+        console.error('Error updating reward points:', error);
+        // Continue with order creation even if reward points fail
       }
     }
 
