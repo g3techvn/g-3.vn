@@ -231,135 +231,127 @@ const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: 
 };
 
 export default function Home() {
-  // State declarations
   const [isMobile, setIsMobile] = useState(false);
-  const [showAdModal, setShowAdModal] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { products: comboProducts, loading: loadingCombo, error: errorCombo } = useProducts({ type: 'combo' });
+  const { products: newProducts, loading: loadingNew, error: errorNew } = useProducts({ type: 'new' });
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [loadingBrands, setLoadingBrands] = useState(true);
-
-  // Use the useProducts hook with different options for different sections
-  const { products: allProducts, loading: loadingAllProducts } = useProducts();
-  const { products: newProducts, loading: loadingNew } = useProducts({ type: 'new' });
-  const { products: comboProducts, loading: loadingCombo } = useProducts({ type: 'combo' });
-  
-  // Loading state combining all loading states
-  const isLoading = loadingAllProducts || loadingNew || loadingCombo || loadingBrands;
 
   useEffect(() => {
     const fetchBrands = async () => {
-    try {
+      try {
         const response = await fetch('/api/brands');
         if (!response.ok) throw new Error('Failed to fetch brands');
-      const data = await response.json();
-      setBrands(data.brands || []);
+        const data = await response.json();
+        setBrands(data.brands || []);
       } catch (error) {
-      console.error('Error fetching brands:', error);
-        setError(error instanceof Error ? error.message : 'Failed to fetch brands');
-    } finally {
-      setLoadingBrands(false);
-    }
+        console.error('Error fetching brands:', error);
+      }
     };
 
     fetchBrands();
   }, []);
 
-  // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth <= 768);
     };
     
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
+    // Set loading to false after initial client-side render
+    setIsLoading(false);
+    
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
-
-  // Show ad modal after a delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAdModal(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <LoadingFallback />;
-  }
 
   return (
-    <div className="min-h-screen">
+    <>
+      <FAQJsonLd faqs={generalFAQs} />
+      
+      {/* Loading overlay */}
       <PageLoadingOverlay isVisible={isLoading} />
       
+      {/* Desktop View */}
+      {!isMobile && (
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="container mx-auto px-4 space-y-8"
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <HeroCarousel />
+          </Suspense>
+
+          <Suspense fallback={<LoadingFallback />}>
+            <CategorySection />
+          </Suspense>
+
+          <Suspense fallback={<LoadingFallback />}>
+            <ComboProduct 
+              products={comboProducts} 
+              loading={loadingCombo} 
+              error={errorCombo}
+              brands={brands}
+            />
+          </Suspense>
+
+          <Suspense fallback={<LoadingFallback />}>
+            <NewProducts 
+              products={newProducts} 
+              loading={loadingNew}
+              error={errorNew}
+              brands={brands}
+            />
+          </Suspense>
+
+          <Suspense fallback={<LoadingFallback />}>
+            <SupportSection />
+          </Suspense>
+        </motion.div>
+      )}
+
       {/* Mobile View */}
-      {isMobile ? (
-        <div className="space-y-4">
-            <Suspense fallback={<LoadingFallback />}>
-              <MobileHomeHeader />
-            </Suspense>
+      {isMobile && (
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="w-full"
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileHomeHeader />
+          </Suspense>
+
           <Suspense fallback={<LoadingFallback />}>
             <MobileHomeTabs />
           </Suspense>
-                <Suspense fallback={<LoadingFallback />}>
-            <MobileBestsellerProducts 
-              products={allProducts}
-              loading={loadingAllProducts}
-              error={error}
+
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileFeatureProduct 
+              products={comboProducts} 
+              loading={loadingCombo}
+              error={errorCombo}
+              brands={brands}
             />
-                </Suspense>
-        </div>
-      ) : (
-        /* Desktop View */
-          <motion.div 
-            initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="space-y-8"
-          >
-              <Suspense fallback={<LoadingFallback />}>
-                <HeroCarousel />
-              </Suspense>
+          </Suspense>
 
-              <Suspense fallback={<LoadingFallback />}>
-                <CategorySection />
-              </Suspense>
-
-                <Suspense fallback={<LoadingFallback />}>
-                    <NewProducts 
-                      products={newProducts} 
-                      loading={loadingNew} 
-              error={error}
-                      brands={brands}
-                    />
-                </Suspense>
-
-                <Suspense fallback={<LoadingFallback />}>
-                    <ComboProduct 
-                      products={comboProducts} 
-                      loading={loadingCombo} 
-              error={error}
-                      brands={brands}
-                    />
-                </Suspense>
-
-                <Suspense fallback={<LoadingFallback />}>
-                  <SupportSection />
-                </Suspense>
-              </motion.div>
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileBestsellerProducts 
+              products={newProducts} 
+              loading={loadingNew}
+              error={errorNew}
+            />
+          </Suspense>
+        </motion.div>
       )}
 
       {/* Ad Modal */}
       <Suspense fallback={null}>
-        {showAdModal && <HomeAdModal />}
+        <HomeAdModal />
       </Suspense>
-
-      {/* FAQ Schema */}
-      <FAQJsonLd faqs={generalFAQs} />
-    </div>
+    </>
   );
 }
