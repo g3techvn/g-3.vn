@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 
-// In-memory rate limiting (for development)
-// In production, you should use Redis with @upstash/ratelimit
+// Simple in-memory rate limiting implementation
 const requests = new Map<string, { count: number; resetTime: number }>();
 
 interface RateLimitConfig {

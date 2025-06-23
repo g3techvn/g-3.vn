@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     const to = from + limit - 1;
     query = query.range(from, to);
 
-    const { data: orders, error, count } = await query;
+    const { data: orders, error } = await query;
 
     if (error) {
       console.error('Error fetching user orders:', error);

@@ -100,7 +100,6 @@ export const CreateOrderSchema = z.object({
 export const ProductQuerySchema = z.object({
   category_id: z.string().optional(),
   brand_id: z.string().optional(),
-  sector_id: z.string().optional(),
   sort: z.enum(['price:asc', 'price:desc', 'name:asc', 'name:desc', 'created_at:asc', 'created_at:desc'])
     .optional(),
   page: z.coerce.number()
@@ -168,4 +167,21 @@ export function validateQueryParams<T>(schema: z.ZodSchema<T>, params: URLSearch
       errors: ['Query parameters không hợp lệ'],
     };
   }
-} 
+}
+
+// Validation schema cho user registration
+export const UserRegistrationSchema = z.object({
+  email: z.string()
+    .email('Email không hợp lệ')
+    .min(1, 'Email không được để trống'),
+  password: z.string()
+    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Mật khẩu phải có ít nhất 1 chữ hoa, 1 chữ thường và 1 số'),
+  full_name: z.string()
+    .min(2, 'Họ tên phải có ít nhất 2 ký tự')
+    .max(50, 'Họ tên không được vượt quá 50 ký tự')
+    .regex(/^[a-zA-ZÀ-ỹ\s]+$/, 'Họ tên chỉ được chứa chữ cái và dấu cách'),
+  phone: z.string()
+    .regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ (VD: 0901234567 hoặc +84901234567)')
+    .min(1, 'Số điện thoại là bắt buộc')
+}); 

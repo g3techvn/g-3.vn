@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onRegisterClick?: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onRegisterClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -241,9 +242,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
               <div className="mt-6 text-center text-sm text-gray-600">
                 Chưa có tài khoản?{' '}
-                <a href="#" className="font-medium text-red-600 hover:text-red-500">
+                <button
+                  type="button"
+                  onClick={onRegisterClick}
+                  className="font-medium text-red-600 hover:text-red-500"
+                >
                   Đăng ký ngay
-                </a>
+                </button>
               </div>
             </div>
           </div>

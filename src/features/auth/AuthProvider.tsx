@@ -16,7 +16,7 @@ interface AuthContextType {
   loading: boolean;
   error: Error | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
@@ -115,14 +115,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Hàm đăng ký
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
     try {
+      // Kiểm tra email và phone đã tồn tại chưa trước khi đăng ký
+      try {
+        const checkResponse = await fetch('/api/user/check-existence', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, phone }),
+        });
+
+        if (!checkResponse.ok) {
+          return { error: new Error('Lỗi kết nối mạng khi kiểm tra thông tin') };
+        }
+
+        const checkResult = await checkResponse.json();
+        
+        if (checkResult.emailExists) {
+          return { error: new Error('Email này đã được sử dụng. Vui lòng sử dụng email khác.') };
+        }
+        
+        if (checkResult.phoneExists && phone) {
+          return { error: new Error('Số điện thoại này đã được sử dụng. Vui lòng sử dụng số khác.') };
+        }
+      } catch (checkError) {
+        console.error('Error checking user existence:', checkError);
+        return { error: new Error('Lỗi kết nối mạng. Vui lòng thử lại.') };
+      }
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
+            phone: phone
           }
         }
       });
@@ -131,8 +160,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error(signUpError.message) };
       }
       
-      // Trong Supabase, người dùng có thể cần xác nhận email trước khi hoàn tất đăng ký
+      // Nếu đăng ký thành công và có user, tạo profile trong user_profiles table
       if (data.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .insert({
+              user_id: data.user.id,
+              email: email,
+              full_name: fullName,
+              phone: phone,
+              created_at: new Date().toISOString()
+            });
+          
+          if (profileError) {
+            console.error('Error creating user profile:', profileError);
+            // Không return error ở đây vì user đã được tạo thành công
+          }
+        } catch (profileError) {
+          console.error('Error inserting user profile:', profileError);
+        }
+        
         setUser(mapSupabaseUser(data.user));
       }
       

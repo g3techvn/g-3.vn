@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback, useRef, useMemo, Suspense, lazy } fro
 import { Product, Brand } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
-import { useDomain } from '@/context/domain-context';
 
 // Lazy loaded components
 const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
@@ -235,682 +234,169 @@ const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: 
 };
 
 export default function Home() {
+  // State declarations
   const [isMobile, setIsMobile] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingBrands, setLoadingBrands] = useState(true);
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [brandError, setBrandError] = useState<string | null>(null);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ name: string; slug: string; productCount: number }[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  
-  // New states for component-specific data
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [newProducts, setNewProducts] = useState<Product[]>([]);
-  const [comboProducts, setComboProducts] = useState<ComboProduct[]>([]);
-  const [loadingFeatured, setLoadingFeatured] = useState(true);
-  const [loadingNew, setLoadingNew] = useState(true);
-  const [loadingCombo, setLoadingCombo] = useState(true);
-  const [featuredError, setFeaturedError] = useState<string | null>(null);
-  const [newError, setNewError] = useState<string | null>(null);
-  const [comboError, setComboError] = useState<string | null>(null);
-  
-  // Animation states
-  const [pageLoaded, setPageLoaded] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  
-  // Track if initial data has loaded
-  const initialLoadComplete = useRef(false);
-  // Track if manual category change
-  const isManualCategoryChange = useRef(false);
-  // Track if category products are loading
-  const [loadingCategoryProducts, setLoadingCategoryProducts] = useState(false);
-  // Cache for category data to prevent reloads
-  const categoryDataCache = useRef<Record<string, CategoryData>>({});
-  
-  // Tracking visible sections for lazy loading
-  const [visibleSections, setVisibleSections] = useState({
-    hero: false,
-    categories: false,
-    featured: false,
-    combo: false,
-    new: false,
-    brands: false,
-    blog: false
-  });
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
 
-  // Use the useProducts hook to get domain-aware products
-  const { products: useProductsProducts, loading: productsLoading, error: productsError, refresh: refreshProducts } = useProducts();
+  // Use the useProducts hook with different options for different sections
+  const { products: allProducts, loading: loadingAllProducts } = useProducts();
+  const { products: featuredProducts, loading: loadingFeatured } = useProducts({ type: 'featured' });
+  const { products: newProducts, loading: loadingNew } = useProducts({ type: 'new' });
+  const { products: comboProducts, loading: loadingCombo } = useProducts({ type: 'combo' });
 
-  // Lấy sector info
-  const { sectorId, isLocalhost } = useDomain();
+  // Loading state combining all loading states
+  const isLoading = loadingAllProducts || loadingFeatured || loadingNew || loadingCombo || loadingBrands;
 
-  // Update the existing useEffect that calls fetchProducts to use our new hook's data
   useEffect(() => {
-    if (useProductsProducts.length > 0 && !initialLoadComplete.current) {
-      setLoading(false);
-      setProducts(useProductsProducts);
-      initialLoadComplete.current = true;
-      console.log('Products loaded:', useProductsProducts.length);
-    }
-  }, [useProductsProducts]);
-
-  // Lấy tất cả thương hiệu
-  const fetchBrands = useCallback(async () => {
-    try {
-      setLoadingBrands(true);
-      const url = '/api/brands';
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
+    const fetchBrands = async () => {
+      try {
+        const response = await fetch('/api/brands');
+        if (!response.ok) throw new Error('Failed to fetch brands');
+        const data = await response.json();
+        setBrands(data.brands || []);
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch brands');
+      } finally {
+        setLoadingBrands(false);
       }
-      
-      const data = await response.json();
-      setBrands(data.brands || []);
-    } catch (error: unknown) {
-      console.error('Error fetching brands:', error);
-      setBrandError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thương hiệu');
-    } finally {
-      setLoadingBrands(false);
-    }
+    };
+
+    fetchBrands();
   }, []);
-
-  // Replace fetchProductsByCategory with our custom hook
-  const fetchCategoryProducts = useCallback(async (categorySlug: string) => {
-    if (!categorySlug) return [];
-    const url = `/api/categories/${categorySlug}`;
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data.products || [];
-  }, []);
-  
-  // Use our custom hook for category data
-  const { 
-    data: currentCategoryProducts, 
-    loading: currentCategoryLoading,
-    error: currentCategoryError 
-  } = useDataCache<Product[]>(
-    `category-${selectedCategory}`,
-    () => fetchCategoryProducts(selectedCategory),
-    [selectedCategory]
-  );
-  
-  // Update state when the cached data changes
-  useEffect(() => {
-    if (currentCategoryProducts) {
-      setCategoryProducts(currentCategoryProducts);
-      setLoading(currentCategoryLoading);
-      if (currentCategoryError) {
-        setError(currentCategoryError);
-      }
-    }
-  }, [currentCategoryProducts, currentCategoryLoading, currentCategoryError]);
-
-  // Lấy tất cả danh mục và đếm sản phẩm
-  const fetchCategories = useCallback(async () => {
-    try {
-      setLoadingCategories(true);
-      
-      // Build URL with query parameters for categories
-      const url = new URL('/api/categories', window.location.origin);
-      if (sectorId && !isLocalhost) {
-        url.searchParams.append('sector_id', sectorId);
-      }
-      
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const cats = data.product_cats || [];
-      
-      // Fetch số lượng sản phẩm cho mỗi danh mục
-      const categoriesWithProductCount = await Promise.all(
-        cats.map(async (cat: { title: string; slug: string }) => {
-          try {
-            // Build URL with sector_id if available
-            const url = new URL(`/api/categories/${cat.slug}`, window.location.origin);
-            if (sectorId && !isLocalhost) {
-              url.searchParams.append('sector_id', sectorId);
-            }
-            
-            const prodResponse = await fetch(url.toString());
-            if (!prodResponse.ok) return { ...cat, productCount: 0 };
-            
-            const prodData = await prodResponse.json();
-            const count = prodData.products?.length || 0;
-            
-            // Cache initial category data to prevent future reloads
-            if (count > 0) {
-              categoryDataCache.current[cat.slug] = {
-                products: prodData.products || [],
-                brands: [], // We'll populate this later
-                isLoaded: true
-              };
-            }
-            
-            return { 
-              name: cat.title, 
-              slug: cat.slug, 
-              productCount: count 
-            };
-          } catch (error) {
-            // console.error(`Error counting products for ${cat.slug}:`, error);
-            return { name: cat.title, slug: cat.slug, productCount: 0 };
-          }
-        })
-      );
-      
-      // Lọc và sắp xếp danh mục theo số lượng sản phẩm
-      const filteredCategories = categoriesWithProductCount
-        .filter(cat => cat.productCount > 0)
-        .sort((a, b) => b.productCount - a.productCount);
-      
-      setCategories(filteredCategories);
-      
-      // Thiết lập danh mục mặc định là danh mục đầu tiên chỉ khi chưa có selectedCategory
-      if (filteredCategories.length > 0 && !selectedCategory && !initialLoadComplete.current) {
-        const firstCategorySlug = filteredCategories[0].slug;
-        setSelectedCategory(firstCategorySlug);
-        
-        // If we already fetched this category's data, use it immediately
-        if (categoryDataCache.current[firstCategorySlug]?.isLoaded) {
-          setCategoryProducts(categoryDataCache.current[firstCategorySlug].products);
-        }
-      }
-    } catch (error: unknown) {
-      // console.error('Error fetching categories:', error);
-      setCategories([]);
-    } finally {
-      setLoadingCategories(false);
-    }
-  }, [selectedCategory, sectorId, isLocalhost]);
-
-  // Fetch featured products
-  const fetchFeaturedProducts = useCallback(async () => {
-    // Don't fetch if already loaded or error occurred
-    if (featuredProducts.length > 0 || featuredError) return;
-    
-    try {
-      setLoadingFeatured(true);
-      const MAX_PRODUCTS = 8;
-      const response = await fetch(`/api/products?sort=featured:desc&limit=${MAX_PRODUCTS}`);
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setFeaturedProducts((data.products || []).slice(0, MAX_PRODUCTS));
-    } catch (error: unknown) {
-      console.error('Error fetching featured products:', error);
-      setFeaturedError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm nổi bật');
-    } finally {
-      setLoadingFeatured(false);
-    }
-  }, [featuredProducts.length, featuredError]);
-
-  // Fetch new products
-  const fetchNewProducts = useCallback(async () => {
-    // Don't fetch if already loaded or error occurred
-    if (newProducts.length > 0 || newError) return;
-    
-    try {
-      setLoadingNew(true);
-      const MAX_PRODUCTS = 12;
-      const response = await fetch(`/api/products?sort=created_at:desc&limit=${MAX_PRODUCTS}`);
-      
-      if (!response.ok) {
-        throw new Error(`Lỗi HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setNewProducts((data.products || []).slice(0, MAX_PRODUCTS));
-    } catch (error: unknown) {
-      console.error('Error fetching new products:', error);
-      setNewError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm mới');
-    } finally {
-      setLoadingNew(false);
-    }
-  }, [newProducts.length, newError]);
-
-  // Use our cache hook for combo products
-  const { 
-    data: cachedComboProducts, 
-    loading: comboProductsLoading, 
-    error: comboProductsError 
-  } = useDataCache<ComboProduct[]>(
-    'combo-products',
-    async () => {
-      const MAX_PRODUCTS = 8;
-      const response = await fetch(`/api/products?type=combo&limit=${MAX_PRODUCTS}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return (data.products || []).slice(0, MAX_PRODUCTS) as ComboProduct[];
-    },
-    []
-  );
-  
-  // Update state when the cached combo products change
-  useEffect(() => {
-    if (cachedComboProducts) {
-      setComboProducts(cachedComboProducts);
-      setLoadingCombo(comboProductsLoading);
-      if (comboProductsError) {
-        setComboError(comboProductsError);
-      }
-    }
-  }, [cachedComboProducts, comboProductsLoading, comboProductsError]);
-
-  // Handle category change from tab click
-  const handleCategoryChange = useCallback((categorySlug: string) => {
-    isManualCategoryChange.current = true;
-    setSelectedCategory(categorySlug);
-  }, []);
-
-  // Xử lý khi danh mục thay đổi
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchCategoryProducts(selectedCategory);
-    } else {
-      setCategoryProducts(products);
-    }
-  }, [selectedCategory, products, fetchCategoryProducts]);
 
   // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
-      const isMobileView = window.innerWidth < 768;
-      setIsMobile(isMobileView);
+      setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
 
-  // Replace the initial data fetch with a batched approach
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Batch API calls for initial core data
-        const endpoints = [
-          '/api/brands',
-          '/api/categories',
-          '/api/products?sort=featured:desc&limit=8',
-          '/api/products?sort=created_at:desc&limit=12'
-        ];
-        
-        const [brandsData, categoriesData, featuredData, newProductsData] = await fetchBatchData(endpoints);
-        
-        // Set data from batch response
-        setBrands(brandsData.brands || []);
-        
-        const cats = categoriesData.product_cats || [];
-        // Process categories with product counts
-        const categoriesWithProductCount = cats.map((cat: { title: string; slug: string }) => ({
-          name: cat.title,
-          slug: cat.slug,
-          productCount: 0 // We'll fetch counts in a separate step if needed
-        }));
-        
-        setCategories(categoriesWithProductCount);
-        setFeaturedProducts((featuredData.products || []).slice(0, 8));
-        setNewProducts((newProductsData.products || []).slice(0, 12));
-        
-        // Set loading states
-        setLoadingBrands(false);
-        setLoadingCategories(false);
-        setLoadingFeatured(false);
-        setLoadingNew(false);
-        
-        // Animation and page transitions
-        setTimeout(() => {
-          setPageLoaded(true);
-          // Hide loading overlay
-          setTimeout(() => {
-            setInitialLoading(false);
-          }, 300);
-        }, 300);
-      } catch (error) {
-        console.error("Error loading initial data:", error);
-        setInitialLoading(false);
-      }
-    };
-    
-    loadInitialData();
-  }, []); 
-
-  // Set up Intersection Observer for lazy loading
-  useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '200px', // Increased margin to load earlier
-      threshold: 0.1,
-    };
-
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const id = entry.target.id;
-        if (entry.isIntersecting) {
-          setVisibleSections(prev => ({ ...prev, [id]: true }));
-          
-          // Section is visible - combo products will load via the cache hook
-          
-          // Once observed, unobserve the section to prevent additional fetches
-          sectionObserver.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-    
-    // Register all sections for observation
-    const sections = document.querySelectorAll('.lazy-section');
-    sections.forEach(section => {
-      const sectionId = section.id;
-      // Skip observing sections that already have data
-      if ((sectionId === 'featured' && featuredProducts.length > 0) ||
-          (sectionId === 'new' && newProducts.length > 0) ||
-          (sectionId === 'combo' && comboProducts.length > 0)) {
-        return;
-      }
-      sectionObserver.observe(section);
-    });
-    
     return () => {
-      sectionObserver.disconnect();
-    };
-  }, [
-    comboProducts.length,
-    featuredProducts.length,
-    newProducts.length
-  ]);
-
-  // Handle scroll animations
-  useEffect(() => {
-    let ticking = false;
-    
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const scrollElements = document.querySelectorAll('.scroll-trigger');
-          
-          // ✅ Early exit nếu không có elements
-          if (scrollElements.length === 0) {
-            ticking = false;
-            return;
-          }
-          
-          const viewportHeight = window.innerHeight;
-          
-          scrollElements.forEach(element => {
-            // ✅ Skip elements đã animate
-            if (element.classList.contains('scroll-animate')) {
-              return;
-            }
-            
-            const rect = element.getBoundingClientRect();
-            const isInView = (rect.top <= viewportHeight * 0.75) && (rect.bottom >= 0);
-            
-            if (isInView) {
-              element.classList.add('scroll-animate');
-            }
-          });
-          
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    
-    // ✅ Use passive listener cho better performance
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Trigger once on load với delay
-    setTimeout(handleScroll, 500);
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Get relevant brands for current category from cache
-  const getCurrentCategoryBrands = useMemo(() => {
-    // If loading or no category selected, return all brands
-    if (loadingCategoryProducts || !selectedCategory) {
-      return brands;
-    }
-    
-    // If we have cached data for this category, use the filtered brands
-    if (categoryDataCache.current[selectedCategory]?.isLoaded) {
-      // If we have cached brands and they're not empty, use them
-      const cachedBrands = categoryDataCache.current[selectedCategory].brands;
-      if (cachedBrands.length > 0) {
-        return cachedBrands;
-      }
-      
-      // Otherwise, filter brands based on products and update cache
-      const products = categoryDataCache.current[selectedCategory].products;
-      const brandIdsInCategory = new Set(
-        products.map((product: Product) => product.brand_id).filter(Boolean)
-      );
-      
-      const filteredBrands = brands.filter(brand => brandIdsInCategory.has(brand.id));
-      
-      // Update cache with filtered brands
-      categoryDataCache.current[selectedCategory].brands = filteredBrands;
-      
-      return filteredBrands;
-    }
-    
-    // Fallback: filter brands based on current category products
-    if (categoryProducts.length > 0) {
-      const brandIdsInCategory = new Set(
-        categoryProducts.map((product: Product) => product.brand_id).filter(Boolean)
-      );
-      
-      return brands.filter(brand => brandIdsInCategory.has(brand.id));
-    }
-    
-    return brands;
-  }, [brands, selectedCategory, categoryProducts, loadingCategoryProducts]);
-
-  // Memoize các props truyền xuống MobileFeatureProduct để tránh re-render
-  const mobileFeatureProductProps = useMemo(() => ({
-    products: categoryProducts,
-    brands,
-    loading: loading,
-    error: error
-  }), [categoryProducts, brands, loading, error]);
-
-  // Memoize các props truyền xuống MobileBestsellerProducts để tránh re-render
-  const mobileBestsellerProps = useMemo(() => ({
-    products: categoryProducts,
-    loading: loading,
-    error: error
-  }), [categoryProducts, loading, error]);
-
-  // Add a CSS class for page transitions
-  useEffect(() => {
-    document.body.classList.add('smooth-transition');
-    return () => {
-      document.body.classList.remove('smooth-transition');
+      window.removeEventListener('resize', checkIfMobile);
     };
   }, []);
+
+  // Show ad modal after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAdModal(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
 
   return (
-    <>
-      {/* FAQ Schema for SEO */}
-      <FAQJsonLd faqs={generalFAQs} type="FAQPage" />
+    <div className="min-h-screen">
+      <PageLoadingOverlay isVisible={isLoading} />
       
-      <Suspense fallback={null}>
-        <HomeAdModal />
-      </Suspense>
-      <PageLoadingOverlay isVisible={initialLoading} />
-      
+      {/* Mobile View */}
       {isMobile ? (
-        <AnimatePresence>
-          <motion.div 
-            className="bg-gray-50 min-h-screen"
-            initial="hidden"
-            animate={pageLoaded ? "visible" : "hidden"}
-            variants={fadeIn}
-          >
-            <Suspense fallback={<LoadingFallback />}>
-              <MobileHomeHeader />
-            </Suspense>
-            
-            <Suspense fallback={<LoadingFallback />}>
-              <MobileHomeTabs 
-                categories={categories}
-                loading={loadingCategories}
-                onCategoryChange={handleCategoryChange} 
-              />
-            </Suspense>
-            
-            <motion.div variants={staggerContainer} className="scroll-trigger">
-              {/* Section: Sản phẩm bán chạy */}
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <MobileBestsellerProducts {...mobileBestsellerProps} />
-                </Suspense>
-              </motion.div>
-            </motion.div>
-            
-            <motion.div variants={staggerContainer} className="scroll-trigger">
-              <motion.div variants={slideUp}>
-                {/* Được đề xuất cho bạn */}
-                <Suspense fallback={<LoadingFallback />}>
-                  <MobileFeatureProduct {...mobileFeatureProductProps} />
-                </Suspense>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
+        <div className="space-y-4">
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileHomeHeader />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileHomeTabs />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileFeatureProduct 
+              products={featuredProducts}
+              brands={brands}
+              loading={loadingFeatured}
+              error={error}
+            />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileBestsellerProducts 
+              products={allProducts}
+              loading={loadingAllProducts}
+              error={error}
+            />
+          </Suspense>
+        </div>
       ) : (
-        <AnimatePresence>
-          <motion.div 
-            className="min-h-screen pb-20"
-            initial="hidden"
-            animate={pageLoaded ? "visible" : "hidden"}
-            variants={fadeIn}
-          >
-            {/* Hero Section */}
-            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="hero">
-              <Suspense fallback={<LoadingFallback />}>
-                <HeroCarousel />
-              </Suspense>
-            </motion.div>
-
-            {/* Category Section */}
-            <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories">
-              <Suspense fallback={<LoadingFallback />}>
-                <CategorySection />
-              </Suspense>
-            </motion.div>
-
-            {/* Category Grid */}
-            {/* <motion.div variants={slideUp} className="scroll-trigger lazy-section" id="categories-grid">
-              <Suspense fallback={<LoadingFallback />}>
-                <CategoryGrid />
-              </Suspense>
-            </motion.div> */}
-
-            {/* Featured Products */}
-            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="featured">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  {(visibleSections.featured || featuredProducts.length > 0) && (
-                    <FeaturedProducts 
-                      products={featuredProducts} 
-                      loading={loadingFeatured} 
-                      error={featuredError}
-                      brands={brands}
-                    />
-                  )}
-                </Suspense>
-              </motion.div>
-            </motion.div> */}
-
-                   {/* New Products */}
-                   <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="new">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  {(visibleSections.new || newProducts.length > 0) && (
-                    <NewProducts 
-                      products={newProducts} 
-                      loading={loadingNew} 
-                      error={newError}
-                      brands={brands}
-                    />
-                  )}
-                </Suspense>
-              </motion.div>
-            </motion.div>
-
-            {/* Combo Product */}
-            <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="combo">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  {(visibleSections.combo || comboProducts.length > 0) && (
-                    <ComboProduct 
-                      products={comboProducts} 
-                      loading={loadingCombo} 
-                      error={comboError}
-                      brands={brands}
-                    />
-                  )}
-                </Suspense>
-              </motion.div>
-            </motion.div>
-
-     
-
-            {/* Brands */}
-            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="brands">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <BrandLogos 
-                    brands={brands} 
-                    loading={loadingBrands} 
-                    error={brandError} 
-                  />
-                </Suspense>
-              </motion.div>
-            </motion.div> */}
-
-            {/* Blog Posts */}
-            {/* <motion.div variants={staggerContainer} className="scroll-trigger lazy-section" id="blog">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <BlogPosts />
-                </Suspense>
-              </motion.div>
-            </motion.div> */}
-            {/* Support Section */}
-            <motion.div variants={staggerContainer} className="scroll-trigger" id="support">
-              <motion.div variants={slideUp}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <SupportSection />
-                </Suspense>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
+        /* Desktop View */
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="space-y-8"
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <HeroCarousel />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <CategorySection />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <CategoryGrid />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <FeaturedProducts 
+              products={featuredProducts}
+              loading={loadingFeatured}
+              error={error}
+              brands={brands}
+            />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <NewProducts 
+              products={newProducts}
+              loading={loadingNew}
+              error={error}
+              brands={brands}
+            />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <ComboProduct 
+              products={comboProducts}
+              loading={loadingCombo}
+              error={error}
+              brands={brands}
+            />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <BrandLogos 
+              brands={brands}
+              loading={loadingBrands}
+              error={error}
+            />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <BlogPosts />
+          </Suspense>
+          
+          <Suspense fallback={<LoadingFallback />}>
+            <SupportSection />
+          </Suspense>
+        </motion.div>
       )}
-    </>
+
+      {/* Ad Modal */}
+      <Suspense fallback={null}>
+        {showAdModal && <HomeAdModal />}
+      </Suspense>
+
+      {/* FAQ Schema */}
+      <FAQJsonLd faqs={generalFAQs} />
+    </div>
   );
 }

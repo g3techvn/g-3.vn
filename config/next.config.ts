@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       'congthaihoc.vn',
       'images.unsplash.com',
       'picsum.photos',
-      'static.g-3.vn',
+      'jjraznkvgfsgqrqvlcwo.supabase.co',
       'img.youtube.com',
     ],
   },

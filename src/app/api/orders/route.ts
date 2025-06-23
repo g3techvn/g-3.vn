@@ -17,6 +17,7 @@ import {
   detectSuspiciousActivity 
 } from '@/lib/auth/auth-middleware';
 import { generateOrderToken } from '@/lib/order-tokens';
+import { Database } from '@/types/supabase';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
@@ -294,83 +295,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   try {
-    const { searchParams } = new URL(request.url);
-    const user_id = searchParams.get('user_id');
-    const token = searchParams.get('token'); // Secure token for thank you page
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    const supabase = createServerClient();
-
-    // If token is provided, validate and fetch order (for thank you page)
-    if (token) {
-      const { validateOrderToken } = await import('@/lib/order-tokens');
-      const validation = validateOrderToken(token);
-      
-      if (!validation.valid) {
-        return NextResponse.json(
-          { error: validation.error || 'Invalid access token' },
-          { status: 403 }
-        );
-      }
-
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *
-          )
-        `)
-        .eq('id', validation.orderId);
-
-      if (error) {
-        return NextResponse.json(
-          { error: `Failed to fetch order: ${error.message}` },
-          { status: 500 }
-        );
-      }
-
-      // Mark token as used to prevent reuse
-      const { markTokenAsUsed } = await import('@/lib/order-tokens');
-      markTokenAsUsed(token);
-
-      return NextResponse.json({ orders });
+    if (error) {
+      throw error;
     }
 
-    // If user_id is provided, fetch user's orders
-    if (user_id) {
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *
-          )
-        `)
-        .eq('user_id', user_id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        return NextResponse.json(
-          { error: `Failed to fetch orders: ${error.message}` },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({ orders });
-    }
-
-    return NextResponse.json(
-      { error: 'Either User ID or Order ID is required' },
-      { status: 400 }
-    );
-
+    return NextResponse.json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
   }
 } 

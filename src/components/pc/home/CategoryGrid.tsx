@@ -3,7 +3,6 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { CameraIcon } from '@radix-ui/react-icons';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useDomain } from '@/context/domain-context';
 
 type Category = {
   name: string;
@@ -37,7 +36,6 @@ function CategoryImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function CategoryGrid({ categories: propCategories }: CategoryGridProps) {
-  const { sectorId } = useDomain();
   const [categories, setCategories] = useState<Category[]>(propCategories || []);
   const [loading, setLoading] = useState(!propCategories);
   const [error, setError] = useState<string | null>(null);
@@ -48,13 +46,7 @@ export default function CategoryGrid({ categories: propCategories }: CategoryGri
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        // Include the sector_id in the API request if available
-        const url = new URL('/api/categories', window.location.origin);
-        if (sectorId) {
-          url.searchParams.append('sector_id', sectorId);
-        }
-        
-        const res = await fetch(url.toString());
+        const res = await fetch('/api/categories');
         if (!res.ok) throw new Error('Lỗi khi tải danh mục');
         const data = await res.json();
         // Giả sử API trả về data.product_cats với trường title, slug, image
@@ -76,7 +68,7 @@ export default function CategoryGrid({ categories: propCategories }: CategoryGri
     };
 
     fetchCategories();
-  }, [propCategories, sectorId]);
+  }, [propCategories]);
 
   if (loading) {
     return (

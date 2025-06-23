@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useAuth } from '@/features/auth/AuthProvider';
-import LoginModal from './LoginModal';
+import AuthModals from './AuthModals';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -12,12 +12,35 @@ interface AccountModalProps {
 
 const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   const { user, signOut } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   if (!isOpen) return null;
 
-  // Show login modal if user is not logged in
+  // Show auth modals if user is not logged in
   if (!user) {
-    return <LoginModal isOpen={isOpen} onClose={onClose} />;
+    return (
+      <AuthModals
+        isLoginOpen={isLoginOpen || isOpen}
+        isRegisterOpen={isRegisterOpen}
+        onCloseLogin={() => {
+          setIsLoginOpen(false);
+          onClose();
+        }}
+        onCloseRegister={() => {
+          setIsRegisterOpen(false);
+          onClose();
+        }}
+        onOpenLogin={() => {
+          setIsLoginOpen(true);
+          setIsRegisterOpen(false);
+        }}
+        onOpenRegister={() => {
+          setIsRegisterOpen(true);
+          setIsLoginOpen(false);
+        }}
+      />
+    );
   }
 
   const handleLogout = async () => {

@@ -1,8 +1,11 @@
 import { NextRequest } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
-import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv();
+// In-memory storage
+const tokenStore = new Map<string, string>();
+const sessionStore = new Map<string, any>();
+const deviceStore = new Map<string, any>();
+const blacklistStore = new Map<string, number>();
 
 // Auth configuration
 const JWT_SECRET = new TextEncoder().encode(
@@ -27,7 +30,7 @@ interface TokenPayload {
   role?: string;
   deviceId: string;
   sessionId: string;
-  [key: string]: any; // Index signature for JWT compatibility
+  [key: string]: any;
 }
 
 interface RefreshTokenData {
@@ -60,10 +63,25 @@ interface DeviceInfo {
 }
 
 export class EnhancedAuthManager {
-  private redis: Redis;
+  // Helper methods for storage
+  private setWithExpiry(store: Map<string, any>, key: string, value: any, expirySeconds: number) {
+    const item = {
+      value,
+      expiry: Date.now() + (expirySeconds * 1000)
+    };
+    store.set(key, JSON.stringify(item));
+  }
 
-  constructor() {
-    this.redis = redis;
+  private getWithExpiry(store: Map<string, any>, key: string) {
+    const itemStr = store.get(key);
+    if (!itemStr) return null;
+
+    const item = JSON.parse(itemStr);
+    if (Date.now() > item.expiry) {
+      store.delete(key);
+      return null;
+    }
+    return item.value;
   }
 
   // Generate device ID from user agent and IP
@@ -108,7 +126,7 @@ export class EnhancedAuthManager {
     };
 
     // Store refresh token with 7 days expiry
-    await this.redis.setex(key, 7 * 24 * 60 * 60, JSON.stringify(tokenData));
+    this.setWithExpiry(tokenStore, key, tokenData, 7 * 24 * 60 * 60);
     
     return refreshToken;
   }
@@ -134,17 +152,17 @@ export class EnhancedAuthManager {
   async verifyRefreshToken(refreshToken: string): Promise<RefreshTokenData | null> {
     try {
       const key = `${AUTH_CONFIG.REFRESH_TOKEN_PREFIX}${refreshToken}`;
-      const data = await this.redis.get(key);
+      const data = this.getWithExpiry(tokenStore, key);
       
       if (!data) {
         return null;
       }
 
-      const tokenData = JSON.parse(data as string) as RefreshTokenData;
+      const tokenData = data as RefreshTokenData;
       
       // Update last used timestamp
       tokenData.lastUsed = Date.now();
-      await this.redis.setex(key, 7 * 24 * 60 * 60, JSON.stringify(tokenData));
+      this.setWithExpiry(tokenStore, key, tokenData, 7 * 24 * 60 * 60);
       
       return tokenData;
     } catch (error) {
@@ -261,14 +279,11 @@ export class EnhancedAuthManager {
     await this.removeDeviceTracking(userId, deviceId);
 
     // Invalidate all refresh tokens for this session
-    const refreshKeys = await this.redis.keys(`${AUTH_CONFIG.REFRESH_TOKEN_PREFIX}*`);
+    const refreshKeys = tokenStore.keys();
     for (const key of refreshKeys) {
-      const data = await this.redis.get(key);
-      if (data) {
-        const tokenData = JSON.parse(data as string) as RefreshTokenData;
-        if (tokenData.sessionId === sessionId) {
-          await this.redis.del(key);
-        }
+      const data = this.getWithExpiry(tokenStore, key);
+      if (data && data.sessionId === sessionId) {
+        tokenStore.delete(key);
       }
     }
 
@@ -285,20 +300,17 @@ export class EnhancedAuthManager {
       await this.invalidateSession(device.sessionId);
       
       // Find and invalidate refresh tokens
-      const refreshKeys = await this.redis.keys(`${AUTH_CONFIG.REFRESH_TOKEN_PREFIX}*`);
+      const refreshKeys = tokenStore.keys();
       for (const key of refreshKeys) {
-        const data = await this.redis.get(key);
-        if (data) {
-          const tokenData = JSON.parse(data as string) as RefreshTokenData;
-          if (tokenData.userId === userId) {
-            await this.redis.del(key);
-          }
+        const data = this.getWithExpiry(tokenStore, key);
+        if (data && data.userId === userId) {
+          tokenStore.delete(key);
         }
       }
     }
 
     // Clear device tracking
-    await this.redis.del(`${AUTH_CONFIG.USER_DEVICES_PREFIX}${userId}`);
+    deviceStore.delete(`${AUTH_CONFIG.USER_DEVICES_PREFIX}${userId}`);
 
     console.log(`🚪 User ${userId} logged out from all devices`);
   }
@@ -321,22 +333,18 @@ export class EnhancedAuthManager {
     };
 
     const key = `${AUTH_CONFIG.SESSION_PREFIX}${sessionId}`;
-    await this.redis.setex(
-      key,
-      Math.ceil(AUTH_CONFIG.SESSION_TIMEOUT / 1000),
-      JSON.stringify(sessionData)
-    );
+    this.setWithExpiry(sessionStore, key, sessionData, Math.ceil(AUTH_CONFIG.SESSION_TIMEOUT / 1000));
   }
 
   private async getSession(sessionId: string): Promise<SessionData | null> {
     const key = `${AUTH_CONFIG.SESSION_PREFIX}${sessionId}`;
-    const data = await this.redis.get(key);
+    const data = this.getWithExpiry(sessionStore, key);
     
     if (!data) {
       return null;
     }
 
-    return JSON.parse(data as string) as SessionData;
+    return data as SessionData;
   }
 
   private async updateSessionActivity(sessionId: string): Promise<void> {
@@ -347,16 +355,12 @@ export class EnhancedAuthManager {
 
     session.lastActivity = Date.now();
     const key = `${AUTH_CONFIG.SESSION_PREFIX}${sessionId}`;
-    await this.redis.setex(
-      key,
-      Math.ceil(AUTH_CONFIG.SESSION_TIMEOUT / 1000),
-      JSON.stringify(session)
-    );
+    this.setWithExpiry(sessionStore, key, session, Math.ceil(AUTH_CONFIG.SESSION_TIMEOUT / 1000));
   }
 
   private async invalidateSession(sessionId: string): Promise<void> {
     const key = `${AUTH_CONFIG.SESSION_PREFIX}${sessionId}`;
-    await this.redis.del(key);
+    sessionStore.delete(key);
   }
 
   // Device tracking
@@ -384,7 +388,7 @@ export class EnhancedAuthManager {
     const filteredDevices = devices.filter(d => d.deviceId !== deviceId);
     filteredDevices.push(deviceInfo);
 
-    await this.redis.setex(key, 7 * 24 * 60 * 60, JSON.stringify(filteredDevices));
+    this.setWithExpiry(deviceStore, key, filteredDevices, 7 * 24 * 60 * 60);
   }
 
   private async removeDeviceTracking(userId: string, deviceId: string): Promise<void> {
@@ -394,9 +398,9 @@ export class EnhancedAuthManager {
     const filteredDevices = devices.filter(d => d.deviceId !== deviceId);
     
     if (filteredDevices.length > 0) {
-      await this.redis.setex(key, 7 * 24 * 60 * 60, JSON.stringify(filteredDevices));
+      this.setWithExpiry(deviceStore, key, filteredDevices, 7 * 24 * 60 * 60);
     } else {
-      await this.redis.del(key);
+      deviceStore.delete(key);
     }
   }
 
@@ -423,30 +427,30 @@ export class EnhancedAuthManager {
 
   async getUserDevices(userId: string): Promise<DeviceInfo[]> {
     const key = `${AUTH_CONFIG.USER_DEVICES_PREFIX}${userId}`;
-    const data = await this.redis.get(key);
+    const data = this.getWithExpiry(deviceStore, key);
     
     if (!data) {
       return [];
     }
 
-    return JSON.parse(data as string) as DeviceInfo[];
+    return data as DeviceInfo[];
   }
 
   // Token blacklisting
   private async blacklistToken(token: string, expiry: number): Promise<void> {
     const key = `${AUTH_CONFIG.BLACKLIST_PREFIX}${token}`;
-    await this.redis.setex(key, Math.ceil(expiry / 1000), 'blacklisted');
+    this.setWithExpiry(blacklistStore, key, expiry, Math.ceil(expiry / 1000));
   }
 
   private async isTokenBlacklisted(token: string): Promise<boolean> {
     const key = `${AUTH_CONFIG.BLACKLIST_PREFIX}${token}`;
-    const result = await this.redis.get(key);
-    return result !== null;
+    const expiry = this.getWithExpiry(blacklistStore, key);
+    return expiry !== null;
   }
 
   private async invalidateRefreshToken(refreshToken: string): Promise<void> {
     const key = `${AUTH_CONFIG.REFRESH_TOKEN_PREFIX}${refreshToken}`;
-    await this.redis.del(key);
+    tokenStore.delete(key);
   }
 
   // Helper methods

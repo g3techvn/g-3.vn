@@ -1,33 +1,26 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
-export async function GET(request: Request) {
+export async function GET() {
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   try {
-    // Khởi tạo Supabase client
-    const supabase = createServerClient();
-    
-    // Truy vấn dữ liệu từ bảng promotion
     const { data: promotions, error } = await supabase
-      .from('promotion')
+      .from('promotions')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json(
-        { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
-        { status: 500 }
-      );
+      throw error;
     }
-    
-    console.log(`Query successful, returning ${promotions.length} promotions`);
+
     return NextResponse.json(promotions);
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in promotion API:', error);
-    return NextResponse.json(
-      { error: `Đã xảy ra lỗi khi xử lý yêu cầu: ${errorMessage}` },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Error fetching promotions:', error);
+    return NextResponse.json({ error: 'Failed to fetch promotions' }, { status: 500 });
   }
 } 

@@ -98,15 +98,15 @@ export default function OptimizedImage({
   const calculatedWidth = width ? (isMobile ? Math.round(width * mobileScale) : width) : undefined;
   const calculatedHeight = height ? (isMobile ? Math.round(height * mobileScale) : height) : undefined;
 
-  // Enhanced URL optimization for static.g-3.vn images
+  // Enhanced URL optimization for Supabase images
   const optimizedSrc = (() => {
     // Handle Next.js optimized images - let Next.js handle optimization
     if (src.startsWith('/_next/image')) {
       return src;
     }
     
-    // For static.g-3.vn images, optimize URL parameters
-    if (src.includes('static.g-3.vn')) {
+    // For Supabase images, optimize URL parameters
+    if (src.includes('jjraznkvgfsgqrqvlcwo.supabase.co')) {
       try {
         const url = new URL(src);
         

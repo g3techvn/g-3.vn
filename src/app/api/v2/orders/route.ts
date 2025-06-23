@@ -17,6 +17,9 @@ import {
   createVersionedResponse, 
   DataTransformer 
 } from '@/lib/api/api-versioning';
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
@@ -229,68 +232,33 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  const ip = getClientIP(request);
-  const userAgent = request.headers.get('user-agent') || undefined;
-  
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get('user_id');
+
+  if (!userId) {
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+  }
+
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   try {
-    securityLogger.logApiAccess(ip, '/api/v2/orders', 'GET', userAgent);
-    
-    const { searchParams } = new URL(request.url);
-    const user_id = searchParams.get('user_id');
-
-    if (!user_id) {
-      return createVersionedResponse(
-        { error: 'User ID is required' },
-        'v2',
-        { status: 400 }
-      );
-    }
-
-    const supabase = createServerClient();
-
     const { data: orders, error } = await supabase
       .from('orders')
-      .select(`
-        *,
-        order_items (
-          *
-        )
-      `)
-      .eq('user_id', user_id)
+      .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      return createVersionedResponse(
-        { error: 'Failed to fetch orders' },
-        'v2',
-        { status: 500 }
-      );
+      throw error;
     }
 
-    // Transform to v2 format
-    const ordersV2 = orders?.map(order => DataTransformer.transformOrderV1ToV2(order)) || [];
-
-    return createVersionedResponse({
-      orders: ordersV2,
-      total: ordersV2.length,
-      metadata: {
-        version: 'v2',
-        timestamp: new Date().toISOString()
-      }
-    }, 'v2');
-
+    return NextResponse.json(orders);
   } catch (error) {
-    securityLogger.logError('Error fetching orders', error as Error, {
-      ip,
-      userAgent,
-      endpoint: '/api/v2/orders'
-    });
-    
-    return createVersionedResponse(
-      { error: 'Internal server error' },
-      'v2',
-      { status: 500 }
-    );
+    console.error('Error fetching user orders:', error);
+    return NextResponse.json({ error: 'Failed to fetch user orders' }, { status: 500 });
   }
 } 

@@ -5,7 +5,6 @@ import { Roboto_Flex as RobotoFlex } from 'next/font/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/features/auth/AuthProvider';
-import { DomainProvider } from '@/context/domain-context';
 
 import { ThemeProvider } from '@/context/ThemeContext';
 import { useState, useRef } from 'react';
@@ -42,7 +41,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${roboto.variable} font-sans`}>
       <QueryClientProvider client={queryClientRef.current}>
-        <DomainProvider>
           <AuthProvider>
               <ThemeProvider>
                 <AntdRegistry>
@@ -55,7 +53,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 </AntdRegistry>
               </ThemeProvider>
           </AuthProvider>
-        </DomainProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}
         {process.env.NODE_ENV === 'development' && mounted && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

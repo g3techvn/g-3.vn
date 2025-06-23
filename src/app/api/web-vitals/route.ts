@@ -3,6 +3,7 @@ import { getClientIP } from '@/lib/rate-limit';
 import { securityLogger } from '@/lib/logger';
 
 import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
 interface WebVitalMetric {
   name: 'CLS' | 'FID' | 'FCP' | 'LCP' | 'TTFB' | 'INP';
@@ -96,14 +97,14 @@ function extractDeviceInfo(userAgent: string) {
 function createServerClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createClient(supabaseUrl, supabaseKey);
+  return createClient<Database>(supabaseUrl, supabaseKey);
 }
 
 // Create admin client with service role key (bypasses RLS)
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createClient(supabaseUrl, supabaseServiceKey);
+  return createClient<Database>(supabaseUrl, supabaseServiceKey);
 }
 
 export async function POST(request: NextRequest) {

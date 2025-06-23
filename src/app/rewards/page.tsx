@@ -142,7 +142,7 @@ export default function RewardsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
             {/* Bronze Card */}
             <div className="bg-[#FDF7F2] rounded-xl p-6">
-              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/bronze.svg?t=2025-06-07T04%3A55%3A17.811Z" alt="Bronze" width={488} height={260} className="w-full h-auto mb-4" />
+              <Image src="https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/reward/card/bronze.svg?t=2025-06-07T04%3A55%3A17.811Z" alt="Bronze" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Bronze</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 500 điểm</li>
@@ -153,7 +153,7 @@ export default function RewardsPage() {
 
             {/* Silver Card */}
             <div className="bg-[#F9FAFB] rounded-xl p-6">
-              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/silver.svg?t=2025-06-07T04%3A55%3A33.086Z" alt="Silver" width={488} height={260} className="w-full h-auto mb-4" />
+              <Image src="https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/reward/card/silver.svg?t=2025-06-07T04%3A55%3A33.086Z" alt="Silver" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Silver</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 10,000 điểm</li>
@@ -166,7 +166,7 @@ export default function RewardsPage() {
 
             {/* Gold Card */}
             <div className="bg-[#FDF7F2] rounded-xl p-6">
-              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/gold.svg?t=2025-06-07T04%3A55%3A38.214Z" alt="Gold" width={488} height={260} className="w-full h-auto mb-4" />
+              <Image src="https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/reward/card/gold.svg?t=2025-06-07T04%3A55%3A38.214Z" alt="Gold" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Gold</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 20,000 điểm</li>
@@ -179,7 +179,7 @@ export default function RewardsPage() {
 
             {/* Titan Card */}
             <div className="rounded-xl p-6">
-              <Image src="https://static.g-3.vn/storage/v1/object/public/g3tech/reward/card/titan.svg" alt="Titan" width={488} height={260} className="w-full h-auto mb-4" />
+              <Image src="https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/reward/card/titan.svg" alt="Titan" width={488} height={260} className="w-full h-auto mb-4" />
               <h3 className="font-semibold mb-4">Hạng Titan</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Hạn mức: 30,000 điểm</li>

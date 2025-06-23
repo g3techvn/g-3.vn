@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getSecurityHeaders } from '@/lib/rate-limit';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,6 +42,10 @@ export async function GET(request: NextRequest) {
       .eq('is_active', true)
       .gte('valid_to', new Date().toISOString())
       .order('created_at', { ascending: false });
+
+    if (user_id) {
+      query.eq('user_id', user_id);
+    }
 
     const { data: vouchers, error } = await query;
 

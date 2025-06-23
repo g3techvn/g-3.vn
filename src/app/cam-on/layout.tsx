@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cảm ơn bạn đã đặt hàng | G3 Tech',
-  description: 'Đơn hàng của bạn đã được tiếp nhận thành công. Chúng tôi sẽ liên hệ để xác nhận đơn hàng sớm nhất.',
+  title: 'Cảm ơn bạn | G3 Tech',
+  description: 'Cảm ơn bạn đã đăng ký tài khoản và tin tưởng G3 Tech. Chúng tôi sẽ mang đến những trải nghiệm mua sắm tuyệt vời nhất.',
   robots: 'noindex, nofollow'
 };
 

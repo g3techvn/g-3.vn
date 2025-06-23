@@ -31,4 +31,43 @@ export interface BucketInfo {
   public: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface Database {
+  public: {
+    Tables: {
+      products: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string;
+          price: number;
+          category_id: string;
+          brand_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+      };
+      categories: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          created_at: string;
+          updated_at: string;
+        };
+      };
+      orders: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: string;
+          total: number;
+          created_at: string;
+          updated_at: string;
+        };
+      };
+    };
+  };
 } 

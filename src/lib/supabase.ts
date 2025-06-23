@@ -13,12 +13,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Tạo client cho server components/API routes
 export const createServerClient = () => {
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  try {
+    return createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      global: {
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            headers: {
+              ...options.headers,
+              'User-Agent': 'g3-vn-app',
+              'apikey': supabaseAnonKey,
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+            },
+          });
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error creating Supabase server client:', error);
+    throw error;
+  }
 };
 
 // Singleton browser client instance
@@ -29,22 +47,46 @@ export const createBrowserClient = () => {
   if (typeof window !== 'undefined') {
     // Only create the client once in the browser environment
     if (!browserClient) {
-      browserClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          storageKey: 'supabase-auth',
-        },
-      });
+      try {
+        browserClient = createClient(supabaseUrl, supabaseAnonKey, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            storageKey: 'supabase-auth',
+          },
+          global: {
+            fetch: (url, options = {}) => {
+              return fetch(url, {
+                ...options,
+                headers: {
+                  ...options.headers,
+                  'User-Agent': 'g3-vn-app',
+                },
+              }).catch((error) => {
+                console.error('Network error:', error);
+                throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
+              });
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Error creating Supabase browser client:', error);
+        throw new Error('Lỗi khởi tạo kết nối. Vui lòng tải lại trang.');
+      }
     }
     return browserClient;
   }
   
   // For SSR, create a new instance that won't be persisted
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  try {
+    return createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating Supabase SSR client:', error);
+    throw error;
+  }
 }; 

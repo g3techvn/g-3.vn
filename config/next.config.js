@@ -11,7 +11,7 @@ const nextConfig = {
     } : false,
   },
   images: {
-    domains: ['localhost', 'api.g-3.vn', 'g-3.vn', 'cdn.g-3.vn', 'static.g-3.vn'],
+    domains: ['localhost',  'g-3.vn', 'jjraznkvgfsgqrqvlcwo.supabase.co'],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -20,9 +20,10 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     unoptimized: false,
     remotePatterns: [
+
       {
         protocol: 'https',
-        hostname: 'static.g-3.vn',
+        hostname: 'jjraznkvgfsgqrqvlcwo.supabase.co',
         port: '',
         pathname: '/storage/**',
       },
