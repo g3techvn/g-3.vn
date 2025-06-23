@@ -2,6 +2,7 @@
   "name": "g-3.vn",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "dev:no-cache": "rm -rf .next && next dev",
@@ -90,6 +91,7 @@
     "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
+    "node-fetch": "^3.3.2",
     "postcss": "^8.5.3",
     "sharp": "^0.34.2",
     "tailwindcss": "^4.1.5",

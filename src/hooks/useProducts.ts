@@ -65,11 +65,19 @@ export function useProducts(options: UseProductsOptions = {}) {
         }
 
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Lỗi khi tải sản phẩm (${response.status})`);
+        if (errorData.error) {
+          throw new Error(errorData.error);
+        } else {
+          throw new Error(`Lỗi khi tải sản phẩm (${response.status})`);
+        }
       }
       
       const data = await response.json();
-      setProducts(data.products || []);
+      if (!data.products) {
+        throw new Error('Không tìm thấy dữ liệu sản phẩm');
+      }
+      
+      setProducts(data.products);
     } catch (error: unknown) {
       console.error('Error fetching products:', error);
       setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm');

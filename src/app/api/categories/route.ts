@@ -34,25 +34,25 @@ export async function GET() {
 
     if (error) {
       throw error;
-    }
-
+      }
+      
     // Filter categories that have products and add product count
     const categoriesWithProducts = categories
       ?.map(cat => ({
-        ...cat,
+          ...cat,
         product_count: cat.products?.length || 0
-      }))
-      .filter(cat => cat.product_count > 0)
-      .sort((a, b) => b.product_count - a.product_count);
-
+        }))
+        .filter(cat => cat.product_count > 0)
+        .sort((a, b) => b.product_count - a.product_count);
+      
     console.log(`API Categories - Found ${categoriesWithProducts?.length || 0} categories with products`);
-    
-    // Cache the result
-    categoriesCache = { 
+      
+      // Cache the result
+      categoriesCache = { 
       data: categoriesWithProducts || [], 
       timestamp: now
-    };
-    
+      };
+      
     return NextResponse.json({ product_cats: categoriesWithProducts || [] });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -238,7 +238,7 @@ export async function GET(request: Request) {
 
   if (!userId) {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-  }
+    }
 
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

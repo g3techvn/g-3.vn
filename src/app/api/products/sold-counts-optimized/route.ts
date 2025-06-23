@@ -11,7 +11,7 @@ const soldCountsCache = new Map<string, { data: Record<string, number>; timestam
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
   const productIds = searchParams.get('ids')?.split(',') || [];
 
   if (!productIds.length) {
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
   if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
     return NextResponse.json(cachedData.data);
-  }
+    }
 
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

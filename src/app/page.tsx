@@ -247,23 +247,23 @@ export default function Home() {
   const { products: featuredProducts, loading: loadingFeatured } = useProducts({ type: 'featured' });
   const { products: newProducts, loading: loadingNew } = useProducts({ type: 'new' });
   const { products: comboProducts, loading: loadingCombo } = useProducts({ type: 'combo' });
-
+  
   // Loading state combining all loading states
   const isLoading = loadingAllProducts || loadingFeatured || loadingNew || loadingCombo || loadingBrands;
 
   useEffect(() => {
     const fetchBrands = async () => {
-      try {
+    try {
         const response = await fetch('/api/brands');
         if (!response.ok) throw new Error('Failed to fetch brands');
-        const data = await response.json();
-        setBrands(data.brands || []);
+      const data = await response.json();
+      setBrands(data.brands || []);
       } catch (error) {
-        console.error('Error fetching brands:', error);
+      console.error('Error fetching brands:', error);
         setError(error instanceof Error ? error.message : 'Failed to fetch brands');
-      } finally {
-        setLoadingBrands(false);
-      }
+    } finally {
+      setLoadingBrands(false);
+    }
     };
 
     fetchBrands();
@@ -274,10 +274,10 @@ export default function Home() {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
+    
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
-
+    
     return () => {
       window.removeEventListener('resize', checkIfMobile);
     };
@@ -303,91 +303,91 @@ export default function Home() {
       {/* Mobile View */}
       {isMobile ? (
         <div className="space-y-4">
-          <Suspense fallback={<LoadingFallback />}>
-            <MobileHomeHeader />
-          </Suspense>
+            <Suspense fallback={<LoadingFallback />}>
+              <MobileHomeHeader />
+            </Suspense>
           <Suspense fallback={<LoadingFallback />}>
             <MobileHomeTabs />
           </Suspense>
-          <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<LoadingFallback />}>
             <MobileFeatureProduct 
               products={featuredProducts}
               brands={brands}
               loading={loadingFeatured}
               error={error}
-            />
-          </Suspense>
-          <Suspense fallback={<LoadingFallback />}>
+              />
+            </Suspense>
+                <Suspense fallback={<LoadingFallback />}>
             <MobileBestsellerProducts 
               products={allProducts}
               loading={loadingAllProducts}
               error={error}
             />
-          </Suspense>
+                </Suspense>
         </div>
       ) : (
         /* Desktop View */
-        <motion.div
-          initial="hidden"
+          <motion.div 
+            initial="hidden"
           animate="visible"
           variants={staggerContainer}
           className="space-y-8"
-        >
-          <Suspense fallback={<LoadingFallback />}>
-            <HeroCarousel />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <CategorySection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <CategoryGrid />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <FeaturedProducts 
-              products={featuredProducts}
-              loading={loadingFeatured}
+          >
+              <Suspense fallback={<LoadingFallback />}>
+                <HeroCarousel />
+              </Suspense>
+
+              <Suspense fallback={<LoadingFallback />}>
+                <CategorySection />
+              </Suspense>
+
+              <Suspense fallback={<LoadingFallback />}>
+                <CategoryGrid />
+              </Suspense>
+
+                <Suspense fallback={<LoadingFallback />}>
+                    <FeaturedProducts 
+                      products={featuredProducts} 
+                      loading={loadingFeatured} 
               error={error}
-              brands={brands}
-            />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <NewProducts 
-              products={newProducts}
-              loading={loadingNew}
+                      brands={brands}
+                    />
+                </Suspense>
+
+                <Suspense fallback={<LoadingFallback />}>
+                    <NewProducts 
+                      products={newProducts} 
+                      loading={loadingNew} 
               error={error}
-              brands={brands}
-            />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <ComboProduct 
-              products={comboProducts}
-              loading={loadingCombo}
+                      brands={brands}
+                    />
+                </Suspense>
+
+                <Suspense fallback={<LoadingFallback />}>
+                    <ComboProduct 
+                      products={comboProducts} 
+                      loading={loadingCombo} 
               error={error}
-              brands={brands}
-            />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <BrandLogos 
-              brands={brands}
-              loading={loadingBrands}
+                      brands={brands}
+                    />
+                </Suspense>
+
+                <Suspense fallback={<LoadingFallback />}>
+                  <BrandLogos 
+                    brands={brands} 
+                    loading={loadingBrands} 
               error={error}
-            />
-          </Suspense>
+                  />
+                </Suspense>
+
+                <Suspense fallback={<LoadingFallback />}>
+                  <BlogPosts />
+                </Suspense>
           
-          <Suspense fallback={<LoadingFallback />}>
-            <BlogPosts />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingFallback />}>
-            <SupportSection />
-          </Suspense>
-        </motion.div>
+                <Suspense fallback={<LoadingFallback />}>
+                  <SupportSection />
+                </Suspense>
+              </motion.div>
       )}
 
       {/* Ad Modal */}

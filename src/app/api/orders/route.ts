@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Create order using service role client to bypass RLS
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
     const { data: orderData, error: orderError } = await supabaseAdmin
@@ -302,14 +302,14 @@ export async function GET() {
   );
 
   try {
-    const { data: orders, error } = await supabase
-      .from('orders')
+      const { data: orders, error } = await supabase
+        .from('orders')
       .select('*')
-      .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
-    if (error) {
+      if (error) {
       throw error;
-    }
+      }
 
     return NextResponse.json(orders);
   } catch (error) {

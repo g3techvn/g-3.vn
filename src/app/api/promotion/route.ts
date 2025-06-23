@@ -7,17 +7,17 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-
+    
   try {
     const { data: promotions, error } = await supabase
       .from('promotions')
       .select('*')
       .order('created_at', { ascending: false });
-
+    
     if (error) {
       throw error;
     }
-
+    
     return NextResponse.json(promotions);
   } catch (error) {
     console.error('Error fetching promotions:', error);

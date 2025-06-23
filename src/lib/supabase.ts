@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 
 // Lấy URL và key từ biến môi trường
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,22 +17,9 @@ export const createServerClient = () => {
   try {
     return createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        persistSession: false,
         autoRefreshToken: false,
-      },
-      global: {
-        fetch: (url, options = {}) => {
-          return fetch(url, {
-            ...options,
-            headers: {
-              ...options.headers,
-              'User-Agent': 'g3-vn-app',
-              'apikey': supabaseAnonKey,
-              'Authorization': `Bearer ${supabaseAnonKey}`,
-            },
-          });
-        },
-      },
+        persistSession: false
+      }
     });
   } catch (error) {
     console.error('Error creating Supabase server client:', error);
@@ -50,24 +38,9 @@ export const createBrowserClient = () => {
       try {
         browserClient = createClient(supabaseUrl, supabaseAnonKey, {
           auth: {
-            persistSession: true,
             autoRefreshToken: true,
-            storageKey: 'supabase-auth',
-          },
-          global: {
-            fetch: (url, options = {}) => {
-              return fetch(url, {
-                ...options,
-                headers: {
-                  ...options.headers,
-                  'User-Agent': 'g3-vn-app',
-                },
-              }).catch((error) => {
-                console.error('Network error:', error);
-                throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
-              });
-            },
-          },
+            persistSession: true
+          }
         });
       } catch (error) {
         console.error('Error creating Supabase browser client:', error);
@@ -81,9 +54,9 @@ export const createBrowserClient = () => {
   try {
     return createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        persistSession: false,
         autoRefreshToken: false,
-      },
+        persistSession: false
+      }
     });
   } catch (error) {
     console.error('Error creating Supabase SSR client:', error);

@@ -5,7 +5,7 @@ import { Database } from '@/types/supabase';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const bucket = searchParams.get('bucket');
-
+  
   if (!bucket) {
     const supabase = createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,8 +14,8 @@ export async function GET(request: Request) {
 
     try {
       const { data, error } = await supabase.storage.listBuckets();
-
-      if (error) {
+    
+    if (error) {
         throw error;
       }
 
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     if (error) {
       throw error;
     }
-
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error listing files:', error);

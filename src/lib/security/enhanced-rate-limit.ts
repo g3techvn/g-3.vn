@@ -49,7 +49,7 @@ export async function enhancedRateLimit(
     }
     
     suspiciousActivities.set(ip, activity);
-
+    
     // Apply rate limiting
     const result = await rateLimit(request, config);
     

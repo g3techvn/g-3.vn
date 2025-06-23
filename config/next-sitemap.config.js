@@ -1,5 +1,5 @@
 /** @type {import('next-sitemap').IConfig} */
-module.exports = {
+export default {
   siteUrl: 'https://g-3.vn',
   generateRobotsTxt: true,
   exclude: [

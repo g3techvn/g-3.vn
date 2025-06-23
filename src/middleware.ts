@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://jjraznkvgfsgqrqvlcwo.supabase.co https://www.google-analytics.com",
+                    "connect-src 'self' https://jjraznkvgfsgqrqvlcwo.supabase.co https://www.google-analytics.com",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

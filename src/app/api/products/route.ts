@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     console.log('API Request - Query params:', { 
       category_id, 
       brand_id, 
-      sort,
+      sort, 
       type,
       limit
     });
@@ -77,67 +77,79 @@ export async function GET(request: NextRequest) {
     // Initialize Supabase client
     const supabase = createServerClient();
     
-    let query = supabase.from('products')
-      .select(`
-        *,
-        brands:brand_id (
-          title
-        ),
-        variants:product_variants(
-          id,
-          product_id,
-          color,
-          size,
-          weight,
-          price,
-          original_price,
-          image_url,
-          gallery_url,
-          sku,
-          stock_quantity,
-          is_default,
-          created_at,
-          is_dropship,
-          gac_chan
-        )
-      `)
-      .eq('status', true);
-    
-    // Add filter conditions
-    if (category_id) {
-      query = query.eq('pd_cat_id', category_id);
-    }
-    
-    if (brand_id) {
-      query = query.eq('brand_id', brand_id);
-    }
-
+      let query = supabase.from('products')
+        .select(`
+          *,
+          brands:brand_id (
+            title
+          ),
+          variants:product_variants(
+            id,
+            product_id,
+            color,
+            size,
+            weight,
+            price,
+            original_price,
+            image_url,
+            gallery_url,
+            sku,
+            stock_quantity,
+            is_default,
+            created_at,
+            is_dropship,
+            gac_chan
+          )
+        `)
+        .eq('status', true);
+      
+      // Add filter conditions
+      if (category_id) {
+        query = query.eq('pd_cat_id', category_id);
+      }
+      
+      if (brand_id) {
+        query = query.eq('brand_id', brand_id);
+      }
+      
     if (type === 'combo') {
       query = query.eq('is_combo', true);
-    }
-    
-    // Execute query
-    const { data: fetchedProducts, error } = await query;
-    
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json(
-        { error: `Error querying data: ${error.message}` },
-        { status: 500 }
-      );
-    }
-    
-    // Validate and convert the fetched products
+      }
+      
+      // Execute query
+      const { data: fetchedProducts, error } = await query;
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        securityLogger.logError('Supabase products error', error as Error, {
+          ip,
+          endpoint: '/api/products'
+        });
+        return NextResponse.json(
+          { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
+          { status: 500, headers: getSecurityHeaders() }
+        );
+      }
+      
+      if (!fetchedProducts) {
+        console.error('No products data returned');
+        return NextResponse.json(
+          { error: 'Không tìm thấy dữ liệu sản phẩm' },
+          { status: 404, headers: getSecurityHeaders() }
+        );
+      }
+      
+      // Validate and convert the fetched products
     let products: Product[] = [];
-    if (fetchedProducts && Array.isArray(fetchedProducts)) {
-      for (const item of fetchedProducts) {
-        if (item && typeof item === 'object' && 'id' in item && 'name' in item) {
-          // Add brand name and variants to product
-          products.push({
-            ...item,
-            brand: (item as Product & { brands?: { title: string } }).brands?.title,
-            variants: (item as Product & { variants: ProductVariant[] }).variants || []
-          });
+      if (fetchedProducts && Array.isArray(fetchedProducts)) {
+        for (const item of fetchedProducts) {
+          if (item && typeof item === 'object' && 'id' in item && 'name' in item) {
+            // Add brand name and variants to product
+            products.push({
+              ...item,
+              brand: (item as Product & { brands?: { title: string } }).brands?.title,
+              variants: (item as Product & { variants: ProductVariant[] }).variants || []
+            });
         }
       }
     }

@@ -8,7 +8,7 @@ interface SoldCount {
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
   const productIds = searchParams.get('ids')?.split(',') || [];
 
   if (!productIds.length) {
@@ -21,14 +21,14 @@ export async function GET(request: Request) {
   );
 
   try {
-    const { data: soldCounts, error } = await supabase
+      const { data: soldCounts, error } = await supabase
       .from('sold_counts')
       .select('product_id, count')
       .in('product_id', productIds);
 
-    if (error) {
+      if (error) {
       throw error;
-    }
+      }
 
     const result: Record<string, number> = {};
     soldCounts?.forEach((item: SoldCount) => {

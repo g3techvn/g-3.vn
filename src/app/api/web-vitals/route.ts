@@ -103,8 +103,8 @@ function createServerClient() {
 // Create admin client with service role key (bypasses RLS)
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createClient<Database>(supabaseUrl, supabaseServiceKey);
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  return createClient<Database>(supabaseUrl, supabaseKey);
 }
 
 export async function POST(request: NextRequest) {
