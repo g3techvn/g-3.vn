@@ -10,7 +10,7 @@ import { useBrandData } from '@/hooks/useBrandData';
 // Import critical above-fold components
 import { ProductHeader } from './ProductHeader';
 import { ProductGallery } from './ProductGallery';
-import { ProductPrice } from './ProductPrice';
+import ProductPrice from './ProductPrice';
 import { ProductInfo } from './ProductInfo';
 import { ProductDescription } from './ProductDescription';
 import { ProductPolicies } from './ProductPolicies';
