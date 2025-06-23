@@ -52,17 +52,13 @@ const nextConfig = {
     optimizePackageImports: ['antd', 'lodash', 'chart.js', 'react-chartjs-2', '@heroicons/react'],
     optimizeServerReact: true,
     serverMinification: true,
-    // Disable cache in development
-    ...(process.env.NODE_ENV === 'development' && {
-      isrMemoryCacheSize: 0,
-    }),
   },
   // Disable cache completely in development
   ...(process.env.NODE_ENV === 'development' && {
     onDemandEntries: {
       maxInactiveAge: 25 * 1000,
       pagesBufferLength: 2,
-  },
+    },
   }),
   headers: async () => {
     const headers = []

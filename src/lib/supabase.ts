@@ -27,6 +27,27 @@ export const createServerClient = () => {
   }
 };
 
+// Tạo client cho server components/API routes với service role (admin)
+export const createServerAdminClient = () => {
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseServiceRoleKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+  }
+
+  try {
+    return createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+  } catch (error) {
+    console.error('Error creating Supabase admin client:', error);
+    throw error;
+  }
+};
+
 // Singleton browser client instance
 let browserClient: ReturnType<typeof createClient> | null = null;
 

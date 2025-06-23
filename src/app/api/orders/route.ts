@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient, createServerAdminClient } from '@/lib/supabase';
 import { CartItem } from '@/types/cart';
 import { CreateOrderSchema, validateRequestBody } from '@/lib/validation/validation';
 import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
@@ -94,6 +93,7 @@ export async function POST(request: NextRequest) {
     } = validatedData;
 
     const supabase = createServerClient();
+    const supabaseAdmin = createServerAdminClient();
 
     // Create shipping address string
     const shipping_address = `${shipping_info.address}, ${shipping_info.ward}, ${shipping_info.district}, ${shipping_info.city}`;
@@ -111,12 +111,6 @@ export async function POST(request: NextRequest) {
     }
 
     const final_total = Math.max(0, total_price + (shipping_fee || 0) - voucher_discount - points_discount);
-
-    // Create order using service role client to bypass RLS
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
 
     const { data: orderData, error: orderError } = await supabaseAdmin
       .from('orders')
@@ -296,24 +290,16 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createServerClient();
+  
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  try {
-      const { data: orders, error } = await supabase
-        .from('orders')
-      .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-      throw error;
-      }
-
-    return NextResponse.json(orders);
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  return NextResponse.json(orders);
 } 
