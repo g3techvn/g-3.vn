@@ -7,17 +7,14 @@ import { useProducts } from '@/hooks/useProducts';
 // Lazy loaded components
 const HeroCarousel = lazy(() => import('@/components/pc/home/HeroCarousel'));
 const CategorySection = lazy(() => import('@/components/pc/home/CategorySection'));
-const CategoryGrid = lazy(() => import('@/components/pc/home/CategoryGrid'));
 const FeaturedProducts = lazy(() => import('@/components/pc/product/FeaturedProducts'));
 const ComboProduct = lazy(() => import('@/components/pc/product/ComboProduct'));
 const NewProducts = lazy(() => import('@/components/pc/product/NewProducts'));
-const BrandLogos = lazy(() => import('@/components/pc/home/BrandLogos'));
-const BlogPosts = lazy(() => import('@/components/pc/home/BlogPosts'));
 const SupportSection = lazy(() => import('@/components/pc/home/support'));
 const MobileHomeHeader = lazy(() => import('@/components/mobile/MobileHomeHeader'));
 const MobileHomeTabs = lazy(() => import('@/components/mobile/MobileHomeTabs'));
-const MobileFeatureProduct = lazy(() => import('../components/mobile/MobileFeatureProduct'));
-const MobileBestsellerProducts = lazy(() => import('../components/mobile/MobileBestsellerProducts'));
+const MobileFeatureProduct = lazy(() => import('@/components/mobile/MobileFeatureProduct'));
+const MobileBestsellerProducts = lazy(() => import('@/components/mobile/MobileBestsellerProducts'));
 const HomeAdModal = lazy(() => import('../components/pc/common/HomeAdModal'));
 
 // Non-lazy imports for SEO
@@ -244,12 +241,11 @@ export default function Home() {
 
   // Use the useProducts hook with different options for different sections
   const { products: allProducts, loading: loadingAllProducts } = useProducts();
-  const { products: featuredProducts, loading: loadingFeatured } = useProducts({ type: 'featured' });
   const { products: newProducts, loading: loadingNew } = useProducts({ type: 'new' });
   const { products: comboProducts, loading: loadingCombo } = useProducts({ type: 'combo' });
   
   // Loading state combining all loading states
-  const isLoading = loadingAllProducts || loadingFeatured || loadingNew || loadingCombo || loadingBrands;
+  const isLoading = loadingAllProducts || loadingNew || loadingCombo || loadingBrands;
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -309,14 +305,6 @@ export default function Home() {
           <Suspense fallback={<LoadingFallback />}>
             <MobileHomeTabs />
           </Suspense>
-            <Suspense fallback={<LoadingFallback />}>
-            <MobileFeatureProduct 
-              products={featuredProducts}
-              brands={brands}
-              loading={loadingFeatured}
-              error={error}
-              />
-            </Suspense>
                 <Suspense fallback={<LoadingFallback />}>
             <MobileBestsellerProducts 
               products={allProducts}
@@ -341,19 +329,6 @@ export default function Home() {
                 <CategorySection />
               </Suspense>
 
-              <Suspense fallback={<LoadingFallback />}>
-                <CategoryGrid />
-              </Suspense>
-
-                <Suspense fallback={<LoadingFallback />}>
-                    <FeaturedProducts 
-                      products={featuredProducts} 
-                      loading={loadingFeatured} 
-              error={error}
-                      brands={brands}
-                    />
-                </Suspense>
-
                 <Suspense fallback={<LoadingFallback />}>
                     <NewProducts 
                       products={newProducts} 
@@ -372,18 +347,6 @@ export default function Home() {
                     />
                 </Suspense>
 
-                <Suspense fallback={<LoadingFallback />}>
-                  <BrandLogos 
-                    brands={brands} 
-                    loading={loadingBrands} 
-              error={error}
-                  />
-                </Suspense>
-
-                <Suspense fallback={<LoadingFallback />}>
-                  <BlogPosts />
-                </Suspense>
-          
                 <Suspense fallback={<LoadingFallback />}>
                   <SupportSection />
                 </Suspense>

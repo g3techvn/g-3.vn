@@ -8,7 +8,6 @@ import { X, Search, AlertCircle, Star } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import debounce from 'lodash/debounce';
-import { useSoldCounts } from '@/hooks/useSoldCounts';
 
 interface ProductSelectionModalProps {
   isOpen: boolean;
@@ -32,9 +31,8 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const { addToCart } = useCart();
   
-  // Get sold counts for products
+  // Remove useSoldCounts hook and its usage
   const productIds = products.map(p => p.id.toString());
-  const { soldCounts } = useSoldCounts(productIds);
 
   // Get unique brands from products
   const brands = useMemo(() => {
@@ -240,7 +238,7 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
                           <span className="ml-1 text-xs text-gray-600">{product.rating || 0}</span>
                         </div>
                         <span className="text-xs text-gray-400">|</span>
-                        <span className="text-xs text-gray-600">Đã bán {soldCounts[product.id.toString()] || 0}</span>
+                        <span className="text-xs text-gray-600">Đã bán {product.sold_count || 0}</span>
                       </div>
                       <div className="mt-1">
                         {product.original_price && product.original_price > product.price && (

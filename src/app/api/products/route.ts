@@ -112,8 +112,11 @@ export async function GET(request: NextRequest) {
         query = query.eq('brand_id', brand_id);
       }
       
-    if (type === 'combo') {
-      query = query.eq('is_combo', true);
+      if (type === 'combo') {
+        query = query.eq('feature', true)
+                    .eq('brand_id', 1) // brand_id 1 is Gami
+                    .eq('pd_cat_id', 1) // category_id 1 is "Ghế Công Thái Học"
+                    .limit(8); // limit to 8 products
       }
       
       // Execute query

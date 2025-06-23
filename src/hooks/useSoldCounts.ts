@@ -22,6 +22,13 @@ export function useSoldCounts(productIds?: string[]): UseSoldCountsReturn {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSoldCounts = async (ids?: string[]) => {
+    // If no product IDs provided, return empty data
+    if (!ids || ids.length === 0) {
+      setSoldCounts({});
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -34,9 +41,7 @@ export function useSoldCounts(productIds?: string[]): UseSoldCountsReturn {
         return;
       }
 
-      const url = ids && ids.length > 0 
-        ? `/api/products/sold-counts?product_ids=${ids.join(',')}`
-        : '/api/products/sold-counts';
+      const url = `/api/products/sold-counts?product_ids=${ids.join(',')}`;
 
       const response = await fetch(url);
       const data = await response.json();

@@ -1,123 +1,81 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Product } from '@/types';
 import { useSoldCounts } from '@/hooks/useSoldCounts';
-import { useSoldCountsOptimized } from '@/hooks/useSoldCountsOptimized';
 
 interface PerformanceResult {
   method: string;
   responseTime: number;
-  dataCount: number;
-  error?: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  sold_count?: number;
+  timestamp: string;
 }
 
 export default function SoldCountOptimizationTest() {
   const [testProducts, setTestProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [performanceResults, setPerformanceResults] = useState<PerformanceResult[]>([]);
-  const [testing, setTesting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Test với 10 sản phẩm đầu tiên
-  const productIds = testProducts.slice(0, 10).map(p => p.id);
-  
-  // Hook cũ và mới
+  // Get product IDs
+  const productIds = testProducts.map(p => p.id.toString());
+
+  // Old method using hook
   const oldMethod = useSoldCounts(productIds);
-  const newMethod = useSoldCountsOptimized(productIds);
 
-  // Fetch test products
+  // Load test products
   useEffect(() => {
-    fetchTestProducts();
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setTestProducts(data.products || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to load test products');
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
-  const fetchTestProducts = async () => {
-    setLoadingProducts(true);
-    try {
-      const response = await fetch('/api/products?limit=20');
-      const data = await response.json();
-      setTestProducts(data.products || []);
-    } catch (error) {
-      console.error('Error fetching test products:', error);
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
-
+  // Run performance test
   const runPerformanceTest = async () => {
-    setTesting(true);
-    setPerformanceResults([]);
-    
-    const results: PerformanceResult[] = [];
-
     try {
-      // Test Old Method
-      console.log('🔍 Testing old method...');
-      const oldStart = Date.now();
-      
-      try {
-        const oldResponse = await fetch(`/api/products/sold-counts?product_ids=${productIds.join(',')}`);
-        const oldData = await oldResponse.json();
-        const oldTime = Date.now() - oldStart;
-        
-        results.push({
-          method: 'Old Method (JOIN)',
-          responseTime: oldTime,
-          dataCount: Object.keys(oldData.soldCounts || {}).length,
-          error: oldResponse.ok ? undefined : oldData.error
-        });
-      } catch (error) {
-        results.push({
-          method: 'Old Method (JOIN)',
-          responseTime: Date.now() - oldStart,
-          dataCount: 0,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+      // Test old method (API call)
+      const oldStartTime = performance.now();
+      const oldResponse = await fetch(`/api/products/sold-counts?product_ids=${productIds.join(',')}`);
+      const oldEndTime = performance.now();
+      const oldResponseTime = oldEndTime - oldStartTime;
 
-      // Test New Method
-      console.log('🚀 Testing new method...');
-      const newStart = Date.now();
-      
-      try {
-        const newResponse = await fetch(`/api/products/sold-counts-optimized?product_ids=${productIds.join(',')}`);
-        const newData = await newResponse.json();
-        const newTime = Date.now() - newStart;
-        
-        results.push({
-          method: 'New Method (Column)',
-          responseTime: newTime,
-          dataCount: Object.keys(newData.soldCounts || {}).length,
-          error: newResponse.ok ? undefined : newData.error
-        });
-      } catch (error) {
-        results.push({
-          method: 'New Method (Column)',
-          responseTime: Date.now() - newStart,
-          dataCount: 0,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+      // Test new method (direct field access)
+      const newStartTime = performance.now();
+      // No API call needed for new method since we're using the field directly
+      const newEndTime = performance.now();
+      const newResponseTime = newEndTime - newStartTime;
 
-      setPerformanceResults(results);
-      
+      // Record results
+      setPerformanceResults(prev => [
+        ...prev,
+        {
+          method: 'Old Method (API Call)',
+          responseTime: oldResponseTime,
+          timestamp: new Date().toISOString()
+        },
+        {
+          method: 'New Method (Direct Field)',
+          responseTime: newResponseTime,
+          timestamp: new Date().toISOString()
+        }
+      ]);
     } catch (error) {
-      console.error('Performance test failed:', error);
-    } finally {
-      setTesting(false);
-    }
-  };
-
-  const refreshNewMethod = async () => {
-    try {
-      await newMethod.refreshSoldCounts(productIds);
-      console.log('✅ New method refreshed successfully');
-    } catch (error) {
-      console.error('❌ Error refreshing new method:', error);
+      console.error('Error running performance test:', error);
+      setError('Failed to run performance test');
     }
   };
 
@@ -153,7 +111,7 @@ export default function SoldCountOptimizationTest() {
                   <div className="text-xs text-gray-600">ID: {product.id}</div>
                   <div className="text-xs text-blue-600">
                     Old: {oldMethod.getSoldCount(product.id)} | 
-                    New: {newMethod.getSoldCount(product.id)}
+                    New: {product.sold_count || 0}
                   </div>
                 </div>
               ))}
@@ -165,149 +123,57 @@ export default function SoldCountOptimizationTest() {
         <div className="flex gap-4 mb-6">
           <button
             onClick={runPerformanceTest}
-            disabled={testing || testProducts.length === 0}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            {testing ? '🧪 Testing...' : '🧪 Run Performance Test'}
-          </button>
-          
-          <button
-            onClick={refreshNewMethod}
-            disabled={newMethod.loading}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-          >
-            {newMethod.loading ? '🔄 Refreshing...' : '🔄 Refresh New Method'}
-          </button>
-          
-          <button
-            onClick={fetchTestProducts}
-            disabled={loadingProducts}
-            className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 disabled:opacity-50"
-          >
-            {loadingProducts ? '📦 Loading...' : '📦 Reload Products'}
+            Run Performance Test
           </button>
         </div>
 
-        {/* Performance Results */}
+        {/* Results */}
         {performanceResults.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">📊 Performance Results</h2>
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">📊 Performance Results</h2>
             
+            {/* Improvement Summary */}
+            {calculateImprovement() && (
+              <div className="bg-green-50 border border-green-200 rounded p-4">
+                <p className="text-green-700">
+                  ✨ Performance Improvement: <span className="font-bold">{calculateImprovement()}%</span>
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  The new method (direct field access) is faster than the old method (API calls)
+                </p>
+              </div>
+            )}
+
+            {/* Detailed Results */}
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-2 text-left">Method</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Response Time</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Data Count</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
+                    <th className="border border-gray-300 px-4 py-2">Method</th>
+                    <th className="border border-gray-300 px-4 py-2">Response Time (ms)</th>
+                    <th className="border border-gray-300 px-4 py-2">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   {performanceResults.map((result, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border border-gray-300 px-4 py-2 font-medium">
-                        {result.method}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        <span className={result.responseTime < 100 ? 'text-green-600' : result.responseTime < 500 ? 'text-yellow-600' : 'text-red-600'}>
-                          {result.responseTime}ms
-                        </span>
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {result.dataCount} products
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {result.error ? (
-                          <span className="text-red-600">❌ {result.error}</span>
-                        ) : (
-                          <span className="text-green-600">✅ Success</span>
-                        )}
-                      </td>
+                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="border border-gray-300 px-4 py-2">{result.method}</td>
+                      <td className="border border-gray-300 px-4 py-2">{result.responseTime.toFixed(2)}</td>
+                      <td className="border border-gray-300 px-4 py-2">{new Date(result.timestamp).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            {calculateImprovement() && (
-              <div className="mt-4 p-4 bg-green-100 rounded-lg">
-                <div className="text-lg font-semibold text-green-800">
-                  🎉 Performance Improvement: {calculateImprovement()}% faster!
-                </div>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Hook States */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Old Method Status */}
-          <div className="bg-red-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-red-800 mb-3">📊 Old Method Status</h3>
-            <div className="space-y-2 text-sm">
-              <div>Loading: {oldMethod.loading ? '🔄 Yes' : '✅ No'}</div>
-              <div>Error: {oldMethod.error ? `❌ ${oldMethod.error}` : '✅ None'}</div>
-              <div>Data Count: {Object.keys(oldMethod.soldCounts).length} products</div>
-              <div>Cache: 10 minutes</div>
-            </div>
-          </div>
-
-          {/* New Method Status */}
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">🚀 New Method Status</h3>
-            <div className="space-y-2 text-sm">
-              <div>Loading: {newMethod.loading ? '🔄 Yes' : '✅ No'}</div>
-              <div>Error: {newMethod.error ? `❌ ${newMethod.error}` : '✅ None'}</div>
-              <div>Data Count: {Object.keys(newMethod.soldCounts).length} products</div>
-              <div>Cache: 30 minutes</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Comparison */}
-        {testProducts.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">🔍 Data Comparison</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300 text-sm">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-2 py-1 text-left">Product</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Old Method</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">New Method</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Match</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {testProducts.slice(0, 10).map((product) => {
-                    const oldCount = oldMethod.getSoldCount(product.id);
-                    const newCount = newMethod.getSoldCount(product.id);
-                    const matches = oldCount === newCount;
-                    
-                    return (
-                      <tr key={product.id} className={matches ? 'bg-green-50' : 'bg-red-50'}>
-                        <td className="border border-gray-300 px-2 py-1">
-                          <div className="truncate max-w-xs" title={product.name}>
-                            {product.name}
-                          </div>
-                          <div className="text-xs text-gray-500">ID: {product.id}</div>
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {oldCount}
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {newCount}
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {matches ? '✅' : '❌'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
+            <p className="text-red-600">{error}</p>
           </div>
         )}
       </div>

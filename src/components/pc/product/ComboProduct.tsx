@@ -385,6 +385,9 @@ export default function ComboProduct({
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
   const [brandNames, setBrandNames] = useState<Record<string, string>>({});
 
+  // Extract product IDs for useSoldCounts hook
+  const productIds = products.map(product => product.id.toString());
+
   // Build a map of brand_id to brand name
   useEffect(() => {
     if (brands.length > 0) {
@@ -504,6 +507,7 @@ export default function ComboProduct({
                       brand: combo.brand,
                       brand_id: combo.brand_id || '',
                       rating: combo.rating,
+                      sold_count: 0,
                       slug: combo.slug || combo.id,
                       description: combo.description || '',
                       category_id: '',

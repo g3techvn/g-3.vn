@@ -7,7 +7,6 @@ import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
 import QuickView from './QuickView';
 import OptimizedImage from '@/components/common/OptimizedImage';
-import { useSoldCounts } from '@/hooks/useSoldCounts';
 import { useBrandData } from '@/hooks/useBrandData';
 
 interface ProductCardProps {
@@ -21,10 +20,6 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  
-  // Get sold count for this product
-  const { getSoldCount } = useSoldCounts([product.id.toString()]);
-  const soldCount = getSoldCount(product.id.toString());
 
   // ✅ Use cached brand data instead of manual fetch
   const { data: brandData, isLoading: brandLoading } = useBrandData(product.brand_id);
@@ -117,7 +112,7 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
                   {(product.rating || 4.9).toFixed(1)}
                 </span>
                 <span>•</span>
-                <span>Đã bán {soldCount}</span>
+                <span>Đã bán {product.sold_count || 0}</span>
               </div>
               <button 
                 className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"

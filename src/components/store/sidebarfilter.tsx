@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
 import { Product } from '@/types';
 
 interface SidebarFilterProps {
@@ -164,7 +162,43 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
     <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
       <div>
         <h3 className="mb-4 text-lg font-semibold">Bộ lọc</h3>
-        {/* Brand Filter - Đưa lên đầu */}
+        
+        {/* Price Range Filter */}
+        <div className="mb-6">
+          <h4 className="mb-3 font-medium">Khoảng giá</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Giá tối thiểu</label>
+              <input
+                type="range"
+                min={0}
+                max={effectiveMaxPrice}
+                value={priceRange.min}
+                onChange={(e) => handlePriceChange('min', e.target.value)}
+                className="w-full"
+              />
+              <div className="text-sm text-gray-600 mt-1">
+                {priceRange.min.toLocaleString()}₫
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Giá tối đa</label>
+              <input
+                type="range"
+                min={0}
+                max={effectiveMaxPrice}
+                value={priceRange.max}
+                onChange={(e) => handlePriceChange('max', e.target.value)}
+                className="w-full"
+              />
+              <div className="text-sm text-gray-600 mt-1">
+                {priceRange.max.toLocaleString()}₫
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Brand Filter */}
         <div className="mb-6">
           <h4 className="mb-3 font-medium">Thương hiệu</h4>
           {loadingBrands ? (
@@ -189,7 +223,8 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
             </div>
           )}
         </div>
-        {/* Category Filter - Thứ hai */}
+
+        {/* Category Filter */}
         <div className="mb-6">
           <h4 className="mb-3 font-medium">Danh mục</h4>
           {loadingCategories ? (
@@ -200,57 +235,19 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
             <div className="text-sm text-gray-500">Không có danh mục</div>
           ) : (
             <div className="space-y-2">
-              {categories.map((cat) => (
-                <label key={cat.id} className="flex items-center space-x-2">
+              {categories.map((category) => (
+                <label key={category.id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={selectedCategoryIds.includes(cat.id)}
-                    onChange={() => handleCategoryChange(cat.id)}
+                    checked={selectedCategoryIds.includes(category.id)}
+                    onChange={() => handleCategoryChange(category.id)}
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-600">{cat.title}</span>
+                  <span className="text-sm text-gray-600">{category.title}</span>
                 </label>
               ))}
             </div>
           )}
-        </div>
-        {/* Price Range Filter - Cuối cùng */}
-        <div className="mb-6">
-          <h4 className="mb-3 font-medium">Khoảng giá</h4>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 w-20">Từ</span>
-              <span className="text-sm text-gray-800 w-24 text-right">{priceRange.min.toLocaleString()}</span>
-              <span className="text-sm text-gray-600 w-12 text-center">-</span>
-              <span className="text-sm text-gray-800 w-24 text-right">{priceRange.max.toLocaleString()}</span>
-              <span className="text-sm text-gray-600 w-20">Đến</span>
-            </div>
-            <div className="px-2">
-              <Slider
-                range
-                min={0}
-                max={effectiveMaxPrice}
-                step={500000}
-                value={[priceRange.min, priceRange.max]}
-                onChange={(val) => {
-                  if (Array.isArray(val) && val.length === 2) {
-                    const [min, max] = val;
-                    setPriceRange({ 
-                      min: Math.min(min, effectiveMaxPrice),
-                      max: Math.min(max, effectiveMaxPrice)
-                    });
-                  }
-                }}
-                allowCross={false}
-                trackStyle={[{ backgroundColor: '#ef4444' }]}
-                handleStyle={[
-                  { borderColor: '#ef4444', backgroundColor: '#fff' },
-                  { borderColor: '#ef4444', backgroundColor: '#fff' }
-                ]}
-                railStyle={{ backgroundColor: '#e5e7eb' }}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>

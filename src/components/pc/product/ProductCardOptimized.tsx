@@ -7,7 +7,6 @@ import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
 import QuickView from './QuickView';
 import OptimizedImage from '@/components/common/OptimizedImage';
-import { useSingleProductSoldCount } from '@/hooks/useSoldCountsOptimized';
 import { useBrandData } from '@/hooks/useBrandData';
 
 interface ProductCardProps {
@@ -22,10 +21,7 @@ export function ProductCardOptimized({ product, className = '' }: ProductCardPro
   const [isHovered, setIsHovered] = useState(false);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   
-  const { soldCount, loading: soldCountLoading } = useSingleProductSoldCount(product.id.toString());
-
-  // ✅ Use cached brand data instead of manual fetch
-  const { data: brandData, isLoading: brandLoading } = useBrandData(product.brand_id);
+  const { data: brandData } = useBrandData(product.brand_id);
   
   // Update brandImage when cached data changes
   useEffect(() => {
@@ -49,18 +45,15 @@ export function ProductCardOptimized({ product, className = '' }: ProductCardPro
     e.preventDefault();
     e.stopPropagation();
     addToCart({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image_url,
+      ...product,
       quantity: 1,
-      original_price: product.original_price
+      image: product.image_url || ''
     });
   };
 
   return (
-    <>
-      <Link href={`/san-pham/${product.slug}`} className={`block ${className}`}>
+    <div className={`group relative bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200 ${className}`}>
+      <Link href={`/san-pham/${product.slug || product.id}`} className="block">
         <div
           className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 overflow-hidden group"
           onMouseEnter={() => setIsHovered(true)}
@@ -116,16 +109,14 @@ export function ProductCardOptimized({ product, className = '' }: ProductCardPro
                 </span>
                 <span>•</span>
                 <span>
-                  Đã bán {soldCountLoading ? '...' : soldCount}
-                  {!soldCountLoading && (
-                    <span className="ml-1 text-green-600 text-xs">⚡</span>
-                  )}
+                  Đã bán {product.sold_count || 0}
+                  <span className="ml-1 text-green-600 text-xs">⚡</span>
                 </span>
               </div>
-              <button 
-                className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
-                aria-label="Thêm vào giỏ hàng"
+              <button
                 onClick={handleAddToCart}
+                className="absolute right-2 bottom-2 p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+                aria-label="Thêm vào giỏ hàng"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -143,6 +134,6 @@ export function ProductCardOptimized({ product, className = '' }: ProductCardPro
           onClose={() => setIsQuickViewOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 } 

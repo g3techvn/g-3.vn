@@ -5,7 +5,6 @@ import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
 import OptimizedImage from '@/components/common/OptimizedImage';
-import { useSoldCounts } from '@/hooks/useSoldCounts';
 
 interface MobileFeatureProductProps {
   products: Product[];
@@ -20,12 +19,10 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   loading, 
   error 
 }) => {
-  // Get sold counts for all products
   const productIds = products.map(p => p.id.toString());
-  const { getSoldCount } = useSoldCounts(productIds);
+  const { addToCart } = useCart();
   const [currentSlides, setCurrentSlides] = useState<Record<string, number>>({});
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const { addToCart } = useCart();
   
   // Biến đổi mảng brands thành map để dễ truy cập - memoized
   const brandsMap = useMemo(() => {
@@ -249,7 +246,7 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
                                 {(product.rating || 4.9).toFixed(1)}
                               </span>
                               <span>•</span>
-                              <span>Đã bán {getSoldCount(product.id.toString())}</span>
+                              <span>Đã bán {product.sold_count || 0}</span>
                             </div>
                             <button 
                               className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"

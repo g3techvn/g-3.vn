@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { generateProductAltTag } from '@/lib/utils/seo-utils';
 
 interface OptimizedImageProps {
-  src: string;
+  src: string | null | undefined;  // Updated to allow null or undefined
   alt: string;
   className?: string;
   width?: number;
@@ -27,6 +27,8 @@ interface OptimizedImageProps {
   color?: string;
   material?: string;
 }
+
+const FALLBACK_IMAGE = '/assets/images/products/placeholder.svg';
 
 export default function OptimizedImage({
   src,
@@ -53,6 +55,7 @@ export default function OptimizedImage({
 }: OptimizedImageProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(src || FALLBACK_IMAGE);
 
   // Detect mobile on client side
   useEffect(() => {
@@ -61,6 +64,11 @@ export default function OptimizedImage({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Update imgSrc when src prop changes
+  useEffect(() => {
+    setImgSrc(src || FALLBACK_IMAGE);
+  }, [src]);
 
   // Calculate quality based on device, priority, and network optimization
   const baseQuality = optimizeForSlowNetwork 
@@ -100,15 +108,20 @@ export default function OptimizedImage({
 
   // Enhanced URL optimization for Supabase images
   const optimizedSrc = (() => {
+    // Handle null or undefined src
+    if (!imgSrc) {
+      return FALLBACK_IMAGE;
+    }
+
     // Handle Next.js optimized images - let Next.js handle optimization
-    if (src.startsWith('/_next/image')) {
-      return src;
+    if (imgSrc.startsWith('/_next/image')) {
+      return imgSrc;
     }
     
     // For Supabase images, optimize URL parameters
-    if (src.includes('jjraznkvgfsgqrqvlcwo.supabase.co')) {
+    if (imgSrc.includes('jjraznkvgfsgqrqvlcwo.supabase.co')) {
       try {
-        const url = new URL(src);
+        const url = new URL(imgSrc);
         
         // Add quality parameter (optimized for slow loading)
         url.searchParams.set('quality', imageQuality.toString());
@@ -129,11 +142,11 @@ export default function OptimizedImage({
         return url.toString();
       } catch (error) {
         // If URL parsing fails, return original src
-        return src;
+        return imgSrc;
       }
     }
     
-    return src;
+    return imgSrc;
   })();
 
   // Preload critical images for LCP optimization
@@ -172,7 +185,10 @@ export default function OptimizedImage({
         placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)} // Show content even if image fails
+        onError={() => {
+          setLoaded(true);
+          setImgSrc(FALLBACK_IMAGE);
+        }}
         style={{ 
           objectFit, 
           opacity: loaded ? 1 : 0,

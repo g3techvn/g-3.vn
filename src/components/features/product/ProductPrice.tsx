@@ -1,6 +1,5 @@
 import React from 'react';
 import { ProductVariant } from '@/types';
-import { useSoldCounts } from '@/hooks/useSoldCounts';
 
 interface ProductPriceProps {
   price: number | undefined;
@@ -8,14 +7,10 @@ interface ProductPriceProps {
   publisher?: string;
   soldCount?: number;
   selectedVariant?: ProductVariant | null;
-  productId?: string; // Add productId to get real sold count
+  productId?: string;
 }
 
-export function ProductPrice({ price, originalPrice, publisher, soldCount = 0, selectedVariant, productId }: ProductPriceProps) {
-  // Get real sold count from API if productId is provided
-  const { getSoldCount } = useSoldCounts(productId ? [productId] : []);
-  const realSoldCount = productId ? getSoldCount(productId) : soldCount;
-  
+export function ProductPrice({ price, originalPrice, publisher, soldCount = 0, selectedVariant }: ProductPriceProps) {
   // Use variant price if available, otherwise fallback to product price
   const currentPrice = selectedVariant?.price ?? price;
   const currentOriginalPrice = selectedVariant?.original_price ?? originalPrice;
@@ -29,7 +24,7 @@ export function ProductPrice({ price, originalPrice, publisher, soldCount = 0, s
             <div className="text-base text-gray-400 line-through">{currentOriginalPrice.toLocaleString('vi-VN')}₫</div>
           )}
         </div>
-        <div className="text-xs text-gray-500">Đã bán {realSoldCount}</div>
+        <div className="text-xs text-gray-500">Đã bán {soldCount}</div>
       </div>
       
       {/* Brand display */}

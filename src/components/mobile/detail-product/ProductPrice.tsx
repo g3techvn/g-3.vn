@@ -1,6 +1,5 @@
 import React from 'react';
 import { ProductVariant } from '@/types';
-import { useSoldCounts } from '@/hooks/useSoldCounts';
 
 interface ProductPriceProps {
   price: number | undefined;
@@ -8,37 +7,61 @@ interface ProductPriceProps {
   publisher?: string;
   soldCount?: number;
   selectedVariant?: ProductVariant | null;
-  productId?: string; // Add productId to get real sold count
+  productId?: string;
 }
 
-export function ProductPrice({ price, originalPrice, publisher, soldCount = 0, selectedVariant, productId }: ProductPriceProps) {
-  // Get real sold count from API if productId is provided
-  const { getSoldCount } = useSoldCounts(productId ? [productId] : []);
-  const realSoldCount = productId ? getSoldCount(productId) : soldCount;
-  
-  // Use variant price if available, otherwise fallback to product price
-  const currentPrice = selectedVariant?.price ?? price;
-  const currentOriginalPrice = selectedVariant?.original_price ?? originalPrice;
-  
+const ProductPrice: React.FC<ProductPriceProps> = ({
+  price,
+  originalPrice,
+  publisher,
+  soldCount = 0,
+  selectedVariant,
+  productId
+}) => {
+  // Calculate discount percentage
+  const discountPercentage = originalPrice && price 
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    : 0;
+
   return (
-    <div className="bg-white px-4 pt-2 pb-3 border-b border-gray-100">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-baseline gap-2">
-          <div className="text-2xl font-bold text-red-600">{currentPrice?.toLocaleString('vi-VN')}₫</div>
-          {currentOriginalPrice && currentOriginalPrice > (currentPrice || 0) && (
-            <div className="text-base text-gray-400 line-through">{currentOriginalPrice.toLocaleString('vi-VN')}₫</div>
+    <div className="bg-white p-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold text-red-600">
+            {price ? price.toLocaleString() : 0}đ
+          </span>
+          {originalPrice && originalPrice > (price || 0) && (
+            <span className="text-sm text-gray-500 line-through">
+              {originalPrice.toLocaleString()}đ
+            </span>
           )}
         </div>
-        <div className="text-xs text-gray-500">Đã bán {realSoldCount}</div>
+        {discountPercentage > 0 && (
+          <span className="px-2 py-1 bg-red-100 text-red-600 text-sm font-medium rounded">
+            -{discountPercentage}%
+          </span>
+        )}
       </div>
-      
-      {/* Brand display */}
-      {publisher && (
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-sm text-gray-600">Thương hiệu:</span>
-          <span className="text-sm font-medium text-gray-800">{publisher}</span>
+
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-0.5">
+            <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6" />
+            </svg>
+            4.9
+          </span>
+          <span>•</span>
+          <span>Đã bán {soldCount}</span>
         </div>
-      )}
+        {publisher && (
+          <div className="text-gray-600">
+            Cung cấp bởi <span className="font-medium">{publisher}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
-} 
+};
+
+export default ProductPrice; 
