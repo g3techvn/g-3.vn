@@ -180,10 +180,10 @@ export default function FeaturedProducts({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
                   >
-                    <div className="aspect-square w-full rounded-lg bg-gray-200 skeleton-shimmer" />
+                    <div className="aspect-square w-full rounded-lg bg-gray-200 animate-pulse" />
                     <div className="mt-2 space-y-2">
-                      <div className="h-4 w-3/4 rounded bg-gray-200 skeleton-shimmer" />
-                      <div className="h-4 w-1/2 rounded bg-gray-200 skeleton-shimmer" />
+                      <div className="h-4 w-3/4 rounded bg-gray-200 animate-pulse" />
+                      <div className="h-4 w-1/2 rounded bg-gray-200 animate-pulse" />
                     </div>
                   </motion.div>
                 ))}

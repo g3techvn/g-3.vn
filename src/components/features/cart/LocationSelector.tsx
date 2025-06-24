@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useLocationData } from '@/lib/locationManager';
 import { useToast } from "@/hooks/useToast";
-import { District, Ward } from '@/lib/provinces';
+import { District, Ward, Province } from '@/lib/provinces';
+import { ChevronDownIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 interface LocationSelectorProps {
   selectedProvinceCode?: number;
@@ -24,185 +25,197 @@ export default function LocationSelector({
   onWardChange,
   disabled = false
 }: LocationSelectorProps) {
-  const { provinces, getDistricts, getWards, stats, hasData } = useLocationData();
+  const { provinces, districts, wards, loading, error } = useLocationData();
   const { showToast } = useToast();
   
-  const [loading, setLoading] = useState({
-    districts: false,
-    wards: false
-  });
+  const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
+  const [filteredWards, setFilteredWards] = useState<Ward[]>([]);
 
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
-
-  useEffect(() => {
-    if (!hasData) {
-      showToast('Đang tải dữ liệu địa chỉ...', 'default');
-      return;
-    }
-
-    if (stats) {
-      showToast(`Đã tải ${stats.totalProvinces} tỉnh/thành, ${stats.totalDistricts} quận/huyện, ${stats.totalWards} phường/xã`, 'default');
-    }
-  }, [hasData, stats]);
-
-  useEffect(() => {
-    async function loadDistricts() {
-      if (selectedProvinceCode) {
-        setLoading(prev => ({ ...prev, districts: true }));
-        try {
-          const districtsData = await getDistricts(selectedProvinceCode);
-          setDistricts(districtsData);
-          if (districtsData.length === 0) {
-            showToast('Không có dữ liệu quận/huyện', 'destructive');
-          }
-        } catch (error) {
-          console.error('Error loading districts:', error);
-          showToast('Lỗi khi tải danh sách quận/huyện', 'destructive');
-        } finally {
-          setLoading(prev => ({ ...prev, districts: false }));
-        }
-      } else {
-        setDistricts([]);
-      }
-    }
-    loadDistricts();
-  }, [selectedProvinceCode, getDistricts]);
-
-  useEffect(() => {
-    async function loadWards() {
-      if (selectedDistrictCode) {
-        setLoading(prev => ({ ...prev, wards: true }));
-        try {
-          const wardsData = await getWards(selectedDistrictCode);
-          setWards(wardsData);
-          if (wardsData.length === 0) {
-            showToast('Không có dữ liệu phường/xã', 'destructive');
-          }
-        } catch (error) {
-          console.error('Error loading wards:', error);
-          showToast('Lỗi khi tải danh sách phường/xã', 'destructive');
-        } finally {
-          setLoading(prev => ({ ...prev, wards: false }));
-        }
-      } else {
-        setWards([]);
-      }
-    }
-    loadWards();
-  }, [selectedDistrictCode, getWards]);
-
+  // Filter districts when province changes
   useEffect(() => {
     if (selectedProvinceCode) {
-      const province = provinces.find(p => p.code === selectedProvinceCode);
-      if (province) {
-        onProvinceChange(province.code, province.name);
-      } else {
-        showToast('Không tìm thấy tỉnh/thành phố', 'destructive');
+      const districtsForProvince = districts.filter(d => d.province_code === selectedProvinceCode);
+      setFilteredDistricts(districtsForProvince);
+      
+      if (districtsForProvince.length === 0) {
+        showToast('Không có dữ liệu quận/huyện cho tỉnh/thành phố này', 'destructive');
       }
+      
+      // Reset ward selection when province changes
+      setFilteredWards([]);
+      onWardChange(0, '');
+    } else {
+      setFilteredDistricts([]);
+      setFilteredWards([]);
     }
-  }, [selectedProvinceCode, provinces, onProvinceChange]);
+  }, [selectedProvinceCode, districts]);
 
+  // Filter wards when district changes
   useEffect(() => {
-    if (selectedDistrictCode && districts.length > 0) {
-      const district = districts.find(d => d.code === selectedDistrictCode);
-      if (district) {
-        onDistrictChange(district.code, district.name);
-      } else {
-        showToast('Không tìm thấy quận/huyện', 'destructive');
+    if (selectedDistrictCode) {
+      const wardsForDistrict = wards.filter(w => w.district_code === selectedDistrictCode);
+      setFilteredWards(wardsForDistrict);
+      
+      if (wardsForDistrict.length === 0) {
+        showToast('Không có dữ liệu phường/xã cho quận/huyện này', 'destructive');
       }
+    } else {
+      setFilteredWards([]);
     }
-  }, [selectedDistrictCode, districts, onDistrictChange]);
+  }, [selectedDistrictCode, wards]);
 
-  useEffect(() => {
-    if (selectedWardCode && wards.length > 0) {
-      const ward = wards.find(w => w.code === selectedWardCode);
-      if (ward) {
-        onWardChange(ward.code, ward.name);
-      } else {
-        showToast('Không tìm thấy phường/xã', 'destructive');
-      }
-    }
-  }, [selectedWardCode, wards, onWardChange]);
+  if (loading) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="mb-4">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+              <div className="h-12 bg-gray-200 rounded-lg"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center py-6 px-4">
+        <MapPinIcon className="w-12 h-12 mx-auto mb-3 text-red-400" />
+        <p className="text-sm mb-4">
+          {error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu địa chỉ'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+        >
+          Tải lại trang
+        </button>
+      </div>
+    );
+  }
+
+  const SelectField = ({ 
+    id, 
+    label, 
+    value, 
+    onChange, 
+    options, 
+    placeholder, 
+    disabled: fieldDisabled 
+  }: {
+    id: string;
+    label: string;
+    value: number | string;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    options: Array<{ code: number; name: string }>;
+    placeholder: string;
+    disabled?: boolean;
+  }) => (
+    <div className="relative">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+        {label} <span className="text-red-500">*</span>
+      </label>
+      <div className="relative">
+        <select
+          id={id}
+          className={`
+            appearance-none block w-full px-4 py-3 pr-10 
+            text-base border border-gray-300 rounded-lg 
+            shadow-sm placeholder-gray-400
+            focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500
+            disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+            transition-all duration-200
+            ${fieldDisabled ? 'bg-gray-50' : 'bg-white'}
+          `}
+          value={value}
+          onChange={onChange}
+          disabled={disabled || fieldDisabled}
+        >
+          <option value="" className="text-gray-500">{placeholder}</option>
+          {options.map((option) => (
+            <option key={option.code} value={option.code} className="text-gray-900">
+              {option.name}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <ChevronDownIcon 
+            className={`h-5 w-5 transition-colors ${fieldDisabled ? 'text-gray-400' : 'text-gray-500'}`} 
+          />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      {/* Province Select */}
-      <div>
-        <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">
-          Tỉnh/Thành phố
-        </label>
-        <select
-          id="province"
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-          value={selectedProvinceCode || ''}
-          onChange={(e) => {
-            const province = provinces.find(p => p.code === Number(e.target.value));
-            if (province) {
-              onProvinceChange(province.code, province.name);
-            }
-          }}
-          disabled={disabled}
-        >
-          <option value="">Chọn Tỉnh/Thành phố</option>
-          {provinces.map(province => (
-            <option key={province.code} value={province.code}>
-              {province.name}
-            </option>
-          ))}
-        </select>
+    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+      <div className="flex items-center mb-4">
+        <MapPinIcon className="w-5 h-5 text-red-500 mr-2" />
+        <h3 className="text-lg font-medium text-gray-900">Thông tin địa chỉ</h3>
       </div>
+
+      {/* Province Select */}
+      <SelectField
+        id="province"
+        label="Tỉnh/Thành phố"
+        value={selectedProvinceCode || ''}
+        onChange={(e) => {
+          const code = Number(e.target.value);
+          const province = provinces.find((p: Province) => p.code === code);
+          if (province) {
+            onProvinceChange(province.code, province.name);
+            // Reset district and ward
+            onDistrictChange(0, '');
+            onWardChange(0, '');
+          }
+        }}
+        options={provinces}
+        placeholder="Chọn Tỉnh/Thành phố"
+      />
 
       {/* District Select */}
-      <div>
-        <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
-          Quận/Huyện
-        </label>
-        <select
-          id="district"
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-          value={selectedDistrictCode || ''}
-          onChange={(e) => {
-            const district = districts.find(d => d.code === Number(e.target.value));
-            if (district) {
-              onDistrictChange(district.code, district.name);
-            }
-          }}
-          disabled={!selectedProvinceCode || loading.districts || disabled}
-        >
-          <option value="">Chọn Quận/Huyện</option>
-          {districts.map(district => (
-            <option key={district.code} value={district.code}>
-              {district.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SelectField
+        id="district"
+        label="Quận/Huyện"
+        value={selectedDistrictCode || ''}
+        onChange={(e) => {
+          const code = Number(e.target.value);
+          const district = filteredDistricts.find((d: District) => d.code === code);
+          if (district) {
+            onDistrictChange(district.code, district.name);
+            // Reset ward
+            onWardChange(0, '');
+          }
+        }}
+        options={filteredDistricts}
+        placeholder="Chọn Quận/Huyện"
+        disabled={!selectedProvinceCode}
+      />
 
       {/* Ward Select */}
-      <div>
-        <label htmlFor="ward" className="block text-sm font-medium text-gray-700 mb-1">
-          Phường/Xã
-        </label>
-        <select
-          id="ward"
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-          value={selectedWardCode || ''}
-          onChange={(e) => {
-            const ward = wards.find(w => w.code === Number(e.target.value));
-            if (ward) {
-              onWardChange(ward.code, ward.name);
-            }
-          }}
-          disabled={!selectedDistrictCode || loading.wards || disabled}
-        >
-          <option value="">Chọn Phường/Xã</option>
-          {wards.map(ward => (
-            <option key={ward.code} value={ward.code}>
-              {ward.name}
-            </option>
-          ))}
-        </select>
+      <SelectField
+        id="ward"
+        label="Phường/Xã"
+        value={selectedWardCode || ''}
+        onChange={(e) => {
+          const code = Number(e.target.value);
+          const ward = filteredWards.find((w: Ward) => w.code === code);
+          if (ward) {
+            onWardChange(ward.code, ward.name);
+          }
+        }}
+        options={filteredWards}
+        placeholder="Chọn Phường/Xã"
+        disabled={!selectedDistrictCode}
+      />
+
+      {/* Info message for mobile users */}
+      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg md:hidden">
+        <p className="text-sm text-blue-700">
+          💡 Chọn từ trên xuống dưới: Tỉnh/Thành phố → Quận/Huyện → Phường/Xã
+        </p>
       </div>
     </div>
   );

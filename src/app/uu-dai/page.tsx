@@ -9,7 +9,7 @@ interface Promotion {
   id: number;
   created_at: string;
   title: string;
-  desc: string;
+  description: string;
   image: string;
   youtube_url?: string;
   slug: string;

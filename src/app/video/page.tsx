@@ -52,8 +52,13 @@ function VideoContent() {
       
       const data = await response.json();
       const fetchedProducts = (data.products || []).filter((product: Product) => 
-        product.video_url && product.video_url.trim() !== ''
+        product.video_url && 
+        product.video_url.trim() !== '' && 
+        product.video_url !== null
       );
+      
+      console.log('Video page - Products with videos:', fetchedProducts.length);
+      console.log('Video page - Sample video URLs:', fetchedProducts.slice(0, 3).map((p: Product) => p.video_url));
       
       if (pageNumber === 1) {
         setProducts(fetchedProducts);
@@ -183,16 +188,34 @@ function VideoContent() {
     );
   }
 
-  if (error || products.length === 0) {
+  if (error) {
     return (
       <div className="flex h-screen flex-col items-center justify-center p-4 text-center">
-        <h2 className="mb-4 text-xl font-bold">Không thể tải sản phẩm</h2>
-        <p className="mb-6 text-gray-600">{error || 'Không tìm thấy sản phẩm nào'}</p>
+        <h2 className="mb-4 text-xl font-bold">Không thể tải video</h2>
+        <p className="mb-6 text-gray-600">{error}</p>
         <button 
           onClick={() => router.push('/')}
           className="rounded-md bg-blue-600 px-4 py-2 text-white"
         >
           Quay lại Trang chủ
+        </button>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center p-4 text-center">
+        <h2 className="mb-4 text-xl font-bold">Chưa có video sản phẩm</h2>
+        <p className="mb-6 text-gray-600">
+          Chúng tôi đang cập nhật video cho các sản phẩm. 
+          <br />Vui lòng quay lại sau.
+        </p>
+        <button 
+          onClick={() => router.push('/')}
+          className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+        >
+          Xem Sản phẩm
         </button>
       </div>
     );

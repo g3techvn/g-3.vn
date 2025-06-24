@@ -45,13 +45,15 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort');
     const type = searchParams.get('type');
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
     
     console.log('API Request - Query params:', { 
       category_id, 
       brand_id, 
       sort, 
       type,
-      limit
+      limit,
+      page
     });
     
     // Create cache key based on query parameters
@@ -60,7 +62,8 @@ export async function GET(request: NextRequest) {
       brand_id,
       sort,
       type,
-      limit
+      limit,
+      page
     });
     
     // Check cache first
@@ -114,9 +117,24 @@ export async function GET(request: NextRequest) {
       
       if (type === 'combo') {
         query = query.eq('feature', true)
-                    .eq('brand_id', 1) // brand_id 1 is Gami
-                    .eq('pd_cat_id', 1) // category_id 1 is "Ghế Công Thái Học"
-                    .limit(8); // limit to 8 products
+                    .eq('brand_id', 1)
+                    .eq('pd_cat_id', 1)
+                    .limit(8);
+      }
+      
+      if (type === 'mobilefeature') {
+        // Mobile feature products - show diverse brands without restrictions
+        query = query.eq('feature', true)
+                    .limit(25); // More products for mobile feature display
+      }
+      
+      // Apply pagination if both page and limit are provided
+      if (page && limit) {
+        const offset = (page - 1) * limit;
+        query = query.range(offset, offset + limit - 1);
+      } else if (limit && !type) {
+        // Apply limit only if no type specified (avoid overriding type-specific limits)
+        query = query.limit(limit);
       }
       
       // Execute query

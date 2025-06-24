@@ -179,7 +179,7 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
 
         <div className="flex-1 overflow-y-auto mt-4">
           {loadingProducts ? (
-            // Loading skeleton
+            // Loading state
             <div className="grid grid-cols-4 gap-4 p-4">
               {Array.from({ length: 8 }).map((_, index) => (
                 <div key={index} className="flex animate-pulse flex-col gap-2 rounded-lg border p-2">

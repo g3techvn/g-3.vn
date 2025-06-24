@@ -26,29 +26,8 @@ import { ProductVariants } from './ProductVariants';
 // ✅ Lazy load non-critical below-fold components
 const ProductReviews = dynamic(() => import('./ProductReviews').then(mod => ({ default: mod.ProductReviews })), {
   loading: () => (
-    <div className="animate-pulse p-4">
-      <div className="h-5 bg-gray-200 rounded w-32 mb-4"></div>
-      <div className="bg-gray-50 rounded-lg p-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-gray-200 rounded"></div>
-          <div className="flex-1">
-            <div className="h-3 bg-gray-200 rounded w-16 mb-1"></div>
-            <div className="h-2 bg-gray-200 rounded w-12"></div>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex gap-2">
-            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-            <div className="flex-1">
-              <div className="h-3 bg-gray-200 rounded w-20 mb-1"></div>
-              <div className="h-2 bg-gray-200 rounded w-full mb-1"></div>
-              <div className="h-2 bg-gray-200 rounded w-2/3"></div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="p-4">
+      <p className="text-gray-500">Đang tải đánh giá...</p>
     </div>
   ),
   ssr: false
@@ -56,16 +35,8 @@ const ProductReviews = dynamic(() => import('./ProductReviews').then(mod => ({ d
 
 const TechnicalSpecs = dynamic(() => import('./TechnicalSpecs').then(mod => ({ default: mod.TechnicalSpecs })), {
   loading: () => (
-    <div className="animate-pulse p-4">
-      <div className="h-5 bg-gray-200 rounded w-32 mb-4"></div>
-      <div className="space-y-2">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex justify-between py-2">
-            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-          </div>
-        ))}
-      </div>
+    <div className="p-4">
+      <p className="text-gray-500">Đang tải thông số kỹ thuật...</p>
     </div>
   ),
   ssr: false
@@ -73,19 +44,8 @@ const TechnicalSpecs = dynamic(() => import('./TechnicalSpecs').then(mod => ({ d
 
 const ProductFeatures = dynamic(() => import('./ProductFeatures').then(mod => ({ default: mod.ProductFeatures })), {
   loading: () => (
-    <div className="animate-pulse p-4">
-      <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
-      <div className="space-y-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <div className="w-4 h-4 bg-gray-200 rounded mt-0.5"></div>
-            <div className="flex-1">
-              <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="p-4">
+      <p className="text-gray-500">Đang tải tính năng sản phẩm...</p>
     </div>
   ),
   ssr: false

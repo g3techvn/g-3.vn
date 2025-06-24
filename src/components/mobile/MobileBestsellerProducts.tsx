@@ -73,31 +73,9 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
       <section className="pt-4">
         <div className="flex items-center justify-between px-4 mb-2">
           <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
-          <div className="flex gap-1">
-            {[...Array(4)].map((_, index) => (
-              <div
-                key={index}
-                className="w-2 h-2 rounded-full bg-gray-300"
-              />
-            ))}
-          </div>
         </div>
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory px-4 pb-4 scrollbar-hide">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-[95%] min-w-[320px] mx-auto space-y-3 snap-center">
-              <div className="w-full aspect-video bg-gray-200 animate-pulse rounded-lg" />
-              <div className="bg-white rounded-lg shadow p-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-20 rounded-md bg-gray-200" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-4 w-3/4 rounded bg-gray-200" />
-                    <div className="h-3 w-1/2 rounded bg-gray-200" />
-                    <div className="h-3 w-1/4 rounded bg-gray-200" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="text-center py-8">
+          <p className="text-gray-500">Đang tải sản phẩm...</p>
         </div>
       </section>
     );

@@ -109,27 +109,7 @@ button:active, a:active {
               0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-/* Hiệu ứng Shimmer cho skeleton */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
 
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(227, 227, 227, 0.4) 0%,
-    rgba(227, 227, 227, 0.9) 50%,
-    rgba(227, 227, 227, 0.4) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
-  will-change: background-position;
-}
 
 /* Image loading animation */
 @keyframes imageFadeIn {

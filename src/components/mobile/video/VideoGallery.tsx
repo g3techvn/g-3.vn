@@ -89,14 +89,37 @@ export function VideoGallery({ mainImageUrl, videoInfo, galleryImages, isLoading
           </div>
         ) : hasItems && currentItem ? (
           currentItem.type === 'video' ? (
-            <iframe
-              src={`${currentItem.embed}?autoplay=1&mute=0&enablejsapi=1`}
-              title={currentItem.title}
-              allow="autoplay"
-              allowFullScreen
-              className="w-full h-full absolute inset-0 bg-black"
-              style={{ aspectRatio: '1/1', minHeight: 200 }}
-            />
+            (() => {
+              // Extract YouTube video ID
+              const getYouTubeId = (url: string) => {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+              };
+              
+              const videoId = getYouTubeId(currentItem.embed);
+              
+              if (!videoId) {
+                return (
+                  <div className="w-full h-full absolute inset-0 bg-gray-900 flex items-center justify-center">
+                    <p className="text-white text-center">Video không hợp lệ</p>
+                  </div>
+                );
+              }
+              
+              const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1`;
+              
+              return (
+                <iframe
+                  src={embedUrl}
+                  title={currentItem.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full absolute inset-0 bg-black border-0"
+                  style={{ aspectRatio: '1/1', minHeight: 200 }}
+                />
+              );
+            })()
           ) : (
             <>
               <Image

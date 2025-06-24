@@ -11,7 +11,7 @@
   "componentsOptimized": 8,
   "implementation": [
     "Dynamic imports for below-fold components",
-    "Skeleton loading states",
+            "Loading states",
     "SSR disabled for non-critical content",
     "Code splitting optimization",
     "Lazy loading with intersection observer"

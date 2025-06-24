@@ -65,7 +65,7 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
         <ScrollArea.Viewport className="w-full">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {loading ? (
-              // Loading skeleton with animations
+              // Loading animations
               [...Array(5)].map((_, i) => (
                 <motion.div 
                   key={i} 

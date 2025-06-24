@@ -312,7 +312,7 @@ export default function PerformanceTestPage() {
                     <h4 className="font-medium text-blue-800 mb-2">🚀 Performance Features:</h4>
                     <ul className="text-sm text-blue-700 space-y-1">
                       <li>• Dynamic imports với React.lazy</li>
-                      <li>• Skeleton loading states</li>
+                      <li>• Loading states</li>
                       <li>• SSR disabled for below-fold content</li>
                       <li>• Intersection Observer lazy loading</li>
                       <li>• Reduced initial bundle size</li>

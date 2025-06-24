@@ -266,21 +266,23 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   const confirmAddToCart = (product: Product, quantity: number, selectedVariant?: ProductVariant | null) => {
     // Create a cart item from the product with variant info
     const cartItem = {
-      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id, // Create unique ID for each variant
+      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
       name: product.name,
-      price: selectedVariant?.price || product.price, // Use variant price if available
+      price: selectedVariant?.price || product.price,
       original_price: selectedVariant?.original_price || product.original_price,
-      quantity: 1, // Each item will be added individually
-      image: selectedVariant?.image_url || product.image_url || '', // Use variant image if available
+      quantity: quantity, // Add all items at once instead of one by one
+      image: selectedVariant?.image_url || product.image_url || '',
       variant: selectedVariant || undefined,
     };
     
-    // Add to cart multiple times based on quantity
-    for (let i = 0; i < quantity; i++) {
-      addToCart(cartItem);
-    }
+    // Add to cart once with the total quantity
+    const success = addToCart(cartItem);
     
-    showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, 'default');
+    if (success) {
+      showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, 'default');
+    } else {
+      // Error message will be shown by the CartContext error handler
+    }
   };
 
   const handleBuyNow = () => {

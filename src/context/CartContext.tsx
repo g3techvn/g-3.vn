@@ -10,12 +10,13 @@ interface CartContextType {
   cartItems: CartItem[]
   totalItems: number
   totalPrice: number
+  error: string | null
   openCart: () => void
   closeCart: () => void
   toggleCart: () => void
-  addToCart: (item: CartItem) => void
+  addToCart: (item: CartItem) => boolean
   removeFromCart: (itemId: string) => void
-  updateQuantity: (itemId: string, quantity: number) => void
+  updateQuantity: (itemId: string, quantity: number) => boolean
   clearCart: () => void
 }
 
@@ -24,9 +25,13 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 // Key for localStorage
 const CART_STORAGE_KEY = 'g3tech_cart_items'
 
+const MAX_QUANTITY_PER_ITEM = 99; // Maximum quantity per item
+const MAX_TOTAL_ITEMS = 999; // Maximum total items in cart
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   // Load cart items from localStorage on initial mount
   useEffect(() => {
@@ -57,20 +62,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const toggleCart = () => setIsCartOpen(prev => !prev)
 
   const addToCart = (item: CartItem) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(i => i.id === item.id)
-      if (existingItem) {
-        return prevItems.map(i =>
-          i.id === item.id
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        )
-      }
-      return [...prevItems, item]
-    })
+    setError(null); // Reset error state
+    
+    try {
+      setCartItems(prevItems => {
+        const existingItem = prevItems.find(i => i.id === item.id)
+        
+        // Check total items limit
+        const currentTotalItems = prevItems.reduce((total, item) => total + item.quantity, 0)
+        if (currentTotalItems + (item.quantity || 1) > MAX_TOTAL_ITEMS) {
+          throw new Error(`Không thể thêm vào giỏ hàng. Số lượng tối đa là ${MAX_TOTAL_ITEMS} sản phẩm.`)
+        }
 
-    // Auto open cart when adding items
-    openCart()
+        if (existingItem) {
+          // Check individual item limit
+          const newQuantity = existingItem.quantity + (item.quantity || 1)
+          if (newQuantity > MAX_QUANTITY_PER_ITEM) {
+            throw new Error(`Số lượng tối đa cho mỗi sản phẩm là ${MAX_QUANTITY_PER_ITEM}.`)
+          }
+
+          return prevItems.map(i =>
+            i.id === item.id
+              ? { ...i, quantity: newQuantity }
+              : i
+          )
+        }
+
+        // Validate new item quantity
+        if (item.quantity > MAX_QUANTITY_PER_ITEM) {
+          throw new Error(`Số lượng tối đa cho mỗi sản phẩm là ${MAX_QUANTITY_PER_ITEM}.`)
+        }
+
+        return [...prevItems, { ...item, quantity: item.quantity || 1 }]
+      })
+
+      // Auto open cart when adding items
+      openCart()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khi thêm vào giỏ hàng')
+      console.error('Error adding to cart:', err)
+      return false
+    }
+    return true
   }
 
   const removeFromCart = (itemId: string) => {
@@ -78,13 +111,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const updateQuantity = (itemId: string, quantity: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? { ...item, quantity: Math.max(0, quantity) }
-          : item
-      ).filter(item => item.quantity > 0)
-    )
+    setError(null); // Reset error state
+    
+    try {
+      if (quantity > MAX_QUANTITY_PER_ITEM) {
+        throw new Error(`Số lượng tối đa cho mỗi sản phẩm là ${MAX_QUANTITY_PER_ITEM}.`)
+      }
+
+      setCartItems(prevItems => {
+        const newItems = prevItems.map(item =>
+          item.id === itemId
+            ? { ...item, quantity: Math.max(0, quantity) }
+            : item
+        ).filter(item => item.quantity > 0)
+
+        // Check total items limit
+        const totalItems = newItems.reduce((total, item) => total + item.quantity, 0)
+        if (totalItems > MAX_TOTAL_ITEMS) {
+          throw new Error(`Không thể thêm vào giỏ hàng. Số lượng tối đa là ${MAX_TOTAL_ITEMS} sản phẩm.`)
+        }
+
+        return newItems
+      })
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật số lượng')
+      console.error('Error updating quantity:', err)
+      return false
+    }
   }
 
   const clearCart = () => {
@@ -102,6 +156,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cartItems, 
         totalItems, 
         totalPrice,
+        error,
         openCart, 
         closeCart, 
         toggleCart,

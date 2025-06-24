@@ -24,6 +24,18 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   const [currentSlides, setCurrentSlides] = useState<Record<string, number>>({});
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
   
+  // Debug logging
+  useEffect(() => {
+    console.log('MobileFeatureProduct Debug:', {
+      productsCount: products.length,
+      brandsCount: brands.length,
+      loading,
+      error,
+      products: products.slice(0, 3), // Log first 3 products
+      brands: brands.slice(0, 3) // Log first 3 brands
+    });
+  }, [products, brands, loading, error]);
+
   // Biến đổi mảng brands thành map để dễ truy cập - memoized
   const brandsMap = useMemo(() => {
     return brands.reduce((acc, brand) => {
@@ -79,8 +91,7 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
         const brandALower = brandA.toLowerCase();
         const brandBLower = brandB.toLowerCase();
         
-        if (brandALower.includes('gami')) return -1;
-        if (brandBLower.includes('gami')) return 1;
+        // Sort alphabetically without prioritizing any brand
         return brandALower.localeCompare(brandBLower);
       });
   }, [productsByBrand, brandsMap]);
@@ -123,23 +134,8 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   if (loading) {
     return (
       <section className="pt-4">
-        <div className="flex gap-4 overflow-x-auto flex-nowrap snap-x snap-mandatory">
-          {[0, 1].map((colIdx) => (
-            <div key={colIdx} className="w-4/5 min-w-[220px] mx-auto space-y-3 snap-center">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="w-full bg-white rounded-lg shadow p-3 animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-md bg-gray-200" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 w-3/4 rounded bg-gray-200" />
-                      <div className="h-3 w-1/2 rounded bg-gray-200" />
-                      <div className="h-3 w-1/4 rounded bg-gray-200" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+        <div className="text-center py-8">
+          <p className="text-gray-500">Đang tải sản phẩm...</p>
         </div>
       </section>
     );

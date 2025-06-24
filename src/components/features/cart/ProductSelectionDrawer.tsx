@@ -147,7 +147,7 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
         </SheetHeader>
 
         {loadingProducts ? (
-          // Loading skeleton
+          // Loading state
           <div className="grid grid-cols-2 gap-4 p-4">
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="flex animate-pulse flex-col gap-2 rounded-lg border p-2">

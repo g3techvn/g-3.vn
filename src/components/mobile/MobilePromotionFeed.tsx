@@ -4,7 +4,7 @@ interface Promotion {
   id: number;
   created_at: string;
   title: string;
-  desc: string;
+  description: string;
   image: string;
   youtube_url?: string;
   slug: string;
@@ -67,8 +67,8 @@ export default function MobilePromotionFeed({
               {/* Description Section */}
               <div className="w-full px-4 pb-2">
                 <p className="text-left text-gray-800 text-[15px] leading-snug">
-                  {expandedDescriptions[promo.id] ? promo.desc : `${promo.desc.substring(0, 100)}${promo.desc.length > 100 ? '...' : ''}`}
-                  {promo.desc.length > 100 && (
+                  {expandedDescriptions[promo.id] ? promo.description : `${promo.description.substring(0, 100)}${promo.description.length > 100 ? '...' : ''}`}
+                  {promo.description.length > 100 && (
                     <button 
                       onClick={() => toggleDescription(promo.id)} 
                       className="text-blue-600 hover:underline ml-1 font-medium text-sm"

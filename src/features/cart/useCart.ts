@@ -33,6 +33,18 @@ const loadCart = (): CartItem[] => {
   return [];
 };
 
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: Product, quantity?: number) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
+  clearCart: () => void;
+  totalItems: number;
+  totalPrice: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
 export function useCart() {
   const queryClient = useQueryClient();
   const [isReady, setIsReady] = useState(false);
@@ -149,5 +161,6 @@ export function useCart() {
     totalItems,
     totalPrice,
     isLoading: addToCart.isPending || updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending,
+    error: null,
   };
 } 

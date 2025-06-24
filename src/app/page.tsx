@@ -24,7 +24,7 @@ import { generalFAQs } from '@/lib/general-faqs';
 // Fallback loading component
 const LoadingFallback = () => (
   <div className="w-full py-20 flex items-center justify-center">
-    <div className="skeleton-shimmer w-full h-48 rounded-lg bg-gray-200"></div>
+    <div className="animate-pulse w-full h-48 rounded-lg bg-gray-200"></div>
   </div>
 );
 
@@ -233,9 +233,32 @@ const useDataCache = <T,>(key: string, fetchFn: () => Promise<T>, dependencies: 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { products: comboProducts, loading: loadingCombo, error: errorCombo } = useProducts({ type: 'combo' });
-  const { products: newProducts, loading: loadingNew, error: errorNew } = useProducts({ type: 'new' });
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  // Convert selected category slug to ID for API calls
+  const selectedCategoryId = useMemo(() => {
+    if (!selectedCategory || selectedCategory === '') return undefined;
+    
+    // Find the category from categories array
+    const foundCategory = categories.find(cat => cat.slug === selectedCategory);
+    return foundCategory?.id?.toString();
+  }, [selectedCategory, categories]);
+
+  // Desktop products (not filtered by category)
+  const { products: comboProducts, loading: loadingCombo, error: errorCombo } = useProducts({ type: 'combo' });
+  
+  // Mobile products (filtered by selected category)
+  const { products: mobileFeatureProducts, loading: loadingMobileFeature, error: errorMobileFeature } = useProducts({ 
+    type: 'mobilefeature',
+    categoryId: selectedCategoryId
+  });
+  const { products: newProducts, loading: loadingNew, error: errorNew } = useProducts({ 
+    type: 'new',
+    categoryId: selectedCategoryId
+  });
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -251,6 +274,40 @@ export default function Home() {
 
     fetchBrands();
   }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await fetch('/api/categories');
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        const data = await response.json();
+        
+        // Format categories for MobileHomeTabs - API returns product_cats
+        const formattedCategories = [
+          { name: 'Tất cả', slug: '', id: null, productCount: 0 },
+          ...(data.product_cats || []).map((cat: any) => ({
+            name: cat.title,
+            slug: cat.slug,
+            id: cat.id,
+            productCount: cat.product_count || 0
+          }))
+        ];
+        
+        setCategories(formattedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (categorySlug: string) => {
+    setSelectedCategory(categorySlug);
+  };
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -326,15 +383,10 @@ export default function Home() {
           </Suspense>
 
           <Suspense fallback={<LoadingFallback />}>
-            <MobileHomeTabs />
-          </Suspense>
-
-          <Suspense fallback={<LoadingFallback />}>
-            <MobileFeatureProduct 
-              products={comboProducts} 
-              loading={loadingCombo}
-              error={errorCombo}
-              brands={brands}
+            <MobileHomeTabs 
+              categories={categories}
+              loading={categoriesLoading}
+              onCategoryChange={handleCategoryChange}
             />
           </Suspense>
 
@@ -343,6 +395,15 @@ export default function Home() {
               products={newProducts} 
               loading={loadingNew}
               error={errorNew}
+            />
+          </Suspense>
+
+          <Suspense fallback={<LoadingFallback />}>
+            <MobileFeatureProduct 
+              products={mobileFeatureProducts} 
+              loading={loadingMobileFeature}
+              error={errorMobileFeature}
+              brands={brands}
             />
           </Suspense>
         </motion.div>

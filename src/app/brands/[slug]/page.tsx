@@ -211,10 +211,10 @@ export default function BrandProductsPage() {
         />
       </div>
       {/* Desktop/main content */}
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-8 px-4 md:px-0">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-6">
-          {/* Sidebar Filter */}
-          <div className="md:col-span-1">
+          {/* Sidebar Filter - Hidden on mobile */}
+          <div className="hidden md:block md:col-span-1">
             <SidebarFilter 
               onFilterChange={handleFilterChange}
               maxPrice={maxPrice}
@@ -223,14 +223,14 @@ export default function BrandProductsPage() {
           </div>
 
           {/* Products Grid */}
-          <div className="md:col-span-5">
+          <div className="col-span-1 md:col-span-5">
             {error && (
               <div className="mb-8 rounded-md bg-red-50 p-4 text-red-600">
                 Đã xảy ra lỗi: {error}
               </div>
             )}
 
-            <div className="bg-white rounded-lg mb-6">
+            <div className="hidden md:block bg-white rounded-lg mb-6">
               <div className="flex items-center justify-between h-[56px] px-4">
                 <Breadcrumb
                   items={[
