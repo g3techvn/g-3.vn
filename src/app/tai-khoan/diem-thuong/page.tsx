@@ -1,11 +1,11 @@
 'use client';
 
-import { useCurrentUser } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthProvider';
 import RewardPointsHistory from '@/components/features/rewards/RewardPointsHistory';
 import Link from 'next/link';
 
 export default function RewardPointsPage() {
-  const { data: user, isLoading: loading } = useCurrentUser();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (

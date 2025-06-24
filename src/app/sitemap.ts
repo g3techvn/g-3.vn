@@ -1,9 +1,6 @@
 import { MetadataRoute } from 'next';
 import { COMPANY_INFO } from '@/constants';
 
-// Export revalidate to control ISR
-export const revalidate = 3600; // Revalidate every hour
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = COMPANY_INFO.website;
   
@@ -91,10 +88,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    // Fetch products with caching for static generation
-    const productsResponse = await fetch(`${baseUrl}/api/products`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
+    // Fetch products without caching
+    const productsResponse = await fetch(`${baseUrl}/api/products`);
     
     let productRoutes: MetadataRoute.Sitemap = [];
     if (productsResponse.ok) {
@@ -109,10 +104,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }));
     }
 
-    // Fetch categories with caching for static generation
-    const categoriesResponse = await fetch(`${baseUrl}/api/categories`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
+    // Fetch categories without caching
+    const categoriesResponse = await fetch(`${baseUrl}/api/categories`);
     
     let categoryRoutes: MetadataRoute.Sitemap = [];
     if (categoriesResponse.ok) {
@@ -127,10 +120,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }));
     }
 
-    // Fetch brands with caching for static generation
-    const brandsResponse = await fetch(`${baseUrl}/api/brands`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
+    // Fetch brands without caching
+    const brandsResponse = await fetch(`${baseUrl}/api/brands`);
     
     let brandRoutes: MetadataRoute.Sitemap = [];
     if (brandsResponse.ok) {

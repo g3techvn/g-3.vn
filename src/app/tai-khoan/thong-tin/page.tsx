@@ -29,7 +29,6 @@ export default function AccountInfoPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const supabase = createBrowserClient();
   const { showToast } = useToast();
 
   const [profileForm, setProfileForm] = useState({
@@ -99,16 +98,19 @@ export default function AccountInfoPage() {
 
   const handleSignOut = async () => {
     try {
+      const supabase = createBrowserClient();
+      if (!supabase) {
+        showToast('Lỗi khi khởi tạo Supabase client', 'destructive');
+        return;
+      }
       const { error } = await supabase.auth.signOut();
       if (error) {
         showToast('Lỗi khi đăng xuất', 'destructive');
         return;
       }
-      
-      showToast('Đăng xuất thành công', 'default');
       router.push('/');
     } catch (error) {
-      showToast('Có lỗi xảy ra khi đăng xuất', 'destructive');
+      showToast('Lỗi khi đăng xuất', 'destructive');
     }
   };
 
@@ -158,8 +160,6 @@ export default function AccountInfoPage() {
           </Link>
           <Button 
             onClick={handleSignOut}
-            variant="outline"
-            size="sm"
             className="text-red-600 border-red-600 hover:bg-red-50"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,8 +173,8 @@ export default function AccountInfoPage() {
       {/* Profile Section */}
       <Card className="p-6">
         <div className="flex items-center space-x-4 mb-6">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
@@ -208,12 +208,27 @@ export default function AccountInfoPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Số điện thoại</label>
+            <label className="block text-sm font-medium mb-2">
+              Số điện thoại {profile?.phone && (
+                <span className="text-sm font-normal text-gray-500 ml-2">
+                  (Hiện tại: {profile.phone})
+                </span>
+              )}
+            </label>
             <Input
+              type="tel"
               value={profileForm.phone}
-              onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
-              placeholder="Nhập số điện thoại"
+              onChange={(e) => {
+                // Chỉ cho phép nhập số
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setProfileForm({...profileForm, phone: value});
+              }}
+              placeholder={profile?.phone || "Nhập số điện thoại"}
+              maxLength={10}
+              pattern="[0-9]*"
+              className="focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
+            <p className="text-xs text-gray-500 mt-1">Vui lòng nhập số điện thoại để nhận thông báo về đơn hàng</p>
           </div>
           
           <div>
@@ -250,12 +265,16 @@ export default function AccountInfoPage() {
         </div>
         
         <div className="mt-6 flex justify-end">
-          <Button 
-            onClick={updateProfile} 
+          <Button
+            onClick={updateProfile}
             disabled={updating}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="w-full"
           >
-            {updating ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+            {updating ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            ) : (
+              'Cập nhật thông tin'
+            )}
           </Button>
         </div>
       </Card>

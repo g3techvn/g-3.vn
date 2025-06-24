@@ -51,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
+    let mounted = true;
+
     const checkAuth = async () => {
       try {
         setLoading(true);
@@ -58,43 +60,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Lấy session hiện tại từ Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
-        } else {
-          setUser(null);
+        if (mounted) {
+          if (session?.user) {
+            setUser(mapSupabaseUser(session.user));
+          } else {
+            setUser(null);
+          }
         }
       } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-        setUser(null);
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
     
     // Chạy kiểm tra lần đầu
     checkAuth();
+
+    // Lắng nghe sự kiện auth từ các tab khác
+    const handleAuthChange = (event: CustomEvent<{ type: 'SIGNED_IN' | 'SIGNED_OUT' }>) => {
+      if (event.detail.type === 'SIGNED_OUT') {
+        setUser(null);
+        // Đảm bảo đăng xuất khỏi session hiện tại
+        supabase.auth.signOut();
+      } else if (event.detail.type === 'SIGNED_IN') {
+        // Kiểm tra lại session khi có đăng nhập mới
+        checkAuth();
+      }
+    };
+
+    window.addEventListener('supabase-auth-change', handleAuthChange as EventListener);
     
     // Thiết lập listener cho thay đổi auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
-        } else {
-          setUser(null);
+        if (mounted) {
+          if (session?.user) {
+            // Kiểm tra xem session có hợp lệ không
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            if (currentSession?.access_token === session.access_token) {
+              setUser(mapSupabaseUser(session.user));
+            } else {
+              // Nếu token không khớp, đăng xuất
+              await supabase.auth.signOut();
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
     
-    // Clean up subscription khi unmount
+    // Clean up subscription và event listener khi unmount
     return () => {
+      mounted = false;
       subscription.unsubscribe();
+      window.removeEventListener('supabase-auth-change', handleAuthChange as EventListener);
     };
   }, [supabase]);
 
   // Hàm đăng nhập
   const signIn = async (email: string, password: string) => {
     try {
+      // Đăng xuất khỏi session hiện tại nếu có
+      await supabase.auth.signOut();
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -117,6 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm đăng ký
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
     try {
+      // Đăng xuất khỏi session hiện tại nếu có
+      await supabase.auth.signOut();
+
       // Kiểm tra email và phone đã tồn tại chưa trước khi đăng ký
       try {
         const checkResponse = await fetch('/api/user/check-existence', {

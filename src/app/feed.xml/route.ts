@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { COMPANY_INFO } from '@/constants';
 
-// Cache the RSS feed for 1 hour
-export const revalidate = 3600;
-
 export async function GET() {
   try {
     const siteUrl = COMPANY_INFO.website;

@@ -85,8 +85,8 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createServerClient();
     
-    // Update user profile
-    const { data: updatedProfile, error } = await supabase
+    // Update user profile in user_profiles table
+    const { data: updatedProfile, error: profileError } = await supabase
       .from('user_profiles')
       .update({
         full_name,
@@ -100,12 +100,25 @@ export async function PUT(request: NextRequest) {
       .select()
       .single();
 
-    if (error) {
-      console.error('Error updating user profile:', error);
+    if (profileError) {
+      console.error('Error updating user profile:', profileError);
       return NextResponse.json(
         { error: 'Failed to update profile' },
         { status: 500 }
       );
+    }
+
+    // Update user metadata in Supabase Auth
+    const { error: authError } = await supabase.auth.updateUser({
+      data: {
+        full_name,
+        phone
+      }
+    });
+
+    if (authError) {
+      console.error('Error updating user metadata:', authError);
+      // Don't return error since profile was updated successfully
     }
 
     return NextResponse.json({ profile: updatedProfile });

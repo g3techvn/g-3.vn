@@ -14,12 +14,9 @@ export interface AuthContext {
 
 // Routes that require authentication
 const PROTECTED_ROUTES: string[] = [
-  // Temporarily removed '/api/user' for testing auth system
-  // '/api/user'
-  // Temporarily removed '/tai-khoan' for testing
-  // '/tai-khoan'
-  // Removed '/api/orders' - to allow guest checkout
-  // Removed '/gio-hang' - cart should be accessible to guest users
+  '/api/user',
+  '/tai-khoan',
+  '/api/user/rewards'
 ];
 
 // Routes that require admin role

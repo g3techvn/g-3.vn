@@ -160,16 +160,18 @@ export default function MyOrdersPage() {
 
   const handleSignOut = async () => {
     try {
+      if (!supabase) {
+        showToast('Lỗi khi khởi tạo Supabase client', 'destructive');
+        return;
+      }
       const { error } = await supabase.auth.signOut();
       if (error) {
         showToast('Lỗi khi đăng xuất', 'destructive');
         return;
       }
-      
-      showToast('Đăng xuất thành công', 'default');
       router.push('/');
     } catch (error) {
-      showToast('Có lỗi xảy ra khi đăng xuất', 'destructive');
+      showToast('Lỗi khi đăng xuất', 'destructive');
     }
   };
 

@@ -1,249 +1,179 @@
+'use client';
+
 import React, { useState } from 'react';
-import Image from 'next/image';
 import * as Dialog from '@radix-ui/react-dialog';
+import { createBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/features/auth/AuthProvider';
-import { UserRegistrationSchema } from '@/lib/validation/validation';
-import { z } from 'zod';
+import { useToast } from '@/hooks/useToast';
 
 interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginClick: () => void;
+  onOpenLogin: () => void;
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onLoginClick }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    full_name: '',
-    phone: ''
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { signUp } = useAuth();
+export default function RegisterModal({ isOpen, onClose, onOpenLogin }: RegisterModalProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear validation error when user starts typing
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    setValidationErrors({});
+    
+    if (password !== confirmPassword) {
+      showToast('Mật khẩu xác nhận không khớp', 'destructive');
+      return;
+    }
+
+    if (password.length < 6) {
+      showToast('Mật khẩu phải có ít nhất 6 ký tự', 'destructive');
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      // Validate form data
-      const validatedData = UserRegistrationSchema.parse(formData);
-
-      // Attempt to register
-      const { error: signUpError } = await signUp(
-        validatedData.email,
-        validatedData.password,
-        validatedData.full_name,
-        validatedData.phone
-      );
-
-      if (signUpError) {
-        setError(signUpError.message);
-      } else {
-        // Registration successful
-        setError(null);
-        onClose();
-        
-        // Redirect to thank you page with email parameter
-        router.push(`/cam-on/dang-ky?email=${encodeURIComponent(validatedData.email)}`);
+      const supabase = createBrowserClient();
+      if (!supabase) {
+        showToast('Lỗi khi khởi tạo Supabase client', 'destructive');
+        return;
       }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors: Record<string, string> = {};
-        err.errors.forEach(error => {
-          if (error.path[0]) {
-            errors[error.path[0].toString()] = error.message;
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName
           }
-        });
-        setValidationErrors(errors);
-      } else {
-        setError('Đã xảy ra lỗi khi đăng ký');
+        }
+      });
+
+      if (error) {
+        showToast(error.message, 'destructive');
+        return;
       }
+
+      if (data.user) {
+        showToast('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.', 'default');
+        onClose();
+      }
+    } catch (error) {
+      showToast('Lỗi khi đăng ký', 'destructive');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 backdrop-blur-sm bg-black/30" />
-        
-        <Dialog.Content 
-          className="fixed inset-0 flex items-center justify-center z-50 px-4 animate-fadeIn"
-          onEscapeKeyDown={onClose}
-        >
-          <Dialog.Title className="sr-only">
-            Đăng ký tài khoản
-          </Dialog.Title>
-          
-          <div 
-            className="relative w-full max-w-sm rounded-xl overflow-hidden bg-white"
-            style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            <div className="flex justify-between items-center p-4 border-b border-gray-100">
-              <div className="w-6"></div>
-              <div className="mx-auto">
-                <Image
-                  src="/logo.svg"
-                  alt="G3 Logo"
-                  width={100}
-                  height={28}
-                  className="h-7 w-auto object-contain"
-                />
-              </div>
-              <Dialog.Close asChild>
-                <button className="text-gray-500 hover:text-gray-700 transition">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </Dialog.Close>
-            </div>
-
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-                Đăng ký tài khoản
-              </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <div>
-                  <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Họ và tên
-                  </label>
-                  <input
-                    id="full_name"
-                    name="full_name"
-                    type="text"
-                    value={formData.full_name}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${
-                      validationErrors.full_name ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Nhập họ và tên của bạn"
-                  />
-                  {validationErrors.full_name && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.full_name}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Số điện thoại
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${
-                      validationErrors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Nhập số điện thoại của bạn"
-                  />
-                  {validationErrors.phone && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${
-                      validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Nhập email của bạn"
-                  />
-                  {validationErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Mật khẩu
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${
-                      validationErrors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Nhập mật khẩu"
-                  />
-                  {validationErrors.password && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition disabled:opacity-50"
-                >
-                  {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
-                </button>
-
-                <div className="text-center text-sm text-gray-600">
-                  Đã có tài khoản?{' '}
-                  <button
-                    type="button"
-                    onClick={onLoginClick}
-                    className="text-red-600 hover:text-red-800 font-medium"
-                  >
-                    Đăng nhập
-                  </button>
-                </div>
-              </form>
-            </div>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <Dialog.Title className="text-xl font-semibold">
+              Đăng ký tài khoản
+            </Dialog.Title>
+            <Dialog.Close className="text-gray-400 hover:text-gray-500">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Dialog.Close>
           </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                Họ và tên
+              </label>
+              <input
+                id="fullName"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                placeholder="Nhập họ và tên của bạn"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Nhập email của bạn"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Mật khẩu
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Xác nhận mật khẩu
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="Nhập lại mật khẩu"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                'Đăng ký'
+              )}
+            </button>
+
+            <div className="text-center text-sm">
+              <span className="text-gray-600">Đã có tài khoản? </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenLogin();
+                }}
+                className="text-red-600 hover:text-red-700 font-medium"
+              >
+                Đăng nhập
+              </button>
+            </div>
+          </form>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
   );
-};
-
-export default RegisterModal; 
+} 

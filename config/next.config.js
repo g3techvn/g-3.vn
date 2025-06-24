@@ -188,51 +188,18 @@ const nextConfig = {
     ]
   },
   webpack: (config, { isServer, dev }) => {
-    // ✅ Enhanced webpack optimization for bundle size reduction
+    // Disable code splitting
     if (!isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxSize: 244000, // 244KB max chunk size
-        cacheGroups: {
-          // Separate vendor libraries into optimized chunks
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          cacheGroups: {
+            default: false,
           },
-          // ✅ Antd optimization - tree-shaken
-          antd: {
-            test: /[\\/]node_modules[\\/]antd[\\/]/,
-            name: 'antd',
-            chunks: 'all',
-            priority: 30,
-          },
-          // ✅ Chart.js lazy loading optimization
-          charts: {
-            test: /[\\/]node_modules[\\/](chart\.js|react-chartjs-2)[\\/]/,
-            name: 'charts',
-            chunks: 'async', // Load only when needed
-            priority: 20,
-          },
-          // ✅ Lodash tree-shaking optimization
-          lodash: {
-            test: /[\\/]node_modules[\\/]lodash[\\/]/,
-            name: 'lodash',
-            chunks: 'all',
-            priority: 25,
-          },
-          // ✅ React optimization
-          react: {
-            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-            name: 'react',
-            chunks: 'all',
-            priority: 40,
-          },
-        }
+        },
+        runtimeChunk: false
       };
     }
-    
     return config;
   }
 }

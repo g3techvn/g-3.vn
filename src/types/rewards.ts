@@ -12,7 +12,7 @@ export interface RewardTransaction {
   type: 'earn' | 'redeem';
   points: number;
   reason: string;
-  related_order_id?: number | null;
+  related_order_id?: string;
   created_at: string;
 }
 

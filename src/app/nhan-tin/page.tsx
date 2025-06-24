@@ -749,6 +749,10 @@ export default function MessagesPage() {
           setShowLoginModal(false);
           setShowInfoModal(true);
         }}
+        onOpenRegister={() => {
+          setShowLoginModal(false);
+          // Thêm xử lý mở modal đăng ký nếu cần
+        }}
       />
 
       <div className="flex flex-col h-screen bg-[url('/images/chat-partten.svg')] bg-repeat">
