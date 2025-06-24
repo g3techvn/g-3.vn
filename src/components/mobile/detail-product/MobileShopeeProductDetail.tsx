@@ -3,11 +3,10 @@ import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ImageItem } from '@/types/supabase';
-import dynamic from 'next/dynamic';
 import { useBrandData } from '@/hooks/useBrandData';
 import { useToast } from "@/hooks/useToast";
 
-// Import critical above-fold components
+// Import all components directly
 import { ProductHeader } from './ProductHeader';
 import { ProductGallery } from './ProductGallery';
 import ProductPrice from './ProductPrice';
@@ -17,39 +16,9 @@ import { ProductPolicies } from './ProductPolicies';
 import { ProductActions } from './ProductActions';
 import { ProductCartSheet } from './ProductCartSheet';
 import { ProductVariants } from './ProductVariants';
-
-// ❌ Remove static imports for lazy loading
-// import { ProductReviews } from './ProductReviews';
-// import { TechnicalSpecs } from './TechnicalSpecs';
-// import { ProductFeatures } from './ProductFeatures';
-
-// ✅ Lazy load non-critical below-fold components
-const ProductReviews = dynamic(() => import('./ProductReviews').then(mod => ({ default: mod.ProductReviews })), {
-  loading: () => (
-    <div className="p-4">
-      <p className="text-gray-500">Đang tải đánh giá...</p>
-    </div>
-  ),
-  ssr: false
-});
-
-const TechnicalSpecs = dynamic(() => import('./TechnicalSpecs').then(mod => ({ default: mod.TechnicalSpecs })), {
-  loading: () => (
-    <div className="p-4">
-      <p className="text-gray-500">Đang tải thông số kỹ thuật...</p>
-    </div>
-  ),
-  ssr: false
-});
-
-const ProductFeatures = dynamic(() => import('./ProductFeatures').then(mod => ({ default: mod.ProductFeatures })), {
-  loading: () => (
-    <div className="p-4">
-      <p className="text-gray-500">Đang tải tính năng sản phẩm...</p>
-    </div>
-  ),
-  ssr: false
-});
+import { ProductReviews } from './ProductReviews';
+import { TechnicalSpecs } from './TechnicalSpecs';
+import { ProductFeatures } from './ProductFeatures';
 
 interface Comment {
   id: string;

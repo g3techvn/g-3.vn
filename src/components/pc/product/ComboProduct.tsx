@@ -110,6 +110,11 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
   const selectedOption = combo.options.find(opt => opt.id === selectedOptionId) || combo.options[0];
   const { addToCart } = useCart();
   
+  // Return early if no options available
+  if (!combo.options.length) {
+    return null;
+  }
+
   const getBrandName = () => {
     if (combo.brand) return combo.brand;
     if (combo.brand_id && brandNames && brandNames[combo.brand_id]) {
@@ -120,6 +125,8 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    if (!selectedOption) return;
     
     // Create a cart item from the combo and selected option
     const cartItem = {
@@ -140,6 +147,11 @@ const ComboCard = ({ combo, selectedOptionId, brandNames }: {
     
     addToCart(cartItem);
   };
+  
+  // Return early if no selected option
+  if (!selectedOption) {
+    return null;
+  }
   
   return (
     <Card className="group h-full">
