@@ -91,7 +91,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   const tags: string[] = ['Công thái học', 'Văn phòng', 'Sức khỏe', 'Làm việc lâu dài', 'Hỗ trợ lưng'];
 
   // Use brandInfo.title if available, otherwise fall back to product.brand or default
-  const publisher = brandInfo?.title || product.brand || 'G3 - TECH';
+  const publisher = brandInfo?.title || (typeof product.brand === 'string' ? product.brand : product.brand?.title) || 'G3 - TECH';
   const brandSlug = brandInfo?.slug || product.brand_slug;
 
   // Add useEffect to fetch brand details

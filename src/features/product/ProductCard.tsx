@@ -31,7 +31,7 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
   useEffect(() => {
     if (brand) {
       // If brand name already exists, use it
-      setBrandName(brand);
+      setBrandName(typeof brand === 'string' ? brand : brand.title);
     } else if (brand_id && brands.length > 0) {
       // Otherwise look up from brands array
       // Log for debugging

@@ -197,8 +197,10 @@ function VideoContent() {
   };
 
   // Helper để lấy tên brand từ brand_id
-  const getBrandName = (product: Product) => {
-    if (product.brand) return product.brand;
+  const getBrandName = (product: Product): string => {
+    if (product.brand) {
+      return typeof product.brand === 'string' ? product.brand : product.brand.title;
+    }
     if (product.brand_id && brands.length > 0) {
       const found = brands.find(b => String(b.id) === String(product.brand_id));
       return found ? found.title : '';

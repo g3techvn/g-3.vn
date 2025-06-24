@@ -78,7 +78,7 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
   const ratingCount = 394000; // mặc định
   const size = '163 MB'; // mặc định
   const age = '3+'; // mặc định
-  const publisher = product.brand || 'Nhà phát hành';
+  const publisher = (typeof product.brand === 'string' ? product.brand : product.brand?.title) || 'Nhà phát hành';
   // Tag thể loại tĩnh (vì Product không có tags)
   const tags: string[] = ['Công thái học', 'Văn phòng', 'Sức khỏe', 'Làm việc lâu dài', 'Hỗ trợ lưng'];
 
@@ -246,7 +246,7 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
         <div className="relative w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border border-gray-200">
           <AspectRatio.Root ratio={1 / 1}>
             <Image
-              src={product.image_url}
+              src={product.image_url || '/placeholder-product.jpg'}
               alt={product.name}
               fill
               className="object-cover"

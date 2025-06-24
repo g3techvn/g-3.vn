@@ -157,7 +157,7 @@ const BrandShopeeHeader: React.FC<BrandShopeeHeaderProps> = ({
                   >
                     <div className="w-12 h-12 relative flex-shrink-0">
                       <Image
-                        src={product.image_url}
+                        src={product.image_url || '/placeholder-product.jpg'}
                         alt={product.name}
                         fill
                         className="object-cover rounded-md"

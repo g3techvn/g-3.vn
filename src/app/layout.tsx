@@ -15,6 +15,8 @@ import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
 import { LocalBusinessJsonLd } from '@/components/SEO/LocalBusinessJsonLd';
 import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
+import { CartProvider } from '@/context/CartContext'
+import { BuyNowProvider } from '@/context/BuyNowContext'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -63,22 +65,25 @@ export default function RootLayout({
         {/* Schema metadata will be rendered in body */}
       </head>
       <body className={`${inter.className} h-full`}>
-        <Providers>
-          <CartLayout>
-            <div className="desktop-layout bg-gray-100">
-              <div className="pl-16">
-                <Header />
-              </div>
-              <StickyNavbar />
-              <main className="pl-16">{children}</main>
-              <div className="pl-16">
-                <Footer />
-              </div>
-            </div>
-            <MobileLayout>{children}</MobileLayout>
-          </CartLayout>
-
-        </Providers>
+        <CartProvider>
+          <BuyNowProvider>
+            <Providers>
+              <CartLayout>
+                <div className="desktop-layout bg-gray-100">
+                  <div className="pl-16">
+                    <Header />
+                  </div>
+                  <StickyNavbar />
+                  <main className="pl-16">{children}</main>
+                  <div className="pl-16">
+                    <Footer />
+                  </div>
+                </div>
+                <MobileLayout>{children}</MobileLayout>
+              </CartLayout>
+            </Providers>
+          </BuyNowProvider>
+        </CartProvider>
         
         {/* SEO Schema */}
         <OrganizationJsonLd 

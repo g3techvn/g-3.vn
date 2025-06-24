@@ -59,7 +59,7 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
             <div className="absolute top-2 right-2 bg-white rounded-lg shadow-md z-10">
               <Image
                 src={brandImage}
-                alt={product.brand || ''}
+                alt={(typeof product.brand === 'string' ? product.brand : product.brand?.title) || ''}
                 width={24}
                 height={24}
                 className="w-6 h-6 object-cover rounded-lg"
@@ -91,7 +91,7 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
               className="object-contain w-full h-full cursor-pointer"
               productName={product.name}
               category={product.category_name}
-              brand={product.brand}
+              brand={typeof product.brand === 'string' ? product.brand : product.brand?.title}
               priority={false}
             />
           </Link>

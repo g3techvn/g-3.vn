@@ -415,7 +415,7 @@ export default function ComboProduct({
       name: product.name,
       description: product.description || '',
       image: product.image_url || '',
-      brand: product.brand,
+      brand: typeof product.brand === 'string' ? product.brand : product.brand?.title,
       brand_id: product.brand_id,
       rating: product.rating,
       slug: product.slug || product.id.toString(),

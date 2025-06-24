@@ -6,17 +6,13 @@ import { Button } from '@/components/ui/Button'
 
 interface ProductListProps {
   items: CartItem[];
-  loading: boolean;
-  onUpdateQuantity: (itemId: string, quantity: number) => void;
-  onRemoveItem: (itemId: string) => void;
+  loading?: boolean;
+  onUpdateQuantity?: (itemId: string, quantity: number) => void;
+  onRemoveItem?: (itemId: string) => void;
+  readOnly?: boolean;
 }
 
-export default function ProductList({
-  items,
-  loading,
-  onUpdateQuantity,
-  onRemoveItem
-}: ProductListProps) {
+export default function ProductList({ items, loading, onUpdateQuantity, onRemoveItem, readOnly = false }: ProductListProps) {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -51,93 +47,73 @@ export default function ProductList({
   }
 
   return (
-    <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="flex gap-4 p-4 bg-white rounded-lg border border-gray-200">
-          {/* Product Image */}
-          <div className="relative w-20 h-20 flex-shrink-0">
-            <Image
-              src={item.image}
-              alt={item.name}
-              fill
-              className="object-cover rounded"
-            />
-          </div>
+    <div className="flow-root">
+      <ul role="list" className="-my-6 divide-y divide-gray-200">
+        {items.map((item) => (
+          <li key={item.id} className="flex py-6">
+            <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+              <Image
+                src={item.image}
+                alt={item.name}
+                width={96}
+                height={96}
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
 
-          {/* Product Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-900">
-                  {item.name}
-                  {item.variant && (
-                    <span className="text-gray-500 ml-1">
-                      - {item.variant.color}
-                      {item.variant.gac_chan !== undefined && (
-                        <span>{item.variant.gac_chan ? ' - Có kê chân' : ' - Không có kê chân'}</span>
-                      )}
-                    </span>
-                  )}
-                </h3>
-                <div className="mt-1">
-                  {item.original_price && item.original_price > item.price && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500 line-through">
-                        {item.original_price.toLocaleString()}đ
-                      </span>
-                      <span className="text-sm text-green-600">
-                        Tiết kiệm: {((item.original_price - item.price) * item.quantity).toLocaleString()}đ
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-red-600 font-medium">
-                    {item.price.toLocaleString()}đ
-                  </p>
+            <div className="ml-4 flex flex-1 flex-col">
+              <div>
+                <div className="flex justify-between text-base font-medium text-gray-900">
+                  <h3>
+                    <a href={item.href}>{item.name}</a>
+                  </h3>
+                  <p className="ml-4">{item.price.toLocaleString()}₫</p>
                 </div>
+                {item.variant && (
+                  <p className="mt-1 text-sm text-gray-500">{`${item.variant.color} - ${item.variant.size}`}</p>
+                )}
               </div>
-              <Button
-                onClick={() => onRemoveItem(item.id)}
-                variant="ghost"
-                size="icon"
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </Button>
-            </div>
+              <div className="flex flex-1 items-end justify-between text-sm">
+                {!readOnly ? (
+                  <div className="flex items-center gap-2">
+                    <p className="text-gray-500">Số lượng</p>
+                    <div className="flex items-center border rounded">
+                      <button
+                        onClick={() => onUpdateQuantity?.(item.id, Math.max(1, item.quantity - 1))}
+                        className="px-2 py-1 hover:bg-gray-100"
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="px-2 py-1">{item.quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity?.(item.id, item.quantity + 1)}
+                        className="px-2 py-1 hover:bg-gray-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Số lượng: {item.quantity}</p>
+                )}
 
-            <div className="mt-2 flex items-center justify-between">
-              <div className="flex items-center">
-                <Button
-                  onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                  </svg>
-                </Button>
-                <span className="mx-2 text-gray-900">{item.quantity}</span>
-                <Button
-                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                </Button>
-              </div>
-              <div className="text-sm font-medium text-gray-900">
-                {(item.price * item.quantity).toLocaleString()}đ
+                {!readOnly && (
+                  <div className="flex">
+                    <button
+                      type="button"
+                      onClick={() => onRemoveItem?.(item.id)}
+                      className="font-medium text-red-600 hover:text-red-500"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-      ))}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 } 

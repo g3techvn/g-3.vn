@@ -380,8 +380,8 @@ export default function CategoryProductsPage() {
                   return uniqueCategories;
                 }, [] as Product[]).map(product => ({
                   name: product.category_name || product.name,
-                  slug: product.slug || product.category_id,
-                  image_url: product.image_square_url || product.image_url
+                  slug: product.slug || product.category_id || '',
+                  image_url: product.image_square_url || product.image_url || '/images/placeholder-product.jpg'
                 }))}
               />
             )}
@@ -428,7 +428,7 @@ export default function CategoryProductsPage() {
                               title={product.name}
                             >
                               <Image
-                                src={product.image_url}
+                                src={product.image_url || '/images/placeholder-product.jpg'}
                                 alt={product.name}
                                 width={300}
                                 height={300}

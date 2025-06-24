@@ -32,7 +32,10 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
 
   // Get unique brands from products
   const brands = useMemo(() => {
-    const uniqueBrands = Array.from(new Set(products.map(product => product.brand).filter((brand): brand is string => brand !== null && brand !== undefined)));
+    const brandNames = products
+      .map(product => typeof product.brand === 'string' ? product.brand : product.brand?.title)
+      .filter((brand): brand is string => brand !== null && brand !== undefined);
+    const uniqueBrands = Array.from(new Set(brandNames));
     return uniqueBrands.sort();
   }, [products]);
 
@@ -88,7 +91,7 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
     return products.filter(product => {
       const matchesSearch = normalizeVietnameseText(product.name.toLowerCase())
         .includes(normalizeVietnameseText(debouncedSearchQuery.toLowerCase()));
-      const matchesBrand = selectedBrand ? product.brand === selectedBrand : true;
+      const matchesBrand = selectedBrand ? (typeof product.brand === 'string' ? product.brand : product.brand?.title) === selectedBrand : true;
       return matchesSearch && matchesBrand;
     });
   }, [products, debouncedSearchQuery, selectedBrand]);

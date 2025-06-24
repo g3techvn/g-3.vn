@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useBuyNow } from '@/context/BuyNowContext';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog } from '@/components/ui/Dialog';
+import Checkout from '@/components/store/checkout';
 
 interface ProductInfoProps {
   product: Product;
@@ -11,11 +14,13 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
   const { addToCart } = useCart();
+  const { setBuyNowItem } = useBuyNow();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showVariantWarning, setShowVariantWarning] = useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
     if (product.variants && product.variants.length > 0 && !selectedVariant) {
       setShowVariantWarning(true);
@@ -25,30 +30,33 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
       return;
     }
 
-    if (!isAddingToCart) {
-      setIsAddingToCart(true);
-      const cartItem = {
-        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+    setIsAddingToCart(true);
+    try {
+      await addToCart({
+        id: product.id,
         name: product.name,
-        price: selectedVariant?.price || product.price,
-        original_price: selectedVariant?.original_price || product.original_price,
+        price: product.price,
+        image: product.images?.[0] || product.image_url || '',
         quantity: 1,
-        image: selectedVariant?.image_url || product.image_url || '',
         variant: selectedVariant || undefined
-      };
-      addToCart(cartItem);
-      
-      // Show success message after adding to cart
-      setTimeout(() => {
-        setIsAddingToCart(false);
-        setShowSuccess(true);
-        
-        // Hide success message after 2 seconds
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 2000);
-      }, 800);
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
     }
+  };
+
+  const handleBuyNow = () => {
+    setBuyNowItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || product.image_url || '',
+      quantity: 1,
+      variant: selectedVariant || undefined
+    });
+    setIsCheckoutOpen(true);
   };
 
   // Animation variants
@@ -145,9 +153,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
           className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            // TODO: Implement buy now functionality
-          }}
+          onClick={handleBuyNow}
         >
           <CheckIcon className="h-5 w-5" />
           Mua ngay
@@ -226,6 +232,12 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
           </motion.div>
         </motion.div>
       </motion.div>
+
+      <Checkout 
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        closeAll={() => setIsCheckoutOpen(false)}
+      />
     </motion.div>
   );
 } 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useCart } from '@/context/CartContext'
+import { useBuyNow } from '@/context/BuyNowContext'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { Voucher } from '@/types/cart'
 import { generatePDF } from '@/components/PDFGenerator'
@@ -49,6 +50,7 @@ interface CheckoutProps {
 
 export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   const { cartItems, totalPrice, removeFromCart, updateQuantity } = useCart()
+  const { buyNowItem, clearBuyNowItem } = useBuyNow()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -112,6 +114,10 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
   const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([])
   
+  // Use either buyNowItem or cartItems based on context
+  const items = buyNowItem ? [buyNowItem] : cartItems
+  const total = buyNowItem ? buyNowItem.price * buyNowItem.quantity : totalPrice
+
   // Fetch vouchers from API
   const fetchVouchers = async () => {
     try {
@@ -279,11 +285,12 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
           note: formData.note
         },
         payment_method: formData.paymentMethod,
-        cart_items: cartItems,
+        cart_items: items,
         voucher: selectedVoucher,
         reward_points: useRewardPoints ? pointsToUse : 0,
-        total_price: totalPrice,
-        shipping_fee: shippingFee
+        total_price: total,
+        shipping_fee: shippingFee,
+        is_buy_now: !!buyNowItem
       }
 
       const response = await fetch('/api/orders', {
@@ -299,6 +306,9 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       if (response.ok) {
         showToast('Đặt hàng thành công')
         handlePreviewPDF()
+        if (buyNowItem) {
+          clearBuyNowItem()
+        }
         closeAll()
       } else {
         throw new Error(data.message || 'Có lỗi xảy ra')
@@ -391,7 +401,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-7xl">
           <DialogHeader>
-            <DialogTitle>Thanh toán</DialogTitle>
+            <DialogTitle>{buyNowItem ? 'Mua ngay' : 'Thanh toán'}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-12 gap-8">
             {/* Left column - Forms */}
@@ -551,16 +561,17 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
             <div className="col-span-4">
               <div className="bg-white p-4 rounded-lg sticky top-4">
                 <ProductList
-                  items={cartItems}
+                  items={items}
                   loading={loading}
-                  onUpdateQuantity={handleQuantityUpdate}
-                  onRemoveItem={removeFromCart}
+                  onUpdateQuantity={buyNowItem ? undefined : handleQuantityUpdate}
+                  onRemoveItem={buyNowItem ? undefined : removeFromCart}
+                  readOnly={!!buyNowItem}
                 />
                 <OrderSummary
-                  items={cartItems}
+                  items={items}
                   selectedVoucher={selectedVoucher}
                   pointsToUse={useRewardPoints ? pointsToUse : 0}
-                  totalPrice={totalPrice}
+                  totalPrice={total}
                 />
                 <Button
                   variant="default"
@@ -569,7 +580,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                   onClick={handleSubmit}
                   disabled={!isFormValid()}
                 >
-                  Đặt hàng
+                  {buyNowItem ? 'Mua ngay' : 'Đặt hàng'}
                 </Button>
               </div>
             </div>
@@ -676,10 +687,10 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
             note: formData.note
           },
           payment_method: formData.paymentMethod,
-          cart_items: cartItems,
+          cart_items: items,
           voucher: selectedVoucher,
           reward_points: useRewardPoints ? pointsToUse : 0,
-          total_price: totalPrice,
+          total_price: total,
           shipping_fee: shippingFee
         }}
       />

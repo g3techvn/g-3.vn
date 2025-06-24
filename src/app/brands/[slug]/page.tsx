@@ -432,7 +432,7 @@ export default function BrandProductsPage() {
                               title={product.name}
                             >
                               <Image
-                                src={product.image_url}
+                                src={product.image_url || '/images/placeholder-product.jpg'}
                                 alt={product.name}
                                 width={300}
                                 height={300}

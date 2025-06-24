@@ -31,14 +31,14 @@ export default function QuickView({ product, isOpen, onClose }: QuickViewProps) 
       return {
         price: selectedVariant.price,
         originalPrice: selectedVariant.original_price,
-        imageUrl: selectedVariant.image_url || product.image_url,
+        imageUrl: selectedVariant.image_url || product.image_url || '/placeholder-product.jpg',
         inStock: selectedVariant.stock_quantity > 0
       }
     }
     return {
       price: product.price,
       originalPrice: product.original_price,
-      imageUrl: product.image_url,
+      imageUrl: product.image_url || '/placeholder-product.jpg',
       inStock: true
     }
   }, [selectedVariant, product])

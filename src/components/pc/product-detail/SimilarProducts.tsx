@@ -140,7 +140,7 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
                         </CardHeader>
                         
                         <CardContent>
-                          <div className="text-xs text-gray-500 mb-1">{product.brand || 'Không rõ'}</div>
+                          <div className="text-xs text-gray-500 mb-1">{(typeof product.brand === 'string' ? product.brand : product.brand?.title) || 'Không rõ'}</div>
                           
                           <h3 className="text-xs font-medium mb-2 text-gray-800 group-hover:text-red-600 line-clamp-2 h-[2.5rem]">
                             {product.name}

@@ -18,35 +18,51 @@ export type ProductVariant = {
   gac_chan: boolean;
 };
 
-export type Product = {
+export interface ProductSpecification {
+  title: string;
+  value: string;
+}
+
+export interface Product {
   id: string;
   name: string;
+  slug?: string;
   description: string;
   price: number;
-  image_url: string;
-  image_square_url?: string;
-  category_id: string;
-  category_name?: string;
-  pd_cat_id: string;
-  brand_id: string;
-  brand?: string;
-  brand_slug?: string;
-  rating?: number;
-  sold_count?: number;
-  created_at: string;
-  updated_at: string;
   original_price?: number;
-  discount_percentage?: number;
-  slug?: string;
+  images?: string[];
+  image_url?: string;
   video_url?: string;
-  gallery_url?: string;
-  content?: string;
-  thong_so_ky_thuat?: { [key: string]: { title: string; value: string } };
-  tinh_nang?: string | string[];
-  loi_ich?: string | string[];
-  status?: boolean;
   variants?: ProductVariant[];
-};
+  category?: Category;
+  brand?: Brand;
+  brand_id?: string;
+  pd_cat_id?: string;
+  category_id?: string;
+  category_name?: string;
+  image_square_url?: string;
+  specifications?: ProductSpecification[];
+  features?: string[];
+  benefits?: string[];
+  instructions?: string[];
+  overview?: string;
+  is_available?: boolean;
+  status?: boolean;
+  stock_status?: 'in_stock' | 'out_of_stock' | 'low_stock';
+  rating?: number;
+  review_count?: number;
+  sold_count?: number;
+  created_at?: string;
+  updated_at?: string;
+  feature?: boolean;
+  gallery_url?: string;
+  brand_slug?: string;
+  content?: string;
+  discount_percentage?: number;
+  thong_so_ky_thuat?: Record<string, { title?: string; value?: string }>;
+  tinh_nang?: string[];
+  loi_ich?: string[];
+}
 
 export type Category = {
   id: string;
