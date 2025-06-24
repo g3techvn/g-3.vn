@@ -372,184 +372,131 @@ const ComboDetailModal = ({
 
 export default function ComboProduct({ 
   products = [],
-  loading = false,
-  error = null,
   brands = []
 }: {
   products: ComboProduct[];
-  loading: boolean;
-  error: string | null;
   brands?: Brand[];
 }) {
-  const { addToCart } = useCart();
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
-  const [brandNames, setBrandNames] = useState<Record<string, string>>({});
+  const [selectedCombo, setSelectedCombo] = useState<ComboItem | null>(null);
+  const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Extract product IDs for useSoldCounts hook
-  const productIds = products.map(product => product.id.toString());
+  // Convert brands array to a map for easier lookup
+  const brandNames = brands.reduce((acc, brand) => {
+    acc[brand.id] = brand.title;
+    return acc;
+  }, {} as Record<string, string>);
 
-  // Build a map of brand_id to brand name
-  useEffect(() => {
-    if (brands.length > 0) {
-      const brandMap: Record<string, string> = {};
-      brands.forEach(brand => {
-        brandMap[brand.id] = brand.title;
-      });
-      setBrandNames(brandMap);
-    }
-  }, [brands]);
+  const convertToComboItem = (product: ComboProduct): ComboItem => {
+    const options = product.combo_products?.map((comboProduct: Product, index: number) => ({
+      id: index + 1,
+      name: comboProduct.name,
+      price: comboProduct.price,
+      originalPrice: comboProduct.original_price,
+      discount: comboProduct.discount_percentage,
+      image: comboProduct.image_url || '',
+      isAvailable: true // You might want to add actual availability logic here
+    })) || [];
 
-  // Convert Product to ComboItem format
-  const convertToComboItem = (product: Product): ComboItem => {
     return {
-      id: product.id,
+      id: product.id.toString(),
       name: product.name,
       description: product.description || '',
       image: product.image_url || '',
       brand: product.brand,
       brand_id: product.brand_id,
       rating: product.rating,
-      slug: product.slug || product.id,
-      options: [{
-        id: 1,
-        name: product.name,
-        price: product.price,
-        originalPrice: product.original_price,
-        discount: product.discount_percentage,
-        image: product.image_url || '',
-        isAvailable: true
-      }]
+      slug: product.slug || product.id.toString(),
+      options
     };
   };
 
-  const comboItems = products.map(convertToComboItem);
+  const handleComboClick = (combo: ComboItem) => {
+    setSelectedCombo(combo);
+    setSelectedOptionId(combo.options[0]?.id || null);
+    setIsModalOpen(true);
+  };
 
-  // Tự động chọn option đầu tiên cho mỗi combo
-  useEffect(() => {
-    const newSelections: Record<string, number> = { ...selectedOptions };
-    let changed = false;
+  const handleOptionSelect = (optionId: number) => {
+    setSelectedOptionId(optionId);
+  };
 
-    comboItems.forEach(combo => {
-      if (selectedOptions[combo.id] === undefined) {
-        const defaultOption = combo.options.find(opt => opt.isAvailable) || combo.options[0];
-        if (defaultOption) {
-          newSelections[combo.id] = defaultOption.id;
-          changed = true;
-        }
-      }
-    });
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedCombo(null);
+    setSelectedOptionId(null);
+  };
 
-    if (changed) {
-      setSelectedOptions(newSelections);
-    }
-  }, [comboItems, selectedOptions]);
+  if (products.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-8 bg-gray-100">
       <div className="container mx-auto">
-        <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 mb-6 inline-block uppercase">
-          Combo Sản Phẩm
+        <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 mb-6 uppercase">
+          Combo sản phẩm
         </h2>
 
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
-            Đã xảy ra lỗi: {error}
-          </div>
-        )}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {products.map((product) => {
+            const comboItem = convertToComboItem(product);
+            return (
+              <Link 
+                key={product.id} 
+                href={`/san-pham/${product.slug || product.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleComboClick(comboItem);
+                }}
+              >
+                <ComboCard 
+                  combo={comboItem} 
+                  selectedOptionId={comboItem.options[0]?.id}
+                  brandNames={brandNames}
+                />
+              </Link>
+            );
+          })}
+        </div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-square w-full rounded-lg bg-gray-200" />
-                <div className="mt-2 space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-gray-200" />
-                  <div className="h-4 w-1/2 rounded bg-gray-200" />
+        {/* Modal */}
+        {isModalOpen && selectedCombo && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {selectedCombo.name}
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedCombo.options.map((option) => (
+                    <ProductOptionCard
+                      key={option.id}
+                      option={option}
+                      isSelected={option.id === selectedOptionId}
+                      onSelect={() => handleOptionSelect(option.id)}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <Button onClick={closeModal}>
+                    Đóng
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : comboItems.length > 0 ? (
-          <>
-            {/* Layout with banner (4 cols) left and 2 products right */}
-            <div className="grid grid-cols-6 gap-4 mb-4">
-              {/* Banner - takes 4 columns */}
-              <div className="col-span-6 lg:col-span-4 relative h-[250px] lg:h-[400px] rounded-lg overflow-hidden">
-                <Image 
-                  src="/images/header-img.jpg"
-                  alt="Combo Sản Phẩm"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 66vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center pl-6 md:pl-12">
-                  <h3 className="text-white text-lg md:text-2xl font-bold mb-1">Nội Thất Văn Phòng</h3>
-                  <p className="text-white/90 text-xs md:text-sm max-w-md lg:max-w-lg">
-                    Nâng tầm không gian làm việc với bộ sưu tập nội thất văn phòng cao cấp, thiết kế hiện đại và tiện nghi
-                  </p>
-                  <Link href="#" className="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors max-w-fit">
-                    Khám phá ngay
-                  </Link>
-                </div>
-              </div>
-
-              {/* First 2 products - takes 1 column each */}
-              {comboItems.slice(0, 2).map((combo, index) => (
-                <div key={combo.id} className="col-span-3 lg:col-span-1">
-                  <ProductCard 
-                    product={{
-                      id: combo.id,
-                      name: combo.name,
-                      price: combo.options[0].price,
-                      original_price: combo.options[0].originalPrice,
-                      discount_percentage: combo.options[0].discount,
-                      image_url: combo.image,
-                      brand: combo.brand,
-                      brand_id: combo.brand_id || '',
-                      rating: combo.rating,
-                      sold_count: 0,
-                      slug: combo.slug || combo.id,
-                      description: combo.description || '',
-                      category_id: '',
-                      pd_cat_id: '',
-                      created_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString()
-                    }}
-                  />
-                </div>
-              ))}
             </div>
-
-            {/* Row 2 with remaining products */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {comboItems.slice(2).map((combo, index) => (
-                <ProductCard 
-                  key={combo.id}
-                  product={{
-                    id: combo.id,
-                    name: combo.name,
-                    price: combo.options[0].price,
-                    original_price: combo.options[0].originalPrice,
-                    discount_percentage: combo.options[0].discount,
-                    image_url: combo.image,
-                    brand: combo.brand,
-                    brand_id: combo.brand_id || '',
-                    rating: combo.rating,
-                    slug: combo.slug || combo.id,
-                    description: combo.description || '',
-                    category_id: '',
-                    pd_cat_id: '',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  }}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
-            <p className="text-base text-gray-600">Không tìm thấy sản phẩm nào.</p>
-            <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
           </div>
         )}
       </div>

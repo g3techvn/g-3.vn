@@ -18,7 +18,7 @@ export default function CollapsibleSection({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="mb-4 bg-white rounded-lg overflow-hidden">
+    <div className="mb-4 bg-white">
       <div 
         className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isCompleted ? 'bg-green-50' : ''}`}
         onClick={() => setIsOpen(!isOpen)}

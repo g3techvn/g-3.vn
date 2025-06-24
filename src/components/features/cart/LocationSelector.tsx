@@ -81,7 +81,7 @@ export default function LocationSelector({
 
   if (error) {
     return (
-      <div className="text-red-500 text-center py-6 px-4">
+      <div className="text-red-500 text-center py-6">
         <MapPinIcon className="w-12 h-12 mx-auto mb-3 text-red-400" />
         <p className="text-sm mb-4">
           {error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu địa chỉ'}
@@ -113,7 +113,7 @@ export default function LocationSelector({
     placeholder: string;
     disabled?: boolean;
   }) => (
-    <div className="relative">
+    <div className="relative mb-4">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
         {label} <span className="text-red-500">*</span>
       </label>
@@ -121,12 +121,13 @@ export default function LocationSelector({
         <select
           id={id}
           className={`
-            appearance-none block w-full px-4 py-3 pr-10 
-            text-base border border-gray-300 rounded-lg 
-            shadow-sm placeholder-gray-400
-            focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500
+            appearance-none block w-full px-3 py-2
+            text-base border ${fieldDisabled ? 'border-gray-300' : 'border-gray-300'}
+            rounded-md
+            placeholder-gray-400
+            focus:outline-none focus:ring-1 focus:ring-red-500
             disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-            transition-all duration-200
+            transition-colors
             ${fieldDisabled ? 'bg-gray-50' : 'bg-white'}
           `}
           value={value}
@@ -150,73 +151,77 @@ export default function LocationSelector({
   );
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-      <div className="flex items-center mb-4">
-        <MapPinIcon className="w-5 h-5 text-red-500 mr-2" />
-        <h3 className="text-lg font-medium text-gray-900">Thông tin địa chỉ</h3>
+    <>
+      <div className="flex items-center mb-3 mt-6">
+        <div className="w-8 h-8 mr-2">
+          <MapPinIcon className="w-full h-full text-red-600" />
+        </div>
+        <span className="text-lg font-medium">Thông tin địa chỉ</span>
       </div>
 
-      {/* Province Select */}
-      <SelectField
-        id="province"
-        label="Tỉnh/Thành phố"
-        value={selectedProvinceCode || ''}
-        onChange={(e) => {
-          const code = Number(e.target.value);
-          const province = provinces.find((p: Province) => p.code === code);
-          if (province) {
-            onProvinceChange(province.code, province.name);
-            // Reset district and ward
-            onDistrictChange(0, '');
-            onWardChange(0, '');
-          }
-        }}
-        options={provinces}
-        placeholder="Chọn Tỉnh/Thành phố"
-      />
+      <div className="bg-white p-4">
+        {/* Province Select */}
+        <SelectField
+          id="province"
+          label="Tỉnh/Thành phố"
+          value={selectedProvinceCode || ''}
+          onChange={(e) => {
+            const code = Number(e.target.value);
+            const province = provinces.find((p: Province) => p.code === code);
+            if (province) {
+              onProvinceChange(province.code, province.name);
+              // Reset district and ward
+              onDistrictChange(0, '');
+              onWardChange(0, '');
+            }
+          }}
+          options={provinces}
+          placeholder="Chọn Tỉnh/Thành phố"
+        />
 
-      {/* District Select */}
-      <SelectField
-        id="district"
-        label="Quận/Huyện"
-        value={selectedDistrictCode || ''}
-        onChange={(e) => {
-          const code = Number(e.target.value);
-          const district = filteredDistricts.find((d: District) => d.code === code);
-          if (district) {
-            onDistrictChange(district.code, district.name);
-            // Reset ward
-            onWardChange(0, '');
-          }
-        }}
-        options={filteredDistricts}
-        placeholder="Chọn Quận/Huyện"
-        disabled={!selectedProvinceCode}
-      />
+        {/* District Select */}
+        <SelectField
+          id="district"
+          label="Quận/Huyện"
+          value={selectedDistrictCode || ''}
+          onChange={(e) => {
+            const code = Number(e.target.value);
+            const district = filteredDistricts.find((d: District) => d.code === code);
+            if (district) {
+              onDistrictChange(district.code, district.name);
+              // Reset ward
+              onWardChange(0, '');
+            }
+          }}
+          options={filteredDistricts}
+          placeholder="Chọn Quận/Huyện"
+          disabled={!selectedProvinceCode}
+        />
 
-      {/* Ward Select */}
-      <SelectField
-        id="ward"
-        label="Phường/Xã"
-        value={selectedWardCode || ''}
-        onChange={(e) => {
-          const code = Number(e.target.value);
-          const ward = filteredWards.find((w: Ward) => w.code === code);
-          if (ward) {
-            onWardChange(ward.code, ward.name);
-          }
-        }}
-        options={filteredWards}
-        placeholder="Chọn Phường/Xã"
-        disabled={!selectedDistrictCode}
-      />
+        {/* Ward Select */}
+        <SelectField
+          id="ward"
+          label="Phường/Xã"
+          value={selectedWardCode || ''}
+          onChange={(e) => {
+            const code = Number(e.target.value);
+            const ward = filteredWards.find((w: Ward) => w.code === code);
+            if (ward) {
+              onWardChange(ward.code, ward.name);
+            }
+          }}
+          options={filteredWards}
+          placeholder="Chọn Phường/Xã"
+          disabled={!selectedDistrictCode}
+        />
 
-      {/* Info message for mobile users */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg md:hidden">
-        <p className="text-sm text-blue-700">
-          💡 Chọn từ trên xuống dưới: Tỉnh/Thành phố → Quận/Huyện → Phường/Xã
-        </p>
+        {/* Info message for mobile users */}
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg md:hidden">
+          <p className="text-sm text-blue-700">
+            💡 Chọn từ trên xuống dưới: Tỉnh/Thành phố → Quận/Huyện → Phường/Xã
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 } 

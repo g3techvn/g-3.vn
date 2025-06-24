@@ -16,14 +16,14 @@ export default function BottomBar({
   loading = false
 }: BottomBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 flex justify-between items-center z-[9999] shadow-lg">
+    <div className="fixed bottom-[70px] left-0 right-0 bg-white p-4 border-t border-gray-200 flex justify-between items-center z-[9999] shadow-lg">
       <div className="flex flex-col justify-center h-full">
         <div className="text-gray-500 text-[10px] leading-tight">{cartItemCount} sản phẩm</div>
         <div className="text-gray-500 text-[10px] leading-tight">Tổng thanh toán</div>
         <div className="text-base font-bold leading-tight">{total.toLocaleString()}đ</div>
       </div>
       <button 
-        className={`px-8 rounded-full font-medium flex items-center h-10 ${
+        className={`px-6 rounded-full font-medium flex items-center h-10 ${
           isValid && !loading 
             ? 'bg-[#DC2626] text-white hover:bg-[#B91C1C]' 
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'

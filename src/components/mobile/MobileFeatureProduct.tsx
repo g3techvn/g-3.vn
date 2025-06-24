@@ -5,36 +5,21 @@ import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
 import OptimizedImage from '@/components/common/OptimizedImage';
+import Image from 'next/image';
 
 interface MobileFeatureProductProps {
   products: Product[];
   brands: Brand[];
-  loading: boolean;
-  error: string | null;
 }
 
 const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({ 
   products, 
-  brands,
-  loading, 
-  error 
+  brands
 }) => {
   const productIds = products.map(p => p.id.toString());
   const { addToCart } = useCart();
   const [currentSlides, setCurrentSlides] = useState<Record<string, number>>({});
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('MobileFeatureProduct Debug:', {
-      productsCount: products.length,
-      brandsCount: brands.length,
-      loading,
-      error,
-      products: products.slice(0, 3), // Log first 3 products
-      brands: brands.slice(0, 3) // Log first 3 brands
-    });
-  }, [products, brands, loading, error]);
 
   // Biến đổi mảng brands thành map để dễ truy cập - memoized
   const brandsMap = useMemo(() => {
@@ -130,38 +115,9 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
     addToCart(cartItem);
   }, [addToCart]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <section className="pt-4">
-        <div className="text-center py-8">
-          <p className="text-gray-500">Đang tải sản phẩm...</p>
-        </div>
-      </section>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <section className="pt-4">
-        <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
-          Đã xảy ra lỗi: {error}
-        </div>
-      </section>
-    );
-  }
-
   // Empty state
   if (!products.length) {
-    return (
-      <section className="pt-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
-          <p className="text-base text-gray-600">Không tìm thấy sản phẩm nào.</p>
-          <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   return (
@@ -207,52 +163,52 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
                       <Link 
                         href={`/san-pham/${product.slug || product.id}`} 
                         key={product.id}
-                        className="w-full bg-white rounded-lg shadow flex items-center"
+                        className="bg-white rounded-lg shadow overflow-hidden block"
                       >
-                        <div className="relative w-24 h-24">
-                          <OptimizedImage
-                            src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
-                            alt={product.name}
-                            fill
-                            className="rounded-l-lg"
-                            objectFit="cover"
-                            quality={70}
-                            sizes="96px"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 p-3">
-                          <div className="font-medium text-sm truncate overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</div>
-                          <div className="flex items-center justify-between mt-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-red-500 font-semibold">{formatCurrency(product.price)}</span>
-                              {product.original_price && product.original_price > product.price && (
-                                <>
-                                  <span className="text-xs text-gray-400 line-through">{formatCurrency(product.original_price)}</span>
-                                  {product.discount_percentage && (
-                                    <span className="text-xs text-red-500">-{product.discount_percentage}%</span>
-                                  )}
-                                </>
-                              )}
-                            </div>
+                        <div className="flex items-center p-2">
+                          <div className="relative w-20 h-20">
+                            <Image
+                              src={product.image_url || "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=200&auto=format"}
+                              alt={product.name}
+                              fill
+                              className="rounded-lg object-cover"
+                            />
                           </div>
-                          <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
-                            <div className="flex items-center gap-2">
-                              <span className="flex items-center gap-0.5">
-                                <svg className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
-                                {(product.rating || 4.9).toFixed(1)}
-                              </span>
-                              <span>•</span>
-                              <span>Đã bán {product.sold_count || 0}</span>
+                          <div className="flex-1 min-w-0 ml-2">
+                            <div className="font-medium text-sm line-clamp-2">
+                              {product.name}
                             </div>
-                            <button 
-                              className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
-                              aria-label="Thêm vào giỏ hàng"
-                              onClick={(e) => handleAddToCart(e, product)}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                            </button>
+                            <div className="flex items-center justify-between mt-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-red-500 font-semibold">
+                                  {formatCurrency(product.price)}
+                                </span>
+                                {product.original_price && product.original_price > product.price && (
+                                  <span className="text-xs text-gray-500 line-through">
+                                    {formatCurrency(product.original_price)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                              <div className="flex items-center gap-2">
+                                <span className="flex items-center gap-0.5">
+                                  <svg className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><polygon points="9.9,1.1 7.6,6.6 1.6,7.3 6.1,11.2 4.8,17.1 9.9,14.1 15,17.1 13.7,11.2 18.2,7.3 12.2,6.6 "/></svg>
+                                  {(product.rating || 4.9).toFixed(1)}
+                                </span>
+                                <span>•</span>
+                                <span>Đã bán {product.sold_count || 0}</span>
+                              </div>
+                              <button 
+                                className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
+                                aria-label="Thêm vào giỏ hàng"
+                                onClick={(e) => handleAddToCart(e, product)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </Link>
@@ -267,8 +223,5 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
     </section>
   );
 });
-
-// Add display name for debugging
-MobileFeatureProduct.displayName = 'MobileFeatureProduct';
 
 export default MobileFeatureProduct; 

@@ -18,14 +18,10 @@ const bannerImages = [
 
 interface MobileBestsellerProductsProps {
   products: Product[];
-  loading: boolean;
-  error: string | null;
 }
 
 const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.memo(({ 
-  products,
-  loading,
-  error
+  products
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -67,47 +63,9 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
       .slice(0, 4);
   }, [products]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <section className="pt-4">
-        <div className="flex items-center justify-between px-4 mb-2">
-          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
-        </div>
-        <div className="text-center py-8">
-          <p className="text-gray-500">Đang tải sản phẩm...</p>
-        </div>
-      </section>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <section className="pt-4">
-        <div className="flex items-center justify-between px-4 mb-2">
-          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
-        </div>
-        <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
-          Đã xảy ra lỗi: {error}
-        </div>
-      </section>
-    );
-  }
-
   // Empty state
   if (displayProducts.length === 0) {
-    return (
-      <section className="pt-4">
-        <div className="flex items-center justify-between px-4 mb-2">
-          <h2 className="text-lg font-semibold text-red-700">Sản phẩm bán chạy</h2>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
-          <p className="text-base text-gray-600">Không tìm thấy sản phẩm nào.</p>
-          <p className="mt-1 text-sm text-gray-500">Vui lòng thử lại sau.</p>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   return (
@@ -201,7 +159,6 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
   );
 });
 
-// Add display name for debugging
 MobileBestsellerProducts.displayName = 'MobileBestsellerProducts';
 
 export default MobileBestsellerProducts; 

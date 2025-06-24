@@ -442,7 +442,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen pb-[140px] md:pb-0">
       <CartHeader 
         showMenu={showMenu}
         setShowMenu={setShowMenu}
@@ -727,8 +727,7 @@ export default function CartPage() {
         />
 
         {/* Location Selection */}
-        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Địa chỉ giao hàng</h3>
+        <div className="bg-white ">
           
           <LocationSelector
             selectedProvinceCode={selectedLocation.provinceCode}

@@ -14,11 +14,29 @@ interface VideoPlayerProps {
 export function VideoPlayer({ videoUrl, isActive, isMuted, onToggleMute }: VideoPlayerProps) {
   const [embedError, setEmbedError] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   const getYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+    try {
+      // Support more URL formats
+      const patterns = [
+        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/,
+        /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/,
+        /^.*(youtube.com\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+      ];
+      
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && (match[2]?.length === 11 || match[1]?.length === 11)) {
+          return match[2] || match[1];
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing YouTube URL:', error);
+      return null;
+    }
   };
 
   const videoId = getYouTubeId(videoUrl);
@@ -43,12 +61,22 @@ export function VideoPlayer({ videoUrl, isActive, isMuted, onToggleMute }: Video
     return (
       <div className="relative w-full h-full bg-black">
         <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1&playsinline=1`}
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
           className="absolute inset-0 w-full h-full border-0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           title={`Video sản phẩm ${videoId}`}
-          onError={() => setEmbedError(true)}
+          onError={() => {
+            if (retryCount < MAX_RETRIES) {
+              setRetryCount(prev => prev + 1);
+              setTimeout(() => setShowEmbed(true), 1000); // Retry after 1 second
+            } else {
+              setEmbedError(true);
+            }
+          }}
+          onLoad={() => {
+            setRetryCount(0); // Reset retry count on successful load
+          }}
         />
         
         {/* Mute toggle button */}

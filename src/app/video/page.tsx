@@ -51,14 +51,34 @@ function VideoContent() {
       }
       
       const data = await response.json();
-      const fetchedProducts = (data.products || []).filter((product: Product) => 
-        product.video_url && 
-        product.video_url.trim() !== '' && 
-        product.video_url !== null
-      );
+      const fetchedProducts = (data.products || []).filter((product: Product) => {
+        if (!product.video_url) return false;
+        
+        try {
+          const url = new URL(product.video_url);
+          // Chấp nhận các domain phổ biến cho video
+          return url.hostname.includes('youtube.com') || 
+                 url.hostname.includes('youtu.be') ||
+                 url.hostname.includes('vimeo.com') ||
+                 url.hostname.includes('facebook.com');
+        } catch (error) {
+          console.warn('Invalid video URL:', product.video_url);
+          return false;
+        }
+      });
       
-      console.log('Video page - Products with videos:', fetchedProducts.length);
-      console.log('Video page - Sample video URLs:', fetchedProducts.slice(0, 3).map((p: Product) => p.video_url));
+      if (fetchedProducts.length === 0) {
+        console.warn('No valid video products found in this batch');
+      } else {
+        console.log('Video page - Products with valid videos:', fetchedProducts.length);
+        console.log('Video page - Sample video URLs:', 
+          fetchedProducts.slice(0, 3).map((p: Product) => ({
+            id: p.id,
+            name: p.name,
+            url: p.video_url
+          }))
+        );
+      }
       
       if (pageNumber === 1) {
         setProducts(fetchedProducts);
@@ -100,7 +120,7 @@ function VideoContent() {
     fetchProducts(1);
   }, [fetchProducts]);
 
-  // Setup intersection observer for videos
+  // Setup intersection observer for videos with improved thresholds
   useEffect(() => {
     if (videoObserver.current) {
       videoObserver.current.disconnect();
@@ -111,17 +131,33 @@ function VideoContent() {
         entries.forEach(entry => {
           const videoIndex = parseInt(entry.target.getAttribute('data-index') || '0', 10);
           
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
             setActiveVideoIndex(videoIndex);
-          } else if (activeVideoIndex === videoIndex) {
+            // Pause other videos
+            products.forEach((_, index) => {
+              if (index !== videoIndex) {
+                const videoElement = document.querySelector(`[data-index="${index}"] iframe`);
+                if (videoElement) {
+                  try {
+                    (videoElement as any).contentWindow?.postMessage(
+                      '{"event":"command","func":"pauseVideo","args":""}',
+                      '*'
+                    );
+                  } catch (error) {
+                    console.warn('Error pausing video:', error);
+                  }
+                }
+              }
+            });
+          } else if (!entry.isIntersecting && activeVideoIndex === videoIndex) {
             setActiveVideoIndex(null);
           }
         });
       },
       {
         root: null,
-        rootMargin: '0px',
-        threshold: 0.5
+        rootMargin: '-10% 0px',
+        threshold: [0, 0.7, 1]
       }
     );
 
