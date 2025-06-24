@@ -224,4 +224,6 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   );
 });
 
+MobileFeatureProduct.displayName = 'MobileFeatureProduct';
+
 export default MobileFeatureProduct; 
