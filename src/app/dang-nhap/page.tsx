@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useToast } from "@/hooks/useToast";
 
 function LoginContent() {
   const { user, loading: isLoading, signIn, signUp } = useAuth();
@@ -26,6 +26,7 @@ function LoginContent() {
   });
 
   const supabase = createBrowserClient();
+  const { showToast } = useToast();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -42,14 +43,14 @@ function LoginContent() {
       const { error } = await signIn(formData.email, formData.password);
 
       if (error) {
-        toast.error(error.message);
+        showToast(error.message, 'destructive');
         return;
       }
 
-        toast.success('Đăng nhập thành công!');
-        router.push(redirectTo);
+      showToast('Đăng nhập thành công!', 'default');
+      router.push(redirectTo);
     } catch (error: any) {
-      toast.error('Có lỗi xảy ra khi đăng nhập');
+      showToast('Có lỗi xảy ra khi đăng nhập', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -59,12 +60,12 @@ function LoginContent() {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
+      showToast('Mật khẩu xác nhận không khớp', 'destructive');
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error('Mật khẩu phải có ít nhất 6 ký tự');
+      showToast('Mật khẩu phải có ít nhất 6 ký tự', 'destructive');
       return;
     }
 
@@ -74,14 +75,14 @@ function LoginContent() {
       const { error } = await signUp(formData.email, formData.password, formData.fullName);
 
       if (error) {
-        toast.error(error.message);
+        showToast(error.message, 'destructive');
         return;
       }
 
-        toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+      showToast('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.', 'default');
       setIsSignInMode(true);
     } catch (error: any) {
-      toast.error('Có lỗi xảy ra khi đăng ký');
+      showToast('Có lỗi xảy ra khi đăng ký', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -98,10 +99,10 @@ function LoginContent() {
       });
 
       if (error) {
-        toast.error(error.message);
+        showToast(error.message, 'destructive');
       }
     } catch (error: any) {
-      toast.error('Có lỗi xảy ra khi đăng nhập với Google');
+      showToast('Có lỗi xảy ra khi đăng nhập với Google', 'destructive');
     } finally {
       setLoading(false);
     }

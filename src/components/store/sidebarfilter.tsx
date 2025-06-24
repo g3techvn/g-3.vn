@@ -159,7 +159,7 @@ export function SidebarFilter({ onFilterChange, maxPrice, products }: SidebarFil
   };
 
   return (
-    <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm hidden md:block">
       <div>
         <h3 className="mb-4 text-lg font-semibold">Bộ lọc</h3>
         

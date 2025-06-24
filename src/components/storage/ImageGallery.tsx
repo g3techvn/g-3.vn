@@ -6,12 +6,12 @@ import Spin from 'antd/es/spin';
 import message from 'antd/es/message';
 import Select from 'antd/es/select';
 import Input from 'antd/es/input';
-import Button from 'antd/es/button';
 import Switch from 'antd/es/switch';
 import Divider from 'antd/es/divider';
 import { SortAscendingOutlined, SortDescendingOutlined, FolderOutlined } from '@ant-design/icons';
 import { useSupabaseStorage } from '@/hooks/useSupabaseStorage';
 import { ImageItem } from '@/types/supabase';
+import { Button } from '@/components/ui/Button';
 
 interface ImageGalleryProps {
   defaultFolder?: string;
@@ -43,6 +43,7 @@ export function ImageGallery({
   const [showDebug, setShowDebug] = useState(false);
   const [useAlternativeUrl, setUseAlternativeUrl] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [selectedImage, setSelectedImage] = useState<ImageItem | null>(null);
   
   const { images, loading, error, refetch, debug, suggestedFolders } = useSupabaseStorage({
     folder,
@@ -108,33 +109,27 @@ export function ImageGallery({
                 <p className="text-xs text-gray-500 mt-1">{image.name}</p>
                 {useAlternativeUrl ? (
                   <Button 
-                    size="small"
+                    variant="default"
+                    size="sm"
                     className="mt-2"
                     onClick={() => {
                       setUseAlternativeUrl(false);
-                      // Reset error state for this image
-                      setImageErrors(prev => ({
-                        ...prev,
-                        [imageKey]: false
-                      }));
+                      setSelectedImage(null);
                     }}
                   >
-                    Try Standard URL
+                    Sử dụng URL gốc
                   </Button>
-                ) : image.alternativeUrl && (
+                ) : (
                   <Button 
-                    size="small"
+                    variant="default"
+                    size="sm"
                     className="mt-2"
                     onClick={() => {
                       setUseAlternativeUrl(true);
-                      // Reset error state for this image
-                      setImageErrors(prev => ({
-                        ...prev,
-                        [imageKey]: false
-                      }));
+                      setSelectedImage(null);
                     }}
                   >
-                    Try Alternative URL
+                    Sử dụng URL thay thế
                   </Button>
                 )}
               </div>
@@ -250,7 +245,7 @@ export function ImageGallery({
                     onChange={(e) => setCustomFolder(e.target.value)}
                     placeholder="Enter folder path"
                   />
-                  <Button type="primary" onClick={handleCustomFolderSubmit}>
+                  <Button variant="default" onClick={handleCustomFolderSubmit}>
                     Apply
                   </Button>
                 </div>
@@ -268,8 +263,7 @@ export function ImageGallery({
                 <span className="text-sm">Use Alternative URL:</span>
                 <Switch 
                   checked={useAlternativeUrl} 
-                  onChange={setUseAlternativeUrl} 
-                  size="small"
+                  onChange={setUseAlternativeUrl}
                 />
               </div>
               
@@ -277,13 +271,15 @@ export function ImageGallery({
                 {showSorting && (
                   <Button 
                     onClick={toggleSortOrder} 
-                    icon={sortOrder === 'asc' ? <SortAscendingOutlined /> : <SortDescendingOutlined />}
+                    variant="outline"
+                    className="flex items-center gap-2"
                   >
+                    {sortOrder === 'asc' ? <SortAscendingOutlined /> : <SortDescendingOutlined />}
                     {sortOrder === 'asc' ? 'Sort A-Z' : 'Sort Z-A'}
                   </Button>
                 )}
                 
-                <Button onClick={refetch}>
+                <Button onClick={refetch} variant="outline">
                   Refresh
                 </Button>
               </div>
@@ -318,8 +314,10 @@ export function ImageGallery({
                   <Button 
                     key={index}
                     onClick={() => navigateToFolder(suggestedFolder)}
-                    icon={<FolderOutlined />}
+                    variant="outline"
+                    className="flex items-center gap-2"
                   >
+                    <FolderOutlined />
                     {suggestedFolder.split('/').pop()}
                   </Button>
                 ))}
@@ -331,20 +329,21 @@ export function ImageGallery({
             <Button 
               onClick={() => navigateToFolder(folder.split('/').slice(0, -1).join('/'))}
               disabled={!folder.includes('/')}
+              variant="outline"
             >
               Go Up One Level
             </Button>
             
             <Button 
               onClick={() => setShowDebug(!showDebug)} 
-              type="dashed"
+              variant="secondary"
             >
               {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
             </Button>
             
             <Button 
               onClick={() => setUseAlternativeUrl(!useAlternativeUrl)} 
-              type="primary"
+              variant="default"
             >
               Try Alternative URL Format
             </Button>

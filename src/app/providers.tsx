@@ -5,12 +5,11 @@ import { Roboto_Flex as RobotoFlex } from 'next/font/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '@/features/auth/AuthProvider';
-
 import { ThemeProvider } from '@/context/ThemeContext';
 import { useState, useRef } from 'react';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
 import PageViewTracker from '@/components/PageViewTracker';
 import { Suspense } from 'react';
+import { Toaster } from '@/components/ui/Toaster';
 
 const roboto = RobotoFlex({
   subsets: ['latin', 'vietnamese'],
@@ -41,18 +40,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${roboto.variable} font-sans`}>
       <QueryClientProvider client={queryClientRef.current}>
-          <AuthProvider>
-              <ThemeProvider>
-                <AntdRegistry>
-                  {mounted && (
-                      <Suspense fallback={null}>
-                        <PageViewTracker />
-                      </Suspense>
-                )}
-                      {children}
-                </AntdRegistry>
-              </ThemeProvider>
-          </AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            {mounted && (
+              <Suspense fallback={null}>
+                <PageViewTracker />
+              </Suspense>
+            )}
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
         {/* ReactQueryDevtools chỉ hiển thị trong môi trường development */}
         {process.env.NODE_ENV === 'development' && mounted && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

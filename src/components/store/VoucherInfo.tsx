@@ -1,8 +1,13 @@
 'use client'
 
+import React, { useState, useEffect, memo } from 'react';
+import { TagsOutlined, PercentageOutlined, GiftOutlined } from '@ant-design/icons';
 import Link from 'next/link'
 import { Voucher } from '@/types/cart'
-import { useToast } from '@/components/ui/Toast'
+import { useToast } from "@/hooks/useToast"
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog'
+import { Input } from '@/components/ui/Input'
 
 interface VoucherInfoProps {
   user: {
@@ -18,7 +23,6 @@ interface VoucherInfoProps {
   availableVouchers: Voucher[];
   totalPrice: number;
   openProfile?: () => void;
-  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export default function VoucherInfo({
@@ -31,11 +35,9 @@ export default function VoucherInfo({
   setSelectedVoucher,
   availableVouchers,
   totalPrice,
-  openProfile,
-  showToast: externalShowToast
+  openProfile
 }: VoucherInfoProps) {
-  const { showToast: internalShowToast } = useToast();
-  const showToast = externalShowToast || internalShowToast;
+  const { showToast } = useToast();
 
   if (!user) {
     return (
@@ -61,15 +63,15 @@ export default function VoucherInfo({
                 Đăng nhập để áp dụng voucher và nhận ưu đãi
               </div>
             </div>
-            <button
+            <Button
               onClick={openProfile}
-              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors flex items-center"
+              className="flex items-center gap-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
               </svg>
               Đăng nhập
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -99,30 +101,29 @@ export default function VoucherInfo({
             Mã Voucher
           </label>
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               id="voucherCode"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 uppercase"
+              className="flex-1"
               placeholder="Nhập mã voucher"
               value={voucherCode}
               onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
             />
-            <button
-              className="px-4 py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
               disabled={!voucherCode.trim()}
               onClick={() => {
                 const foundVoucher = availableVouchers.find(v => v.code === voucherCode);
                 if (foundVoucher) {
                   setSelectedVoucher(foundVoucher);
-                  showToast('Áp dụng voucher thành công!', 'success');
+                  showToast('Áp dụng voucher thành công!', 'default');
                 } else {
-                  showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'error');
+                  showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'destructive');
                 }
                 setVoucherCode('');
               }}
             >
               Áp dụng
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -139,9 +140,9 @@ export default function VoucherInfo({
                 onClick={() => {
                   if (totalPrice >= voucher.minOrderValue) {
                     setSelectedVoucher(voucher);
-                    showToast('Áp dụng voucher thành công!', 'success');
+                    showToast('Áp dụng voucher thành công!', 'default');
                   } else {
-                    showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'warning');
+                    showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'destructive');
                   }
                 }}
               >
@@ -166,7 +167,7 @@ export default function VoucherInfo({
               <button
                 onClick={() => {
                   setSelectedVoucher(null);
-                  showToast('Đã hủy voucher', 'info');
+                  showToast('Đã hủy voucher', 'default');
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >

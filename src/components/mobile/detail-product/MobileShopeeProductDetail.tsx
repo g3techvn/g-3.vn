@@ -2,10 +2,10 @@ import { Product, Brand, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { ImageItem } from '@/types/supabase';
 import dynamic from 'next/dynamic';
 import { useBrandData } from '@/hooks/useBrandData';
+import { useToast } from "@/hooks/useToast";
 
 // Import critical above-fold components
 import { ProductHeader } from './ProductHeader';
@@ -147,6 +147,7 @@ type GalleryItem = GalleryVideo | GalleryImage;
 export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary, technicalSpecs = [], keyFeatures, benefits, instructions, overview, selectedVariant, onSelectVariant }: MobileProductDetailProps) {
   const { addToCart, cartItems, totalItems } = useCart();
   const router = useRouter();
+  const { showToast } = useToast();
   
   // Cart drawer state
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
@@ -316,22 +317,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       
       addToCart(cartItem);
       
-      toast.success(`Đã thêm sản phẩm vào giỏ hàng!`, {
-        duration: 3000,
-        position: 'top-right',
-        style: {
-          background: '#fff',
-          color: '#333',
-          padding: '16px',
-          borderRadius: '10px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          fontSize: '14px',
-          fontWeight: '500',
-          maxWidth: '300px',
-          border: 'none',
-        },
-        icon: '🛒',
-      });
+      showToast('Đã thêm sản phẩm vào giỏ hàng!', 'default');
       return;
     }
     
@@ -356,22 +342,7 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
       addToCart(cartItem);
     }
     
-    toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, {
-      duration: 3000,
-      position: 'top-right',
-      style: {
-        background: '#fff',
-        color: '#333',
-        padding: '16px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-        fontSize: '14px',
-        fontWeight: '500',
-        maxWidth: '300px',
-        border: 'none',
-      },
-      icon: '🛒',
-    });
+    showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, 'default');
   };
 
   const handleBuyNow = () => {

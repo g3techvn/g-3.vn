@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Badge } from '@/components/ui/Badge';
 import { createBrowserClient } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useToast } from "@/hooks/useToast";
 
 interface UserProfile {
   id?: string;
@@ -63,6 +63,7 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const { showToast } = useToast();
 
   // Form states
   const [profileForm, setProfileForm] = useState({
@@ -117,7 +118,7 @@ export default function UserProfile() {
 
     } catch (error) {
       console.error('Error loading user data:', error);
-      toast.error('Lỗi khi tải thông tin người dùng');
+      showToast('Lỗi khi tải thông tin người dùng', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -141,11 +142,11 @@ export default function UserProfile() {
 
       const { profile: updatedProfile } = await response.json();
       setProfile(updatedProfile);
-      toast.success('Cập nhật thông tin thành công!');
+      showToast('Cập nhật thông tin thành công!', 'default');
 
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Lỗi khi cập nhật thông tin');
+      showToast('Lỗi khi cập nhật thông tin', 'destructive');
     } finally {
       setUpdating(false);
     }

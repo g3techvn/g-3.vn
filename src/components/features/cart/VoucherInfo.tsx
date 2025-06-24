@@ -6,7 +6,7 @@ import Drawer from 'antd/es/drawer';
 import { TagsOutlined, PercentageOutlined, GiftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { Voucher } from '@/types/cart';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from "@/hooks/useToast";
 
 interface VoucherInfoProps {
   user: {
@@ -21,7 +21,7 @@ interface VoucherInfoProps {
   setSelectedVoucher: (voucher: Voucher | null) => void;
   availableVouchers: Voucher[];
   totalPrice: number;
-  showToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  openProfile?: () => void;
 }
 
 export default function VoucherInfo({
@@ -34,10 +34,9 @@ export default function VoucherInfo({
   setSelectedVoucher,
   availableVouchers,
   totalPrice,
-  showToast: externalShowToast
+  openProfile
 }: VoucherInfoProps) {
-  const { showToast: internalShowToast } = useToast();
-  const showToast = externalShowToast || internalShowToast;
+  const { showToast } = useToast();
 
   return (
     <>
@@ -124,10 +123,9 @@ export default function VoucherInfo({
                         const foundVoucher = availableVouchers.find(v => v.code === voucherCode);
                         if (foundVoucher) {
                           setSelectedVoucher(foundVoucher);
-                          setShowVoucherDrawer(false);
-                          showToast('Áp dụng voucher thành công!', 'success');
+                          showToast('Áp dụng voucher thành công!', 'default');
                         } else {
-                          showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'error');
+                          showToast('Mã voucher không hợp lệ hoặc đã hết hạn', 'destructive');
                         }
                         setVoucherCode('');
                       }}
@@ -150,10 +148,9 @@ export default function VoucherInfo({
                         onClick={() => {
                           if (totalPrice >= voucher.minOrderValue) {
                             setSelectedVoucher(voucher);
-                            setShowVoucherDrawer(false);
-                            showToast('Áp dụng voucher thành công!', 'success');
+                            showToast('Áp dụng voucher thành công!', 'default');
                           } else {
-                            showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'warning');
+                            showToast(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString()}đ để sử dụng voucher này`, 'destructive');
                           }
                         }}
                       >

@@ -6,7 +6,6 @@ import StickyNavbar from '@/components/layout/header/StickyNavbar';
 import MobileLayout from '@/components/mobile/MobileLayout';
 import CartLayout from '@/components/layout/CartLayout';
 import Providers from './providers';
-import { Toaster } from 'react-hot-toast';
 import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { defaultMetadata } from './metadata';
@@ -78,29 +77,7 @@ export default function RootLayout({
             </div>
             <MobileLayout>{children}</MobileLayout>
           </CartLayout>
-          <Toaster
-            toastOptions={{
-              className: '',
-              style: {
-                background: '#fff',
-                color: '#333',
-                padding: '16px',
-                borderRadius: '10px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                fontSize: '14px',
-                fontWeight: '500',
-                maxWidth: '300px',
-                border: 'none',
-              },
-            }}
-            position="top-right"
-            reverseOrder={false}
-            gutter={8}
-            containerStyle={{
-              top: 20,
-              right: 20,
-            }}
-          />
+
         </Providers>
         
         {/* SEO Schema */}

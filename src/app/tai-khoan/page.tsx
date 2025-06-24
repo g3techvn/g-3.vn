@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useToast } from "@/hooks/useToast";
 
 interface UserProfile {
   id?: string;
@@ -34,6 +34,7 @@ export default function AccountPage() {
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createBrowserClient();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!user || authLoading) return;
@@ -67,7 +68,7 @@ export default function AccountPage() {
 
     } catch (error) {
       console.error('Error loading account data:', error);
-      toast.error('Lỗi khi tải thông tin tài khoản');
+      showToast('Lỗi khi tải thông tin tài khoản', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -77,14 +78,14 @@ export default function AccountPage() {
     try {
       const { error } = await signOut();
       if (error) {
-        toast.error('Lỗi khi đăng xuất');
+        showToast('Lỗi khi đăng xuất', 'destructive');
         return;
       }
       
-      toast.success('Đăng xuất thành công');
+      showToast('Đăng xuất thành công', 'default');
       router.push('/');
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi đăng xuất');
+      showToast('Có lỗi xảy ra khi đăng xuất', 'destructive');
     }
   };
 

@@ -2,6 +2,7 @@
 
 import { CartItem } from '@/types/cart'
 import Image from 'next/image'
+import { Button } from '@/components/ui/Button'
 
 interface ProductListProps {
   items: CartItem[];
@@ -94,35 +95,41 @@ export default function ProductList({
                   </p>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={() => onRemoveItem(item.id)}
+                variant="ghost"
+                size="icon"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
 
             <div className="mt-2 flex items-center justify-between">
               <div className="flex items-center">
-                <button
+                <Button
                   onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                  className="p-1 text-gray-500 hover:text-gray-700"
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-gray-700"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
                   </svg>
-                </button>
+                </Button>
                 <span className="mx-2 text-gray-900">{item.quantity}</span>
-                <button
+                <Button
                   onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                  className="p-1 text-gray-500 hover:text-gray-700"
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-gray-700"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
-                </button>
+                </Button>
               </div>
               <div className="text-sm font-medium text-gray-900">
                 {(item.price * item.quantity).toLocaleString()}đ

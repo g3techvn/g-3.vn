@@ -1,6 +1,8 @@
 'use client'
 
 import { useAuth } from '@/features/auth/AuthProvider'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
 
 interface BuyerInfoForm {
   fullName: string;
@@ -69,14 +71,14 @@ export default function BuyerInfo({
                   <label htmlFor="phone" className="block text-xs font-medium text-gray-700 mb-1">
                     Số điện thoại <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <Input
                     type="tel"
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => {
                       setFormData({ ...formData, phone: e.target.value })
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 text-sm"
+                    className="text-sm"
                     placeholder="Nhập số điện thoại"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -105,7 +107,7 @@ export default function BuyerInfo({
         <div className="flex-1">
           <div className="font-medium">Thông tin người mua</div>
           <div className="text-xs text-gray-500 mt-1">
-            Hoặc <button onClick={() => setShowDrawer(true)} className="text-red-600 hover:text-red-700 underline">đăng nhập</button> để sử dụng thông tin có sẵn
+            Hoặc <Button onClick={() => setShowDrawer(true)} variant="link" className="text-red-600 hover:text-red-700 h-auto p-0">đăng nhập</Button> để sử dụng thông tin có sẵn
           </div>
         </div>
       </div>
@@ -115,14 +117,13 @@ export default function BuyerInfo({
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
             Họ và tên <span className="text-red-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             id="fullName"
             value={formData.fullName}
             onChange={(e) => {
               setFormData({ ...formData, fullName: e.target.value })
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập họ và tên"
           />
         </div>
@@ -131,14 +132,13 @@ export default function BuyerInfo({
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
             Số điện thoại <span className="text-red-500">*</span>
           </label>
-          <input
+          <Input
             type="tel"
             id="phone"
             value={formData.phone}
             onChange={(e) => {
               setFormData({ ...formData, phone: e.target.value })
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập số điện thoại"
           />
         </div>
@@ -147,12 +147,11 @@ export default function BuyerInfo({
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
-          <input
+          <Input
             type="email"
             id="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="Nhập email"
           />
         </div>

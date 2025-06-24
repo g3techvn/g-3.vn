@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from './Checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { RadioGroup, RadioGroupItem } from './RadioGroup';
-import { useToast } from './Toast';
+import { useToast } from "@/hooks/useToast";
 
 // Define the form schema with Zod
 const contactFormSchema = z.object({
@@ -37,8 +37,8 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export function ContactForm() {
-  const { showToast, ToastComponent } = useToast();
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -55,21 +55,34 @@ export function ContactForm() {
     },
   });
 
+  const { showToast } = useToast();
+
   const onSubmit = async (data: ContactFormData) => {
+    setLoading(true);
     try {
-      // TODO: Implement form submission logic
-      console.log('Form submitted:', data);
-      
-      // Đóng dialog nếu đang mở
-      setOpenDialog(false);
-      
+      // Gửi dữ liệu form đi
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Có lỗi xảy ra khi gửi liên hệ');
+      }
+
       // Hiển thị thông báo thành công
-      showToast('Gửi liên hệ thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.', 'success');
-      
+      showToast('Gửi liên hệ thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.', 'default');
+
       // Reset form
       reset();
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting contact form:', error);
+      showToast(error instanceof Error ? error.message : 'Có lỗi xảy ra khi gửi liên hệ', 'destructive');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -209,8 +222,8 @@ export function ContactForm() {
           </div>
           
           <div className="flex space-x-4 pt-4">
-            <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
-              {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
+            <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting || loading}>
+              {loading ? 'Đang gửi...' : 'Gửi tin nhắn'}
             </Button>
             
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -241,8 +254,6 @@ export function ContactForm() {
           </div>
         </form>
       </div>
-      
-      <ToastComponent />
     </>
   );
 } 

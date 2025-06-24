@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useToast } from "@/hooks/useToast";
 
 interface UserProfile {
   id?: string;
@@ -30,6 +30,7 @@ export default function AccountInfoPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const supabase = createBrowserClient();
+  const { showToast } = useToast();
 
   const [profileForm, setProfileForm] = useState({
     full_name: '',
@@ -62,7 +63,7 @@ export default function AccountInfoPage() {
       }
     } catch (error) {
       console.error('Error loading user data:', error);
-      toast.error('Lỗi khi tải thông tin người dùng');
+      showToast('Lỗi khi tải thông tin người dùng', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -86,11 +87,11 @@ export default function AccountInfoPage() {
 
       const { profile: updatedProfile } = await response.json();
       setProfile(updatedProfile);
-      toast.success('Cập nhật thông tin thành công!');
+      showToast('Cập nhật thông tin thành công!', 'default');
 
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Lỗi khi cập nhật thông tin');
+      showToast('Lỗi khi cập nhật thông tin', 'destructive');
     } finally {
       setUpdating(false);
     }
@@ -100,14 +101,14 @@ export default function AccountInfoPage() {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error('Lỗi khi đăng xuất');
+        showToast('Lỗi khi đăng xuất', 'destructive');
         return;
       }
       
-      toast.success('Đăng xuất thành công');
+      showToast('Đăng xuất thành công', 'default');
       router.push('/');
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi đăng xuất');
+      showToast('Có lỗi xảy ra khi đăng xuất', 'destructive');
     }
   };
 

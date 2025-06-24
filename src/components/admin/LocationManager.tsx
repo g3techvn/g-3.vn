@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { getProvinces, getDistricts, getWards, type Province, type District, type Ward } from '@/lib/provinces';
 import { locationManager, useLocationData } from '@/lib/locationManager';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from "@/hooks/useToast";
+import { Button } from '@/components/ui/Button';
 
 interface SyncProgress {
   current: number;
@@ -14,8 +15,6 @@ interface SyncProgress {
 
 export default function LocationManager() {
   const { provinces, getDistricts, getWards, stats, hasData, isStale } = useLocationData();
-  const { showToast, ToastComponent } = useToast();
-  
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<SyncProgress>({
     current: 0,
@@ -37,6 +36,8 @@ export default function LocationManager() {
     setRefreshKey(prev => prev + 1);
   };
 
+  const { showToast } = useToast();
+
   const syncAllProvinces = async () => {
     setLoading(true);
     setProgress({ current: 0, total: 1, status: 'Đang tải danh sách tỉnh thành...', phase: 'provinces' });
@@ -52,11 +53,11 @@ export default function LocationManager() {
         phase: 'complete' 
       });
       
-      showToast(`Đã đồng bộ ${provinceList.length} tỉnh thành thành công!`, 'success');
+      showToast('Đã đồng bộ ' + provinceList.length + ' tỉnh thành thành công!', 'default');
       refreshData();
       
     } catch (error) {
-      showToast('Lỗi khi đồng bộ tỉnh thành: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
+      showToast('Lỗi khi đồng bộ tỉnh thành: ' + (error instanceof Error ? error.message : 'Unknown error'), 'destructive');
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,7 @@ export default function LocationManager() {
 
   const syncAllDistricts = async () => {
     if (provinces.length === 0) {
-      showToast('Vui lòng đồng bộ tỉnh thành trước!', 'warning');
+      showToast('Vui lòng đồng bộ tỉnh thành trước!', 'destructive');
       return;
     }
 
@@ -114,11 +115,11 @@ export default function LocationManager() {
         phase: 'complete'
       });
 
-      showToast(`Đã đồng bộ ${allDistricts.length} quận huyện thành công!`, 'success');
+      showToast('Đã đồng bộ ' + allDistricts.length + ' quận huyện thành công!', 'default');
       refreshData();
 
     } catch (error) {
-      showToast('Lỗi khi đồng bộ quận huyện: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
+      showToast('Lỗi khi đồng bộ quận huyện: ' + (error instanceof Error ? error.message : 'Unknown error'), 'destructive');
     } finally {
       setLoading(false);
     }
@@ -144,11 +145,11 @@ export default function LocationManager() {
         phase: 'complete'
       });
 
-      showToast(`Đã tải ${wards.length} phường xã cho ${district.name}`, 'success');
+      showToast(`Đã tải ${wards.length} phường xã cho ${district.name}`, 'default');
       refreshData();
 
     } catch (error) {
-      showToast('Lỗi khi tải phường xã: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
+      showToast('Lỗi khi tải phường xã: ' + (error instanceof Error ? error.message : 'Unknown error'), 'destructive');
     } finally {
       setLoading(false);
     }
@@ -171,33 +172,33 @@ export default function LocationManager() {
       link.download = `location_data_${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Đã xuất dữ liệu thành công!', 'success');
+      showToast('Đã xuất dữ liệu thành công!', 'default');
     } catch (error) {
-      showToast('Lỗi khi xuất dữ liệu: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
+      showToast('Lỗi khi xuất dữ liệu: ' + (error instanceof Error ? error.message : 'Unknown error'), 'destructive');
     }
   };
 
   const handleImport = () => {
     if (!importData.trim()) {
-      showToast('Vui lòng nhập dữ liệu JSON!', 'warning');
+      showToast('Vui lòng nhập dữ liệu JSON!', 'destructive');
       return;
     }
 
     const success = locationManager.importData(importData);
     if (success) {
-      showToast('Đã nhập dữ liệu thành công!', 'success');
+      showToast('Đã nhập dữ liệu thành công!', 'default');
       setShowImportModal(false);
       setImportData('');
       refreshData();
     } else {
-      showToast('Lỗi: Dữ liệu JSON không hợp lệ!', 'error');
+      showToast('Dữ liệu JSON không hợp lệ!', 'destructive');
     }
   };
 
   const clearCache = () => {
     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu đã lưu?')) {
       locationManager.clearCache();
-      showToast('Đã xóa cache thành công!', 'success');
+      showToast('Đã xóa cache thành công!', 'default');
       refreshData();
     }
   };
@@ -262,46 +263,46 @@ export default function LocationManager() {
 
           {/* Controls */}
           <div className="flex flex-wrap gap-3 mb-4">
-            <button
+            <Button
               onClick={syncAllProvinces}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              variant="secondary"
             >
               {loading && progress.phase === 'provinces' ? '🔄 Đang tải...' : '🏙️ Đồng bộ tỉnh thành'}
-            </button>
+            </Button>
             
-            <button
+            <Button
               onClick={syncAllDistricts}
               disabled={loading || provinces.length === 0}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              variant="secondary"
             >
               {loading && progress.phase === 'districts' ? '🔄 Đang tải...' : '🏘️ Đồng bộ quận huyện'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={syncAllData}
               disabled={loading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              variant="secondary"
             >
               {loading ? '🔄 Đang đồng bộ...' : '🔄 Đồng bộ tất cả'}
-            </button>
+            </Button>
             
             <div className="h-8 border-l border-gray-300 mx-1"></div>
             
-            <button
+            <Button
               onClick={exportData}
               disabled={!hasData()}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              variant="outline"
             >
               📥 Xuất dữ liệu
-            </button>
+            </Button>
             
-            <button
+            <Button
               onClick={() => setShowImportModal(true)}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              variant="default"
             >
               📤 Nhập dữ liệu
-            </button>
+            </Button>
             
             <button
               onClick={clearCache}
@@ -497,8 +498,6 @@ export default function LocationManager() {
           </div>
         </div>
       )}
-
-      <ToastComponent />
     </div>
   );
 } 

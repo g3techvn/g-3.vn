@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useToast } from "@/hooks/useToast";
 
 interface Order {
   id: string;
@@ -44,6 +44,7 @@ export default function MyOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const supabase = createBrowserClient();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!user || authLoading) return;
@@ -67,7 +68,7 @@ export default function MyOrdersPage() {
       }
     } catch (error) {
       console.error('Error loading orders:', error);
-      toast.error('Lỗi khi tải đơn hàng');
+      showToast('Lỗi khi tải đơn hàng', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -161,14 +162,14 @@ export default function MyOrdersPage() {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error('Lỗi khi đăng xuất');
+        showToast('Lỗi khi đăng xuất', 'destructive');
         return;
       }
       
-      toast.success('Đăng xuất thành công');
+      showToast('Đăng xuất thành công', 'default');
       router.push('/');
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi đăng xuất');
+      showToast('Có lỗi xảy ra khi đăng xuất', 'destructive');
     }
   };
 

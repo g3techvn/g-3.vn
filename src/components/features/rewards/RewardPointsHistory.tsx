@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { RewardTransaction, UserRewardsResponse } from '@/types/rewards';
+import { Button } from '@/components/ui/Button';
 
 interface RewardPointsHistoryProps {
   user: { id: string; fullName: string } | null;
@@ -204,38 +205,37 @@ export default function RewardPointsHistory({ user }: RewardPointsHistoryProps) 
         {/* Pagination */}
         {data?.pagination && data.pagination.pages > 1 && (
           <div className="flex justify-center mt-6 space-x-2">
-            <button
+            <Button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50"
+              variant="outline"
+              size="sm"
             >
               Trước
-            </button>
+            </Button>
             
             {[...Array(Math.min(5, data.pagination.pages))].map((_, i) => {
               const page = i + 1;
               return (
-                <button
+                <Button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    currentPage === page
-                      ? 'bg-red-600 text-white'
-                      : 'border border-gray-300 hover:bg-gray-50'
-                  }`}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
                 >
                   {page}
-                </button>
+                </Button>
               );
             })}
             
-            <button
+            <Button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === data.pagination.pages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-400 hover:bg-gray-50"
+              variant="outline"
+              size="sm"
             >
               Sau
-            </button>
+            </Button>
           </div>
         )}
       </div>

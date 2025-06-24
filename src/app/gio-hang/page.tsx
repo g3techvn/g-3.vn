@@ -7,10 +7,11 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { Drawer, Button } from 'antd';
+import Drawer from 'antd/es/drawer';
 import { LoadingOutlined } from '@ant-design/icons';
 import LocationSelector from '@/components/features/cart/LocationSelector';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/hooks/useToast';
+import { Button } from '@/components/ui/Button';
 
 // Import new components
 import CartHeader from '@/components/features/cart/CartHeader';
@@ -86,12 +87,12 @@ interface FormData {
 
 export default function CartPage() {
   const { cartItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
-  const { user } = useAuth();
-  const { showToast, ToastComponent } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [shippingFee] = useState(0); // Default shipping fee is 0
+  const { showToast } = useToast();
   
   // Form data state like checkout
   const [formData, setFormData] = useState<FormData>({
@@ -369,7 +370,7 @@ export default function CartPage() {
 
   const handleSubmit = async () => {
     if (!isFormValid()) {
-      showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+      showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'destructive');
       return;
     }
 
@@ -434,7 +435,7 @@ export default function CartPage() {
       }
     } catch (error) {
       console.error('Order submission error:', error);
-      showToast(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
+      showToast(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'destructive');
     } finally {
       setLoading(false);
     }
@@ -612,7 +613,6 @@ export default function CartPage() {
                     availableVouchers={availableVouchers}
                     totalPrice={totalPrice}
                     openProfile={() => setShowProfileDrawer(true)}
-                    showToast={showToast}
                   />
                 </CollapsibleSection>
 
@@ -650,16 +650,19 @@ export default function CartPage() {
                     totalPrice={totalPrice}
                   />
                   <Button
-                    type="primary"
-                    danger
-                    block
-                    size="large"
                     onClick={handleSubmit}
-                    disabled={!isFormValid()}
-                    loading={loading}
-                    className="mt-4"
+                    disabled={loading}
+                    className="w-full bg-red-600 text-white hover:bg-red-700"
+                    size="lg"
                   >
-                    Đặt hàng
+                    {loading ? (
+                      <div className="flex items-center justify-center">
+                        <LoadingOutlined className="mr-2" />
+                        Đang xử lý...
+                      </div>
+                    ) : (
+                      'Đặt hàng'
+                    )}
                   </Button>
                 </div>
               </div>
@@ -790,7 +793,6 @@ export default function CartPage() {
           setSelectedVoucher={setSelectedVoucher}
           availableVouchers={availableVouchers}
           totalPrice={totalPrice}
-            showToast={showToast}
         />
 
         <PaymentDetails 
@@ -822,8 +824,6 @@ export default function CartPage() {
       />
       </div>
       
-      <ToastComponent />
-
       {/* Profile Drawer */}
       <ProfileDrawer 
         isOpen={showProfileDrawer} 

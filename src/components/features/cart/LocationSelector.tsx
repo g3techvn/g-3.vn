@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLocationDatabase, Province, District, Ward } from '@/lib/locationDatabase';
-import { useToast } from '@/components/ui/Toast';
+import { useLocationData } from '@/lib/locationManager';
+import { useToast } from "@/hooks/useToast";
+import { District, Ward } from '@/lib/provinces';
 
 interface LocationSelectorProps {
   selectedProvinceCode?: number;
   selectedDistrictCode?: number;
   selectedWardCode?: number;
-  onProvinceChange: (provinceCode: number, provinceName: string) => void;
-  onDistrictChange: (districtCode: number, districtName: string) => void;
-  onWardChange: (wardCode: number, wardName: string) => void;
+  onProvinceChange: (code: number, name: string) => void;
+  onDistrictChange: (code: number, name: string) => void;
+  onWardChange: (code: number, name: string) => void;
   disabled?: boolean;
 }
 
@@ -23,211 +24,128 @@ export default function LocationSelector({
   onWardChange,
   disabled = false
 }: LocationSelectorProps) {
-  const { 
-    getProvinces, 
-    getDistricts, 
-    getWards, 
-    hasLocationData,
-    getLocationStats 
-  } = useLocationDatabase();
-  
+  const { provinces, getDistricts, getWards, stats, hasData } = useLocationData();
   const { showToast } = useToast();
   
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
-  const [hasData, setHasData] = useState<boolean>(false);
-  
   const [loading, setLoading] = useState({
-    provinces: false,
     districts: false,
-    wards: false,
-    checking: true
+    wards: false
   });
 
-  // Check if database has data on mount
-  useEffect(() => {
-    checkDatabaseData();
-  }, []);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
 
-  // Load provinces when database has data
   useEffect(() => {
-    if (hasData && provinces.length === 0) {
-      loadProvinces();
+    if (!hasData) {
+      showToast('Đang tải dữ liệu địa chỉ...', 'default');
+      return;
     }
-  }, [hasData, provinces.length]);
 
-  // Load districts when province changes
+    if (stats) {
+      showToast(`Đã tải ${stats.totalProvinces} tỉnh/thành, ${stats.totalDistricts} quận/huyện, ${stats.totalWards} phường/xã`, 'default');
+    }
+  }, [hasData, stats]);
+
+  useEffect(() => {
+    async function loadDistricts() {
+      if (selectedProvinceCode) {
+        setLoading(prev => ({ ...prev, districts: true }));
+        try {
+          const districtsData = await getDistricts(selectedProvinceCode);
+          setDistricts(districtsData);
+          if (districtsData.length === 0) {
+            showToast('Không có dữ liệu quận/huyện', 'destructive');
+          }
+        } catch (error) {
+          console.error('Error loading districts:', error);
+          showToast('Lỗi khi tải danh sách quận/huyện', 'destructive');
+        } finally {
+          setLoading(prev => ({ ...prev, districts: false }));
+        }
+      } else {
+        setDistricts([]);
+      }
+    }
+    loadDistricts();
+  }, [selectedProvinceCode, getDistricts]);
+
+  useEffect(() => {
+    async function loadWards() {
+      if (selectedDistrictCode) {
+        setLoading(prev => ({ ...prev, wards: true }));
+        try {
+          const wardsData = await getWards(selectedDistrictCode);
+          setWards(wardsData);
+          if (wardsData.length === 0) {
+            showToast('Không có dữ liệu phường/xã', 'destructive');
+          }
+        } catch (error) {
+          console.error('Error loading wards:', error);
+          showToast('Lỗi khi tải danh sách phường/xã', 'destructive');
+        } finally {
+          setLoading(prev => ({ ...prev, wards: false }));
+        }
+      } else {
+        setWards([]);
+      }
+    }
+    loadWards();
+  }, [selectedDistrictCode, getWards]);
+
   useEffect(() => {
     if (selectedProvinceCode) {
-      loadDistricts(selectedProvinceCode);
-      // Reset wards when province changes
-      setWards([]);
-    } else {
-      setDistricts([]);
-      setWards([]);
-    }
-  }, [selectedProvinceCode]);
-
-  // Load wards when district changes
-  useEffect(() => {
-    if (selectedDistrictCode) {
-      loadWards(selectedDistrictCode);
-    } else {
-      setWards([]);
-    }
-  }, [selectedDistrictCode]);
-
-  const checkDatabaseData = async () => {
-    setLoading(prev => ({ ...prev, checking: true }));
-    try {
-      const dataExists = await hasLocationData();
-      setHasData(dataExists);
-      
-      if (dataExists) {
-        const stats = await getLocationStats();
-        console.log('📊 Location database stats:', stats);
+      const province = provinces.find(p => p.code === selectedProvinceCode);
+      if (province) {
+        onProvinceChange(province.code, province.name);
       } else {
-        showToast('Database chưa có dữ liệu địa điểm. Vui lòng liên hệ admin để sync dữ liệu.', 'warning');
+        showToast('Không tìm thấy tỉnh/thành phố', 'destructive');
       }
-    } catch (error) {
-      console.error('Error checking database data:', error);
-      showToast('Không thể kết nối database. Vui lòng thử lại.', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, checking: false }));
     }
-  };
+  }, [selectedProvinceCode, provinces, onProvinceChange]);
 
-  const loadProvinces = async () => {
-    setLoading(prev => ({ ...prev, provinces: true }));
-    try {
-      const provincesData = await getProvinces();
-      setProvinces(provincesData);
-    } catch (error) {
-      console.error('Error loading provinces:', error);
-      showToast('Không thể tải danh sách tỉnh thành. Vui lòng thử lại.', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, provinces: false }));
+  useEffect(() => {
+    if (selectedDistrictCode && districts.length > 0) {
+      const district = districts.find(d => d.code === selectedDistrictCode);
+      if (district) {
+        onDistrictChange(district.code, district.name);
+      } else {
+        showToast('Không tìm thấy quận/huyện', 'destructive');
+      }
     }
-  };
+  }, [selectedDistrictCode, districts, onDistrictChange]);
 
-  const loadDistricts = async (provinceCode: number) => {
-    setLoading(prev => ({ ...prev, districts: true }));
-    try {
-      const districtsData = await getDistricts(provinceCode);
-      setDistricts(districtsData);
-    } catch (error) {
-      console.error('Error loading districts:', error);
-      showToast('Không thể tải danh sách quận huyện. Vui lòng thử lại.', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, districts: false }));
+  useEffect(() => {
+    if (selectedWardCode && wards.length > 0) {
+      const ward = wards.find(w => w.code === selectedWardCode);
+      if (ward) {
+        onWardChange(ward.code, ward.name);
+      } else {
+        showToast('Không tìm thấy phường/xã', 'destructive');
+      }
     }
-  };
-
-  const loadWards = async (districtCode: number) => {
-    setLoading(prev => ({ ...prev, wards: true }));
-    try {
-      const wardsData = await getWards(districtCode);
-      setWards(wardsData);
-    } catch (error) {
-      console.error('Error loading wards:', error);
-      showToast('Không thể tải danh sách phường xã. Vui lòng thử lại.', 'error');
-    } finally {
-      setLoading(prev => ({ ...prev, wards: false }));
-    }
-  };
-
-  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const provinceCode = Number(e.target.value);
-    if (!provinceCode) {
-      onProvinceChange(0, '');
-      return;
-    }
-
-    const province = provinces.find(p => p.code === provinceCode);
-    if (province) {
-      onProvinceChange(provinceCode, province.name);
-    }
-  };
-
-  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const districtCode = Number(e.target.value);
-    if (!districtCode) {
-      onDistrictChange(0, '');
-      return;
-    }
-
-    const district = districts.find(d => d.code === districtCode);
-    if (district) {
-      onDistrictChange(districtCode, district.name);
-    }
-  };
-
-  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const wardCode = Number(e.target.value);
-    if (!wardCode) {
-      onWardChange(0, '');
-      return;
-    }
-
-    const ward = wards.find(w => w.code === wardCode);
-    if (ward) {
-      onWardChange(wardCode, ward.name);
-    }
-  };
-
-  // Show loading state while checking database
-  if (loading.checking) {
-    return (
-      <div className="space-y-4">
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
-            <div className="text-blue-800 text-sm font-medium">Đang kiểm tra dữ liệu...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if no database data
-  if (!hasData) {
-    return (
-      <div className="space-y-4">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="text-red-800 text-sm font-medium">❌ Chưa có dữ liệu địa điểm</div>
-          <div className="text-red-600 text-xs mt-1">
-            Database chưa được đồng bộ dữ liệu. Vui lòng liên hệ admin để cập nhật dữ liệu địa điểm.
-          </div>
-          <button
-            onClick={checkDatabaseData}
-            className="mt-2 px-3 py-1 bg-red-100 text-red-700 text-xs rounded hover:bg-red-200 transition-colors"
-          >
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
+  }, [selectedWardCode, wards, onWardChange]);
 
   return (
     <div className="space-y-4">
-      {/* Province Selection */}
+      {/* Province Select */}
       <div>
         <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">
-          Tỉnh/Thành phố <span className="text-red-500">*</span>
+          Tỉnh/Thành phố
         </label>
         <select
           id="province"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
           value={selectedProvinceCode || ''}
-          onChange={handleProvinceChange}
-          disabled={disabled || loading.provinces}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          onChange={(e) => {
+            const province = provinces.find(p => p.code === Number(e.target.value));
+            if (province) {
+              onProvinceChange(province.code, province.name);
+            }
+          }}
+          disabled={disabled}
         >
-          <option value="">
-            {loading.provinces ? 'Đang tải tỉnh thành...' : 'Chọn Tỉnh/Thành phố'}
-          </option>
-          {provinces.map((province) => (
+          <option value="">Chọn Tỉnh/Thành phố</option>
+          {provinces.map(province => (
             <option key={province.code} value={province.code}>
               {province.name}
             </option>
@@ -235,24 +153,25 @@ export default function LocationSelector({
         </select>
       </div>
 
-      {/* District Selection */}
+      {/* District Select */}
       <div>
         <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
-          Quận/Huyện <span className="text-red-500">*</span>
+          Quận/Huyện
         </label>
         <select
           id="district"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
           value={selectedDistrictCode || ''}
-          onChange={handleDistrictChange}
-          disabled={disabled || !selectedProvinceCode || loading.districts}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          onChange={(e) => {
+            const district = districts.find(d => d.code === Number(e.target.value));
+            if (district) {
+              onDistrictChange(district.code, district.name);
+            }
+          }}
+          disabled={!selectedProvinceCode || loading.districts || disabled}
         >
-          <option value="">
-            {loading.districts ? 'Đang tải quận huyện...' : 
-             !selectedProvinceCode ? 'Vui lòng chọn tỉnh/thành phố trước' : 
-             'Chọn Quận/Huyện'}
-          </option>
-          {districts.map((district) => (
+          <option value="">Chọn Quận/Huyện</option>
+          {districts.map(district => (
             <option key={district.code} value={district.code}>
               {district.name}
             </option>
@@ -260,31 +179,31 @@ export default function LocationSelector({
         </select>
       </div>
 
-      {/* Ward Selection */}
+      {/* Ward Select */}
       <div>
         <label htmlFor="ward" className="block text-sm font-medium text-gray-700 mb-1">
-          Phường/Xã <span className="text-red-500">*</span>
+          Phường/Xã
         </label>
         <select
           id="ward"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
           value={selectedWardCode || ''}
-          onChange={handleWardChange}
-          disabled={disabled || !selectedDistrictCode || loading.wards}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          onChange={(e) => {
+            const ward = wards.find(w => w.code === Number(e.target.value));
+            if (ward) {
+              onWardChange(ward.code, ward.name);
+            }
+          }}
+          disabled={!selectedDistrictCode || loading.wards || disabled}
         >
-          <option value="">
-            {loading.wards ? 'Đang tải phường xã...' : 
-             !selectedDistrictCode ? 'Vui lòng chọn quận/huyện trước' : 
-             'Chọn Phường/Xã'}
-          </option>
-          {wards.map((ward) => (
+          <option value="">Chọn Phường/Xã</option>
+          {wards.map(ward => (
             <option key={ward.code} value={ward.code}>
               {ward.name}
             </option>
           ))}
         </select>
       </div>
-
     </div>
   );
 } 
