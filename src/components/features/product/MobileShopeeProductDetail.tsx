@@ -1,5 +1,6 @@
 import { Product, Brand, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useBuyNow } from '@/context/BuyNowContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ImageItem } from '@/types/supabase';
@@ -74,6 +75,7 @@ type GalleryItem = GalleryVideo | GalleryImage;
 
 export function MobileShopeeProductDetail({ product, galleryImages = [], videoInfo, comments = [], ratingSummary, technicalSpecs = [], keyFeatures, benefits, instructions, overview, selectedVariant, onSelectVariant }: MobileProductDetailProps) {
   const { addToCart, cartItems, totalItems } = useCart();
+  const { setBuyNowItem } = useBuyNow();
   const router = useRouter();
   const { showToast } = useToast();
   
@@ -286,7 +288,21 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
   };
 
   const handleBuyNow = () => {
-    console.log('Buy now:', product.id);
+    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      showToast('Vui lòng chọn biến thể sản phẩm', 'destructive');
+      return;
+    }
+
+    setBuyNowItem({
+      id: product.id,
+      name: product.name,
+      price: selectedVariant?.price || product.price,
+      image: selectedVariant?.image_url || product.image_url || '',
+      quantity: 1,
+      variant: selectedVariant || undefined
+    });
+    router.push('/mua-ngay');
   };
 
   return (

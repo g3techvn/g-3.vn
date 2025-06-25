@@ -1,7 +1,9 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Product, ProductVariant, CartItem } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useBuyNow } from '@/context/BuyNowContext';
 import { useEffect, useRef, useState } from 'react';
 import { formatCurrency } from '@/utils/helpers';
 
@@ -12,6 +14,8 @@ export interface FloatProductActionProps {
 
 export function FloatProductAction({ product, selectedVariant }: FloatProductActionProps) {
   const { addToCart } = useCart();
+  const { setBuyNowItem } = useBuyNow();
+  const router = useRouter();
   const [show, setShow] = useState(true);
   const lastScrollY = useRef(0);
   const lastTimestamp = useRef(Date.now());
@@ -36,6 +40,18 @@ export function FloatProductAction({ product, selectedVariant }: FloatProductAct
     } finally {
       setIsAddingToCart(false);
     }
+  };
+
+  const handleBuyNow = () => {
+    setBuyNowItem({
+      id: product.id,
+      name: product.name,
+      price: selectedVariant?.price || product.price,
+      image: selectedVariant?.image_url || product.image_url || '',
+      quantity: 1,
+      variant: selectedVariant || undefined
+    });
+    router.push('/mua-ngay');
   };
 
   useEffect(() => {
@@ -105,7 +121,7 @@ export function FloatProductAction({ product, selectedVariant }: FloatProductAct
         <div className="flex items-center space-x-3">
          
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={handleBuyNow}
             className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
           >
             Mua ngay

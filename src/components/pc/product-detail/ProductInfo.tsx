@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Product, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useBuyNow } from '@/context/BuyNowContext';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,6 +13,8 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
   const { addToCart } = useCart();
+  const { setBuyNowItem } = useBuyNow();
+  const router = useRouter();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showVariantWarning, setShowVariantWarning] = useState(false);
@@ -49,6 +53,27 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
         }, 2000);
       }, 800);
     }
+  };
+
+  const handleBuyNow = () => {
+    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      setShowVariantWarning(true);
+      setTimeout(() => {
+        setShowVariantWarning(false);
+      }, 2000);
+      return;
+    }
+
+    setBuyNowItem({
+      id: product.id,
+      name: product.name,
+      price: selectedVariant?.price || product.price,
+      image: selectedVariant?.image_url || product.image_url || '',
+      quantity: 1,
+      variant: selectedVariant || undefined
+    });
+    router.push('/mua-ngay');
   };
 
   // Animation variants
@@ -145,9 +170,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
           className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            // TODO: Implement buy now functionality
-          }}
+          onClick={handleBuyNow}
         >
           <CheckIcon className="h-5 w-5" />
           Mua ngay
