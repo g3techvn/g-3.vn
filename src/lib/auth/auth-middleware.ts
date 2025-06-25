@@ -22,7 +22,8 @@ const PROTECTED_ROUTES: string[] = [
 // Routes that require admin role
 const ADMIN_ROUTES = [
   '/api/admin',
-  '/admin'
+  '/admin',
+  '/don-hang'
 ];
 
 export async function authenticateRequest(request: NextRequest): Promise<AuthContext> {
@@ -114,10 +115,18 @@ export function requireAdmin(authContext: AuthContext, request: NextRequest): Ne
   
   if (isAdminRoute) {
     if (!authContext.isAuthenticated) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      // For API routes, return 401
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+      
+      // For pages, redirect to login with return URL
+      const loginUrl = new URL('/dang-nhap', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
     }
     
     if (authContext.user?.role !== 'admin') {
@@ -129,10 +138,19 @@ export function requireAdmin(authContext: AuthContext, request: NextRequest): Ne
         request.headers.get('user-agent') || undefined
       );
       
-      return NextResponse.json(
-        { error: 'Admin privileges required' },
-        { status: 403 }
-      );
+      // For API routes, return 403
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { error: 'Admin privileges required' },
+          { status: 403 }
+        );
+      }
+      
+      // For pages, let component handle the error display
+      // We'll pass the error info via headers
+      const response = NextResponse.next();
+      response.headers.set('X-Auth-Error', 'insufficient-privileges');
+      return response;
     }
   }
 
