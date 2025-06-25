@@ -399,7 +399,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     <>
       {/* Main Checkout Dialog */}
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl">
+        <DialogContent className="max-w-7xl z-[2000]" style={{ zIndex: 2000 }}>
           <DialogHeader>
             <DialogTitle>{buyNowItem ? 'Mua ngay' : 'Thanh toán'}</DialogTitle>
           </DialogHeader>
@@ -590,7 +590,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
 
       {/* PDF Preview Dialog */}
       <Dialog open={!!pdfPreviewUrl} onOpenChange={() => handleClosePdfPreview()}>
-        <DialogContent className="w-[90vw] max-w-[90vw] h-[80vh] max-h-[80vh] p-0">
+        <DialogContent className="w-[90vw] max-w-[90vw] h-[80vh] max-h-[80vh] p-0 z-[2100]" style={{ zIndex: 2100 }}>
           <DialogHeader className="p-6 border-b">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-red-600 mr-2">

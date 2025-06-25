@@ -74,6 +74,7 @@ export default function ShoppingCart({ isOpen = false, onClose }: { isOpen: bool
         closeIcon={null} // Hide default close icon
         mask={true}
         maskClosable={true}
+        zIndex={1000}
         styles={{
           body: {
             paddingBottom: 80,
