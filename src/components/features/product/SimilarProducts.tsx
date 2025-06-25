@@ -8,6 +8,7 @@ import { AspectRatio } from '@/components/ui/AspectRatio';
 import { Rating } from '@/components/ui/Rating';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { motion } from 'framer-motion';
+import { CartItem } from '@/types/cart';
 
 interface SimilarProductsProps {
   products: Product[];
@@ -180,10 +181,13 @@ export function SimilarProducts({ products, loading }: SimilarProductsProps) {
                               aria-label="Thêm vào giỏ hàng"
                               onClick={(e) => {
                                 e.preventDefault();
-                                const cartItem = {
-                                  ...product,
+                                const cartItem: CartItem = {
+                                  productId: product.id,
                                   quantity: 1,
-                                  image: product.image_url || ''
+                                  product: {
+                                    ...product,
+                                    variants: product.variants || []
+                                  }
                                 };
                                 addToCart(cartItem);
                               }}

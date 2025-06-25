@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
-import { Product, ProductVariant, CartItem } from '@/types';
+import { Product, ProductVariant } from '@/types';
+import { CartItem } from '@/types/cart';
 import { useCart } from '@/context/CartContext';
 import { useEffect, useRef, useState } from 'react';
 import { formatCurrency } from '@/utils/helpers';
@@ -22,13 +23,12 @@ export function FloatProductAction({ product, selectedVariant }: FloatProductAct
     setIsAddingToCart(true);
     try {
       const cartItem: CartItem = {
-        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
-        name: product.name,
-        price: selectedVariant?.price || product.price,
-        original_price: selectedVariant?.original_price || product.original_price,
+        productId: product.id,
         quantity: 1,
-        image: selectedVariant?.image_url || product.image_url || '',
-        variant: selectedVariant || undefined
+        product: {
+          ...product,
+          variants: selectedVariant ? [selectedVariant] : []
+        }
       };
       await addToCart(cartItem);
     } catch (error) {

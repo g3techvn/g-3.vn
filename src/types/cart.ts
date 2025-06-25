@@ -1,22 +1,13 @@
 import { User as BaseUser } from './index';
-import { ProductVariant } from './index';
+import { ProductVariant, Product } from './index';
 
 // Simplified user type for cart context
 export type CartUser = Pick<BaseUser, 'id' | 'email' | 'name' | 'address' | 'phone'>;
 
 export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
+  productId: string;
   quantity: number;
-  image: string;
-  href?: string;
-  variant?: ProductVariant;
-  original_price?: number;
-  weight?: number; // Weight in grams
-  length?: number; // Length in cm
-  width?: number;  // Width in cm
-  height?: number; // Height in cm
+  product: Product;
 }
 
 export interface Voucher {

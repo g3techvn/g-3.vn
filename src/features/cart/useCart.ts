@@ -5,12 +5,9 @@ import {
   useQueryClient 
 } from '@tanstack/react-query';
 import { Product } from '@/types';
+import { CartItem as CartItemType } from '@/types/cart';
 
-type CartItem = {
-  productId: string;
-  quantity: number;
-  product: Product;
-};
+type CartItem = CartItemType;
 
 // Lưu giỏ hàng vào localStorage
 const saveCart = (items: CartItem[]) => {
@@ -79,7 +76,10 @@ export function useCart() {
         newCart.push({
           productId: product.id,
           quantity,
-          product,
+          product: {
+            ...product,
+            variants: product.variants || []
+          }
         });
       }
 

@@ -45,9 +45,9 @@ export function ProductCardOptimized({ product, className = '' }: ProductCardPro
     e.preventDefault();
     e.stopPropagation();
     addToCart({
-      ...product,
+      productId: product.id,
       quantity: 1,
-      image: product.image_url || ''
+      product
     });
   };
 

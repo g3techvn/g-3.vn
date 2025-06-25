@@ -1,80 +1,67 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Product, ProductVariant } from '@/types';
+import { Product, ProductVariant, Brand } from '@/types';
+import { CartItem } from '@/types/cart';
 import { useCart } from '@/context/CartContext';
 import { useBuyNow } from '@/context/BuyNowContext';
+import { useToast } from '@/hooks/useToast';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency } from '@/utils/helpers';
 
-interface ProductInfoProps {
+export interface ProductInfoProps {
   product: Product;
   selectedVariant: ProductVariant | null;
+  onSelectVariant: (variant: ProductVariant | null) => void;
 }
 
-export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
+export function ProductInfo({ product, selectedVariant, onSelectVariant }: ProductInfoProps) {
   const { addToCart } = useCart();
   const { setBuyNowItem } = useBuyNow();
   const router = useRouter();
+  const { showToast } = useToast();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showVariantWarning, setShowVariantWarning] = useState(false);
 
-  const handleAddToCart = () => {
-    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
-    if (product.variants && product.variants.length > 0 && !selectedVariant) {
-      setShowVariantWarning(true);
-      setTimeout(() => {
-        setShowVariantWarning(false);
-      }, 2000);
-      return;
-    }
-
-    if (!isAddingToCart) {
-      setIsAddingToCart(true);
-      const cartItem = {
-        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
-        name: product.name,
-        price: selectedVariant?.price || product.price,
-        original_price: selectedVariant?.original_price || product.original_price,
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    try {
+      if (!selectedVariant && product.variants && product.variants.length > 0) {
+        showToast('Vui lòng chọn phân loại sản phẩm!', 'destructive');
+        return;
+      }
+      const cartItem: CartItem = {
+        productId: product.id,
         quantity: 1,
-        image: selectedVariant?.image_url || product.image_url || '',
-        variant: selectedVariant || undefined
+        product: product
       };
-      addToCart(cartItem);
-      
-      // Show success message after adding to cart
-      setTimeout(() => {
-        setIsAddingToCart(false);
-        setShowSuccess(true);
-        
-        // Hide success message after 2 seconds
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 2000);
-      }, 800);
+      await addToCart(cartItem);
+      showToast('Đã thêm vào giỏ hàng!', 'default');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showToast('Có lỗi xảy ra khi thêm vào giỏ hàng!', 'destructive');
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
   const handleBuyNow = () => {
-    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
-    if (product.variants && product.variants.length > 0 && !selectedVariant) {
-      setShowVariantWarning(true);
-      setTimeout(() => {
-        setShowVariantWarning(false);
-      }, 2000);
+    if (!selectedVariant && product.variants && product.variants.length > 0) {
+      showToast('Vui lòng chọn phân loại sản phẩm!', 'destructive');
       return;
     }
-
-    setBuyNowItem({
-      id: product.id,
-      name: product.name,
-      price: selectedVariant?.price || product.price,
-      image: selectedVariant?.image_url || product.image_url || '',
+    const buyNowItem: CartItem = {
+      productId: product.id,
       quantity: 1,
-      variant: selectedVariant || undefined
-    });
+      product: product
+    };
+    setBuyNowItem(buyNowItem);
     router.push('/mua-ngay');
   };
+
+  const brandName = typeof product.brand === 'string' ? product.brand : product.brand?.title;
 
   // Animation variants
   const fadeIn = {
@@ -99,10 +86,10 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
       animate="visible"
       variants={staggerChildren}
     >
-      {/* <motion.div variants={fadeIn}>
+      <motion.div variants={fadeIn}>
         <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-        {product.brand && (
-          <p className="text-lg text-gray-600 mt-2">Thương hiệu: {product.brand}</p>
+        {brandName && (
+          <div className="text-sm text-gray-600 mt-1">{brandName}</div>
         )}
       </motion.div>
 
@@ -111,17 +98,11 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
         variants={fadeIn}
       >
         <span className="text-3xl font-bold text-gray-900">
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-          }).format(product.price)}
+          {formatCurrency(selectedVariant?.price || product.price || 0)}
         </span>
-        {product.original_price && product.original_price > product.price && (
+        {(selectedVariant?.original_price || product.original_price) && (
           <span className="text-lg text-gray-500 line-through">
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND'
-            }).format(product.original_price)}
+            {formatCurrency(selectedVariant?.original_price || product.original_price || 0)}
           </span>
         )}
         {product.discount_percentage && (
@@ -134,7 +115,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
             -{product.discount_percentage}%
           </motion.span>
         )}
-      </motion.div> */}
+      </motion.div>
 
       {/* Success notification */}
       <AnimatePresence>

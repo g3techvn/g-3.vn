@@ -40,9 +40,11 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setIsSubmitting(true)
     
     if (!email || !password) {
       setError('Vui lòng nhập đầy đủ thông tin')
+      setIsSubmitting(false)
       return
     }
     
@@ -50,9 +52,9 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
     if (result.error) {
       setError(result.error.message)
     } else {
-      onClose();
-      router.push('/gio-hang');
+      handleClose();
     }
+    setIsSubmitting(false)
   }
   
   const handleSignUp = async (e: React.FormEvent) => {
@@ -97,22 +99,24 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
     if (result.error) {
       setError(result.error.message)
     } else {
-      onClose();
-      router.push('/gio-hang');
+      handleClose();
     }
     setIsSubmitting(false)
   }
   
   const handleSignOut = async () => {
+    setIsSubmitting(true)
     await signOut();
     setView('login');
+    setIsSubmitting(false)
+    handleClose();
   }
 
   const renderForm = () => {
     if (loading) {
       return (
-        <div className="py-6 text-center">
-          <p className="text-gray-500">Đang tải...</p>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
         </div>
       );
     }
@@ -169,30 +173,6 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                   Thông tin tài khoản
                 </Link>
               </li>
-              <li>
-                <Link 
-                  href="/tai-khoan/don-hang" 
-                  className="flex items-center text-gray-700 hover:text-red-600"
-                  onClick={handleClose}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                  Đơn hàng của tôi
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/uu-dai" 
-                  className="flex items-center text-gray-700 hover:text-red-600"
-                  onClick={handleClose}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  Ưu đãi & Voucher
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -219,6 +199,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 placeholder="Nhập email của bạn"
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -232,6 +213,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 placeholder="Nhập mật khẩu của bạn"
+                disabled={isSubmitting}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -241,6 +223,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                   name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  disabled={isSubmitting}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Ghi nhớ đăng nhập
@@ -255,9 +238,17 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-400"
               >
-                Đăng nhập
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Đang đăng nhập...
+                  </div>
+                ) : (
+                  'Đăng nhập'
+                )}
               </button>
             </div>
           </form>
@@ -267,6 +258,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               <button
                 onClick={() => setView('register')}
                 className="text-red-600 hover:text-red-500 font-medium"
+                disabled={isSubmitting}
               >
                 Đăng ký ngay
               </button>
@@ -276,6 +268,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
       );
     }
 
+    // Register form
     return (
       <div className="py-4">
         {error && (
@@ -284,19 +277,6 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
           </div>
         )}
         <form onSubmit={handleSignUp} className="space-y-4">
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              Họ và tên
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              placeholder="Nhập họ và tên của bạn"
-            />
-          </div>
           <div>
             <label htmlFor="registerEmail" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -308,12 +288,26 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               placeholder="Nhập email của bạn"
-              required
+              disabled={isSubmitting}
+            />
+          </div>
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+              Họ và tên
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="Nhập họ và tên của bạn"
+              disabled={isSubmitting}
             />
           </div>
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Số điện thoại (tùy chọn)
+              Số điện thoại
             </label>
             <input
               type="tel"
@@ -322,6 +316,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               onChange={(e) => setPhone(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               placeholder="Nhập số điện thoại của bạn"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -335,6 +330,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               placeholder="Nhập mật khẩu của bạn"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -348,21 +344,19 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               placeholder="Nhập lại mật khẩu của bạn"
+              disabled={isSubmitting}
             />
           </div>
           <div>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-400"
             >
               {isSubmitting ? (
                 <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Đang xử lý...
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Đang đăng ký...
                 </div>
               ) : (
                 'Đăng ký'
@@ -376,6 +370,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
             <button
               onClick={() => setView('login')}
               className="text-red-600 hover:text-red-500 font-medium"
+              disabled={isSubmitting}
             >
               Đăng nhập
             </button>
@@ -415,6 +410,7 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                         type="button"
                         onClick={handleClose}
                         className="relative -m-2 p-2 text-gray-400 hover:text-gray-500"
+                        disabled={isSubmitting}
                       >
                         <span className="absolute -inset-0.5" />
                         <span className="sr-only">Đóng</span>
@@ -434,12 +430,22 @@ export default function ProfileDrawer({ isOpen = false, onClose }: { isOpen: boo
                   <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-red-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-red-700"
+                      disabled={isSubmitting}
+                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-red-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-red-700 disabled:bg-red-400"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Đăng xuất
+                      {isSubmitting ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                          Đang đăng xuất...
+                        </div>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          Đăng xuất
+                        </>
+                      )}
                     </button>
                   </div>
                 )}

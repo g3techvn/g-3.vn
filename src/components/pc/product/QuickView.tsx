@@ -45,12 +45,14 @@ export default function QuickView({ product, isOpen, onClose }: QuickViewProps) 
 
   const handleAddToCart = () => {
     const cartItem = {
-      ...product,
-      price: displayInfo.price,
-      original_price: displayInfo.originalPrice,
+      productId: product.id,
       quantity,
-      image: displayInfo.imageUrl,
-      variant: selectedVariant || undefined
+      product: {
+        ...product,
+        price: displayInfo.price,
+        original_price: displayInfo.originalPrice,
+        variant: selectedVariant || undefined
+      }
     }
     addToCart(cartItem)
     onClose()

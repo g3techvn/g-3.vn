@@ -20,7 +20,7 @@ import Image from 'next/image';
 // Import checkout components
 import BuyerInfo from '@/components/store/BuyerInfo';
 import PaymentMethodSelection from '@/components/store/PaymentMethodSelection';
-import OrderSummary from '@/components/store/OrderSummary';
+import OrderSummary from './OrderSummary';
 import VoucherInfo from '@/components/store/VoucherInfo';
 import RewardPoints from '@/components/store/RewardPoints';
 import ProductList from '@/components/store/ProductList';
@@ -28,6 +28,7 @@ import CollapsibleSection from '@/components/store/CollapsibleSection';
 import ProfileDrawer from '@/components/store/ProfileDrawer';
 import LocationSelector from '@/components/features/cart/LocationSelector';
 import { Voucher } from '@/types/cart';
+import OrderProductList from './OrderProductList';
 
 // Types
 interface Order {
@@ -987,33 +988,19 @@ export function OrdersManager() {
                 </div>
 
                 {/* Product List giống checkout */}
-                <ProductList
-                  items={formData.items.map(item => ({
-                    id: item.id,
-                    name: item.product_name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    image: item.product_image || ''
-                  }))}
+                <OrderProductList
+                  items={formData.items}
                   loading={false}
                   onUpdateQuantity={(itemId, newQuantity) => {
                     updateItem(itemId, { quantity: newQuantity });
                   }}
-                  onRemoveItem={(itemId) => {
-                    removeItem(itemId);
-                  }}
+                  onRemoveItem={removeItem}
                   readOnly={false}
                 />
 
                 {/* Order Summary */}
                 <OrderSummary
-                  items={formData.items.map(item => ({
-                    id: item.id,
-                    name: item.product_name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    image: item.product_image || ''
-                  }))}
+                  items={formData.items}
                   selectedVoucher={selectedVoucher}
                   pointsToUse={useRewardPoints ? pointsToUse : 0}
                   totalPrice={formData.items.reduce((sum, item) => sum + item.total_price, 0)}

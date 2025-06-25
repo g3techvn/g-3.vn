@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect, useState } from 'react';
 import { CartItem } from '@/types/cart'
+import { formatCurrency } from '@/utils/helpers'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 
@@ -50,11 +52,11 @@ export default function ProductList({ items, loading, onUpdateQuantity, onRemove
     <div className="flow-root">
       <ul role="list" className="-my-6 divide-y divide-gray-200">
         {items.map((item) => (
-          <li key={item.id} className="flex py-6">
+          <li key={item.productId} className="flex py-6">
             <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
               <Image
-                src={item.image}
-                alt={item.name}
+                src={item.product.image_url || ''}
+                alt={item.product.name}
                 width={96}
                 height={96}
                 className="h-full w-full object-cover object-center"
@@ -64,13 +66,13 @@ export default function ProductList({ items, loading, onUpdateQuantity, onRemove
             <div className="ml-4 flex flex-1 flex-col">
               <div>
                 <div className="flex justify-between text-base font-medium text-gray-900">
-                  <h3>
-                    <a href={item.href}>{item.name}</a>
-                  </h3>
-                  <p className="ml-4">{item.price.toLocaleString()}₫</p>
+                  <h3 className="font-medium">{item.product.name}</h3>
+                  <p className="text-sm text-gray-500">{formatCurrency(item.product.price)}</p>
                 </div>
-                {item.variant && (
-                  <p className="mt-1 text-sm text-gray-500">{`${item.variant.color} - ${item.variant.size}`}</p>
+                {item.product.variants && item.product.variants.length > 0 && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    {`${item.product.variants[0].color || ''} ${item.product.variants[0].size || ''}`}
+                  </p>
                 )}
               </div>
               <div className="flex flex-1 items-end justify-between text-sm">
@@ -79,7 +81,7 @@ export default function ProductList({ items, loading, onUpdateQuantity, onRemove
                     <p className="text-gray-500">Số lượng</p>
                     <div className="flex items-center border rounded">
                       <button
-                        onClick={() => onUpdateQuantity?.(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => onUpdateQuantity?.(item.productId, Math.max(1, item.quantity - 1))}
                         className="px-2 py-1 hover:bg-gray-100"
                         disabled={item.quantity <= 1}
                       >
@@ -87,7 +89,7 @@ export default function ProductList({ items, loading, onUpdateQuantity, onRemove
                       </button>
                       <span className="px-2 py-1">{item.quantity}</span>
                       <button
-                        onClick={() => onUpdateQuantity?.(item.id, item.quantity + 1)}
+                        onClick={() => onUpdateQuantity?.(item.productId, item.quantity + 1)}
                         className="px-2 py-1 hover:bg-gray-100"
                       >
                         +
@@ -102,7 +104,7 @@ export default function ProductList({ items, loading, onUpdateQuantity, onRemove
                   <div className="flex">
                     <button
                       type="button"
-                      onClick={() => onRemoveItem?.(item.id)}
+                      onClick={() => onRemoveItem?.(item.productId)}
                       className="font-medium text-red-600 hover:text-red-500"
                     >
                       Xóa

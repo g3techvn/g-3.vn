@@ -116,7 +116,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
   
   // Use either buyNowItem or cartItems based on context
   const items = buyNowItem ? [buyNowItem] : cartItems
-  const total = buyNowItem ? buyNowItem.price * buyNowItem.quantity : totalPrice
+  const total = buyNowItem ? buyNowItem.product.price * buyNowItem.quantity : totalPrice
 
   // Fetch vouchers from API
   const fetchVouchers = async () => {

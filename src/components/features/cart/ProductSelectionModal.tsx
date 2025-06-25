@@ -203,6 +203,29 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
     });
   }, [products, debouncedSearchQuery, selectedBrand, selectedCategory]);
 
+  // Handle adding product to cart
+  const handleAddToCart = async (product: Product) => {
+    try {
+      // Create cart item with proper structure
+      const cartItem = {
+        productId: product.id,
+        quantity: 1,
+        product: {
+          ...product,
+          // Ensure variants are properly handled
+          variants: product.variants || []
+        }
+      };
+      
+      await addToCart(cartItem);
+      // Close modal after successful add
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+      setError('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+    }
+  };
+
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
@@ -285,91 +308,61 @@ export default function ProductSelectionModal({ isOpen, onOpenChange }: ProductS
           </div>
         </DialogHeader>
 
+        {error && (
+          <div className="flex items-center gap-2 p-4 text-red-600 bg-red-50 rounded-md">
+            <AlertCircle className="h-5 w-5" />
+            <p>{error}</p>
+            <button
+              onClick={handleRetry}
+              className="ml-auto text-sm font-medium hover:underline"
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto mt-4">
           {loadingProducts ? (
-            // Loading state
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 p-2 md:p-4">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="flex animate-pulse flex-col gap-2 rounded-lg border p-2">
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-200" />
-                  <div className="flex flex-col gap-1">
-                    <div className="h-3 md:h-4 w-3/4 rounded bg-gray-200" />
-                    <div className="h-3 md:h-4 w-1/2 rounded bg-gray-200" />
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="relative group bg-white rounded-lg border p-2 hover:border-red-600 transition-colors"
+                >
+                  <div className="relative aspect-square mb-2">
+                    <Image
+                      src={product.image_url || '/placeholder.png'}
+                      alt={product.name}
+                      fill
+                      className="object-cover rounded-md"
+                    />
                   </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium line-clamp-2">{product.name}</h3>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-sm text-gray-600">{product.rating || 5}</span>
+                    </div>
+                    <p className="text-sm font-medium text-red-600">
+                      {new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                      }).format(product.price)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <span className="text-white font-medium">Thêm vào giỏ</span>
+                  </button>
                 </div>
               ))}
             </div>
-          ) : error ? (
-            // Error state
-            <div className="flex flex-col items-center justify-center gap-4 py-8">
-              <AlertCircle className="h-8 w-8 text-red-500" />
-              <p className="text-center text-sm text-gray-500">{error}</p>
-              <button
-                onClick={handleRetry}
-                className="rounded-md bg-primary px-4 py-2 text-sm text-white transition-colors hover:bg-primary/90"
-              >
-                Thử lại
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex cursor-pointer flex-col gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm transition-all hover:shadow-md"
-                    onClick={() => {
-                      const cartItem = {
-                        ...product,
-                        quantity: 1,
-                        image: product.image_url || ''
-                      };
-                      addToCart(cartItem);
-                      onOpenChange(false);
-                    }}
-                  >
-                    <div className="relative aspect-square overflow-hidden rounded-lg">
-                      <Image
-                        src={product.image_url || 'https://via.placeholder.com/200'}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover"
-                        priority={false}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <p className="line-clamp-2 text-xs md:text-sm font-medium">{product.name}</p>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="ml-1 text-[10px] md:text-xs text-gray-600">{product.rating || 0}</span>
-                        </div>
-                        <span className="text-[10px] md:text-xs text-gray-400">|</span>
-                        <span className="text-[10px] md:text-xs text-gray-600">Đã bán {product.sold_count || 0}</span>
-                      </div>
-                      <div className="mt-1">
-                        {product.original_price && product.original_price > product.price && (
-                          <div className="text-[10px] md:text-xs text-gray-500 line-through">
-                            {product.original_price.toLocaleString()}đ
-                          </div>
-                        )}
-                        <div className="text-xs md:text-sm font-medium text-red-600">{product.price.toLocaleString()}đ</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {filteredProducts.length === 0 && (
-                <div className="flex flex-col items-center justify-center gap-2 py-8">
-                  <AlertCircle className="h-6 md:h-8 w-6 md:w-8 text-gray-400" />
-                  <p className="text-center text-xs md:text-sm text-gray-500">
-                    Không tìm thấy sản phẩm phù hợp
-                  </p>
-                </div>
-              )}
-            </>
           )}
         </div>
       </DialogContent>

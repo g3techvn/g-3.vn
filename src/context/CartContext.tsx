@@ -2,7 +2,6 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react'
 import { Product } from '@/types'
-
 import { CartItem } from '@/types/cart'
 
 interface CartContextType {
@@ -15,8 +14,8 @@ interface CartContextType {
   closeCart: () => void
   toggleCart: () => void
   addToCart: (item: CartItem) => boolean
-  removeFromCart: (itemId: string) => void
-  updateQuantity: (itemId: string, quantity: number) => boolean
+  removeFromCart: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => boolean
   clearCart: () => void
 }
 
@@ -66,23 +65,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     
     try {
       setCartItems(prevItems => {
-        const existingItem = prevItems.find(i => i.id === item.id)
+        const existingItem = prevItems.find(i => i.productId === item.productId)
         
         // Check total items limit
         const currentTotalItems = prevItems.reduce((total, item) => total + item.quantity, 0)
-        if (currentTotalItems + (item.quantity || 1) > MAX_TOTAL_ITEMS) {
+        if (currentTotalItems + item.quantity > MAX_TOTAL_ITEMS) {
           throw new Error(`Không thể thêm vào giỏ hàng. Số lượng tối đa là ${MAX_TOTAL_ITEMS} sản phẩm.`)
         }
 
         if (existingItem) {
           // Check individual item limit
-          const newQuantity = existingItem.quantity + (item.quantity || 1)
+          const newQuantity = existingItem.quantity + item.quantity
           if (newQuantity > MAX_QUANTITY_PER_ITEM) {
             throw new Error(`Số lượng tối đa cho mỗi sản phẩm là ${MAX_QUANTITY_PER_ITEM}.`)
           }
 
           return prevItems.map(i =>
-            i.id === item.id
+            i.productId === item.productId
               ? { ...i, quantity: newQuantity }
               : i
           )
@@ -93,7 +92,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           throw new Error(`Số lượng tối đa cho mỗi sản phẩm là ${MAX_QUANTITY_PER_ITEM}.`)
         }
 
-        return [...prevItems, { ...item, quantity: item.quantity || 1 }]
+        return [...prevItems, item]
       })
 
       // Auto open cart when adding items
@@ -106,11 +105,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return true
   }
 
-  const removeFromCart = (itemId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId))
+  const removeFromCart = (productId: string) => {
+    setCartItems(prevItems => prevItems.filter(item => item.productId !== productId))
   }
 
-  const updateQuantity = (itemId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     setError(null); // Reset error state
     
     try {
@@ -120,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       setCartItems(prevItems => {
         const newItems = prevItems.map(item =>
-          item.id === itemId
+          item.productId === productId
             ? { ...item, quantity: Math.max(0, quantity) }
             : item
         ).filter(item => item.quantity > 0)
@@ -147,7 +146,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Calculate total items and price
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0)
-  const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+  const totalPrice = cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0)
 
   return (
     <CartContext.Provider 

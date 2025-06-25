@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import { ProductGallery } from './ProductGallery';
@@ -35,6 +35,8 @@ type Benefits = string[] | { benefits: string[] } | string;
 
 export interface ProductDetailDesktopProps {
   product: Product;
+  selectedVariant: ProductVariant | null;
+  onSelectVariant: (variant: ProductVariant | null) => void;
   galleryImages: string[];
   isLoadingGallery: boolean;
   videoInfo: {
@@ -45,7 +47,10 @@ export interface ProductDetailDesktopProps {
   ratingSummary: {
     average: number;
     total: number;
-    stars: { star: number; count: number; }[];
+    stars: {
+      star: number;
+      count: number;
+    }[];
   };
   similarProducts: Product[];
   loadingSimilar: boolean;
@@ -54,8 +59,6 @@ export interface ProductDetailDesktopProps {
   benefits: Benefits;
   instructions: string[];
   overview: string;
-  selectedVariant: ProductVariant | null;
-  onSelectVariant: (variant: ProductVariant) => void;
 }
 
 export function ProductDetailDesktop({
@@ -176,7 +179,11 @@ export function ProductDetailDesktop({
               )}
 
               {/* Product Features & Info */}
-              <ProductInfo product={product} selectedVariant={selectedVariant} />
+              <ProductInfo 
+                product={product} 
+                selectedVariant={selectedVariant}
+                onSelectVariant={onSelectVariant}
+              />
             </div>
           </motion.div>
         </motion.div>

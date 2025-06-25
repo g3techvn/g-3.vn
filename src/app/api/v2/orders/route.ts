@@ -132,18 +132,18 @@ export async function POST(request: NextRequest) {
     // Create order items
     const orderItems = cart_items.map((item) => ({
       order_id: orderData.id,
-      product_id: item.id,
-      product_name: item.name,
-      variant_id: item.variant?.id || null,
-      variant_details: item.variant ? JSON.stringify({
-        color: item.variant.color,
-        size: item.variant.size,
-        gac_chan: item.variant.gac_chan
+      product_id: item.productId,
+      product_name: item.product.name,
+      variant_id: item.product.variant?.id || null,
+      variant_details: item.product.variant ? JSON.stringify({
+        color: item.product.variant.color,
+        size: item.product.variant.size,
+        gac_chan: item.product.variant.gac_chan
       }) : null,
       quantity: item.quantity,
-      unit_price: item.price,
-      total_price: item.price * item.quantity,
-      product_image: item.image || ''
+      unit_price: item.product.price,
+      total_price: item.product.price * item.quantity,
+      product_image: item.product.image || ''
     }));
 
     const { data: orderItemsData, error: orderItemsError } = await supabase

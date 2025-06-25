@@ -25,31 +25,29 @@ export const ShippingInfoSchema = z.object({
   note: z.string().optional().transform(val => val === '' ? undefined : val),
 });
 
-// Validation schema cho cart item
+// Validation schema for cart item
 export const CartItemSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(val => String(val)),
-  name: z.string().min(1, 'Tên sản phẩm không được để trống'),
-  price: z.number().positive('Giá sản phẩm phải lớn hơn 0'),
-  original_price: z.number().optional(),
+  productId: z.string().min(1, 'Product ID is required'),
   quantity: z.number()
-    .int('Số lượng phải là số nguyên')
-    .min(1, 'Số lượng phải ít nhất là 1')
-    .max(100, 'Số lượng không được vượt quá 100'),
-  image: z.string().optional(),
-  variant: z.object({
-    id: z.number(),
-    color: z.string().nullable().optional(),
-    size: z.string().nullable().optional(),
-    gac_chan: z.boolean().nullable().optional(),
-    price: z.number().optional(),
+    .int('Quantity must be an integer')
+    .min(1, 'Quantity must be at least 1')
+    .max(100, 'Quantity cannot exceed 100'),
+  product: z.object({
+    id: z.string().min(1, 'Product ID is required'),
+    name: z.string().min(1, 'Product name is required'),
+    price: z.number().positive('Product price must be greater than 0'),
     original_price: z.number().optional(),
-    image_url: z.string().optional(),
-  }).optional(),
-  // Additional optional fields that might exist in cart items
-  weight: z.number().optional(),
-  length: z.number().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
+    image: z.string().optional(),
+    variant: z.object({
+      id: z.number(),
+      color: z.string().nullable().optional(),
+      size: z.string().nullable().optional(),
+      gac_chan: z.boolean().nullable().optional(),
+      price: z.number().optional(),
+      original_price: z.number().optional(),
+      image_url: z.string().optional(),
+    }).optional()
+  })
 });
 
 // Validation schema cho voucher - made more flexible

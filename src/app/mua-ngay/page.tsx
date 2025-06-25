@@ -148,7 +148,7 @@ export default function BuyNowPage() {
   }, [items, router]);
 
   // Calculate totals
-  const subtotal = items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+  const subtotal = items.reduce((sum: number, item: CartItem) => sum + (item.product.price * item.quantity), 0);
   const shippingFee = 0; // Free shipping
   const totalPrice = subtotal + shippingFee;
 
@@ -431,8 +431,8 @@ export default function BuyNowPage() {
                   <div key={index} className="flex space-x-3">
                     <div className="relative">
                       <Image
-                        src={item.image || '/images/placeholder-product.jpg'}
-                        alt={item.name}
+                        src={item.product.image_url || '/images/placeholder-product.jpg'}
+                        alt={item.product.name}
                         width={64}
                         height={64}
                         className="object-cover rounded-lg"
@@ -446,18 +446,15 @@ export default function BuyNowPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-gray-900 truncate">
-                        {item.name}
+                        {item.product.name}
                       </h3>
-                      {item.variant && (
+                      {item.product.variants && item.product.variants.length > 0 && (
                         <p className="text-xs text-gray-500">
-                          {typeof item.variant === 'object' 
-                            ? `${item.variant.color || ''} ${item.variant.size || ''}`.trim()
-                            : item.variant
-                          }
+                          {item.product.variants[0].color || ''} {item.product.variants[0].size || ''}
                         </p>
                       )}
                       <p className="text-sm font-medium text-red-600">
-                        {(item.price * item.quantity).toLocaleString('vi-VN')}đ
+                        {(item.product.price * item.quantity).toLocaleString('vi-VN')}đ
                       </p>
                     </div>
                   </div>

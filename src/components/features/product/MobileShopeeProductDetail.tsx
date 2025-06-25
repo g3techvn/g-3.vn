@@ -246,63 +246,57 @@ export function MobileShopeeProductDetail({ product, galleryImages = [], videoIn
     // If product has no variants, add directly to cart
     if (!product.variants || product.variants.length === 0) {
       const cartItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        original_price: product.original_price,
+        productId: product.id,
         quantity: 1,
-        image: product.image_url || '',
-        variant: undefined,
+        product: {
+          ...product,
+          variants: []
+        }
       };
-      
       addToCart(cartItem);
-      
-      showToast('Đã thêm sản phẩm vào giỏ hàng!', 'default');
-      return;
-    }
-    
-    // If product has variants, open cart drawer
-    setIsCartDrawerOpen(true);
-  };
-  
-  const confirmAddToCart = (product: Product, quantity: number, selectedVariant?: ProductVariant | null) => {
-    // Create a cart item from the product with variant info
-    const cartItem = {
-      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
-      name: product.name,
-      price: selectedVariant?.price || product.price,
-      original_price: selectedVariant?.original_price || product.original_price,
-      quantity: quantity, // Add all items at once instead of one by one
-      image: selectedVariant?.image_url || product.image_url || '',
-      variant: selectedVariant || undefined,
-    };
-    
-    // Add to cart once with the total quantity
-    const success = addToCart(cartItem);
-    
-    if (success) {
-      showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`, 'default');
+      showToast('Đã thêm vào giỏ hàng', 'default');
     } else {
-      // Error message will be shown by the CartContext error handler
+      // If product has variants, open cart drawer to select variant
+      setIsCartDrawerOpen(true);
+    }
+  };
+
+  const confirmAddToCart = async (product: Product, quantity: number, selectedVariant?: ProductVariant | null) => {
+    try {
+      const cartItem = {
+        productId: product.id,
+        quantity,
+        product: {
+          ...product,
+          variants: selectedVariant ? [selectedVariant] : []
+        }
+      };
+      await addToCart(cartItem);
+      showToast('Đã thêm vào giỏ hàng', 'default');
+      setIsCartDrawerOpen(false);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showToast('Không thể thêm vào giỏ hàng', 'destructive');
     }
   };
 
   const handleBuyNow = () => {
-    // Nếu sản phẩm có biến thể nhưng chưa chọn biến thể
-    if (product.variants && product.variants.length > 0 && !selectedVariant) {
-      showToast('Vui lòng chọn biến thể sản phẩm', 'destructive');
-      return;
+    // If product has no variants, proceed to buy now
+    if (!product.variants || product.variants.length === 0) {
+      const buyNowItem = {
+        productId: product.id,
+        quantity: 1,
+        product: {
+          ...product,
+          variants: []
+        }
+      };
+      setBuyNowItem(buyNowItem);
+      router.push('/mua-ngay');
+    } else {
+      // If product has variants, open cart drawer to select variant
+      setIsCartDrawerOpen(true);
     }
-
-    setBuyNowItem({
-      id: product.id,
-      name: product.name,
-      price: selectedVariant?.price || product.price,
-      image: selectedVariant?.image_url || product.image_url || '',
-      quantity: 1,
-      variant: selectedVariant || undefined
-    });
-    router.push('/mua-ngay');
   };
 
   return (

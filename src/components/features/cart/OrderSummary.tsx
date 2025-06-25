@@ -17,8 +17,8 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
   // Calculate total savings from original prices
   const totalSavings = cartItems.reduce((sum, item) => {
-    if (item.original_price && item.original_price > item.price) {
-      return sum + ((item.original_price - item.price) * item.quantity);
+    if (item.product.original_price && item.product.original_price > item.product.price) {
+      return sum + ((item.product.original_price - item.product.price) * item.quantity);
     }
     return sum;
   }, 0);

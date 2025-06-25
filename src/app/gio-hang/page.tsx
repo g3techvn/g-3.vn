@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/features/cart/useCart';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';
@@ -86,7 +86,7 @@ interface FormData {
 }
 
 export default function CartPage() {
-  const { cartItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cart, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -391,7 +391,7 @@ export default function CartPage() {
           note: formData.note
         },
         payment_method: formData.paymentMethod,
-        cart_items: cartItems,
+        cart_items: cart,
         voucher: selectedVoucher,
         reward_points: useRewardPoints ? pointsToUse : 0,
         total_price: totalPrice,
@@ -446,7 +446,7 @@ export default function CartPage() {
       <CartHeader 
         showMenu={showMenu}
         setShowMenu={setShowMenu}
-        handlePreviewPDF={() => generatePDF({ cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
+        handlePreviewPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName,
           phone: formData.phone,
           email: user.email
@@ -455,7 +455,7 @@ export default function CartPage() {
           phone: formData.phone,
           email: formData.email || undefined
         }, preview: true })}
-        handleDownloadPDF={() => generatePDF({ cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
+        handleDownloadPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName,
           phone: formData.phone,
           email: user.email
@@ -638,13 +638,13 @@ export default function CartPage() {
               <div className="col-span-4">
                 <div className="bg-white p-4 rounded-lg sticky top-4">
                   <ProductListStore
-                    items={cartItems}
+                    items={cart}
                     loading={loading}
                     onUpdateQuantity={handleQuantityUpdate}
                     onRemoveItem={removeFromCart}
                   />
                   <OrderSummary
-                    items={cartItems}
+                    items={cart}
                     selectedVoucher={selectedVoucher}
                     pointsToUse={useRewardPoints ? pointsToUse : 0}
                     totalPrice={totalPrice}
@@ -676,7 +676,7 @@ export default function CartPage() {
         <div className="pt-16 px-4 pb-20 max-w-full overflow-hidden">        
           <ProductList 
             loading={loading}
-            cartItems={cartItems}
+            cartItems={cart}
             removeFromCart={removeFromCart}
             updateQuantity={updateQuantity}
           />
@@ -800,7 +800,7 @@ export default function CartPage() {
               shipping={shippingFee}
             selectedVoucher={selectedVoucher}
               pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
-            cartItems={cartItems}
+            cartItems={cart}
             useRewardPoints={useRewardPoints}
             setUseRewardPoints={setUseRewardPoints}
             pointsToUse={pointsToUse}
@@ -815,7 +815,7 @@ export default function CartPage() {
         </div>
 
         <BottomBar 
-          cartItemCount={cartItems.length}
+          cartItemCount={cart.length}
           total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
           onCheckout={handleSubmit}
           isValid={isFormValid()}

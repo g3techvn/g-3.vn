@@ -177,10 +177,10 @@ export const generatePDF = async ({ cartItems, totalPrice, shipping, buyerInfo, 
       head: [['STT', 'Sản phẩm', 'SL', 'Đơn giá', 'Thành tiền']],
       body: cartItems.map((item, index) => [
         (index + 1).toString(),
-        item.name,
+        item.product.name,
         item.quantity.toString(),
-        `${item.price.toLocaleString()}đ`,
-        `${(item.price * item.quantity).toLocaleString()}đ`
+        `${item.product.price.toLocaleString()}đ`,
+        `${(item.product.price * item.quantity).toLocaleString()}đ`
       ]),
       startY: startY + 55,
       theme: 'grid',

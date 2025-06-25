@@ -120,9 +120,9 @@ export function ProductCard({ product, className = '' }: ProductCardProps) {
                 onClick={(e) => {
                   e.preventDefault();
                   const cartItem = {
-                    ...product,
+                    productId: product.id,
                     quantity: 1,
-                    image: product.image_url || ''
+                    product
                   };
                   addToCart(cartItem);
                 }}

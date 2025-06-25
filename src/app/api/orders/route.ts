@@ -138,12 +138,12 @@ export async function POST(request: NextRequest) {
     // Create order items
     const orderItems = cart_items.map((item) => ({
       order_id: orderData.id,
-      product_id: typeof item.id === 'string' ? parseInt(item.id) : item.id, // Convert to number for database
-      product_name: item.name,
+      product_id: typeof item.productId === 'string' ? parseInt(item.productId) : item.productId, // Convert to number for database
+      product_name: item.product.name,
       quantity: item.quantity,
-      price: item.price, // Match database schema
-      total_price: item.price * item.quantity,
-      product_image: item.image || ''
+      price: item.product.price, // Match database schema
+      total_price: item.product.price * item.quantity,
+      product_image: item.product.image || ''
     }));
 
     const { data: orderItemsData, error: orderItemsError } = await supabaseAdmin

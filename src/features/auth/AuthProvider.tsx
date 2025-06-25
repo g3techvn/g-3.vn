@@ -55,83 +55,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkAuth = async () => {
       try {
-        setLoading(true);
+        if (!mounted) return;
         
-        // Lấy session hiện tại từ Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (mounted) {
-          if (session?.user) {
-            setUser(mapSupabaseUser(session.user));
-          } else {
-            setUser(null);
-          }
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
+        if (!mounted) return;
+        
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
           setUser(null);
         }
+      } catch (err) {
+        if (!mounted) return;
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setUser(null);
       } finally {
         if (mounted) {
           setLoading(false);
         }
       }
     };
-    
-    // Chạy kiểm tra lần đầu
-    checkAuth();
 
-    // Lắng nghe sự kiện auth từ các tab khác
-    const handleAuthChange = (event: CustomEvent<{ type: 'SIGNED_IN' | 'SIGNED_OUT' }>) => {
-      if (event.detail.type === 'SIGNED_OUT') {
-        setUser(null);
-        // Đảm bảo đăng xuất khỏi session hiện tại
-        supabase.auth.signOut();
-      } else if (event.detail.type === 'SIGNED_IN') {
-        // Kiểm tra lại session khi có đăng nhập mới
-        checkAuth();
-      }
-    };
-
-    window.addEventListener('supabase-auth-change', handleAuthChange as EventListener);
-    
     // Thiết lập listener cho thay đổi auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (mounted) {
-          if (session?.user) {
-            // Kiểm tra xem session có hợp lệ không
-            const { data: { session: currentSession } } = await supabase.auth.getSession();
-            if (currentSession?.access_token === session.access_token) {
-              setUser(mapSupabaseUser(session.user));
-            } else {
-              // Nếu token không khớp, đăng xuất
-              await supabase.auth.signOut();
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
-          setLoading(false);
+        if (!mounted) return;
+
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
         }
+        setLoading(false);
       }
     );
     
-    // Clean up subscription và event listener khi unmount
+    // Chạy kiểm tra lần đầu
+    checkAuth();
+    
+    // Clean up subscription khi unmount
     return () => {
       mounted = false;
       subscription.unsubscribe();
-      window.removeEventListener('supabase-auth-change', handleAuthChange as EventListener);
     };
   }, [supabase]);
 
   // Hàm đăng nhập
   const signIn = async (email: string, password: string) => {
     try {
-      // Đăng xuất khỏi session hiện tại nếu có
-      await supabase.auth.signOut();
-
+      setLoading(true);
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -148,6 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
+    } finally {
+      setLoading(false);
     }
   };
 

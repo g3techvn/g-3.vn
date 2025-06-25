@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '@/types';
 import { Breadcrumb } from '@/components/pc/common/Breadcrumb';
 import Image from 'next/image';
-import { MobileShopeeProductDetail } from '@/components/mobile/detail-product/MobileShopeeProductDetail';
+import MobileShopeeProductDetail from '@/components/mobile/detail-product/MobileShopeeProductDetail';
 import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, ShoppingCartIcon, CheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Card, CardBadge, CardContent, CardHeader } from '@/components/ui/Card';
 import { AspectRatio } from '@/components/ui/AspectRatio';
@@ -543,23 +543,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       
       {/* Mobile View */}
       <div className="md:hidden">
-        <MobileShopeeProductDetail 
-          product={product} 
-          galleryImages={galleryImages}
-          videoInfo={{
-            videoUrl: video?.videoUrl || '',
-            thumbnail: video?.thumbnail || ''
-          }}
-          comments={comments}
-          ratingSummary={ratingSummary}
-          technicalSpecs={technicalSpecs}
-          keyFeatures={keyFeatures}
-          benefits={benefits}
-          instructions={instructions}
-          overview={overview}
-          selectedVariant={selectedVariant}
-          onSelectVariant={setSelectedVariant}
-        />
+        <MobileShopeeProductDetail product={product} />
       </div>
 
       {/* Desktop View */}

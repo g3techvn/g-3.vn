@@ -153,12 +153,4 @@ export type BlogPost = {
   updated_at: string;
 };
 
-export type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  original_price?: number;
-  quantity: number;
-  image: string;
-  variant?: ProductVariant;
-}; 
+// CartItem type has been moved to @/types/cart.ts 

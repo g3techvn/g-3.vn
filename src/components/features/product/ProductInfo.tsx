@@ -32,12 +32,12 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
     setIsAddingToCart(true);
     try {
       await addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images?.[0] || product.image_url || '',
+        productId: product.id,
         quantity: 1,
-        variant: selectedVariant || undefined
+        product: {
+          ...product,
+          variants: selectedVariant ? [selectedVariant] : []
+        }
       });
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -57,12 +57,12 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
     }
 
     setBuyNowItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images?.[0] || product.image_url || '',
+      productId: product.id,
       quantity: 1,
-      variant: selectedVariant || undefined
+      product: {
+        ...product,
+        variants: selectedVariant ? [selectedVariant] : []
+      }
     });
     router.push('/mua-ngay');
   };

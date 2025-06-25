@@ -6,6 +6,7 @@ import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
 import OptimizedImage from '@/components/common/OptimizedImage';
 import Image from 'next/image';
+import { CartItem } from '@/types/cart';
 
 interface MobileFeatureProductProps {
   products: Product[];
@@ -107,10 +108,13 @@ const MobileFeatureProduct: React.FC<MobileFeatureProductProps> = React.memo(({
   const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    const cartItem = {
-      ...product,
+    const cartItem: CartItem = {
+      productId: product.id,
       quantity: 1,
-      image: product.image_url || ''
+      product: {
+        ...product,
+        variants: product.variants || []
+      }
     };
     addToCart(cartItem);
   }, [addToCart]);

@@ -15,9 +15,9 @@ export default function OrderSummary({
   pointsToUse,
   totalPrice
 }: OrderSummaryProps) {
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
   const originalSubtotal = items.reduce((sum, item) => 
-    sum + ((item.original_price || item.price) * item.quantity), 0)
+    sum + ((item.product.original_price || item.product.price) * item.quantity), 0)
   const totalSavings = originalSubtotal - subtotal
   const voucherDiscount = selectedVoucher ? selectedVoucher.discountAmount : 0
   const pointsDiscount = pointsToUse / 100 // Convert points to money

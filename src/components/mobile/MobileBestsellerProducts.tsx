@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { formatCurrency } from '@/utils/helpers';
 import { StarIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/context/CartContext';
+import { CartItem } from '@/types/cart';
 
 // Random banner images from Unsplash
 const bannerImages = [
@@ -45,13 +46,16 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
     }
   }, []);
 
-  const handleAddToCart = useCallback((e: React.MouseEvent, product: Product) => {
+  const handleAddToCart = React.useCallback((e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    const cartItem = {
-      ...product,
+    const cartItem: CartItem = {
+      productId: product.id,
       quantity: 1,
-      image: product.image_url || ''
+      product: {
+        ...product,
+        variants: product.variants || []
+      }
     };
     addToCart(cartItem);
   }, [addToCart]);
@@ -138,7 +142,7 @@ const MobileBestsellerProducts: React.FC<MobileBestsellerProductsProps> = React.
                         <span>•</span>
                         <span>Đã bán {product.sold_count || 0}</span>
                       </div>
-                      <button 
+                      <button
                         className="p-1.5 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition-colors duration-200"
                         aria-label="Thêm vào giỏ hàng"
                         onClick={(e) => handleAddToCart(e, product)}

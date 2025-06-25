@@ -1,11 +1,15 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Product, ProductVariant, CartItem } from '@/types';
+import { Product, ProductVariant } from '@/types';
+import { CartItem } from '@/types/cart';
 import { useCart } from '@/context/CartContext';
 import { useBuyNow } from '@/context/BuyNowContext';
 import { useEffect, useRef, useState } from 'react';
 import { formatCurrency } from '@/utils/helpers';
+import { useToast } from '@/hooks/useToast';
+import { Button } from '@/components/ui/Button';
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 export interface FloatProductActionProps {
   product: Product;
@@ -13,126 +17,121 @@ export interface FloatProductActionProps {
 }
 
 export function FloatProductAction({ product, selectedVariant }: FloatProductActionProps) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { setBuyNowItem } = useBuyNow();
-  const router = useRouter();
-  const [show, setShow] = useState(true);
-  const lastScrollY = useRef(0);
-  const lastTimestamp = useRef(Date.now());
-  const SCROLL_SPEED_THRESHOLD = 200; // px per second
+  const { showToast } = useToast();
+  const [isVisible, setIsVisible] = useState(true);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const lastScrollY = useRef(0);
+  const lastScrollTime = useRef(Date.now());
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
     try {
+      if (!selectedVariant && product.variants && product.variants.length > 0) {
+        showToast('Vui lòng chọn phân loại sản phẩm!', 'destructive');
+        return;
+      }
       const cartItem: CartItem = {
-        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
-        name: product.name,
-        price: selectedVariant?.price || product.price,
-        original_price: selectedVariant?.original_price || product.original_price,
+        productId: product.id,
         quantity: 1,
-        image: selectedVariant?.image_url || product.image_url || '',
-        variant: selectedVariant || undefined
+        product: product
       };
       await addToCart(cartItem);
+      showToast('Đã thêm vào giỏ hàng!', 'default');
     } catch (error) {
       console.error('Error adding to cart:', error);
+      showToast('Có lỗi xảy ra khi thêm vào giỏ hàng!', 'destructive');
     } finally {
       setIsAddingToCart(false);
     }
   };
 
   const handleBuyNow = () => {
-    setBuyNowItem({
-      id: product.id,
-      name: product.name,
-      price: selectedVariant?.price || product.price,
-      image: selectedVariant?.image_url || product.image_url || '',
+    if (!selectedVariant && product.variants && product.variants.length > 0) {
+      showToast('Vui lòng chọn phân loại sản phẩm!', 'destructive');
+      return;
+    }
+    const buyNowItem: CartItem = {
+      productId: product.id,
       quantity: 1,
-      variant: selectedVariant || undefined
-    });
+      product: product
+    };
+    setBuyNowItem(buyNowItem);
     router.push('/mua-ngay');
   };
 
   useEffect(() => {
+    const SCROLL_THRESHOLD = 50; // px
+    const SCROLL_SPEED_THRESHOLD = 200; // px per second
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const currentTimestamp = Date.now();
-      const timeDiff = currentTimestamp - lastTimestamp.current;
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastScrollTime.current;
       const scrollDiff = Math.abs(currentScrollY - lastScrollY.current);
       const scrollSpeed = (scrollDiff / timeDiff) * 1000;
 
       if (scrollSpeed > SCROLL_SPEED_THRESHOLD) {
-        if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-          // Scrolling down fast
-          setShow(false);
-        } else if (currentScrollY < lastScrollY.current) {
-          // Scrolling up fast
-          setShow(true);
-        }
+        setIsVisible(currentScrollY <= lastScrollY.current);
+      } else if (Math.abs(currentScrollY - lastScrollY.current) > SCROLL_THRESHOLD) {
+        setIsVisible(currentScrollY <= lastScrollY.current);
       }
 
       lastScrollY.current = currentScrollY;
-      lastTimestamp.current = currentTimestamp;
+      lastScrollTime.current = currentTime;
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const currentPrice = selectedVariant?.price || product.price;
-  const originalPrice = selectedVariant?.original_price || product.original_price;
-
   return (
-    <div
-      className={`fixed container mx-auto left-0 right-16 bottom-2 z-50 flex justify-center transition-all duration-300 ${show ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-8 pointer-events-none'} translate-x-16`}
-      style={{ width: '100%' }}
-    >
-      <div className="container mx-auto bg-white/30 backdrop-blur-md border border-gray-200 shadow-lg py-2 rounded-md flex items-center justify-between px-4">
-        <div className="flex items-center space-x-4">
-          <div className="relative w-12 h-12">
-            <Image
-              src={selectedVariant?.image_url || product.image_url || '/placeholder.png'}
-              alt={product.name}
-              fill
-              className="object-contain"
-              sizes="48px"
-            />
-          </div>
-          <div>
-            <div className="text-red-600 font-bold">
-              {formatCurrency(currentPrice)}
+    <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 transform transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'} hidden md:block z-50`}>
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+              <Image
+                src={selectedVariant?.image_url || product.image_url || '/placeholder-product.jpg'}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </div>
-            {originalPrice && originalPrice > currentPrice && (
-              <div className="text-gray-500 line-through text-sm">
-                {formatCurrency(originalPrice)}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{product.name}</h3>
+              <div className="flex items-baseline gap-2 mt-1">
+                <div className="text-xl font-bold text-red-600">{formatCurrency(selectedVariant?.price || product.price || 0)}</div>
+                {(selectedVariant?.original_price || product.original_price) && (
+                  <div className="text-sm text-gray-400 line-through">{formatCurrency(selectedVariant?.original_price || product.original_price || 0)}</div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-
-        <div className="flex-1 text-center px-4">
-          <div className="font-medium text-gray-900 line-clamp-1">
-            {product.name}
-            {selectedVariant && ` - ${selectedVariant.color}`}
+          <div className="flex-1" />
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="lg"
+              className="min-w-[180px]"
+              onClick={handleAddToCart}
+              disabled={isAddingToCart}
+            >
+              <ShoppingCartIcon className="w-5 h-5 mr-2" />
+              Thêm vào giỏ
+            </Button>
+            <Button
+              variant="default"
+              size="lg"
+              className="min-w-[180px] bg-red-600 hover:bg-red-700"
+              onClick={handleBuyNow}
+            >
+              Mua ngay
+            </Button>
           </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
-         
-          <button
-            onClick={handleBuyNow}
-            className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Mua ngay
-          </button>
-          <button
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-            className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
-          >
-            {isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ'}
-          </button>
         </div>
       </div>
     </div>
