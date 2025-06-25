@@ -673,154 +673,154 @@ export default function CartPage() {
 
       {/* Mobile Layout - Keep existing design */}
       <div className="md:hidden">
-      <div className="px-4 pb-20 max-w-full overflow-hidden">        
-        <ProductList 
-          loading={loading}
-          cartItems={cartItems}
-          removeFromCart={removeFromCart}
-          updateQuantity={updateQuantity}
-        />
-
-        <BuyerInfo 
-          user={user}
-             guestInfo={{
-               fullName: formData.fullName,
-               phone: formData.phone,
-               email: formData.email
-             }}
-             setGuestInfo={(info) => {
-               if (typeof info === 'function') {
-                 setFormData(prev => {
-                   const currentInfo = {
-                     fullName: prev.fullName,
-                     phone: prev.phone,
-                     email: prev.email
-                   };
-                   const newInfo = info(currentInfo);
-                   return {
-                     ...prev,
-                     fullName: newInfo.fullName,
-                     phone: newInfo.phone,
-                     email: newInfo.email
-                   };
-                 });
-               } else {
-                 setFormData(prev => ({
-                   ...prev,
-                   fullName: info.fullName,
-                   phone: info.phone,
-                   email: info.email
-                 }));
-               }
-             }}
-             userPhone={formData.phone}
-             setUserPhone={(phone) => {
-               if (typeof phone === 'string') {
-                 handleFormChange('phone', phone);
-               }
-             }}
-             errors={{
-               fullName: '',
-               phone: ''
-             }}
-             setErrors={() => {}}
-        />
-
-        {/* Location Selection */}
-        <div className="bg-white ">
-          
-          <LocationSelector
-            selectedProvinceCode={selectedLocation.provinceCode}
-            selectedDistrictCode={selectedLocation.districtCode}
-            selectedWardCode={selectedLocation.wardCode}
-            onProvinceChange={handleLocationChange.province}
-            onDistrictChange={handleLocationChange.district}
-            onWardChange={handleLocationChange.ward}
+        <div className="pt-16 px-4 pb-20 max-w-full overflow-hidden">        
+          <ProductList 
+            loading={loading}
+            cartItems={cartItems}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
           />
-          
-          {/* Address input */}
-          <div className="mt-4">
-              <label htmlFor="address-mobile" className="block text-sm font-medium text-gray-700 mb-1">
-              Địa chỉ cụ thể <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-                id="address-mobile"
-                value={formData.address}
-                onChange={(e) => handleFormChange('address', e.target.value)}
-              placeholder="Số nhà, tên đường..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            />
-          </div>
 
-          {/* Shipping carrier selection */}
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phương thức vận chuyển
-            </label>
-              <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
-                <div className="font-medium text-gray-900">Giao hàng bởi G3-Tech</div>
-                    <div className="text-sm text-gray-600">
-                  Miễn phí • 2-3 ngày
-                    </div>
+          <BuyerInfo 
+            user={user}
+               guestInfo={{
+                 fullName: formData.fullName,
+                 phone: formData.phone,
+                 email: formData.email
+               }}
+               setGuestInfo={(info) => {
+                 if (typeof info === 'function') {
+                   setFormData(prev => {
+                     const currentInfo = {
+                       fullName: prev.fullName,
+                       phone: prev.phone,
+                       email: prev.email
+                     };
+                     const newInfo = info(currentInfo);
+                     return {
+                       ...prev,
+                       fullName: newInfo.fullName,
+                       phone: newInfo.phone,
+                       email: newInfo.email
+                     };
+                   });
+                 } else {
+                   setFormData(prev => ({
+                     ...prev,
+                     fullName: info.fullName,
+                     phone: info.phone,
+                     email: info.email
+                   }));
+                 }
+               }}
+               userPhone={formData.phone}
+               setUserPhone={(phone) => {
+                 if (typeof phone === 'string') {
+                   handleFormChange('phone', phone);
+                 }
+               }}
+               errors={{
+                 fullName: '',
+                 phone: ''
+               }}
+               setErrors={() => {}}
+          />
+
+          {/* Location Selection */}
+          <div className="bg-white ">
+            
+            <LocationSelector
+              selectedProvinceCode={selectedLocation.provinceCode}
+              selectedDistrictCode={selectedLocation.districtCode}
+              selectedWardCode={selectedLocation.wardCode}
+              onProvinceChange={handleLocationChange.province}
+              onDistrictChange={handleLocationChange.district}
+              onWardChange={handleLocationChange.ward}
+            />
+            
+            {/* Address input */}
+            <div className="mt-4">
+                <label htmlFor="address-mobile" className="block text-sm font-medium text-gray-700 mb-1">
+                Địa chỉ cụ thể <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                  id="address-mobile"
+                  value={formData.address}
+                  onChange={(e) => handleFormChange('address', e.target.value)}
+                placeholder="Số nhà, tên đường..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+            </div>
+
+            {/* Shipping carrier selection */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phương thức vận chuyển
+              </label>
+                <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="font-medium text-gray-900">Giao hàng bởi G3-Tech</div>
+                      <div className="text-sm text-gray-600">
+                    Miễn phí • 2-3 ngày
+                      </div>
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="mt-4">
+                <label htmlFor="note-mobile" className="block text-sm font-medium text-gray-700 mb-1">
+                Ghi chú đơn hàng
+              </label>
+              <textarea
+                  id="note-mobile"
+                  value={formData.note}
+                  onChange={(e) => handleFormChange('note', e.target.value)}
+                placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
             </div>
           </div>
 
-          {/* Note */}
-          <div className="mt-4">
-              <label htmlFor="note-mobile" className="block text-sm font-medium text-gray-700 mb-1">
-              Ghi chú đơn hàng
-            </label>
-            <textarea
-                id="note-mobile"
-                value={formData.note}
-                onChange={(e) => handleFormChange('note', e.target.value)}
-              placeholder="Ghi chú cho đơn hàng (tùy chọn)"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-            />
-          </div>
+          <VoucherInfo 
+            user={user}
+            showVoucherDrawer={showVoucherDrawer}
+            setShowVoucherDrawer={setShowVoucherDrawer}
+              voucherCode={formData.voucher}
+              setVoucherCode={(code) => handleFormChange('voucher', code)}
+            selectedVoucher={selectedVoucher}
+            setSelectedVoucher={setSelectedVoucher}
+            availableVouchers={availableVouchers}
+            totalPrice={totalPrice}
+          />
+
+          <PaymentDetails 
+            user={user}
+            totalPrice={totalPrice}
+              shipping={shippingFee}
+            selectedVoucher={selectedVoucher}
+              pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
+            cartItems={cartItems}
+            useRewardPoints={useRewardPoints}
+            setUseRewardPoints={setUseRewardPoints}
+            pointsToUse={pointsToUse}
+            setPointsToUse={setPointsToUse}
+              rewardPoints={rewardPointsData}
+            showPaymentDrawer={showPaymentDrawer}
+            setShowPaymentDrawer={setShowPaymentDrawer}
+              selectedPayment={formData.paymentMethod}
+              setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
+            paymentMethods={paymentMethods}
+          />
         </div>
 
-        <VoucherInfo 
-          user={user}
-          showVoucherDrawer={showVoucherDrawer}
-          setShowVoucherDrawer={setShowVoucherDrawer}
-            voucherCode={formData.voucher}
-            setVoucherCode={(code) => handleFormChange('voucher', code)}
-          selectedVoucher={selectedVoucher}
-          setSelectedVoucher={setSelectedVoucher}
-          availableVouchers={availableVouchers}
-          totalPrice={totalPrice}
+        <BottomBar 
+          cartItemCount={cartItems.length}
+          total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
+          onCheckout={handleSubmit}
+          isValid={isFormValid()}
+          loading={loading}
         />
-
-        <PaymentDetails 
-          user={user}
-          totalPrice={totalPrice}
-            shipping={shippingFee}
-          selectedVoucher={selectedVoucher}
-            pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
-          cartItems={cartItems}
-          useRewardPoints={useRewardPoints}
-          setUseRewardPoints={setUseRewardPoints}
-          pointsToUse={pointsToUse}
-          setPointsToUse={setPointsToUse}
-            rewardPoints={rewardPointsData}
-          showPaymentDrawer={showPaymentDrawer}
-          setShowPaymentDrawer={setShowPaymentDrawer}
-            selectedPayment={formData.paymentMethod}
-            setSelectedPayment={(method) => handleFormChange('paymentMethod', method)}
-          paymentMethods={paymentMethods}
-        />
-      </div>
-
-      <BottomBar 
-        cartItemCount={cartItems.length}
-        total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
-        onCheckout={handleSubmit}
-        isValid={isFormValid()}
-        loading={loading}
-      />
       </div>
       
       {/* Profile Drawer */}

@@ -66,10 +66,14 @@ export interface Product {
 
 export type Category = {
   id: string;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
+  title: string;
+  slug: string;
+  description?: string;
+  image_url?: string;
+  image_square_url?: string;
+  product_count?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Brand = {

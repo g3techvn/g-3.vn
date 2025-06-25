@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useBuyNow } from '@/context/BuyNowContext';
 import { useCurrentUser } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -429,10 +430,12 @@ export default function BuyNowPage() {
                 {items.map((item: CartItem, index: number) => (
                   <div key={index} className="flex space-x-3">
                     <div className="relative">
-                      <img
+                      <Image
                         src={item.image || '/images/placeholder-product.jpg'}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        width={64}
+                        height={64}
+                        className="object-cover rounded-lg"
                       />
                       <Badge 
                         variant="error" 
