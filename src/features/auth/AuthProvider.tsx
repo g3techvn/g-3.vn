@@ -31,23 +31,51 @@ export function useAuth() {
   return context;
 }
 
-// Chuyển đổi từ Supabase User sang User của chúng ta
-const mapSupabaseUser = (supabaseUser: SupabaseUser): User => {
-  return {
-    id: supabaseUser.id,
-    email: supabaseUser.email || '',
-    fullName: supabaseUser.user_metadata?.full_name || 'Người dùng',
-    phone: supabaseUser.user_metadata?.phone,
-    avatar: supabaseUser.user_metadata?.avatar_url,
-    role: supabaseUser.app_metadata?.role || 'user',
-  };
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = createBrowserClient();
+
+  // Hàm để fetch user profile từ database
+  const fetchUserProfile = async (userId: string): Promise<Partial<User>> => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('role, full_name, phone, avatar_url')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return { role: 'user' }; // Default role nếu không tìm thấy
+      }
+
+      return {
+        role: profile?.role || 'user',
+        fullName: profile?.full_name,
+        phone: profile?.phone,
+        avatar: profile?.avatar_url
+      };
+    } catch (err) {
+      console.error('Error in fetchUserProfile:', err);
+      return { role: 'user' };
+    }
+  };
+
+  const mapSupabaseUser = async (supabaseUser: SupabaseUser): Promise<User> => {
+    // Fetch thêm thông tin từ user_profiles
+    const profileData = await fetchUserProfile(supabaseUser.id);
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      fullName: profileData.fullName || supabaseUser.user_metadata?.full_name || 'Người dùng',
+      phone: profileData.phone || supabaseUser.user_metadata?.phone,
+      avatar: profileData.avatar || supabaseUser.user_metadata?.avatar_url,
+      role: profileData.role || 'user', // Ưu tiên role từ database
+    };
+  };
 
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
@@ -62,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         
         if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
+          setUser(await mapSupabaseUser(session.user));
         } else {
           setUser(null);
         }
@@ -83,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
 
         if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
+          setUser(await mapSupabaseUser(session.user));
         } else {
           setUser(null);
         }
@@ -115,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (data.user) {
-        setUser(mapSupabaseUser(data.user));
+        setUser(await mapSupabaseUser(data.user));
       }
       
       return { error: null };
@@ -196,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Error inserting user profile:', profileError);
         }
         
-        setUser(mapSupabaseUser(data.user));
+        setUser(await mapSupabaseUser(data.user));
       }
       
       return { error: null };

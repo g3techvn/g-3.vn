@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useBuyNow } from '@/context/BuyNowContext';
-import { useCurrentUser } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -42,7 +42,7 @@ interface FormData {
 export default function BuyNowPage() {
   const router = useRouter();
   const { buyNowItem, clearBuyNowItem } = useBuyNow();
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
 

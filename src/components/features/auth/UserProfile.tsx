@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useCurrentUser } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -56,7 +56,7 @@ interface ShippingAddress {
 }
 
 export default function UserProfile() {
-  const { data: user, isLoading: authLoading } = useCurrentUser();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<ShippingAddress[]>([]);

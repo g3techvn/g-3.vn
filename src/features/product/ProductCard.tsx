@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatCurrency } from '@/utils/helpers';
 import { Product, Brand } from '@/types';
+import { CartItem } from '@/types/cart';
 import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import OptimizedImage from '@/components/common/OptimizedImage';
@@ -183,10 +184,13 @@ export function ProductCard({ product, index = 0, priority = false, brands = [] 
           aria-label="Add to cart"
           onClick={(e) => {
             e.preventDefault();
-            const cartItem = {
-              ...product,
+            const cartItem: CartItem = {
+              productId: product.id,
               quantity: 1,
-              image: product.image_url || ''
+              product: {
+                ...product,
+                variants: product.variants || []
+              }
             };
             addToCart(cartItem);
           }}

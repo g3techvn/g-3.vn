@@ -48,11 +48,29 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthCon
       return { user: null, isAuthenticated: false };
     }
 
+    // Fetch role from user_profiles table (consistent with AuthProvider)
+    let userRole = 'user'; // default
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profileError && profile?.role) {
+        userRole = profile.role;
+      }
+    } catch (profileError) {
+      console.error('Error fetching user profile in middleware:', profileError);
+      // Fallback to metadata if database query fails
+      userRole = user.user_metadata?.role || 'user';
+    }
+
     return {
       user: {
         id: user.id,
         email: user.email!,
-        role: user.user_metadata?.role || 'user'
+        role: userRole
       },
       isAuthenticated: true
     };
