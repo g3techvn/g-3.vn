@@ -399,7 +399,7 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
     <>
       {/* Main Checkout Dialog */}
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl z-[2000]" style={{ zIndex: 2000 }}>
+        <DialogContent className="max-w-7xl z-[2000] max-h-[90vh] overflow-y-auto" style={{ zIndex: 2000 }}>
           <DialogHeader>
             <DialogTitle>{buyNowItem ? 'Mua ngay' : 'Thanh toán'}</DialogTitle>
           </DialogHeader>
