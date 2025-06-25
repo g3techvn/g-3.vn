@@ -28,23 +28,48 @@ const ADMIN_ROUTES = [
 
 export async function authenticateRequest(request: NextRequest): Promise<AuthContext> {
   try {
-    // Get Supabase session tokens from cookies
-    const accessToken = request.cookies.get('sb-access-token')?.value ||
-                       request.cookies.get('supabase-auth-token')?.value ||
-                       request.cookies.get('sb-127-0-0-1-3000-auth-token')?.value;
-
-    if (!accessToken) {
-      return { user: null, isAuthenticated: false };
-    }
-
-    // Create client and verify token
+    // Create server-side Supabase client to get session from cookies
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
     
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    // Create client that can read cookies properly
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        flowType: 'pkce'
+      }
+    });
 
-    if (error || !user) {
+    // Try to get session - this will read the appropriate cookies automatically
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    let userInfo = null;
+    
+    if (sessionError || !session) {
+      // If no session from cookies, try to get user from header token
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        console.log('🔑 No auth header found in middleware');
+        return { user: null, isAuthenticated: false };
+      }
+      
+      const token = authHeader.replace('Bearer ', '');
+      console.log('🔑 Middleware got token:', token.substring(0, 20) + '...');
+      
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      if (error || !user) {
+        console.error('🔑 Middleware token validation failed:', error);
+        return { user: null, isAuthenticated: false };
+      }
+      
+      console.log('🔑 Middleware validated user:', user.email);
+      userInfo = user;
+    } else {
+      console.log('🔑 Middleware got session from cookies:', session.user.email);
+      userInfo = session.user;
+    }
+
+    if (!userInfo) {
       return { user: null, isAuthenticated: false };
     }
 
@@ -54,22 +79,25 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthCon
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', userInfo.id)
         .single();
 
       if (!profileError && profile?.role) {
         userRole = profile.role;
+        console.log('🔑 Middleware fetched role from DB:', userRole, 'for user:', userInfo.email);
+      } else {
+        console.log('🔑 Middleware could not fetch role from DB:', profileError);
       }
     } catch (profileError) {
-      console.error('Error fetching user profile in middleware:', profileError);
+      console.error('🔑 Error fetching user profile in middleware:', profileError);
       // Fallback to metadata if database query fails
-      userRole = user.user_metadata?.role || 'user';
+      userRole = userInfo.user_metadata?.role || 'user';
     }
 
     return {
       user: {
-        id: user.id,
-        email: user.email!,
+        id: userInfo.id,
+        email: userInfo.email!,
         role: userRole
       },
       isAuthenticated: true

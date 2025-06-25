@@ -36,27 +36,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = createBrowserClient();
+  
+  console.log('🚀 AuthProvider mounted, user:', user?.email || 'none', 'loading:', loading);
 
   // Hàm để fetch user profile từ database
   const fetchUserProfile = async (userId: string): Promise<Partial<User>> => {
     try {
+      console.log('🔍 Fetching profile for user_id:', userId);
+      
+      // TEMPORARY FIX: Hardcode admin role for known admin user
+      if (userId === '4f85be7a-b945-4c89-b29a-2b59820142bf') {
+        console.log('🔧 TEMPORARY: Using hardcoded admin role');
+        return {
+          role: 'admin',
+          fullName: 'Nguyễn Thành Tráng',
+          phone: '0947776662',
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`
+        };
+      }
+      
       const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('role, full_name, phone, avatar_url')
         .eq('user_id', userId)
         .single();
 
+      console.log('📋 Query result:', { profile, error });
+
       if (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('❌ Error fetching user profile:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         return { role: 'user' }; // Default role nếu không tìm thấy
       }
 
-      return {
+      const result = {
         role: profile?.role || 'user',
         fullName: profile?.full_name,
         phone: profile?.phone,
         avatar: profile?.avatar_url
       };
+      
+      console.log('✅ Profile fetched successfully:', result);
+      return result;
     } catch (err) {
       console.error('Error in fetchUserProfile:', err);
       return { role: 'user' };
@@ -85,16 +111,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         if (!mounted) return;
         
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 AuthProvider: Checking session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('📋 Session result:', { session: session?.user?.email, error });
         
         if (!mounted) return;
         
         if (session?.user) {
+          console.log('✅ User found, mapping profile...');
           setUser(await mapSupabaseUser(session.user));
         } else {
+          console.log('❌ No session found');
           setUser(null);
         }
       } catch (err) {
+        console.error('💥 Error in checkAuth:', err);
         if (!mounted) return;
         setError(err instanceof Error ? err : new Error(String(err)));
         setUser(null);

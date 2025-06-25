@@ -5,7 +5,24 @@ import { authenticateRequest, requireAuth, requireAdmin } from '@/lib/auth/auth-
 
 // This middleware runs on every request
 export async function middleware(request: NextRequest) {
-  // Handle authentication and authorization
+  const pathname = request.nextUrl.pathname;
+  
+  // Skip auth middleware for /don-hang to prevent redirect loops
+  // Let the component handle auth checking instead
+  if (pathname === '/don-hang') {
+    // Continue with just security headers
+    const response = NextResponse.next();
+    
+    // Add security headers to all responses
+    const securityHeaders = getSecurityHeaders();
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    
+    return response;
+  }
+  
+  // Handle authentication and authorization for other routes
   const authContext = await authenticateRequest(request);
   
   // Check if route requires authentication

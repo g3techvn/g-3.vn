@@ -5,9 +5,20 @@ import { authenticateRequest } from '@/lib/auth/auth-middleware';
 // GET /api/admin/orders - Get all orders (admin only)
 export async function GET(request: NextRequest) {
   try {
+    console.log('📝 Admin orders API called');
+    
     // Authenticate user and check admin role
     const authContext = await authenticateRequest(request);
+    console.log('📝 Auth context:', {
+      isAuthenticated: authContext.isAuthenticated,
+      user: authContext.user ? {
+        email: authContext.user.email,
+        role: authContext.user.role
+      } : null
+    });
+    
     if (!authContext.isAuthenticated || !authContext.user) {
+      console.log('📝 Authentication failed');
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -16,11 +27,14 @@ export async function GET(request: NextRequest) {
 
     // Check if user is admin
     if (authContext.user.role !== 'admin') {
+      console.log('📝 Admin access denied for user:', authContext.user.email, 'role:', authContext.user.role);
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
       );
     }
+    
+    console.log('📝 Admin access granted');
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');

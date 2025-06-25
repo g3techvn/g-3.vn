@@ -16,6 +16,8 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { createBrowserClient } from '@/lib/supabase';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 // Import checkout components
 import BuyerInfo from '@/components/store/BuyerInfo';
@@ -99,6 +101,7 @@ const PAYMENT_METHODS = [
 ];
 
 export function OrdersManager() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -198,7 +201,33 @@ export function OrdersManager() {
         ...(status !== 'all' && { status }),
       });
 
-      const response = await fetch(`/api/admin/orders?${params}`);
+      // Get access token from Supabase client
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      console.log('🎯 OrdersManager session check:', {
+        hasSession: !!session,
+        hasToken: !!session?.access_token,
+        userEmail: session?.user?.email
+      });
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+        console.log('🎯 OrdersManager sending token:', session.access_token.substring(0, 20) + '...');
+      } else {
+        console.warn('🎯 OrdersManager no access token available');
+      }
+
+      const response = await fetch(`/api/admin/orders?${params}`, {
+        method: 'GET',
+        headers,
+        credentials: 'include', // Include cookies for authentication
+      });
+      
       const data = await response.json();
       
       if (response.ok) {
@@ -319,9 +348,22 @@ export function OrdersManager() {
         is_buy_now: false
       };
 
+      // Get access token from Supabase client
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(orderData),
       });
       
@@ -346,9 +388,22 @@ export function OrdersManager() {
     if (!editingOrder) return;
     
     try {
+      // Get access token from Supabase client
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch(`/api/admin/orders/${editingOrder.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       
@@ -374,8 +429,20 @@ export function OrdersManager() {
     if (!confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) return;
     
     try {
+      // Get access token from Supabase client
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {};
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'DELETE',
+        headers,
+        credentials: 'include',
       });
       
       if (response.ok) {
@@ -394,7 +461,20 @@ export function OrdersManager() {
   // Get order details
   const getOrderDetails = async (orderId: string) => {
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}`);
+      // Get access token from Supabase client
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {};
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        headers,
+        credentials: 'include',
+      });
       const data = await response.json();
       
       if (response.ok) {
