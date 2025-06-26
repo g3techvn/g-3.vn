@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient, createServerAdminClient } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase';
 import { CartItem } from '@/types/cart';
 import { CreateOrderSchema, validateRequestBody } from '@/lib/validation/validation';
 import { rateLimit, RATE_LIMITS, getSecurityHeaders, getClientIP } from '@/lib/rate-limit';
@@ -17,6 +17,7 @@ import {
 } from '@/lib/auth/auth-middleware';
 import { generateOrderToken } from '@/lib/order-tokens';
 import { Database } from '@/types/supabase';
+import { safeFetch } from '@/lib/utils/fetch-utils';
 
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
@@ -93,7 +94,6 @@ export async function POST(request: NextRequest) {
     } = validatedData;
 
     const supabase = createServerClient();
-    const supabaseAdmin = createServerAdminClient();
 
     // Create shipping address string
     const shipping_address = `${shipping_info.address}, ${shipping_info.ward}, ${shipping_info.district}, ${shipping_info.city}`;
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     const final_total = Math.max(0, total_price + (shipping_fee || 0) - voucher_discount - points_discount);
 
-    const { data: orderData, error: orderError } = await supabaseAdmin
+    const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: user_id || null, // Allow null for guest orders
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       product_image: item.product.image || ''
     }));
 
-    const { data: orderItemsData, error: orderItemsError } = await supabaseAdmin
+    const { data: orderItemsData, error: orderItemsError } = await supabase
       .from('order_items')
       .insert(orderItems)
       .select();
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     if (orderItemsError) {
       console.error('Order items creation error:', orderItemsError);
       // Try to delete the order if order items creation failed
-      await supabaseAdmin.from('orders').delete().eq('id', orderData.id);
+      await supabase.from('orders').delete().eq('id', orderData.id);
       return NextResponse.json(
         { error: `Failed to create order items: ${orderItemsError.message}` },
         { status: 500 }
@@ -263,6 +263,27 @@ export async function POST(request: NextRequest) {
 
     // Log successful order creation
     logOrderCreated(ip, String(orderData.id), authContext.user?.id || undefined, userAgent);
+    
+    // Notify external services about new order
+    try {
+      const notificationResponse = await safeFetch('YOUR_NOTIFICATION_SERVICE', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          orderId: orderData.id,
+          userId: authContext.user?.id,
+          items: orderItemsData
+        })
+      });
+
+      if (!notificationResponse.ok) {
+        console.error('Failed to send order notification');
+      }
+    } catch (notifyError) {
+      console.error('Error sending order notification:', notifyError);
+    }
     
     return NextResponse.json({
       success: true,

@@ -1,114 +1,177 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { securityLogger, logSuspiciousRequest } from '@/lib/logger';
-import { getClientIP } from '@/lib/rate-limit';
+import { getClientIP, rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 
-export interface AuthContext {
-  user: {
-    id: string;
-    email: string;
-    role?: string;
-  } | null;
-  isAuthenticated: boolean;
-}
-
-// Routes that require authentication
-const PROTECTED_ROUTES: string[] = [
+const PROTECTED_ROUTES = [
   '/api/user',
-  '/tai-khoan',
-  '/api/user/rewards'
-];
-
-// Routes that require admin role
-const ADMIN_ROUTES = [
+  '/api/orders',
   '/api/admin',
-  '/admin',
+  '/tai-khoan',
   '/don-hang'
 ];
 
-export async function authenticateRequest(request: NextRequest): Promise<AuthContext> {
-  try {
-    // Create server-side Supabase client to get session from cookies
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    
-    // Create client that can read cookies properly
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        flowType: 'pkce'
-      }
-    });
+const ADMIN_ROUTES = [
+  '/api/admin',
+  '/admin'
+];
 
-    // Try to get session - this will read the appropriate cookies automatically
+interface AuthUser {
+  id: string;
+  email: string;
+  phone?: string | null;
+  role?: string;
+}
+
+interface AuthContext {
+  user: AuthUser | null;
+  session: any | null;
+  isAuthenticated: boolean;
+  response?: NextResponse;
+}
+
+interface CookieOptions {
+  name: string;
+  value: string;
+  maxAge?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+  path?: string;
+  domain?: string;
+  sameSite?: 'strict' | 'lax' | 'none';
+}
+
+// Rate limit configurations for different routes
+const ROUTE_RATE_LIMITS = {
+  '/api/products': RATE_LIMITS.API_GENERAL,
+  '/api/orders': RATE_LIMITS.API_GENERAL
+};
+
+// Function for API routes to authenticate requests
+export async function authenticateRequest(request: Request): Promise<AuthContext> {
+  console.log('🔍 Starting authenticateRequest for:', request.url);
+  
+  try {
+    // Create server client
+    const supabase = createServerComponentClient({ cookies });
+
+    // Get session and user data
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    let userInfo = null;
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError);
+      throw sessionError;
+    }
+
+    if (!session) {
+      console.log('❌ No active session found');
+      throw new Error('No active session');
+    }
+
+    // Get user data
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (sessionError || !session) {
-      // If no session from cookies, try to get user from header token
-      const authHeader = request.headers.get('authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
-        console.log('🔑 No auth header found in middleware');
-        return { user: null, isAuthenticated: false };
-      }
-      
-      const token = authHeader.replace('Bearer ', '');
-      console.log('🔑 Middleware got token:', token.substring(0, 20) + '...');
-      
-      const { data: { user }, error } = await supabase.auth.getUser(token);
-      
-      if (error || !user) {
-        console.error('🔑 Middleware token validation failed:', error);
-        return { user: null, isAuthenticated: false };
-      }
-      
-      console.log('🔑 Middleware validated user:', user.email);
-      userInfo = user;
-    } else {
-      console.log('🔑 Middleware got session from cookies:', session.user.email);
-      userInfo = session.user;
+    if (userError || !user) {
+      console.error('❌ User error:', userError);
+      throw userError || new Error('User not found');
     }
 
-    if (!userInfo) {
-      return { user: null, isAuthenticated: false };
-    }
-
-    // Fetch role from user_profiles table (consistent with AuthProvider)
-    let userRole = 'user'; // default
-    try {
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('role')
-        .eq('user_id', userInfo.id)
-        .single();
-
-      if (!profileError && profile?.role) {
-        userRole = profile.role;
-        console.log('🔑 Middleware fetched role from DB:', userRole, 'for user:', userInfo.email);
-      } else {
-        console.log('🔑 Middleware could not fetch role from DB:', profileError);
-      }
-    } catch (profileError) {
-      console.error('🔑 Error fetching user profile in middleware:', profileError);
-      // Fallback to metadata if database query fails
-      userRole = userInfo.user_metadata?.role || 'user';
-    }
-
-    return {
-      user: {
-        id: userInfo.id,
-        email: userInfo.email!,
-        role: userRole
-      },
-      isAuthenticated: true
+    const authUser: AuthUser = {
+      id: user.id,
+      email: user.email || '',
+      phone: user.phone || null,
+      role: user.user_metadata?.role || 'user'
     };
+
+    console.log('✅ Authentication successful for user:', authUser.id);
+    return { user: authUser, session, isAuthenticated: true };
+
   } catch (error) {
-    securityLogger.logError('Authentication error', error as Error, {
-      ip: getClientIP(request),
-      endpoint: request.nextUrl.pathname
-    });
+    console.error('❌ Authentication failed:', error);
     
-    return { user: null, isAuthenticated: false };
+    // Check if route requires authentication
+    const path = new URL(request.url).pathname;
+    const requiresAuth = PROTECTED_ROUTES.some(route => path.startsWith(route));
+    
+    if (requiresAuth) {
+      console.log('🔒 Auth required but no user found for path:', path);
+      const response = NextResponse.json(
+        { error: 'Unauthorized' },
+        { 
+          status: 401,
+          headers: {
+            'WWW-Authenticate': 'Bearer error="invalid_token"',
+            'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_SITE_URL || '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          }
+        }
+      );
+      return { user: null, session: null, isAuthenticated: false, response };
+    }
+    
+    return { user: null, session: null, isAuthenticated: false };
+  }
+}
+
+// Function for middleware to handle auth
+export async function handleAuth(request: NextRequest) {
+  try {
+    // Create server client
+    const supabase = createServerComponentClient({ cookies });
+
+    // Get session and user data
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError);
+      throw sessionError;
+    }
+
+    // Check if the path requires authentication
+    const path = request.nextUrl.pathname;
+    const requiresAuth = PROTECTED_ROUTES.some(route => path.startsWith(route));
+    const requiresAdmin = ADMIN_ROUTES.some(route => path.startsWith(route));
+
+    // Check authentication requirements
+    if (requiresAuth && !session) {
+      console.log('🔒 Auth required but no session found for path:', path);
+      if (path.startsWith('/api/')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      } else {
+        // For non-API routes, redirect to login
+        return NextResponse.redirect(new URL('/dang-nhap', request.url));
+      }
+    }
+
+    // If session exists, get user data
+    if (session) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      // Check admin role requirement
+      if (requiresAdmin && (!user || user.user_metadata?.role !== 'admin')) {
+        console.log('👮‍♂️ Admin required but user is not admin:', user?.email);
+        return new NextResponse(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    console.log('✅ Auth check passed for:', path);
+    return NextResponse.next();
+  } catch (error) {
+    console.error('❌ Error in auth middleware:', error);
+    return new NextResponse(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
 

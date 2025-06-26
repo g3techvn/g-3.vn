@@ -1,186 +1,394 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface User {
   id: string;
   email: string;
-  fullName: string;
+  fullName?: string;
   phone?: string;
-  avatar?: string;
-  role: string;
+  role?: string;
+  created_at?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  error: Error | null;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  checkAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  error: null,
+  signIn: async () => ({ error: null }),
+  signUp: async () => ({ error: null }),
+  signOut: async () => ({ error: null }),
+  resetPassword: async () => ({ error: null }),
+  checkAuth: async () => {}
+});
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+// Routes that require authentication
+const PROTECTED_ROUTES = [
+  '/tai-khoan',
+  '/admin'
+];
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Export the AuthProvider component
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const supabase = createBrowserClient();
-  
-  console.log('🚀 AuthProvider mounted, user:', user?.email || 'none', 'loading:', loading);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Hàm để fetch user profile từ database
-  const fetchUserProfile = async (userId: string): Promise<Partial<User>> => {
-    try {
-      console.log('🔍 Fetching profile for user_id:', userId);
-      
-      // TEMPORARY FIX: Hardcode admin role for known admin user
-      if (userId === '4f85be7a-b945-4c89-b29a-2b59820142bf') {
-        console.log('🔧 TEMPORARY: Using hardcoded admin role');
-        return {
-          role: 'admin',
-          fullName: 'Nguyễn Thành Tráng',
-          phone: '0947776662',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`
-        };
-      }
-      
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('role, full_name, phone, avatar_url')
-        .eq('user_id', userId)
-        .single();
-
-      console.log('📋 Query result:', { profile, error });
-
-      if (error) {
-        console.error('❌ Error fetching user profile:', error);
-        console.error('❌ Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
-        return { role: 'user' }; // Default role nếu không tìm thấy
-      }
-
-      const result = {
-        role: profile?.role || 'user',
-        fullName: profile?.full_name,
-        phone: profile?.phone,
-        avatar: profile?.avatar_url
-      };
-      
-      console.log('✅ Profile fetched successfully:', result);
-      return result;
-    } catch (err) {
-      console.error('Error in fetchUserProfile:', err);
-      return { role: 'user' };
+  const cleanup = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
   };
 
-  const mapSupabaseUser = async (supabaseUser: SupabaseUser): Promise<User> => {
-    // Fetch thêm thông tin từ user_profiles
-    const profileData = await fetchUserProfile(supabaseUser.id);
-    
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      fullName: profileData.fullName || supabaseUser.user_metadata?.full_name || 'Người dùng',
-      phone: profileData.phone || supabaseUser.user_metadata?.phone,
-      avatar: profileData.avatar || supabaseUser.user_metadata?.avatar_url,
-      role: profileData.role || 'user', // Ưu tiên role từ database
+  useEffect(() => {
+    // Initial auth check
+    checkAuth();
+
+    // Cleanup on unmount
+    return () => {
+      cleanup();
     };
+  }, []);
+
+  useEffect(() => {
+    // Re-run auth check on route change for protected routes
+    if (pathname && PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
+      checkAuth();
+    }
+  }, [pathname]);
+
+  const checkAuth = async () => {
+    const startTime = Date.now();
+    console.log('🔍 Starting auth check...', new Date().toISOString());
+    
+    // Create new AbortController
+    cleanup(); // Cleanup any existing controller
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Global timeout for entire auth check process
+      const globalTimeout = setTimeout(() => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort('Auth check timeout');
+        }
+      }, 15000); // 15 second timeout for entire process
+
+      // Step 1: Create Supabase client
+      console.log('📍 Step 1: Creating Supabase client...');
+      const supabase = createBrowserClient();
+      if (!supabase) {
+        console.error('❌ Failed to create Supabase client');
+        setError('Failed to initialize authentication');
+        setUser(null);
+        return;
+      }
+      console.log('✅ Step 1 completed - Supabase client created');
+
+      // Step 2: Try immediate session check first (synchronous if cached)
+      console.log('📍 Step 2: Quick session check...');
+      let session, sessionError;
+      
+      try {
+        // First try a quick session check
+        const quickResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick check timeout')), 3000))
+        ]) as { data: { session: any }, error: any };
+        
+        session = quickResult.data.session;
+        sessionError = quickResult.error;
+        
+        if (session) {
+          console.log('✅ Step 2 completed - Quick session check successful');
+          
+          // Step 3: Get user data
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (user && !userError) {
+            setUser({
+              id: user.id,
+              email: user.email || '',
+              fullName: user.user_metadata?.full_name,
+              role: user.user_metadata?.role,
+              phone: user.phone || '',
+              created_at: user.created_at
+            });
+            setError(null);
+          } else {
+            console.error('❌ Failed to get user data:', userError);
+            setUser(null);
+            setError('Failed to get user data');
+          }
+        } else {
+          throw new Error('No session found');
+        }
+      } catch (quickError) {
+        console.log('⚠️ Step 2 failed - Quick session check failed, trying with timeout:', quickError);
+        
+        if (signal.aborted) {
+          throw new Error('Auth check aborted during quick check');
+        }
+
+        // If quick check fails, try with longer timeout
+        try {
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Session check timeout')), 8000)
+          );
+
+          const result = await Promise.race([sessionPromise, timeoutPromise]);
+          const sessionResult = result as { data: { session: any }, error: any };
+          session = sessionResult.data.session;
+          sessionError = sessionResult.error;
+
+          if (session) {
+            console.log('✅ Step 2 completed - Timeout-protected session check successful');
+            
+            // Step 3: Get user data
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (user && !userError) {
+              setUser({
+                id: user.id,
+                email: user.email || '',
+                fullName: user.user_metadata?.full_name,
+                role: user.user_metadata?.role,
+                phone: user.phone || '',
+                created_at: user.created_at
+              });
+              setError(null);
+            } else {
+              console.error('❌ Failed to get user data:', userError);
+              setUser(null);
+              setError('Failed to get user data');
+            }
+          } else {
+            throw new Error('No session found');
+          }
+        } catch (error) {
+          if (signal.aborted) {
+            throw new Error('Auth check aborted during extended check');
+          }
+
+          console.log('⏰ Step 2 timed out:', error);
+          
+          const timeoutError = error as Error;
+          if (timeoutError.message === 'Session check timeout') {
+            setError('Connection timeout - please check your internet connection');
+            setLoading(false);
+            return;
+          }
+
+          // Step 2b: Try localStorage fallback
+          console.log('📍 Step 2b: Checking localStorage fallback...');
+          try {
+            if (signal.aborted) {
+              throw new Error('Auth check aborted during localStorage check');
+            }
+
+            // Try multiple possible localStorage keys
+            const possibleKeys = [
+              'supabase.auth.token',
+              'sb-jjraznkvgfsgqrqvlcwo-auth-token',
+              'supabase-auth-token'
+            ];
+            
+            let storedSession = null;
+            for (const key of possibleKeys) {
+              storedSession = localStorage.getItem(key);
+              if (storedSession) {
+                console.log(`📍 Found auth data in localStorage key: ${key}`);
+                break;
+              }
+            }
+            
+            if (storedSession) {
+              const parsed = JSON.parse(storedSession);
+              if (parsed.access_token) {
+                console.log('🔄 Using stored session token...');
+                const { data: { user }, error } = await supabase.auth.getUser(parsed.access_token);
+                if (user && !error) {
+                  setUser({
+                    id: user.id,
+                    email: user.email || '',
+                    fullName: user.user_metadata?.full_name,
+                    role: user.user_metadata?.role,
+                    phone: user.phone || '',
+                    created_at: user.created_at
+                  });
+                  setError(null);
+                  console.log('✅ Step 2b completed - Fallback session successful');
+                } else {
+                  throw new Error('Invalid stored session');
+                }
+              }
+            } else {
+              setUser(null);
+              setError('No valid session found');
+            }
+          } catch (fallbackError) {
+            console.log('❌ Step 2b failed:', fallbackError);
+            if (fallbackError instanceof Error && fallbackError.message.includes('aborted')) {
+              throw fallbackError;
+            }
+            setUser(null);
+            setError('Failed to restore session');
+          }
+        }
+      }
+
+      // Clear global timeout as we've completed the critical parts
+      clearTimeout(globalTimeout);
+
+      // Step 4: Handle protected routes
+      console.log('📍 Step 4: Checking route protection...');
+      const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname?.startsWith(route));
+      if (isProtectedRoute && !user) {
+        console.log('🔒 Protected route accessed without auth, redirecting...');
+        router.push('/dang-nhap');
+      }
+
+      console.log('✅ Auth check completed in', Date.now() - startTime, 'ms');
+      setLoading(false);
+
+    } catch (error) {
+      console.error('❌ Auth check error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('aborted')) {
+          // If aborted, try to get session synchronously from localStorage
+          try {
+            const storedSession = localStorage.getItem('sb-jjraznkvgfsgqrqvlcwo-auth-token');
+            if (storedSession) {
+              const parsed = JSON.parse(storedSession);
+              if (parsed.user) {
+                const user = parsed.user;
+                setUser({
+                  id: user.id,
+                  email: user.email || '',
+                  fullName: user.user_metadata?.full_name,
+                  role: user.user_metadata?.role,
+                  phone: user.phone || '',
+                  created_at: user.created_at
+                });
+                setError(null);
+                console.log('✅ Recovered session from localStorage after abort');
+              }
+            }
+          } catch (fallbackError) {
+            console.error('❌ Failed to recover from abort:', fallbackError);
+            setError('Authentication check failed. Please refresh the page.');
+          }
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError('An unknown error occurred');
+      }
+      setUser(null);
+      setLoading(false);
+    } finally {
+      cleanup();
+    }
   };
 
-  // Kiểm tra trạng thái đăng nhập khi component mount
+  // Subscribe to auth state changes
   useEffect(() => {
-    let mounted = true;
+    const supabase = createBrowserClient();
+    if (!supabase) return;
 
-    const checkAuth = async () => {
-      try {
-        if (!mounted) return;
-        
-        console.log('🔍 AuthProvider: Checking session...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('📋 Session result:', { session: session?.user?.email, error });
-        
-        if (!mounted) return;
-        
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event);
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session?.user) {
-          console.log('✅ User found, mapping profile...');
-          setUser(await mapSupabaseUser(session.user));
-        } else {
-          console.log('❌ No session found');
-          setUser(null);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            fullName: session.user.user_metadata?.full_name,
+            role: session.user.user_metadata?.role,
+            phone: session.user.phone || '',
+            created_at: session.user.created_at
+          });
+          setError(null);
         }
-      } catch (err) {
-        console.error('💥 Error in checkAuth:', err);
-        if (!mounted) return;
-        setError(err instanceof Error ? err : new Error(String(err)));
+      } else if (event === 'SIGNED_OUT') {
         setUser(null);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setError(null);
       }
-    };
+    });
 
-    // Thiết lập listener cho thay đổi auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        if (session?.user) {
-          setUser(await mapSupabaseUser(session.user));
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
-    
-    // Chạy kiểm tra lần đầu
-    checkAuth();
-    
-    // Clean up subscription khi unmount
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
-  // Hàm đăng nhập
+  // Hàm đăng nhập với retry mechanism
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
+      setError(null);
+
+      const supabase = createBrowserClient();
+      if (!supabase) {
+        throw new Error('Failed to initialize authentication client');
+      }
+
+      // Try sign in with timeout protection
+      const signInPromise = supabase.auth.signInWithPassword({ email, password });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sign in timeout')), 8000)
+      );
+
+      const { data, error: signInError } = await Promise.race([
+        signInPromise,
+        timeoutPromise
+      ]) as any;
+
       if (signInError) {
+        console.error('❌ Sign in error:', signInError);
         return { error: new Error(signInError.message) };
       }
       
-      if (data.user) {
-        setUser(await mapSupabaseUser(data.user));
+      if (data?.user) {
+        const basicUser: User = {
+          id: data.user.id,
+          email: data.user.email || '',
+          role: data.user.id === process.env.ADMIN_USER_ID ? 'admin' : 'user'
+        };
+        setUser(basicUser);
+        await checkAuth(); // Fetch full profile after sign in
       }
       
       return { error: null };
     } catch (err) {
-      return { error: err instanceof Error ? err : new Error(String(err)) };
+      console.error('❌ Sign in failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
+      setError(errorMessage);
+      return { error: new Error(errorMessage) };
     } finally {
       setLoading(false);
     }
@@ -190,7 +398,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
     try {
       // Đăng xuất khỏi session hiện tại nếu có
-      await supabase.auth.signOut();
+      await createBrowserClient().auth.signOut();
 
       // Kiểm tra email và phone đã tồn tại chưa trước khi đăng ký
       try {
@@ -203,24 +411,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         if (!checkResponse.ok) {
-          return { error: new Error('Lỗi kết nối mạng khi kiểm tra thông tin') };
-        }
-
-        const checkResult = await checkResponse.json();
-        
-        if (checkResult.emailExists) {
-          return { error: new Error('Email này đã được sử dụng. Vui lòng sử dụng email khác.') };
-        }
-        
-        if (checkResult.phoneExists && phone) {
-          return { error: new Error('Số điện thoại này đã được sử dụng. Vui lòng sử dụng số khác.') };
+          const errorData = await checkResponse.json();
+          return { error: new Error(errorData.message || 'Email hoặc số điện thoại đã tồn tại') };
         }
       } catch (checkError) {
-        console.error('Error checking user existence:', checkError);
-        return { error: new Error('Lỗi kết nối mạng. Vui lòng thử lại.') };
+        console.error('Error checking existence:', checkError);
       }
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // Tiến hành đăng ký
+      const { data, error: signUpError } = await createBrowserClient().auth.signUp({
         email,
         password,
         options: {
@@ -230,35 +429,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       });
-      
+
       if (signUpError) {
         return { error: new Error(signUpError.message) };
       }
-      
-      // Nếu đăng ký thành công và có user, tạo profile trong user_profiles table
+
       if (data.user) {
-        try {
-          const { error: profileError } = await supabase
-            .from('user_profiles')
-            .insert({
-              user_id: data.user.id,
-              email: email,
-              full_name: fullName,
-              phone: phone,
-              created_at: new Date().toISOString()
-            });
-          
-          if (profileError) {
-            console.error('Error creating user profile:', profileError);
-            // Không return error ở đây vì user đã được tạo thành công
-          }
-        } catch (profileError) {
-          console.error('Error inserting user profile:', profileError);
-        }
-        
-        setUser(await mapSupabaseUser(data.user));
+        const basicUser: User = {
+          id: data.user.id,
+          email: data.user.email || '',
+          fullName,
+          phone,
+          role: 'user'
+        };
+        setUser(basicUser);
       }
-      
+
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error(String(err)) };
@@ -268,7 +454,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm đăng xuất
   const signOut = async () => {
     try {
-      const { error: signOutError } = await supabase.auth.signOut();
+      const { error: signOutError } = await createBrowserClient().auth.signOut();
       
       if (signOutError) {
         return { error: new Error(signOutError.message) };
@@ -284,7 +470,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hàm reset mật khẩu
   const resetPassword = async (email: string) => {
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error: resetError } = await createBrowserClient().auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       
@@ -298,16 +484,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Value cho context
-  const value = {
-    user,
-    loading,
-    error,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-  };
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        signIn,
+        signUp,
+        signOut,
+        resetPassword,
+        checkAuth
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-} 
+// Export the hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

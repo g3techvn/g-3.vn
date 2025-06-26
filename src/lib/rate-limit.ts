@@ -131,5 +131,9 @@ export function getSecurityHeaders(): Record<string, string> {
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'X-DNS-Prefetch-Control': 'off',
+    'X-Download-Options': 'noopen',
+    'X-Permitted-Cross-Domain-Policies': 'none',
   };
 } 

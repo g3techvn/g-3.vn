@@ -1,5 +1,16 @@
 // Định nghĩa các types chính cho dự án
 
+import { Agent } from 'https';
+
+declare global {
+  interface RequestInit {
+    agent?: Agent;
+  }
+}
+
+export * from './cart';
+export * from './rewards';
+
 export type ProductVariant = {
   id: number;
   product_id: number;

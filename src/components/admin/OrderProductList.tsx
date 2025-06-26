@@ -1,79 +1,65 @@
 import React from 'react';
 import Image from 'next/image';
-import { X, Minus, Plus } from 'lucide-react';
-import { formatCurrency } from '@/utils/helpers';
+import { formatPrice } from '@/utils/helpers';
+import { Button } from '@/components/ui/Button';
 
-interface OrderItem {
+interface OrderProductListItem {
   id: string;
-  product_name: string;
-  price: number;
+  product_id: number;
   quantity: number;
-  product_image?: string;
+  price: number;
+  total_price: number;
+  display_name: string;
+  display_image: string;
 }
 
 interface OrderProductListProps {
-  items: OrderItem[];
-  loading: boolean;
-  onUpdateQuantity: (itemId: string, quantity: number) => void;
+  items: OrderProductListItem[];
+  onUpdateQuantity: (params: { itemId: string; newQuantity: number }) => void;
   onRemoveItem: (itemId: string) => void;
-  readOnly?: boolean;
 }
 
-export default function OrderProductList({
-  items,
-  loading,
-  onUpdateQuantity,
-  onRemoveItem,
-  readOnly = false
-}: OrderProductListProps) {
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
+export default function OrderProductList({ items, onUpdateQuantity, onRemoveItem }: OrderProductListProps) {
   return (
     <div className="space-y-4">
       {items.map((item) => (
-        <div key={item.id} className="flex gap-4 py-4 border-b">
+        <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
           <div className="relative w-20 h-20">
             <Image
-              src={item.product_image || '/placeholder.png'}
-              alt={item.product_name}
+              src={item.display_image}
+              alt={item.display_name}
               fill
               className="object-cover rounded-md"
             />
           </div>
-          
           <div className="flex-1">
-            <h3 className="font-medium">{item.product_name}</h3>
-            <p className="text-sm text-gray-500">{formatCurrency(item.price)}</p>
-            
-            {!readOnly && (
-              <div className="flex items-center gap-2 mt-2">
-                <button
-                  onClick={() => onUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                  className="p-1 rounded-full hover:bg-gray-100"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="w-8 text-center">{item.quantity}</span>
-                <button
-                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                  className="p-1 rounded-full hover:bg-gray-100"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+            <h3 className="font-medium">{item.display_name}</h3>
+            <div className="flex items-center space-x-4 mt-2">
+              <input
+                type="number"
+                min="1"
+                value={item.quantity}
+                onChange={(e) => onUpdateQuantity({
+                  itemId: item.id,
+                  newQuantity: parseInt(e.target.value) || 1
+                })}
+                className="w-20 border border-gray-300 rounded px-2 py-1"
+              />
+              <p className="text-sm text-gray-500">
+                x {formatPrice(item.price)}
+              </p>
+            </div>
           </div>
-          
-          {!readOnly && (
-            <button
+          <div className="text-right space-y-2">
+            <p className="font-medium">{formatPrice(item.total_price)}</p>
+            <Button
               onClick={() => onRemoveItem(item.id)}
-              className="p-1 rounded-full hover:bg-gray-100"
+              variant="destructive"
+              size="sm"
             >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+              Xóa
+            </Button>
+          </div>
         </div>
       ))}
     </div>

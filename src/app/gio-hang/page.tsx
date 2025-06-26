@@ -447,22 +447,22 @@ export default function CartPage() {
         showMenu={showMenu}
         setShowMenu={setShowMenu}
         handlePreviewPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
-          fullName: user.fullName,
+          fullName: user.fullName || formData.fullName,
           phone: formData.phone,
-          email: user.email
+          email: user.email || formData.email
         } : {
           fullName: formData.fullName,
           phone: formData.phone,
-          email: formData.email || undefined
+          email: formData.email
         }, preview: true })}
         handleDownloadPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
-          fullName: user.fullName,
+          fullName: user.fullName || formData.fullName,
           phone: formData.phone,
-          email: user.email
+          email: user.email || formData.email
         } : {
           fullName: formData.fullName,
           phone: formData.phone,
-          email: formData.email || undefined
+          email: formData.email
         }})}
       />
 

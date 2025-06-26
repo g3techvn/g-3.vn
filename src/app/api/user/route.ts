@@ -1,66 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
-import { authenticateRequest } from '@/lib/auth/auth-middleware';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 // GET /api/user - Get current user profile
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  console.log('🔍 GET /api/user called');
+  
   try {
-    // Authenticate user
-    const authContext = await authenticateRequest(request);
-    if (!authContext.isAuthenticated || !authContext.user) {
+    // Create Supabase client
+    const supabase = createServerComponentClient({ cookies });
+
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError);
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Authentication error' },
         { status: 401 }
       );
     }
 
-    const supabase = createServerClient();
-    
-    // Get user profile from user_profiles table
+    if (!session) {
+      console.log('❌ No active session found');
+      return NextResponse.json(
+        { error: 'No active session' },
+        { status: 401 }
+      );
+    }
+
+    // Get user data
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error('❌ Error fetching user:', userError);
+      return NextResponse.json(
+        { error: 'Failed to fetch user data' },
+        { status: 401 }
+      );
+    }
+
+    // Get full user profile
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('*')
-      .eq('user_id', authContext.user.id)
+      .eq('user_id', user.id)
       .single();
 
-    // If no profile exists, create one with basic info
-    if (profileError && profileError.code === 'PGRST116') {
-      const newProfile = {
-        user_id: authContext.user.id,
-        email: authContext.user.email,
-        full_name: authContext.user.email.split('@')[0],
-        created_at: new Date().toISOString()
-      };
-
-      const { data: createdProfile, error: createError } = await supabase
-        .from('user_profiles')
-        .insert(newProfile)
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('Error creating user profile:', createError);
-        return NextResponse.json(
-          { error: 'Failed to create user profile' },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({ profile: createdProfile });
-    }
-
     if (profileError) {
-      console.error('Error fetching user profile:', profileError);
+      console.error('❌ Error fetching user profile:', profileError);
       return NextResponse.json(
         { error: 'Failed to fetch user profile' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ profile });
+    // Combine auth user data with profile data
+    const userData = {
+      id: user.id,
+      email: user.email,
+      fullName: profile?.full_name || user.user_metadata?.full_name,
+      phone: profile?.phone || user.phone,
+      role: profile?.role || user.user_metadata?.role || 'user',
+      created_at: profile?.created_at || user.created_at,
+      profile: profile || null
+    };
+
+    console.log('✅ User data fetched successfully');
+    return NextResponse.json(userData);
 
   } catch (error) {
-    console.error('User API error:', error);
+    console.error('❌ Error in /api/user route:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -71,62 +81,77 @@ export async function GET(request: NextRequest) {
 // PUT /api/user - Update user profile
 export async function PUT(request: NextRequest) {
   try {
-    // Authenticate user
-    const authContext = await authenticateRequest(request);
-    if (!authContext.isAuthenticated || !authContext.user) {
+    console.log('🔍 PUT /api/user - Start');
+    
+    // Create Supabase client
+    const supabase = createServerComponentClient({ cookies });
+
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error('❌ Session error:', sessionError);
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    const body = await request.json();
-    const { full_name, phone, address, date_of_birth, gender } = body;
+    // Get user data
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    const supabase = createServerClient();
-    
-    // Update user profile in user_profiles table
-    const { data: updatedProfile, error: profileError } = await supabase
+    if (userError || !user) {
+      console.error('❌ Error fetching user:', userError);
+      return NextResponse.json(
+        { error: 'Failed to fetch user data' },
+        { status: 401 }
+      );
+    }
+
+    const updateData = await request.json();
+
+    // Map updateData to database fields
+    const dbUpdateData = {
+      user_id: user.id,
+      full_name: updateData.fullName,
+      phone: updateData.phone,
+      updated_at: new Date().toISOString()
+    };
+
+    // Update user profile
+    const { data: profile, error: updateError } = await supabase
       .from('user_profiles')
-      .update({
-        full_name,
-        phone,
-        address,
-        date_of_birth,
-        gender,
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', authContext.user.id)
+      .upsert(dbUpdateData)
+      .eq('user_id', user.id)
       .select()
       .single();
 
-    if (profileError) {
-      console.error('Error updating user profile:', profileError);
+    if (updateError) {
+      console.error('❌ Error updating user profile:', updateError);
       return NextResponse.json(
         { error: 'Failed to update profile' },
         { status: 500 }
       );
     }
 
-    // Update user metadata in Supabase Auth
-    const { error: authError } = await supabase.auth.updateUser({
-      data: {
-        full_name,
-        phone
-      }
-    });
+    // Combine profile with auth user data
+    const enrichedProfile = {
+      id: user.id,
+      email: user.email,
+      fullName: profile.full_name,
+      phone: profile.phone || user.phone,
+      role: profile.role || 'user',
+      created_at: profile.created_at,
+      profile: profile
+    };
 
-    if (authError) {
-      console.error('Error updating user metadata:', authError);
-      // Don't return error since profile was updated successfully
-    }
-
-    return NextResponse.json({ profile: updatedProfile });
+    console.log('✅ Updated profile:', enrichedProfile);
+    return NextResponse.json({ profile: enrichedProfile });
 
   } catch (error) {
-    console.error('User update API error:', error);
+    console.error('❌ Error in PUT /api/user:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to update profile' },
       { status: 500 }
     );
   }

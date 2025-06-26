@@ -18,6 +18,17 @@ import {
 import Image from 'next/image';
 import { createBrowserClient } from '@/lib/supabase';
 import { useAuth } from '@/features/auth/AuthProvider';
+import {
+  Order,
+  OrderItem,
+  OrderProductListItem,
+  OrderProductListProps,
+  UpdateQuantityParams,
+  FormData,
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  OrderStatus
+} from '@/types/orders';
 
 // Import checkout components
 import BuyerInfo from '@/components/store/BuyerInfo';
@@ -31,74 +42,7 @@ import ProfileDrawer from '@/components/store/ProfileDrawer';
 import LocationSelector from '@/components/features/cart/LocationSelector';
 import { Voucher } from '@/types/cart';
 import OrderProductList from './OrderProductList';
-
-// Types
-interface Order {
-  id: string;
-  user_id: string | null;
-  full_name: string;
-  phone: string;
-  email?: string | null;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'canceled';
-  total_price: number;
-  payment_method: string;
-  address: string;
-  note?: string | null;
-  created_at: string;
-  updated_at: string;
-  order_items?: OrderItem[];
-}
-
-interface OrderItem {
-  id: string;
-  order_id: string;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  price: number;
-  total_price: number;
-  product_image?: string;
-}
-
-interface FormData {
-  fullName: string;
-  phone: string;
-  email: string;
-  address: string;
-  city: string;
-  cityCode: number;
-  district: string;
-  districtCode: number;
-  ward: string;
-  wardCode: number;
-  note: string;
-  paymentMethod: string;
-  voucher: string;
-  rewardPoints: number;
-  status: string;
-  total_price: number;
-  items: OrderItem[];
-}
-
-interface NewOrderItem {
-  product_name: string;
-  quantity: number;
-  price: number;
-  product_image?: string;
-}
-
-const ORDER_STATUSES = [
-  { value: 'pending', label: 'Chờ xử lý', color: 'yellow' },
-  { value: 'processing', label: 'Đang xử lý', color: 'blue' },
-  { value: 'shipped', label: 'Đã gửi hàng', color: 'indigo' },
-  { value: 'delivered', label: 'Đã giao hàng', color: 'green' },
-  { value: 'canceled', label: 'Đã hủy', color: 'red' },
-];
-
-const PAYMENT_METHODS = [
-  { value: 'cod', label: 'Thanh toán khi nhận hàng' },
-  { value: 'bank_transfer', label: 'Chuyển khoản ngân hàng' },
-];
+import { formatPrice } from '@/utils/helpers';
 
 export function OrdersManager() {
   const { user } = useAuth();
@@ -114,30 +58,37 @@ export function OrdersManager() {
   const [totalPages, setTotalPages] = useState(1);
   
   // Order items state
-  const [newItem, setNewItem] = useState<NewOrderItem>({
-    product_name: '',
+  const [newItem, setNewItem] = useState<OrderItem>({
+    id: '',
+    order_id: '',
+    product_id: 0,
     quantity: 1,
     price: 0,
-    product_image: '',
-  });
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    cityCode: 0,
-    district: '',
-    districtCode: 0,
-    ward: '',
-    wardCode: 0,
-    note: '',
-    paymentMethod: 'cod',
-    voucher: '',
-    rewardPoints: 0,
-    status: 'pending',
     total_price: 0,
+    product_name: '',
+    products: {
+      name: '',
+      image_url: '/placeholder-product.jpg'
+    }
+  });
+
+  const [formData, setFormData] = useState<FormData>({
+    status: 'pending',
+    total_amount: 0,
+    payment_method: 'cod',
     items: [],
+    shipping_info: {
+      fullName: '',
+      phone: '',
+      email: '',
+      address: '',
+      city: '',
+      cityCode: 0,
+      district: '',
+      districtCode: 0,
+      ward: '',
+      wardCode: 0
+    }
   });
   
   // Additional states for checkout-like functionality
@@ -194,50 +145,29 @@ export function OrdersManager() {
   const fetchOrders = async (page = 1, search = '', status = 'all') => {
     setLoading(true);
     try {
+      console.log('🚀 OrdersManager fetchOrders started');
+      
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '10',
         ...(search && { search }),
-        ...(status !== 'all' && { status }),
+        ...(status !== 'all' && { status })
       });
 
-      // Get access token from Supabase client
-      const supabase = createBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      console.log('🎯 OrdersManager session check:', {
-        hasSession: !!session,
-        hasToken: !!session?.access_token,
-        userEmail: session?.user?.email
-      });
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-        console.log('🎯 OrdersManager sending token:', session.access_token.substring(0, 20) + '...');
-      } else {
-        console.warn('🎯 OrdersManager no access token available');
-      }
-
-      const response = await fetch(`/api/admin/orders?${params}`, {
-        method: 'GET',
-        headers,
-        credentials: 'include', // Include cookies for authentication
-      });
-      
+      const response = await fetch(`/api/admin/orders?${params}`);
       const data = await response.json();
-      
-      if (response.ok) {
-        setOrders(data.orders || []);
-        setTotalPages(data.pagination?.pages || 1);
-      } else {
-        console.error('Error fetching orders:', data.error);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch orders');
       }
+
+      console.log('📦 Orders fetched:', data.orders);
+      setOrders(data.orders);
+      setTotalPages(data.pagination.pages);
+      
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('❌ Error fetching orders:', error);
+      // Handle error appropriately
     } finally {
       setLoading(false);
     }
@@ -245,138 +175,139 @@ export function OrdersManager() {
 
   // Add item to order
   const addItem = () => {
-    if (!newItem.product_name || newItem.quantity <= 0 || newItem.price <= 0) {
-      alert('Vui lòng điền đầy đủ thông tin sản phẩm');
+    if (!newItem.product_id || !newItem.products.name) {
+      alert('Vui lòng chọn sản phẩm');
       return;
     }
     
-    const item: OrderItem = {
-      id: Date.now().toString(), // Temporary ID for new items
-      order_id: '',
-      product_id: Date.now(), // Temporary product_id
-      product_name: newItem.product_name,
-      quantity: newItem.quantity,
-      price: newItem.price,
-      total_price: newItem.quantity * newItem.price,
-      product_image: newItem.product_image,
+    const newItemWithId = {
+      ...newItem,
+      id: Math.random().toString(),
+      total_price: newItem.quantity * newItem.price
     };
-    
+
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, item],
-      total_price: prev.total_price + item.total_price,
+      items: [...prev.items, newItemWithId],
+      total_amount: prev.total_amount + newItemWithId.total_price
     }));
-    
-    // Reset new item form
+
     setNewItem({
-      product_name: '',
+      id: '',
+      order_id: '',
+      product_id: 0,
       quantity: 1,
       price: 0,
-      product_image: '',
+      total_price: 0,
+      product_name: '',
+      products: {
+        name: '',
+        image_url: ''
+      }
     });
   };
   
   // Remove item from order
   const removeItem = (itemId: string) => {
-    const item = formData.items.find(i => i.id === itemId);
-    if (item) {
-      setFormData(prev => ({
+    setFormData(prev => {
+      const removedItem = prev.items.find(item => item.id === itemId);
+      if (!removedItem) return prev;
+
+      return {
         ...prev,
-        items: prev.items.filter(i => i.id !== itemId),
-        total_price: prev.total_price - item.total_price,
-      }));
-    }
+        items: prev.items.filter(item => item.id !== itemId),
+        total_amount: prev.total_amount - removedItem.total_price
+      };
+    });
   };
   
   // Update item in order
   const updateItem = (itemId: string, updates: Partial<OrderItem>) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => {
+    setFormData(prev => {
+      const updatedItems = prev.items.map(item => {
         if (item.id === itemId) {
-          const updatedItem = { ...item, ...updates };
-          updatedItem.total_price = updatedItem.quantity * updatedItem.price;
+          const updatedItem = {
+            ...item,
+            ...updates,
+            total_price: (updates.quantity || item.quantity) * (updates.price || item.price)
+          };
           return updatedItem;
         }
         return item;
-      }),
-    }));
-    
-    // Recalculate total
-    setTimeout(() => {
-      setFormData(prev => ({
+      });
+
+      const newTotalPrice = updatedItems.reduce((sum, item) => sum + item.total_price, 0);
+
+      return {
         ...prev,
-        total_price: prev.items.reduce((sum, item) => sum + item.total_price, 0),
-      }));
-    }, 0);
+        items: updatedItems,
+        total_amount: newTotalPrice
+      };
+    });
   };
 
   // Create order
   const createOrder = async () => {
     try {
-      // Validate that order has items
-      if (formData.items.length === 0) {
-        alert('Vui lòng thêm ít nhất một sản phẩm vào đơn hàng');
-        return;
-      }
-
-      // Create order data similar to checkout
-      const orderData = {
-        user_id: null, // Admin created order
-        buyer_info: {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email
-        },
-        shipping_info: {
-          address: formData.address,
-          ward: formData.ward,
-          district: formData.district,
-          city: formData.city,
-          note: formData.note
-        },
-        payment_method: formData.paymentMethod,
-        cart_items: formData.items.map(item => ({
-          id: item.product_id.toString(),
-          name: item.product_name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.product_image || ''
-        })),
-        total_price: formData.total_price,
-        shipping_fee: 0,
-        is_buy_now: false
-      };
-
-      // Get access token from Supabase client
-      const supabase = createBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      const response = await fetch('/api/orders', {
+      // Create shipping address first
+      const shippingAddressResponse = await fetch('/api/user/addresses', {
         method: 'POST',
-        headers,
-        credentials: 'include',
-        body: JSON.stringify(orderData),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData.shipping_info)
       });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        await fetchOrders(currentPage, searchTerm, statusFilter);
-        setIsModalOpen(false);
-        resetForm();
-      } else {
-        console.error('Error creating order:', data.error);
-        alert('Có lỗi xảy ra khi tạo đơn hàng: ' + data.error);
+
+      if (!shippingAddressResponse.ok) {
+        throw new Error('Failed to create shipping address');
       }
+
+      const { id: shipping_address_id } = await shippingAddressResponse.json();
+
+      // Create order
+      const orderData = {
+        ...formData,
+        shipping_address_id,
+        items: formData.items.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      const orderResponse = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error('Failed to create order');
+      }
+
+      alert('Đơn hàng đã được tạo thành công');
+      
+      // Reset form
+      setFormData({
+        status: 'pending',
+        total_amount: 0,
+        payment_method: 'cod',
+        items: [],
+        shipping_info: {
+          fullName: '',
+          phone: '',
+          email: '',
+          address: '',
+          city: '',
+          cityCode: 0,
+          district: '',
+          districtCode: 0,
+          ward: '',
+          wardCode: 0
+        }
+      });
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Có lỗi xảy ra khi tạo đơn hàng');
@@ -493,23 +424,22 @@ export function OrdersManager() {
   // Reset form
   const resetForm = () => {
     setFormData({
-      fullName: '',
-      phone: '',
-      email: '',
-      address: '',
-      city: '',
-      cityCode: 0,
-      district: '',
-      districtCode: 0,
-      ward: '',
-      wardCode: 0,
-      note: '',
-      paymentMethod: 'cod',
-      voucher: '',
-      rewardPoints: 0,
       status: 'pending',
-      total_price: 0,
+      total_amount: 0,
+      payment_method: 'cod',
       items: [],
+      shipping_info: {
+        fullName: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        cityCode: 0,
+        district: '',
+        districtCode: 0,
+        ward: '',
+        wardCode: 0
+      }
     });
   };
 
@@ -520,26 +450,25 @@ export function OrdersManager() {
 
   // Open edit modal
   const openEditModal = (order: Order) => {
-    setEditingOrder(order);
     setFormData({
-      fullName: order.full_name,
-      phone: order.phone,
-      email: order.email || '',
-      address: order.address,
-      city: '',
-      cityCode: 0,
-      district: '',
-      districtCode: 0,
-      ward: '',
-      wardCode: 0,
-      note: order.note || '',
-      paymentMethod: order.payment_method,
-      voucher: '',
-      rewardPoints: 0,
       status: order.status,
-      total_price: order.total_price,
+      total_amount: order.total_price,
+      payment_method: order.payment_method,
       items: order.order_items || [],
+      shipping_info: {
+        fullName: order.full_name,
+        phone: order.phone,
+        email: order.email || '',
+        address: order.address,
+        city: '',
+        cityCode: 0,
+        district: '',
+        districtCode: 0,
+        ward: '',
+        wardCode: 0
+      }
     });
+    setEditingOrder(order);
     setIsModalOpen(true);
   };
 
@@ -606,15 +535,15 @@ export function OrdersManager() {
 
   // Completion check functions (giống checkout)
   const isBuyerInfoCompleted = () => {
-    return !!formData.fullName && !!formData.phone;
+    return !!formData.shipping_info.fullName && !!formData.shipping_info.phone;
   };
 
   const isShippingInfoCompleted = () => {
-    return !!formData.address && !!formData.city;
+    return !!formData.shipping_info.address && !!formData.shipping_info.city;
   };
 
   const isPaymentMethodCompleted = () => {
-    return !!formData.paymentMethod;
+    return !!formData.payment_method_id;
   };
 
   // Handle form change (giống checkout)
@@ -632,8 +561,93 @@ export function OrdersManager() {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    // Only fetch orders when user is authenticated and is admin
+    if (user && user.role === 'admin') {
+      fetchOrders();
+    }
+  }, [user]);
+
+  // Update the renderOrderDetails function
+  const renderOrderDetails = (order: Order) => {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h3 className="font-medium">Order Information</h3>
+            <p>Order ID: {order.id}</p>
+            <p>Status: {getStatusLabel(order.status)}</p>
+            <p>Created: {formatDate(order.created_at)}</p>
+          </div>
+          <div>
+            <h3 className="font-medium">Customer Information</h3>
+            <p>Name: {order.full_name}</p>
+            <p>Phone: {order.phone}</p>
+            <p>Email: {order.email || 'N/A'}</p>
+            <p>Address: {order.address}</p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Sản phẩm</h3>
+          <OrderProductList
+            items={renderOrderItems(order.order_items || [])}
+            onUpdateQuantity={updateQuantity}
+            onRemoveItem={(itemId) => removeItem(itemId)}
+          />
+        </div>
+
+        <div className="text-right">
+          <p className="text-lg font-medium">
+            Total: {formatCurrency(order.total_price)}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  // Update the form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingOrder) {
+      await updateOrder();
+    } else {
+      await createOrder();
+    }
+  };
+
+  // Update renderOrderItems function
+  const renderOrderItems = (items: OrderItem[]): OrderProductListItem[] => {
+    return items.map(item => ({
+      id: item.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: item.price,
+      total_price: item.total_price,
+      display_name: item.products?.name || item.product_name,
+      display_image: item.products?.image_url || '/placeholder-product.jpg'
+    }));
+  };
+
+  // Update the updateQuantity function
+  const updateQuantity = ({ itemId, newQuantity }: UpdateQuantityParams) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.id === itemId
+          ? { ...item, quantity: newQuantity, total_price: item.price * newQuantity }
+          : item
+      )
+    }));
+  };
+
+  // Update handleStatusChange
+  const handleStatusChange = (newStatus: OrderStatus) => {
+    setFormData(prev => ({
+      ...prev,
+      status: newStatus
+    }));
+  };
 
   return (
     <div className="space-y-6">
@@ -865,32 +879,38 @@ export function OrdersManager() {
               <CollapsibleSection
                 title="Thông tin người mua"
                 stepNumber={1}
-                isCompleted={!!formData.fullName && !!formData.phone}
+                isCompleted={!!formData.shipping_info.fullName && !!formData.shipping_info.phone}
                 defaultOpen={true}
               >
                 <BuyerInfo
                   formData={{
-                    fullName: formData.fullName,
-                    phone: formData.phone,
-                    email: formData.email
+                    fullName: formData.shipping_info.fullName,
+                    phone: formData.shipping_info.phone,
+                    email: formData.shipping_info.email
                   }}
                   setFormData={(info) => {
                     if (typeof info === 'function') {
                       setFormData(prev => {
                         const newBuyerInfo = info({
-                          fullName: prev.fullName,
-                          phone: prev.phone,
-                          email: prev.email
+                          fullName: prev.shipping_info.fullName,
+                          phone: prev.shipping_info.phone,
+                          email: prev.shipping_info.email
                         });
                         return {
                           ...prev,
-                          ...newBuyerInfo
+                          shipping_info: {
+                            ...prev.shipping_info,
+                            ...newBuyerInfo
+                          }
                         };
                       });
                     } else {
                       setFormData(prev => ({
                         ...prev,
-                        ...info
+                        shipping_info: {
+                          ...prev.shipping_info,
+                          ...info
+                        }
                       }));
                     }
                   }}
@@ -902,7 +922,7 @@ export function OrdersManager() {
               <CollapsibleSection
                 title="Thông tin giao hàng"
                 stepNumber={2}
-                isCompleted={!!formData.address && !!formData.city}
+                isCompleted={!!formData.shipping_info.address && !!formData.shipping_info.city}
                 defaultOpen={true}
               >
                 <LocationSelector
@@ -921,12 +941,15 @@ export function OrdersManager() {
                     }));
                     setFormData(prev => ({
                       ...prev,
-                      city: name,
-                      cityCode: code,
-                      district: '',
-                      districtCode: 0,
-                      ward: '',
-                      wardCode: 0
+                      shipping_info: {
+                        ...prev.shipping_info,
+                        city: name,
+                        cityCode: code,
+                        district: '',
+                        districtCode: 0,
+                        ward: '',
+                        wardCode: 0
+                      }
                     }));
                   }}
                   onDistrictChange={(code, name) => {
@@ -939,10 +962,13 @@ export function OrdersManager() {
                     }));
                     setFormData(prev => ({
                       ...prev,
-                      district: name,
-                      districtCode: code,
-                      ward: '',
-                      wardCode: 0
+                      shipping_info: {
+                        ...prev.shipping_info,
+                        district: name,
+                        districtCode: code,
+                        ward: '',
+                        wardCode: 0
+                      }
                     }));
                   }}
                   onWardChange={(code, name) => {
@@ -953,8 +979,11 @@ export function OrdersManager() {
                     }));
                     setFormData(prev => ({
                       ...prev,
-                      ward: name,
-                      wardCode: code
+                      shipping_info: {
+                        ...prev.shipping_info,
+                        ward: name,
+                        wardCode: code
+                      }
                     }));
                   }}
                 />
@@ -964,8 +993,8 @@ export function OrdersManager() {
                     Địa chỉ chi tiết *
                   </label>
                   <textarea
-                    value={formData.address}
-                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                    value={formData.shipping_info.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, shipping_info: { ...prev.shipping_info, address: e.target.value } }))}
                     rows={3}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="Nhập số nhà, tên đường..."
@@ -978,8 +1007,8 @@ export function OrdersManager() {
                     Ghi chú
                   </label>
                   <textarea
-                    value={formData.note}
-                    onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                     rows={2}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="Ghi chú thêm về đơn hàng..."
@@ -990,14 +1019,14 @@ export function OrdersManager() {
               <CollapsibleSection
                 title="Phương thức thanh toán"
                 stepNumber={3}
-                isCompleted={!!formData.paymentMethod}
+                isCompleted={!!formData.payment_method_id}
                 defaultOpen={true}
               >
                 <PaymentMethodSelection
                   showPaymentDrawer={showPaymentDrawer}
                   setShowPaymentDrawer={setShowPaymentDrawer}
-                  selectedPayment={formData.paymentMethod}
-                  setSelectedPayment={(method) => setFormData(prev => ({ ...prev, paymentMethod: method }))}
+                  selectedPayment={formData.payment_method}
+                  setSelectedPayment={(method) => setFormData(prev => ({ ...prev, payment_method: method }))}
                   paymentMethods={paymentMethods}
                 />
               </CollapsibleSection>
@@ -1014,7 +1043,7 @@ export function OrdersManager() {
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                    onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   >
@@ -1038,8 +1067,14 @@ export function OrdersManager() {
                     <input
                       type="text"
                       placeholder="Tên sản phẩm"
-                      value={newItem.product_name}
-                      onChange={(e) => setNewItem(prev => ({ ...prev, product_name: e.target.value }))}
+                      value={newItem.products.name}
+                      onChange={(e) => setNewItem(prev => ({
+                        ...prev,
+                        products: {
+                          ...prev.products,
+                          name: e.target.value
+                        }
+                      }))}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     />
                     <div className="grid grid-cols-2 gap-2">
@@ -1069,13 +1104,9 @@ export function OrdersManager() {
 
                 {/* Product List giống checkout */}
                 <OrderProductList
-                  items={formData.items}
-                  loading={false}
-                  onUpdateQuantity={(itemId, newQuantity) => {
-                    updateItem(itemId, { quantity: newQuantity });
-                  }}
-                  onRemoveItem={removeItem}
-                  readOnly={false}
+                  items={renderOrderItems(formData.items)}
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={(itemId) => removeItem(itemId)}
                 />
 
                 {/* Order Summary */}
@@ -1089,7 +1120,7 @@ export function OrdersManager() {
                 {/* Action buttons */}
                 <div className="space-y-3">
                   <Button
-                    onClick={editingOrder ? updateOrder : createOrder}
+                    onClick={handleSubmit}
                     className="w-full"
                     size="lg"
                     disabled={formData.items.length === 0}
@@ -1128,62 +1159,7 @@ export function OrdersManager() {
           
           {selectedOrder && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Thông tin khách hàng</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Họ tên:</span> {selectedOrder.full_name}</p>
-                    <p><span className="font-medium">Điện thoại:</span> {selectedOrder.phone}</p>
-                    {selectedOrder.email && (
-                      <p><span className="font-medium">Email:</span> {selectedOrder.email}</p>
-                    )}
-                    <p><span className="font-medium">Địa chỉ:</span> {selectedOrder.address}</p>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-3">Thông tin đơn hàng</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Tổng tiền:</span> {formatCurrency(selectedOrder.total_price)}</p>
-                    <p><span className="font-medium">Thanh toán:</span> {PAYMENT_METHODS.find(p => p.value === selectedOrder.payment_method)?.label}</p>
-                    <p><span className="font-medium">Ngày tạo:</span> {formatDate(selectedOrder.created_at)}</p>
-                    <p><span className="font-medium">Cập nhật:</span> {formatDate(selectedOrder.updated_at)}</p>
-                    {selectedOrder.note && (
-                      <p><span className="font-medium">Ghi chú:</span> {selectedOrder.note}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              {selectedOrder.order_items && selectedOrder.order_items.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Sản phẩm trong đơn hàng</h3>
-                  <div className="space-y-3">
-                    {selectedOrder.order_items.map((item) => (
-                      <div key={item.id} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
-                        {item.product_image && (
-                          <Image
-                            src={item.product_image}
-                            alt={item.product_name}
-                            width={60}
-                            height={60}
-                            className="rounded object-cover"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-medium">{item.product_name}</h4>
-                          <p className="text-sm text-gray-600">
-                            Số lượng: {item.quantity} × {formatCurrency(item.price)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">{formatCurrency(item.total_price)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {renderOrderDetails(selectedOrder)}
               
               <div className="flex justify-end mt-6">
                 <Button

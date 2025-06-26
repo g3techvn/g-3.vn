@@ -10,13 +10,12 @@ import Script from 'next/script';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { defaultMetadata } from './metadata';
 import Footer from '@/components/layout/footer/Footer';
-import WebVitalsTracker from '@/components/WebVitalsTracker';
 import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
 import { LocalBusinessJsonLd } from '@/components/SEO/LocalBusinessJsonLd';
 import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { COMPANY_INFO, SOCIAL_LINKS } from '@/constants';
 import { CartProvider } from '@/context/CartContext'
-import { BuyNowProvider } from '@/context/BuyNowContext'
+// import { BuyNowProvider } from '@/context/BuyNowContext' - Temporarily commented out
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -66,7 +65,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} h-full`}>
         <CartProvider>
-          <BuyNowProvider>
+          {/* <BuyNowProvider> - Temporarily commented out to fix crash */}
             <Providers>
               <CartLayout>
                 <div className="desktop-layout bg-gray-100">
@@ -82,7 +81,7 @@ export default function RootLayout({
                 <MobileLayout>{children}</MobileLayout>
               </CartLayout>
             </Providers>
-          </BuyNowProvider>
+          {/* </BuyNowProvider> */}
         </CartProvider>
         
         {/* SEO Schema */}
@@ -98,9 +97,6 @@ export default function RootLayout({
           }), {})}
         />
         <LocalBusinessJsonLd includeReviews={true} />
-        
-        {/* Web Vitals Tracking */}
-        <WebVitalsTracker />
         
         {/* Register Service Worker */}
         <Script

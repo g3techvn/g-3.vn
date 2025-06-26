@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerAdminClient } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase';
 import { authenticateRequest } from '@/lib/auth/auth-middleware';
 
 // GET /api/admin/orders/[id] - Get single order details (admin only)
@@ -26,7 +26,7 @@ export async function GET(
       );
     }
 
-    const supabase = createServerAdminClient();
+    const supabase = createServerClient();
 
     const { data: order, error } = await supabase
       .from('orders')
@@ -64,7 +64,7 @@ export async function GET(
   }
 }
 
-// PUT /api/admin/orders/[id] - Update order (admin only)
+// PUT /api/admin/orders/[id] - Update order status (admin only)
 export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -89,40 +89,20 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const {
-      full_name,
-      phone,
-      email,
-      address,
-      payment_method,
-      status,
-      note,
-      total_price
-    } = body;
+    const { status } = body;
 
-    // Validate required fields
-    if (!full_name || !phone || !address || !payment_method || !status || total_price === undefined) {
+    if (!status) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Status is required' },
         { status: 400 }
       );
     }
 
-    const supabase = createServerAdminClient();
+    const supabase = createServerClient();
 
     const { data: order, error } = await supabase
       .from('orders')
-      .update({
-        full_name,
-        phone,
-        email: email || null,
-        address,
-        payment_method,
-        status,
-        note: note || null,
-        total_price,
-        updated_at: new Date().toISOString()
-      })
+      .update({ status })
       .eq('id', params.id)
       .select()
       .single();
@@ -135,7 +115,7 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json({ success: true, order });
+    return NextResponse.json({ order });
 
   } catch (error) {
     console.error('Admin update order error:', error);
@@ -170,7 +150,7 @@ export async function DELETE(
       );
     }
 
-    const supabase = createServerAdminClient();
+    const supabase = createServerClient();
 
     // First delete order items
     const { error: itemsError } = await supabase
