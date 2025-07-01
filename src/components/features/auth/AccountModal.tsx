@@ -94,7 +94,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
             <div className="p-4 flex items-center border-b border-gray-100/80">
               <div className="relative w-12 h-12 mr-3">
                 <Image 
-                  src={user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
+                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
                   alt="avatar" 
                   fill
                   className="rounded-full object-cover shadow-md" 

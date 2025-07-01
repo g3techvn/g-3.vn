@@ -526,7 +526,10 @@ export default function Checkout({ isOpen, onClose, closeAll }: CheckoutProps) {
                 defaultOpen={!isVoucherCompleted()}
               >
                 <VoucherInfo
-                  user={user}
+                  user={user ? {
+                    fullName: user.fullName || '',
+                    email: user.email || ''
+                  } : null}
                   showVoucherDrawer={showVoucherDrawer}
                   setShowVoucherDrawer={setShowVoucherDrawer}
                   voucherCode={formData.voucher}

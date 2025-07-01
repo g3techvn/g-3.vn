@@ -100,7 +100,10 @@ export default function RewardPointsPage() {
 
           {/* Points History */}
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <RewardPointsHistory user={user} />
+            <RewardPointsHistory user={user ? {
+              id: user.id,
+              fullName: user.fullName || ''
+            } : null} />
           </div>
 
           {/* Terms and Conditions */}

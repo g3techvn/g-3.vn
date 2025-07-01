@@ -10,6 +10,7 @@ import debounce from 'lodash/debounce';
 interface ProductSelectionDrawerProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onProductSelect?: (product: Product) => void;
 }
 
 // Helper function to normalize Vietnamese text
@@ -20,7 +21,7 @@ const normalizeVietnameseText = (text: string) => {
     .replace(/đ/g, 'd');
 };
 
-export default function ProductSelectionDrawer({ isOpen, onOpenChange }: ProductSelectionDrawerProps) {
+export default function ProductSelectionDrawer({ isOpen, onOpenChange, onProductSelect }: ProductSelectionDrawerProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -182,15 +183,7 @@ export default function ProductSelectionDrawer({ isOpen, onOpenChange }: Product
                   key={product.id}
                   className="flex cursor-pointer pb-2 shadow-md rounded-lg flex-col gap-2  bg-gray-100 "
                   onClick={() => {
-                    const cartItem = {
-                      productId: product.id,
-                      quantity: 1,
-                      product: {
-                        ...product,
-                        variants: product.variants || []
-                      }
-                    };
-                    addToCart(cartItem);
+                    if (onProductSelect) onProductSelect(product);
                     onOpenChange(false);
                   }}
                 >

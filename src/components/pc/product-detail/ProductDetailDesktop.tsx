@@ -153,38 +153,12 @@ export function ProductDetailDesktop({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="space-y-6">
-              {/* Product Name */}
-              <h1 className="text-3xl font-bold">{product.name}</h1>
-
-              {/* Price Section */}
-              <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold text-primary">
-                  {formatCurrency(currentPrice)}
-                </span>
-                {originalPrice && originalPrice > currentPrice && (
-                  <span className="text-lg text-gray-500 line-through">
-                    {formatCurrency(originalPrice)}
-                  </span>
-                )}
-              </div>
-              
-              {/* Variants Selection */}
-              {product.variants && product.variants.length > 0 && (
-                <ProductVariants
-                  variants={product.variants}
-                  selectedVariant={selectedVariant}
-                  onSelectVariant={onSelectVariant}
-                />
-              )}
-
-              {/* Product Features & Info */}
-              <ProductInfo 
-                product={product} 
-                selectedVariant={selectedVariant}
-                onSelectVariant={onSelectVariant}
-              />
-            </div>
+            {/* Product Features & Info */}
+            <ProductInfo 
+              product={product} 
+              selectedVariant={selectedVariant}
+              onSelectVariant={onSelectVariant}
+            />
           </motion.div>
         </motion.div>
 

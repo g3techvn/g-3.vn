@@ -29,6 +29,8 @@ import {
   PAYMENT_METHODS,
   OrderStatus
 } from '@/types/orders';
+import { Product } from '@/types';
+import { CartItem } from '@/types/cart';
 
 // Import checkout components
 import BuyerInfo from '@/components/store/BuyerInfo';
@@ -43,6 +45,7 @@ import LocationSelector from '@/components/features/cart/LocationSelector';
 import { Voucher } from '@/types/cart';
 import OrderProductList from './OrderProductList';
 import { formatPrice } from '@/utils/helpers';
+import ProductSelectionDrawer from '@/components/features/cart/ProductSelectionDrawer';
 
 export function OrdersManager() {
   const { user } = useAuth();
@@ -140,6 +143,8 @@ export function OrdersManager() {
     wardCode: 0,
     wardName: ''
   });
+
+  const [isProductDrawerOpen, setIsProductDrawerOpen] = useState(false);
 
   // Fetch orders
   const fetchOrders = async (page = 1, search = '', status = 'all') => {
@@ -249,25 +254,29 @@ export function OrdersManager() {
   // Create order
   const createOrder = async () => {
     try {
-      // Create shipping address first
-      const shippingAddressResponse = await fetch('/api/user/addresses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData.shipping_info)
-      });
-
-      if (!shippingAddressResponse.ok) {
-        throw new Error('Failed to create shipping address');
+      // Validate required fields
+      if (!formData.shipping_info.fullName || !formData.shipping_info.phone) {
+        alert('Vui lòng nhập đầy đủ thông tin người mua');
+        return;
       }
 
-      const { id: shipping_address_id } = await shippingAddressResponse.json();
+      if (!formData.shipping_info.address || !formData.shipping_info.city) {
+        alert('Vui lòng nhập đầy đủ địa chỉ giao hàng');
+        return;
+      }
 
-      // Create order
+      if (formData.items.length === 0) {
+        alert('Vui lòng thêm ít nhất một sản phẩm');
+        return;
+      }
+
+      // Create order data
       const orderData = {
-        ...formData,
-        shipping_address_id,
+        shipping_info: formData.shipping_info,
+        status: formData.status,
+        payment_method: formData.payment_method,
+        notes: formData.notes,
+        total_amount: formData.items.reduce((sum, item) => sum + item.total_price, 0),
         items: formData.items.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
@@ -275,7 +284,7 @@ export function OrdersManager() {
         }))
       };
 
-      const orderResponse = await fetch('/api/admin/orders', {
+      const response = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -283,34 +292,24 @@ export function OrdersManager() {
         body: JSON.stringify(orderData)
       });
 
-      if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create order');
       }
 
       alert('Đơn hàng đã được tạo thành công');
       
-      // Reset form
-      setFormData({
-        status: 'pending',
-        total_amount: 0,
-        payment_method: 'cod',
-        items: [],
-        shipping_info: {
-          fullName: '',
-          phone: '',
-          email: '',
-          address: '',
-          city: '',
-          cityCode: 0,
-          district: '',
-          districtCode: 0,
-          ward: '',
-          wardCode: 0
-        }
-      });
+      // Reset form and close modal
+      resetForm();
+      setIsModalOpen(false);
+      
+      // Refresh orders list
+      fetchOrders(currentPage, searchTerm, statusFilter);
+
     } catch (error) {
       console.error('Error creating order:', error);
-      alert('Có lỗi xảy ra khi tạo đơn hàng');
+      alert('Có lỗi xảy ra khi tạo đơn hàng: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -558,6 +557,28 @@ export function OrdersManager() {
 
   const closeProfile = () => {
     setIsProfileOpen(false);
+  };
+
+  // Hàm thêm sản phẩm từ drawer vào formData.items
+  const handleAddProductFromDrawer = (product: Product) => {
+    const newItemWithId: OrderItem = {
+      id: Math.random().toString(),
+      order_id: '',
+      product_id: parseInt(product.id),
+      quantity: 1,
+      price: product.price,
+      total_price: product.price,
+      product_name: product.name,
+      products: {
+        name: product.name,
+        image_url: product.image_url || '/placeholder-product.jpg'
+      }
+    };
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItemWithId],
+      total_amount: prev.total_amount + newItemWithId.total_price
+    }));
   };
 
   useEffect(() => {
@@ -1060,53 +1081,65 @@ export function OrdersManager() {
             {/* Right column - Product management và Order summary */}
             <div className="col-span-4">
               <div className="bg-white p-4 rounded-lg sticky top-4 space-y-6">
-                {/* Add new item form */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Thêm sản phẩm</h3>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Tên sản phẩm"
-                      value={newItem.products.name}
-                      onChange={(e) => setNewItem(prev => ({
-                        ...prev,
-                        products: {
-                          ...prev.products,
-                          name: e.target.value
-                        }
-                      }))}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="number"
-                        placeholder="Số lượng"
-                        value={newItem.quantity}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        min="1"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Giá"
-                        value={newItem.price}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        min="0"
-                      />
-                    </div>
-                    <Button onClick={addItem} className="w-full">
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Thêm sản phẩm
-                    </Button>
-                  </div>
-                </div>
+                {/* Nút thêm sản phẩm bằng drawer */}
+                <button
+                  type="button"
+                  className="w-full mb-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  onClick={() => setIsProductDrawerOpen(true)}
+                >
+                  Thêm sản phẩm
+                </button>
+                <ProductSelectionDrawer
+                  isOpen={isProductDrawerOpen}
+                  onOpenChange={(open) => setIsProductDrawerOpen(open)}
+                  onProductSelect={handleAddProductFromDrawer}
+                />
 
                 {/* Product List giống checkout */}
-                <OrderProductList
-                  items={renderOrderItems(formData.items)}
-                  onUpdateQuantity={updateQuantity}
-                  onRemoveItem={(itemId) => removeItem(itemId)}
+                <ProductList
+                  items={formData.items.map(item => ({
+                    productId: item.product_id.toString(),
+                    quantity: item.quantity,
+                    product: {
+                      id: item.product_id.toString(),
+                      name: item.products?.name || item.product_name,
+                      description: '',
+                      price: item.price,
+                      image_url: item.products?.image_url || '/placeholder-product.jpg'
+                    }
+                  }))}
+                  onUpdateQuantity={(productId, quantity) => {
+                    updateQuantity({ itemId: productId, newQuantity: quantity });
+                  }}
+                  onRemoveItem={removeItem}
+                />
+
+                {/* Voucher section */}
+                <VoucherInfo
+                  user={user ? {
+                    fullName: user.fullName || '',
+                    email: user.email || ''
+                  } : null}
+                  voucherCode=""
+                  setVoucherCode={() => {}}
+                  showVoucherDrawer={showVoucherDrawer}
+                  setShowVoucherDrawer={setShowVoucherDrawer}
+                  selectedVoucher={selectedVoucher}
+                  setSelectedVoucher={setSelectedVoucher}
+                  availableVouchers={availableVouchers}
+                  totalPrice={formData.items.reduce((sum, item) => sum + item.total_price, 0)}
+                />
+
+                {/* Reward points section */}
+                <RewardPoints
+                  isLoggedIn={!!user}
+                  useRewardPoints={useRewardPoints}
+                  setUseRewardPoints={setUseRewardPoints}
+                  pointsToUse={pointsToUse}
+                  setPointsToUse={setPointsToUse}
+                  availablePoints={rewardPointsData.available}
+                  maxPointsToUse={rewardPointsData.maxPointsPerOrder}
+                  openProfile={() => setIsProfileOpen(true)}
                 />
 
                 {/* Order Summary */}

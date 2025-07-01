@@ -9,6 +9,7 @@ import { ArrowPathIcon, ShieldCheckIcon, TruckIcon, WrenchScrewdriverIcon, Shopp
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/utils/helpers';
+import { ProductVariants } from './ProductVariants';
 
 export interface ProductInfoProps {
   product: Product;
@@ -116,6 +117,17 @@ export function ProductInfo({ product, selectedVariant, onSelectVariant }: Produ
           </motion.span>
         )}
       </motion.div>
+
+      {/* Variants Selection */}
+      {product.variants && product.variants.length > 0 && (
+        <motion.div variants={fadeIn}>
+          <ProductVariants
+            variants={product.variants}
+            selectedVariant={selectedVariant}
+            onSelectVariant={onSelectVariant}
+          />
+        </motion.div>
+      )}
 
       {/* Success notification */}
       <AnimatePresence>

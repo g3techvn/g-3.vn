@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/Toaster';
 import { Roboto } from 'next/font/google';
 import { useRef } from 'react';
 import { AuthProvider } from '@/features/auth';
+import { DeviceProvider } from '@/components/common/DeviceProvider';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -34,10 +35,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <div className={`${roboto.variable} font-sans`}>
       <QueryClientProvider client={queryClientRef.current}>
         <AuthProvider>
-          <ThemeProvider>
-            {children}
-            <Toaster />
-          </ThemeProvider>
+          <DeviceProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </DeviceProvider>
         </AuthProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

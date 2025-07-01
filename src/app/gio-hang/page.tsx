@@ -603,7 +603,10 @@ export default function CartPage() {
                   isCompleted={isVoucherCompleted()}
                 >
                   <VoucherInfoStore
-                    user={user}
+                    user={user ? {
+                      fullName: user.fullName || '',
+                      email: user.email || ''
+                    } : null}
                     showVoucherDrawer={showVoucherDrawer}
                     setShowVoucherDrawer={setShowVoucherDrawer}
                     voucherCode={formData.voucher}
@@ -783,7 +786,10 @@ export default function CartPage() {
           </div>
 
           <VoucherInfo 
-            user={user}
+            user={user ? {
+              fullName: user.fullName || '',
+              email: user.email || ''
+            } : null}
             showVoucherDrawer={showVoucherDrawer}
             setShowVoucherDrawer={setShowVoucherDrawer}
               voucherCode={formData.voucher}
@@ -795,7 +801,10 @@ export default function CartPage() {
           />
 
           <PaymentDetails 
-            user={user}
+            user={user ? {
+              fullName: user.fullName || '',
+              email: user.email || ''
+            } : null}
             totalPrice={totalPrice}
               shipping={shippingFee}
             selectedVoucher={selectedVoucher}

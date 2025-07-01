@@ -25,6 +25,7 @@ import { FAQJsonLd, generateProductFAQs } from '@/components/SEO/FAQJsonLd';
 import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 import { generateProductMeta } from '@/lib/utils/seo-utils';
 import dynamic from 'next/dynamic';
+import { useDevice } from '@/components/common/DeviceProvider';
 
 // ✅ Lazy load SEO components for better initial performance
 const LazyProductJsonLd = dynamic(() => import('@/components/SEO/ProductJsonLd').then(mod => ({ default: mod.ProductJsonLd })), {
@@ -92,8 +93,10 @@ interface TechnicalSpec {
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { addToCart } = useCart();
+  const { isMobile } = useDevice();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [isDeviceDetected, setIsDeviceDetected] = useState(false);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,6 +261,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       setLoadingSimilar(false);
     }
   };
+
+  // Device detection effect
+  useEffect(() => {
+    // Small delay to ensure device detection is complete
+    const timer = setTimeout(() => {
+      setIsDeviceDetected(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -454,7 +467,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     };
   }, [selectedIndex]);
 
-  if (loading) {
+  // Show loading until both product and device detection are ready
+  if (loading || !isDeviceDetected) {
     return (
       <div className="container mx-auto py-8">
         <div className="animate-pulse">
@@ -541,13 +555,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       <LazyBreadcrumbJsonLd items={breadcrumbItems} />
       <LazyFAQJsonLd faqs={productFAQs} />
       
-      {/* Mobile View */}
-      <div className="md:hidden">
+      {/* Conditional rendering based on device type */}
+      {isMobile ? (
         <MobileShopeeProductDetail product={product} />
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden md:block">
+      ) : (
         <ProductDetailDesktop 
           product={product}
           galleryImages={galleryImages}
@@ -568,13 +579,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           selectedVariant={selectedVariant}
           onSelectVariant={setSelectedVariant}
         />
-      </div>
+      )}
 
-      {/* Float Product Action */}
-      <FloatProductAction 
-        product={product} 
-        selectedVariant={selectedVariant}
-      />
+      {/* Float Product Action - chỉ hiển thị trên desktop */}
+      {!isMobile && (
+        <FloatProductAction 
+          product={product} 
+          selectedVariant={selectedVariant}
+        />
+      )}
     </>
   );
 } 

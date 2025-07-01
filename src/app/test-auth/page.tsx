@@ -3,6 +3,7 @@
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
+import Link from 'next/link';
 
 interface ApiTestResult {
   status?: number;
@@ -384,24 +385,24 @@ export default function TestAuthPage() {
 
           {/* Navigation Buttons */}
           <div className="flex gap-4 justify-center">
-            <a 
+            <Link 
               href="/dang-nhap" 
               className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               🔑 Go to Login
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/tai-khoan" 
               className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
               👤 Go to Account
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/" 
               className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
             >
               🏠 Go to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

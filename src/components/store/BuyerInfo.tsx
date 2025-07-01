@@ -3,6 +3,7 @@
 import { useAuth } from '@/features/auth/AuthProvider'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { useEffect, useState } from 'react'
 
 interface BuyerInfoForm {
   fullName: string;
@@ -24,6 +25,27 @@ export default function BuyerInfo({
   setShowDrawer
 }: BuyerInfoProps) {
   const { user } = useAuth()
+  const [customerList, setCustomerList] = useState([
+    { id: 8, fullName: 'Nguyễn Thành An', phone: '', email: 'g3.vntech@gmail.com' },
+    { id: 4, fullName: 'Nguyễn Thành Tráng', phone: '0947776662', email: 'thanhtrang16490@gmail.com' },
+    { id: 1, fullName: 'Admin G3', phone: '0987654321', email: 'admin@g3furniture.vn' },
+    { id: 2, fullName: 'Sale G3', phone: '0987654322', email: 'sale@g3furniture.vn' },
+    { id: 3, fullName: 'Customer G3', phone: '0987654323', email: 'customer@gmail.com' },
+  ]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+
+  useEffect(() => {
+    if (selectedCustomerId) {
+      const customer = customerList.find(c => c.id.toString() === selectedCustomerId);
+      if (customer) {
+        setFormData({
+          fullName: customer.fullName || '',
+          phone: customer.phone || '',
+          email: customer.email || ''
+        });
+      }
+    }
+  }, [selectedCustomerId]);
   
   // Nếu user đã đăng nhập, hiển thị thông tin readonly
   if (user) {
@@ -96,6 +118,21 @@ export default function BuyerInfo({
   // Nếu user chưa đăng nhập, hiển thị form nhập thông tin
   return (
     <div className="space-y-4">
+      {/* Dropdown chọn khách hàng có sẵn */}
+      <div className="mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Chọn khách hàng có sẵn</label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          value={selectedCustomerId}
+          onChange={e => setSelectedCustomerId(e.target.value)}
+        >
+          <option value="">-- Nhập thủ công hoặc chọn khách hàng --</option>
+          {customerList.map(c => (
+            <option key={c.id} value={c.id}>{c.fullName} ({c.email}{c.phone ? ` - ${c.phone}` : ''})</option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0 mr-3">
           <div className="w-10 h-10 flex items-center justify-center">
@@ -106,9 +143,6 @@ export default function BuyerInfo({
         </div>
         <div className="flex-1">
           <div className="font-medium">Thông tin người mua</div>
-          <div className="text-xs text-gray-500 mt-1">
-            Hoặc <Button onClick={() => setShowDrawer(true)} variant="link" className="text-red-600 hover:text-red-700 h-auto p-0">đăng nhập</Button> để sử dụng thông tin có sẵn
-          </div>
         </div>
       </div>
 
