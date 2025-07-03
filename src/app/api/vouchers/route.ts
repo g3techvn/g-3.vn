@@ -29,8 +29,11 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // Transform voucher data to match new format
+      const transformedVoucher = transformVoucherData(voucher);
+
       return NextResponse.json(
-        { voucher },
+        { voucher: transformedVoucher },
         { headers: getSecurityHeaders() }
       );
     }
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Filter vouchers based on usage if user_id is provided
+    // Filter and transform vouchers
     let availableVouchers = vouchers || [];
     
     if (user_id && vouchers) {
@@ -70,43 +73,47 @@ export async function GET(request: NextRequest) {
       const usedVoucherIds = usedVouchers?.map(uv => uv.voucher_id) || [];
       const usedVoucherCodes = usedVouchers?.map(uv => uv.voucher_code) || [];
       
-      availableVouchers = vouchers.filter(voucher => {
-        // Check global usage limit
-        if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
-          return false;
-        }
-        
-        // Check if user already used this voucher
-        if (usedVoucherIds.includes(voucher.id) || usedVoucherCodes.includes(voucher.code)) {
-          return false;
-        }
-        
-        // Check if voucher is still valid
-        if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
-          return false;
-        }
-        
-        // Check if voucher has started
-        if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
-          return false;
-        }
-        
-        return true;
-      });
+      availableVouchers = vouchers
+        .filter(voucher => {
+          // Check global usage limit
+          if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
+            return false;
+          }
+          
+          // Check if user already used this voucher
+          if (usedVoucherIds.includes(voucher.id) || usedVoucherCodes.includes(voucher.code)) {
+            return false;
+          }
+          
+          // Check if voucher is still valid
+          if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
+            return false;
+          }
+          
+          // Check if voucher has started
+          if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
+            return false;
+          }
+          
+          return true;
+        })
+        .map(transformVoucherData); // Transform each voucher
     } else {
       // For guest users, only filter by global limits and validity
-      availableVouchers = vouchers.filter(voucher => {
-        if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
-          return false;
-        }
-        if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
-          return false;
-        }
-        if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
-          return false;
-        }
-        return true;
-      });
+      availableVouchers = vouchers
+        .filter(voucher => {
+          if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
+            return false;
+          }
+          if (voucher.valid_to && new Date(voucher.valid_to) < new Date()) {
+            return false;
+          }
+          if (voucher.valid_from && new Date(voucher.valid_from) > new Date()) {
+            return false;
+          }
+          return true;
+        })
+        .map(transformVoucherData); // Transform each voucher
     }
 
     return NextResponse.json(
@@ -121,4 +128,21 @@ export async function GET(request: NextRequest) {
       { status: 500, headers: getSecurityHeaders() }
     );
   }
+}
+
+// Helper function to transform voucher data
+function transformVoucherData(voucher: any) {
+  return {
+    ...voucher,
+    // Convert legacy discount_amount to discount_value if needed
+    discount_value: voucher.discount_value || voucher.discount_amount,
+    // Set proper discount_type
+    discount_type: voucher.is_freeship ? 'shipping' 
+      : voucher.is_installation ? 'service'
+      : voucher.discount_type,
+    // Add new fields
+    is_freeship: !!voucher.is_freeship,
+    is_installation: !!voucher.is_installation,
+    location_provinces: voucher.location_provinces || []
+  };
 } 

@@ -86,7 +86,7 @@ interface FormData {
 }
 
 export default function CartPage() {
-  const { cart, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cartItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -391,7 +391,7 @@ export default function CartPage() {
           note: formData.note
         },
         payment_method: formData.paymentMethod,
-        cart_items: cart,
+        cart_items: cartItems,
         voucher: selectedVoucher,
         reward_points: useRewardPoints ? pointsToUse : 0,
         total_price: totalPrice,
@@ -446,7 +446,7 @@ export default function CartPage() {
       <CartHeader 
         showMenu={showMenu}
         setShowMenu={setShowMenu}
-        handlePreviewPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
+        handlePreviewPDF={() => generatePDF({ cartItems: cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName || formData.fullName,
           phone: formData.phone,
           email: user.email || formData.email
@@ -455,7 +455,7 @@ export default function CartPage() {
           phone: formData.phone,
           email: formData.email
         }, preview: true })}
-        handleDownloadPDF={() => generatePDF({ cartItems: cart, totalPrice, shipping: shippingFee, buyerInfo: user ? {
+        handleDownloadPDF={() => generatePDF({ cartItems: cartItems, totalPrice, shipping: shippingFee, buyerInfo: user ? {
           fullName: user.fullName || formData.fullName,
           phone: formData.phone,
           email: user.email || formData.email
@@ -641,13 +641,13 @@ export default function CartPage() {
               <div className="col-span-4">
                 <div className="bg-white p-4 rounded-lg sticky top-4">
                   <ProductListStore
-                    items={cart}
+                    items={cartItems}
                     loading={loading}
                     onUpdateQuantity={handleQuantityUpdate}
                     onRemoveItem={removeFromCart}
                   />
                   <OrderSummary
-                    items={cart}
+                    items={cartItems}
                     selectedVoucher={selectedVoucher}
                     pointsToUse={useRewardPoints ? pointsToUse : 0}
                     totalPrice={totalPrice}
@@ -679,7 +679,7 @@ export default function CartPage() {
         <div className="pt-16 px-4 pb-20 max-w-full overflow-hidden">        
           <ProductList 
             loading={loading}
-            cartItems={cart}
+            cartItems={cartItems}
             removeFromCart={removeFromCart}
             updateQuantity={updateQuantity}
           />
@@ -809,7 +809,7 @@ export default function CartPage() {
               shipping={shippingFee}
             selectedVoucher={selectedVoucher}
               pointsDiscount={useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0}
-            cartItems={cart}
+            cartItems={cartItems}
             useRewardPoints={useRewardPoints}
             setUseRewardPoints={setUseRewardPoints}
             pointsToUse={pointsToUse}
@@ -824,7 +824,7 @@ export default function CartPage() {
         </div>
 
         <BottomBar 
-          cartItemCount={cart.length}
+          cartItemCount={cartItems.length}
           total={totalPrice + shippingFee - (selectedVoucher?.discountAmount || 0) - (useRewardPoints ? pointsToUse * rewardPointsData.pointValue : 0)}
           onCheckout={handleSubmit}
           isValid={isFormValid()}

@@ -1,39 +1,33 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    console.log('API Promotion - Starting fetch');
+    // Khởi tạo Supabase client
     const supabase = createServerClient();
     
-    if (!supabase) {
-      throw new Error('Failed to create Supabase client');
-    }
-    
-    console.log('API Promotion - Querying database');
+    // Truy vấn dữ liệu từ bảng promotion
     const { data: promotions, error } = await supabase
       .from('promotion')
       .select('*')
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('API Promotion - Supabase error:', error);
-      throw error;
+      console.error('Supabase error:', error);
+      return NextResponse.json(
+        { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
+        { status: 500 }
+      );
     }
     
-    console.log(`API Promotion - Found ${promotions?.length || 0} promotions`);
-    
-    return NextResponse.json(promotions || []);
-  } catch (error) {
-    console.error('API Promotion - Error details:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    
-    return NextResponse.json({ 
-      error: 'Failed to fetch promotions',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.log(`Query successful, returning ${promotions.length} promotions`);
+    return NextResponse.json(promotions);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error in promotion API:', error);
+    return NextResponse.json(
+      { error: `Đã xảy ra lỗi khi xử lý yêu cầu: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 } 

@@ -79,27 +79,54 @@ async function setupDatabase() {
       .upsert([
         { 
           code: 'NEWUSER', 
-          title: 'Khách hàng mới', 
           description: 'Giảm 15% cho khách hàng mới', 
           discount_type: 'percentage', 
-          discount_amount: 15, 
+          discount_value: 15, 
           min_order_value: 300000, 
           usage_limit: 1000, 
           used_count: 0, 
+          valid_from: new Date().toISOString(),
           valid_to: '2024-12-31', 
           is_active: true 
         },
         { 
           code: 'BLACKFRIDAY', 
-          title: 'Black Friday', 
           description: 'Giảm 100K cho Black Friday', 
           discount_type: 'fixed', 
-          discount_amount: 100000, 
+          discount_value: 100000, 
           min_order_value: 800000, 
           usage_limit: 500, 
           used_count: 0, 
+          valid_from: new Date().toISOString(),
           valid_to: '2024-12-31', 
           is_active: true 
+        },
+        {
+          code: 'FREESHIP1M',
+          description: 'Miễn phí vận chuyển toàn quốc cho đơn hàng từ 1 triệu',
+          discount_type: 'shipping',
+          discount_value: null,
+          min_order_value: 1000000,
+          is_freeship: true,
+          usage_limit: 1000,
+          used_count: 0,
+          valid_from: new Date().toISOString(),
+          valid_to: '2024-12-31',
+          is_active: true
+        },
+        {
+          code: 'LAPDAT',
+          description: 'Miễn phí lắp đặt tại Hà Nội và HCM',
+          discount_type: 'service',
+          discount_value: null,
+          min_order_value: 0,
+          is_installation: true,
+          location_provinces: [1, 79], // 1 = Hà Nội, 79 = HCM
+          usage_limit: 2000,
+          used_count: 0,
+          valid_from: new Date().toISOString(),
+          valid_to: '2024-12-31',
+          is_active: true
         }
       ], { onConflict: 'code' });
 

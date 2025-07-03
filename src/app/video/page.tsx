@@ -44,49 +44,28 @@ function VideoContent() {
         setLoadingMore(true);
       }
       
-      const response = await fetch(`/api/products?page=${pageNumber}&limit=10`);
+      const response = await fetch(`/api/products?page=${pageNumber}&limit=10&video_only=true`);
       
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
       
       const data = await response.json();
-      const fetchedProducts = (data.products || []).filter((product: Product) => {
-        if (!product.video_url) return false;
-        
-        try {
-          const url = new URL(product.video_url);
-          // Chấp nhận các domain phổ biến cho video
-          return url.hostname.includes('youtube.com') || 
-                 url.hostname.includes('youtu.be') ||
-                 url.hostname.includes('vimeo.com') ||
-                 url.hostname.includes('facebook.com');
-        } catch (error) {
-          console.warn('Invalid video URL:', product.video_url);
-          return false;
-        }
-      });
       
-      if (fetchedProducts.length === 0) {
-        console.warn('No valid video products found in this batch');
-      } else {
-        console.log('Video page - Products with valid videos:', fetchedProducts.length);
-        console.log('Video page - Sample video URLs:', 
-          fetchedProducts.slice(0, 3).map((p: Product) => ({
-            id: p.id,
-            name: p.name,
-            url: p.video_url
-          }))
-        );
+      if (!data.products || !Array.isArray(data.products)) {
+        throw new Error('Invalid response format');
       }
+
+      // Filter products with video_url
+      const productsWithVideo = data.products.filter((p: Product) => p.video_url && p.video_url !== '');
       
       if (pageNumber === 1) {
-        setProducts(fetchedProducts);
+        setProducts(productsWithVideo);
       } else {
-        setProducts(prev => [...prev, ...fetchedProducts]);
+        setProducts(prev => [...prev, ...productsWithVideo]);
       }
       
-      setHasMore(fetchedProducts.length === 10);
+      setHasMore(productsWithVideo.length === 10);
       
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -120,7 +99,7 @@ function VideoContent() {
     fetchProducts(1);
   }, [fetchProducts]);
 
-  // Setup intersection observer for videos with improved thresholds
+  // Setup intersection observer for videos
   useEffect(() => {
     if (videoObserver.current) {
       videoObserver.current.disconnect();
@@ -131,33 +110,17 @@ function VideoContent() {
         entries.forEach(entry => {
           const videoIndex = parseInt(entry.target.getAttribute('data-index') || '0', 10);
           
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+          if (entry.isIntersecting) {
             setActiveVideoIndex(videoIndex);
-            // Pause other videos
-            products.forEach((_, index) => {
-              if (index !== videoIndex) {
-                const videoElement = document.querySelector(`[data-index="${index}"] iframe`);
-                if (videoElement) {
-                  try {
-                    (videoElement as any).contentWindow?.postMessage(
-                      '{"event":"command","func":"pauseVideo","args":""}',
-                      '*'
-                    );
-                  } catch (error) {
-                    console.warn('Error pausing video:', error);
-                  }
-                }
-              }
-            });
-          } else if (!entry.isIntersecting && activeVideoIndex === videoIndex) {
+          } else if (activeVideoIndex === videoIndex) {
             setActiveVideoIndex(null);
           }
         });
       },
       {
         root: null,
-        rootMargin: '-10% 0px',
-        threshold: [0, 0.7, 1]
+        rootMargin: '0px',
+        threshold: 0.5
       }
     );
 
@@ -197,10 +160,8 @@ function VideoContent() {
   };
 
   // Helper để lấy tên brand từ brand_id
-  const getBrandName = (product: Product): string => {
-    if (product.brand) {
-      return typeof product.brand === 'string' ? product.brand : product.brand.title;
-    }
+  const getBrandName = (product: Product) => {
+    if (typeof product.brand === 'string') return product.brand;
     if (product.brand_id && brands.length > 0) {
       const found = brands.find(b => String(b.id) === String(product.brand_id));
       return found ? found.title : '';
@@ -226,34 +187,16 @@ function VideoContent() {
     );
   }
 
-  if (error) {
+  if (error || products.length === 0) {
     return (
       <div className="flex h-screen flex-col items-center justify-center p-4 text-center">
-        <h2 className="mb-4 text-xl font-bold">Không thể tải video</h2>
-        <p className="mb-6 text-gray-600">{error}</p>
+        <h2 className="mb-4 text-xl font-bold">Không thể tải sản phẩm</h2>
+        <p className="mb-6 text-gray-600">{error || 'Không tìm thấy sản phẩm nào'}</p>
         <button 
           onClick={() => router.push('/')}
           className="rounded-md bg-blue-600 px-4 py-2 text-white"
         >
           Quay lại Trang chủ
-        </button>
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center p-4 text-center">
-        <h2 className="mb-4 text-xl font-bold">Chưa có video sản phẩm</h2>
-        <p className="mb-6 text-gray-600">
-          Chúng tôi đang cập nhật video cho các sản phẩm. 
-          <br />Vui lòng quay lại sau.
-        </p>
-        <button 
-          onClick={() => router.push('/')}
-          className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-        >
-          Xem Sản phẩm
         </button>
       </div>
     );

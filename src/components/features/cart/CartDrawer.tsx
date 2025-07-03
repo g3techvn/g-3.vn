@@ -16,7 +16,7 @@ export interface CartDrawerProps {
 }
 
 const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
-  const { cart, updateQuantity, removeFromCart, totalPrice, error } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, totalPrice, error } = useCart();
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -41,7 +41,7 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
         )}
 
         <div className="mt-8">
-          {cart.length === 0 ? (
+          {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
               <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
               <p className="text-gray-500">Giỏ hàng trống</p>
@@ -49,7 +49,7 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
           ) : (
             <>
               <div className="space-y-4">
-                {cart.map((item) => (
+                {cartItems.map((item) => (
                   <div key={item.productId} className="flex gap-4 py-4 border-b">
                     <div className="relative w-20 h-20">
                       <Image

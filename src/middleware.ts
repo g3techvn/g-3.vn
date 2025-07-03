@@ -129,6 +129,14 @@ export async function middleware(request: NextRequest) {
       );
     }
 
+    // Get the pathname of the request (e.g. /, /about, /blog/first-post)
+    const path = request.nextUrl.pathname;
+
+    // Redirect /uu-dai to /voucher
+    if (path === '/uu-dai') {
+      return NextResponse.redirect(new URL('/voucher', request.url));
+    }
+
     // Return response with updated headers and session
     return response;
 
@@ -230,5 +238,6 @@ export const config = {
      * - api/public (public API routes)
      */
     '/((?!_next/static|_next/image|favicon.ico|public|api/public).*)',
+    '/uu-dai'
   ],
 }; 

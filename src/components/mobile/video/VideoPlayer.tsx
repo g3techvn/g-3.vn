@@ -1,9 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { PlayCircleIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/outline';
-
 interface VideoPlayerProps {
   videoUrl: string;
   isActive: boolean;
@@ -12,139 +8,36 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ videoUrl, isActive, isMuted, onToggleMute }: VideoPlayerProps) {
-  const [embedError, setEmbedError] = useState(false);
-  const [showEmbed, setShowEmbed] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 3;
-
   const getYouTubeId = (url: string) => {
-    try {
-      // Support more URL formats
-      const patterns = [
-        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/,
-        /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/,
-        /^.*(youtube.com\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
-      ];
-      
-      for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match && (match[2]?.length === 11 || match[1]?.length === 11)) {
-          return match[2] || match[1];
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Error parsing YouTube URL:', error);
-      return null;
-    }
+    return url || 'dQw4w9WgXcQ';
   };
 
-  const videoId = getYouTubeId(videoUrl);
-  
-  if (!videoId) {
-    return (
-      <div className="relative w-full h-full bg-gray-900 flex items-center justify-center">
-        <p className="text-white">Video không hợp lệ</p>
-      </div>
-    );
-  }
-
-  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  
-  // Auto-show embed when active
-  if (isActive && !showEmbed && !embedError) {
-    setShowEmbed(true);
-  }
-
-  // Show embed if active and no error
-  if (showEmbed && !embedError) {
-    return (
-      <div className="relative w-full h-full bg-black">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-          className="absolute inset-0 w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          title={`Video sản phẩm ${videoId}`}
-          onError={() => {
-            if (retryCount < MAX_RETRIES) {
-              setRetryCount(prev => prev + 1);
-              setTimeout(() => setShowEmbed(true), 1000); // Retry after 1 second
-            } else {
-              setEmbedError(true);
-            }
-          }}
-          onLoad={() => {
-            setRetryCount(0); // Reset retry count on successful load
-          }}
-        />
-        
-        {/* Mute toggle button */}
-        <button
-          onClick={onToggleMute}
-          className="absolute bottom-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
-        >
-          {isMuted ? (
-            <SpeakerXMarkIcon className="h-6 w-6" />
-          ) : (
-            <SpeakerWaveIcon className="h-6 w-6" />
-          )}
-        </button>
-      </div>
-    );
-  }
-
-  // Show thumbnail with play button as fallback
   return (
-    <div className="relative w-full h-full cursor-pointer" onClick={() => setShowEmbed(true)}>
-      <Image
-        src={thumbnailUrl}
-        alt="Video thumbnail"
-        fill
-        className="object-cover"
-        onError={() => {
-          // If maxres fails, try hqdefault
-          const img = document.querySelector(`img[src="${thumbnailUrl}"]`) as HTMLImageElement;
-          if (img && !img.src.includes('hqdefault')) {
-            img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-          }
-        }}
+    <div className="relative w-full h-full">
+      <iframe
+        src={`https://www.youtube.com/embed/${getYouTubeId(videoUrl)}?autoplay=${isActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${getYouTubeId(videoUrl)}`}
+        className="absolute inset-0 w-full h-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
       
-      {/* Play button overlay */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 hover:bg-opacity-30 transition-opacity">
-        <PlayCircleIcon className="w-20 h-20 text-white drop-shadow-lg" />
-      </div>
-      
-      {/* Error fallback */}
-      {embedError && (
-        <div className="absolute bottom-4 left-4 right-4">
-          <a
-            href={videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full bg-red-600 text-white text-center py-2 px-4 rounded hover:bg-red-700 transition-colors text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Xem video trên YouTube
-          </a>
-        </div>
+      {isActive && (
+        <button
+          onClick={onToggleMute}
+          className="absolute bottom-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+        >
+          {isMuted ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+          )}
+        </button>
       )}
-      
-      {/* Mute toggle for thumbnail view */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleMute();
-        }}
-        className="absolute bottom-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-      >
-        {isMuted ? (
-          <SpeakerXMarkIcon className="h-6 w-6" />
-        ) : (
-          <SpeakerWaveIcon className="h-6 w-6" />
-        )}
-      </button>
     </div>
   );
 } 
