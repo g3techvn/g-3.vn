@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
-import { useCart } from '@/features/cart/useCart';
+import { useCart } from '@/context/CartContext';
 import { formatCurrency } from '@/utils/helpers';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';

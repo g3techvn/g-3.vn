@@ -4,30 +4,6 @@ import type { NextRequest } from 'next/server';
 import { handleAuth } from '@/lib/auth/auth-middleware';
 import { securityLogger } from '@/lib/logger';
 
-// Routes that don't require authentication
-const PUBLIC_ROUTES = [
-  '/api/products',
-  '/api/categories',
-  '/api/brands',
-  '/api/sectors',
-  '/api/combo-products'
-];
-
-// Routes that require authentication  
-const PROTECTED_ROUTES = [
-  '/api/user',
-  '/api/orders',
-  '/api/user/orders',
-  '/api/user/rewards',
-  '/tai-khoan'
-];
-
-// Routes that require admin role
-const ADMIN_ROUTES = [
-  '/api/admin',
-  '/admin'
-];
-
 // Simplified domain validation for development
 function validateRequestOrigin(request: NextRequest): boolean {
   // In development, allow all requests
@@ -50,63 +26,20 @@ function validateRequestOrigin(request: NextRequest): boolean {
 // This middleware runs on every request
 export async function middleware(request: NextRequest) {
   try {
-    // Create a response early so we can modify headers
-    const response = NextResponse.next();
-
-    // Create Supabase client with response header mutation enabled
-    const supabase = createMiddlewareClient({ req: request, res: response });
-
-    // Refresh session if expired - will update response headers if successful
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession();
-
-    if (sessionError) {
-      console.error('❌ Session error in middleware:', sessionError);
-    }
-
-    // Log request details for debugging
-    console.log('🔍 Middleware request:', {
+    console.log('🔍 Middleware processing:', {
       url: request.url,
       method: request.method,
-      hasSession: !!session,
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll().map(c => c.name)
+      path: request.nextUrl.pathname
     });
 
-    // Check if the request path matches any protected routes
-    const requestPath = new URL(request.url).pathname;
-    const isProtectedRoute = PROTECTED_ROUTES.some(route => requestPath.startsWith(route));
-    const isAdminRoute = ADMIN_ROUTES.some(route => requestPath.startsWith(route));
+    // Create response early for header modifications
+    const response = NextResponse.next();
 
-    // If it's a protected route and there's no session, return 401
-    if (isProtectedRoute && !session) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { 
-          status: 401,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-
-    // If it's an admin route, check for admin role
-    if (isAdminRoute) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || user.user_metadata?.role !== 'admin') {
-        return new NextResponse(
-          JSON.stringify({ error: 'Unauthorized - Admin access required' }),
-          { 
-            status: 403,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      }
+    // Use centralized auth handler
+    const authResult = await handleAuth(request);
+    if (authResult) {
+      // handleAuth returned a response (redirect or error)
+      return authResult;
     }
 
     // Add security headers
@@ -117,35 +50,46 @@ export async function middleware(request: NextRequest) {
       'Permissions-Policy',
       'camera=(), microphone=(), geolocation=(), interest-cohort=()'
     );
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+    );
 
     // Add CORS headers for API routes
-    if (request.url.includes('/api/')) {
+    if (request.nextUrl.pathname.startsWith('/api/')) {
       response.headers.set('Access-Control-Allow-Credentials', 'true');
       response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_SITE_URL || '*');
-      response.headers.set('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT');
+      response.headers.set('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT,OPTIONS');
       response.headers.set(
         'Access-Control-Allow-Headers',
         'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
       );
+
+      // Handle preflight requests
+      if (request.method === 'OPTIONS') {
+        return new NextResponse(null, { status: 200, headers: response.headers });
+      }
     }
 
-    // Get the pathname of the request (e.g. /, /about, /blog/first-post)
+    // Handle route redirects
     const path = request.nextUrl.pathname;
-
+    
     // Redirect /uu-dai to /voucher
     if (path === '/uu-dai') {
       return NextResponse.redirect(new URL('/voucher', request.url));
     }
 
-    // Return response with updated headers and session
+    console.log('✅ Middleware completed successfully for:', path);
     return response;
 
   } catch (error) {
     console.error('❌ Error in middleware:', error);
     
-    // Return error response
     return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
+      JSON.stringify({ 
+        error: 'Internal Server Error',
+        message: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Server error'
+      }),
       { 
         status: 500,
         headers: {

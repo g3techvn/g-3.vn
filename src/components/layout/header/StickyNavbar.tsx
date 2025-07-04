@@ -49,26 +49,38 @@ export default function StickyNavbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch('/api/categories');
-        if (!res.ok) throw new Error('Lỗi khi tải danh mục');
         const data = await res.json();
-        const mapped = (data.product_cats || []).map((cat: ApiCategory) => ({
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Lỗi khi tải danh mục');
+        }
+        
+        if (!data.product_cats || !Array.isArray(data.product_cats)) {
+          throw new Error('Dữ liệu danh mục không hợp lệ');
+        }
+        
+        const mapped = data.product_cats.map((cat: ApiCategory) => ({
           name: cat.title,
           slug: cat.slug,
           image_url: cat.image_url || '/images/categories/default.jpg',
         }));
+        
         setCategories(mapped);
       } catch (err: unknown) {
+        console.error('Error fetching categories:', err);
         if (err instanceof Error) {
-          setError(err.message || 'Lỗi không xác định');
+          setError(err.message);
         } else {
-          setError('Lỗi không xác định');
+          setError('Lỗi không xác định khi tải danh mục');
         }
       } finally {
         setLoading(false);
       }
     };
+    
     fetchCategories();
   }, []);
 
@@ -275,4 +287,4 @@ export default function StickyNavbar() {
       </div>
     </div>
   );
-} 
+}

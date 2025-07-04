@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useCart } from '@/features/cart/useCart';
+import { useCart } from '@/context/CartContext';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { generatePDF } from '@/components/PDFGenerator';

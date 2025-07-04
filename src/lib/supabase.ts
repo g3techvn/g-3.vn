@@ -41,12 +41,48 @@ export const createServerClient = () => {
     return createClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: {
         autoRefreshToken: false,
-        persistSession: false, // Server không cần persist session
+        persistSession: false,
         detectSessionInUrl: false
       },
       global: {
         headers: {
           'User-Agent': 'G3-Furniture-Server/1.0'
+        },
+        fetch: async (url, options) => {
+          const maxRetries = 3;
+          let lastError = null;
+
+          for (let i = 0; i < maxRetries; i++) {
+            try {
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
+              const response = await fetch(url, { 
+                ...options,
+                signal: controller.signal
+              });
+
+              clearTimeout(timeout);
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response;
+            } catch (error) {
+              console.error(`Server client attempt ${i + 1} failed:`, error);
+              lastError = error;
+              
+              if (error instanceof Error && error.name === 'AbortError') {
+                console.log('Request timed out, retrying...');
+              }
+
+              // Wait before retrying (exponential backoff)
+              if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+              }
+            }
+          }
+          throw lastError;
         }
       }
     });
@@ -270,4 +306,4 @@ export const initializeDatabase = async () => {
   const supabase = createServerClient();
   await createStoredProcedure(supabase);
   await createUserProfilesTable(supabase);
-}; 
+};

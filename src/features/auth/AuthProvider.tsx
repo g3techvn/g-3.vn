@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { createBrowserClient } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useRouter, usePathname } from 'next/navigation';
+import { isProtectedRoute } from '@/lib/auth/auth-constants';
 
 interface User {
   id: string;
@@ -37,10 +38,7 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 // Routes that require authentication
-const PROTECTED_ROUTES = [
-  '/tai-khoan',
-  '/admin'
-];
+
 
 // Export the AuthProvider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -70,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Re-run auth check on route change for protected routes
-    if (pathname && PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
+    if (pathname && isProtectedRoute(pathname)) {
       checkAuth();
     }
   }, [pathname]);
@@ -264,8 +262,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Step 4: Handle protected routes
       console.log('📍 Step 4: Checking route protection...');
-      const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname?.startsWith(route));
-      if (isProtectedRoute && !user) {
+      const isProtected = pathname ? isProtectedRoute(pathname) : false;
+      if (isProtected && !user) {
         console.log('🔒 Protected route accessed without auth, redirecting...');
         router.push('/dang-nhap');
       }

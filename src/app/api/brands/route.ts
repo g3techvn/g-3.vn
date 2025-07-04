@@ -1,15 +1,26 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
-export async function GET(request: Request) {
+async function GET(request: Request) {
   try {
-    // Khởi tạo Supabase client
+    const cacheKey = 'brands_list';
+    const { cacheData } = await import('@/lib/cache');
+    
+    // Try to get from cache first
+    const cachedData = cacheData.get(cacheKey);
+    if (cachedData) {
+      console.log('Returning cached brands data');
+      return NextResponse.json({ brands: cachedData });
+    }
+
+    // If not in cache, query from database
     const supabase = createServerClient();
 
-    // Lấy danh sách thương hiệu từ bảng brands
     const { data: brands, error } = await supabase
       .from('brands')
-      .select('id, title, slug, created_at, image_url, image_square_url');
+      .select('id, title, slug, created_at, image_url, image_square_url')
+      .eq('status', true) // Only get active brands
+      .order('title', { ascending: true });
 
     if (error) {
       console.error('Supabase error:', error);
@@ -17,6 +28,11 @@ export async function GET(request: Request) {
         { error: `Lỗi khi truy vấn dữ liệu: ${error.message}` },
         { status: 500 }
       );
+    }
+
+    // Cache the result for 5 minutes
+    if (brands) {
+      cacheData.set(cacheKey, brands, 300); // 5 minutes
     }
 
     console.log(`Query successful, returning ${brands.length} brands`);
