@@ -9,21 +9,28 @@ interface RateLimitConfig {
 }
 
 export function getClientIP(request: NextRequest): string {
-  // Get client IP from various headers
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  const cfConnectingIP = request.headers.get('cf-connecting-ip');
-  
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  
-  if (realIP) {
-    return realIP;
-  }
-  
-  if (cfConnectingIP) {
-    return cfConnectingIP;
+  try {
+    // Get client IP from various headers
+    const headers = request?.headers;
+    if (!headers) return 'unknown';
+
+    const forwarded = headers.get('x-forwarded-for');
+    const realIP = headers.get('x-real-ip');
+    const cfConnectingIP = headers.get('cf-connecting-ip');
+    
+    if (forwarded) {
+      return forwarded.split(',')[0].trim();
+    }
+    
+    if (realIP) {
+      return realIP;
+    }
+    
+    if (cfConnectingIP) {
+      return cfConnectingIP;
+    }
+  } catch (error) {
+    console.error('Error getting client IP:', error);
   }
   
   // Fallback for unknown IP

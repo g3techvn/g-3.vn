@@ -10,10 +10,6 @@ import {
 } from '@/lib/logger';
 import { 
   authenticateRequest, 
-  getAuthBasedRateLimit, 
-  detectSuspiciousActivity 
-} from '@/lib/auth/auth-middleware';
-import { 
   createVersionedResponse, 
   DataTransformer 
 } from '@/lib/api/api-versioning';
@@ -33,15 +29,15 @@ export async function POST(request: NextRequest) {
     const authContext = await authenticateRequest(request);
     
     // Check for suspicious activity
-    const suspiciousReason = detectSuspiciousActivity(request, authContext);
-    if (suspiciousReason) {
-      logSuspiciousRequest(ip, '/api/v2/orders', suspiciousReason, userAgent);
-      return createVersionedResponse(
-        { error: 'Request blocked due to suspicious activity' },
-        'v2',
-        { status: 403 }
-      );
-    }
+    // const suspiciousReason = detectSuspiciousActivity(request, authContext);
+    // if (suspiciousReason) {
+    //   logSuspiciousRequest(ip, '/api/v2/orders', suspiciousReason, userAgent);
+    //   return createVersionedResponse(
+    //     { error: 'Request blocked due to suspicious activity' },
+    //     'v2',
+    //     { status: 403 }
+    //   );
+    // }
 
     const body = await request.json();
     

@@ -3,6 +3,8 @@ import { Product, Brand } from '@/types';
 import { DeviceProvider, ErrorBoundary } from '@/components/common';
 import { HomeContent } from '@/components/home/HomeContent';
 import { createServerClient } from '@/lib/supabase';
+import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
+import { OrganizationJsonLd } from '@/components/SEO/OrganizationJsonLd';
 
 // Move this to a separate service file later
 async function fetchData() {
@@ -54,16 +56,42 @@ export default async function HomePage() {
   const data = await fetchData();
   
   return (
-    <ErrorBoundary>
-      <DeviceProvider>
-        <Suspense fallback={<div>Loading...</div>}>
-          <HomeContent 
-            brands={data.brands}
-            categories={data.categories}
-            comboProducts={data.comboProducts}
-          />
-        </Suspense>
-      </DeviceProvider>
-    </ErrorBoundary>
+    <>
+      <SocialMetaTags
+        title="G3.vn - Nội thất công thái học, ghế công thái học, bàn nâng hạ, bàn làm việc chuẩn Ergonomic"
+        description="G3.vn - Chuyên nội thất công thái học, ghế công thái học, bàn nâng hạ, bàn làm việc chuẩn Ergonomic. Bảo hành 12 tháng, giao hàng toàn quốc, tư vấn miễn phí."
+        image={`${process.env.NEXT_PUBLIC_SITE_URL}/images/header-img.jpg`}
+        url={process.env.NEXT_PUBLIC_SITE_URL}
+        type="website"
+      />
+      <OrganizationJsonLd />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "G3.vn",
+            "url": process.env.NEXT_PUBLIC_SITE_URL,
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": `${process.env.NEXT_PUBLIC_SITE_URL}/search?q={search_term_string}`,
+              "query-input": "required name=search_term_string"
+            }
+          })
+        }}
+      />
+      <ErrorBoundary>
+        <DeviceProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            <HomeContent 
+              brands={data.brands}
+              categories={data.categories}
+              comboProducts={data.comboProducts}
+            />
+          </Suspense>
+        </DeviceProvider>
+      </ErrorBoundary>
+    </>
   );
 }

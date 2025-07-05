@@ -1,0 +1,40 @@
+{
+  "shippingCarriers": [
+    {
+      "id": 1,
+      "name": "Miễn phí giao hàng",
+      "code": "FREE",
+      "description": "Giao hàng miễn phí",
+      "is_active": true,
+      "created_at": "2025-06-23T08:21:57.348853+00:00",
+      "updated_at": "2025-06-23T08:21:57.348853+00:00"
+    },
+    {
+      "id": 2,
+      "name": "Giao hàng nhanh",
+      "code": "EXPRESS",
+      "description": "Giao hàng trong 24h",
+      "is_active": true,
+      "created_at": "2025-06-23T08:21:57.348853+00:00",
+      "updated_at": "2025-06-23T08:21:57.348853+00:00"
+    },
+    {
+      "id": 3,
+      "name": "Giao hàng tiêu chuẩn",
+      "code": "STANDARD",
+      "description": "Giao hàng trong 2-3 ngày",
+      "is_active": true,
+      "created_at": "2025-06-23T08:21:57.348853+00:00",
+      "updated_at": "2025-06-23T08:21:57.348853+00:00"
+    },
+    {
+      "id": 4,
+      "name": "Giao hàng tiết kiệm",
+      "code": "ECONOMY",
+      "description": "Giao hàng trong 4-5 ngày",
+      "is_active": true,
+      "created_at": "2025-06-23T08:21:57.348853+00:00",
+      "updated_at": "2025-06-23T08:21:57.348853+00:00"
+    }
+  ]
+}

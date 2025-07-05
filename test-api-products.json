@@ -1,0 +1,1446 @@
+{
+  "products": [
+    {
+      "id": 43,
+      "name": "Ghế ergonomic Sihoo M97 Doro",
+      "slug": "ergonomic-sihoo-m97-doro",
+      "description": "Ghế ergonomic Sihoo M97 Doro",
+      "price": 10000000,
+      "original_price": 11500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m97-doro/ergonomic-sihoo-m97-doro-g-3.vn-7.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m97-doro",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 497,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T07:03:57.816435+00:00",
+      "updated_at": "2025-05-26T07:03:57.816435",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 42,
+      "name": "Ghế Sihoo S2C (GL327)",
+      "slug": "ghe-ergonomic-sihoo-s2c",
+      "description": null,
+      "price": 2650000,
+      "original_price": 3100000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ghe-ergonomic-sihoo-s2c/ghe-ergonomic-sihoo-s2c-g-3-vn-9.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ghe-ergonomic-sihoo-s2c",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 363,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:56:53.990637+00:00",
+      "updated_at": "2025-05-26T06:56:53.990637",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 41,
+      "name": "Ghế Sihoo S1C (GL328)",
+      "slug": "ghe-ergonomic-sihoo-s1c",
+      "description": null,
+      "price": 2650000,
+      "original_price": 3200000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-s1c/ergonomic-sihoo-s1c-g-3.vn-6.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-s1c",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 756,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:54:39.337619+00:00",
+      "updated_at": "2025-05-26T06:54:39.337619",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 38,
+      "name": "Ghế Sihoo M90",
+      "slug": "ghe-ergonomic-sihoo-m90",
+      "description": "Ghế Sihoo M90",
+      "price": 4900000,
+      "original_price": 5500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m90c/ergonomic-sihoo-m90c-g-3.vn-8.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m90c",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 408,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:39:43.500329+00:00",
+      "updated_at": "2025-05-26T06:39:43.500329",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 37,
+      "name": "Ghế Sihoo M86 chính hãng",
+      "slug": "ghe-ergonomic-sihoo-m86",
+      "description": "Ghế ergonomic Sihoo M86 chính hãng",
+      "price": 2200000,
+      "original_price": 2500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ghe-ergonomic-sihoo-m86/ghe-ergonomic-sihoo-m86-g-3.vn-11.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ghe-ergonomic-sihoo-m86",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 767,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:34:10.476815+00:00",
+      "updated_at": "2025-05-26T06:34:10.476815",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 36,
+      "name": "Ghế Sihoo M59B",
+      "slug": "ghe-ergonomic-sihoo-m59b",
+      "description": "Ghế ergonomic Sihoo M59B",
+      "price": 3150000,
+      "original_price": 3500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m59b/ergonomic-sihoo-m59b-g-3.vn-7.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m59b",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 838,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:22:21.926625+00:00",
+      "updated_at": "2025-05-26T06:22:21.926625",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 34,
+      "name": "Ghế SIHOO x Xiaoqi X5 Pro cao cấp (Tặng kèm kê chân)",
+      "slug": "ghe-cong-thai-hoc-gaming-ergonomic-sihoo-x-xiaoqi-x5-pro-cao-cap",
+      "description": "Ghế SIHOO x Xiaoqi X5 Pro cao cấp (Tặng kèm kê chân)",
+      "price": 7800000,
+      "original_price": 8200000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-x-xiaoqi-x5-pro/ergonomic-sihoo-x-xiaoqi-x5-pro-g-3.vn-1.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-x-xiaoqi-x5-pro",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 553,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:18:26.930407+00:00",
+      "updated_at": "2025-05-26T06:18:26.930407",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 33,
+      "name": "Ghế SIHOO x Xiaoqi X5 bản thường",
+      "slug": "ghe-cong-thai-hoc-gaming-ergonomic-sihoo-xiaoqi-x5",
+      "description": "Ghế  Ergonomic SIHOO x Xiaoqi X5 bản thường",
+      "price": 5800000,
+      "original_price": 6500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-xiaoqi-x5/ergonomic-sihoo-xiaoqi-x5-g-3.vn-4.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-xiaoqi-x5",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 653,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T06:09:53.275264+00:00",
+      "updated_at": "2025-05-26T06:09:53.275264",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 32,
+      "name": "Ghế  Sihoo V1",
+      "slug": "ghe-ergonomic-sihoo-v1",
+      "description": "Ghế  Sihoo V1",
+      "price": 6300000,
+      "original_price": 7500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-v1/ergonomic-sihoo-v1-g-3.vn-1.jpg",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-v1",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 353,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T05:48:06.903506+00:00",
+      "updated_at": "2025-05-26T05:48:06.903506",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 31,
+      "name": "Ghế Sihoo M93",
+      "slug": "ghe-ergonomic-sihoo-m93",
+      "description": "Ghế ergonomic Sihoo M93",
+      "price": 5390000,
+      "original_price": 6500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m93/ergonomic-sihoo-m93-g-3.vn-4.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m93",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 950,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-26T05:10:51.470006+00:00",
+      "updated_at": "2025-05-26T05:10:51.470006",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 30,
+      "name": "Ghế Sihoo M91C BẢN TAY NÂNG CẤP 3D",
+      "slug": "ghe-ergonomic-sihoo-m91c",
+      "description": "Ghế công thái học ergonomic Sihoo M91C BẢN TAY NÂNG CẤP 3D",
+      "price": 4250000,
+      "original_price": 4750000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m91c/ergonomic-sihoo-m91c-g-3.vn-2.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m91c",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 510,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T14:42:45.515351+00:00",
+      "updated_at": "2025-05-22T14:42:45.515351",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 29,
+      "name": "Ghế Sihoo M77",
+      "slug": "ghe-cong-thai-hoc-ergonomic-sihoo-m77",
+      "description": "Ghế công thái học ergonomic Sihoo M77",
+      "price": 2390000,
+      "original_price": 3000000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m77/ergonomic-sihoo-m77-g-3.vn-6.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m77",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 348,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T14:38:04.940608+00:00",
+      "updated_at": "2025-05-22T14:38:04.940608",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 28,
+      "name": "Ghế Sihoo M57 / M57B (có gác chân)",
+      "slug": "ergonomic-sihoo-m57",
+      "description": "Ghế công thái học ergonomic Sihoo M57 / M57B (có gác chân)",
+      "price": 4000000,
+      "original_price": 5000000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m57/ergonomic-sihoo-m57-g-3.vn-1.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m57",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 845,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T12:40:58.278277+00:00",
+      "updated_at": "2025-05-22T12:40:58.278277",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 27,
+      "name": "Ghế Sihoo M18/M18 có gác chân",
+      "slug": "ergonomic-sihoo-m1",
+      "description": "Ghế công thái học ergonomic Sihoo M18/M18 có gác chân",
+      "price": 3300000,
+      "original_price": 4000000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-m18/ghe-ergonomic-sihoo-m18-g-3.vn-1.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-m18",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 635,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T12:30:31.603917+00:00",
+      "updated_at": "2025-05-22T12:30:31.603917",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 26,
+      "name": "Ghế  Sihoo Doro S100 (Bản chân nhôm cao cấp)",
+      "slug": "ghe-cong-thai-hoc-ergonomic-sihoo-doro-s100",
+      "description": "Ghế công thái học ergonomic Sihoo Doro S100 (Bản chân nhôm cao cấp)",
+      "price": 7190000,
+      "original_price": 8000000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-doro-s100/ergonomic-sihoo-doro-s100-g-3.vn-6.png",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-doro-s100",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 475,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T11:59:37.170501+00:00",
+      "updated_at": "2025-05-22T11:59:37.170501",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 25,
+      "name": "Ghế Sihoo AU (Sihoo Doro S300) full options",
+      "slug": "ghe-cong-thai-hoc-ergonomic-sihoo-au-sihoo-doro-s300",
+      "description": "Ghế công thái học ergonomic Sihoo AU (Sihoo Doro S300) bản 3.0 2024 version mới nhất full options",
+      "price": 11900000,
+      "original_price": 12500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/sihoo/ergonomic-sihoo-au-sihoo-doro-s300/ergonomic-sihoo-au-sihoo-doro-s300-g-3.vn-4.webp",
+      "cover_image_url": null,
+      "gallery_url": "products/sihoo/ergonomic-sihoo-au-sihoo-doro-s300",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 2,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 856,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-22T11:36:56.349244+00:00",
+      "updated_at": "2025-05-22T11:36:56.349244",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 2,
+        "title": "Sihoo"
+      }
+    },
+    {
+      "id": 17,
+      "name": "Ghế công thái học G-121",
+      "slug": "ghe-cth-g-121",
+      "description": "Ghế công thái học G-121",
+      "price": 2850000,
+      "original_price": 3950000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-121/ghe-cth-g-121-g-3.vn-1.jpeg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-121",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 395,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T04:06:32.770914+00:00",
+      "updated_at": "2025-05-16T04:06:32.770914",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 16,
+      "name": "Ghế công thái học G-99",
+      "slug": "ghe-cth-g-99",
+      "description": "Ghế công thái học G-99",
+      "price": 2350000,
+      "original_price": 2600000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-99/ghe-cth-g-99-g-3.vn-1.jpeg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-99",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 765,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T04:04:41.117615+00:00",
+      "updated_at": "2025-05-16T04:04:41.117615",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Ghế công thái học G-95",
+      "slug": "ghe-cth-g95",
+      "description": "Ghế công thái học G-95",
+      "price": 1490000,
+      "original_price": 1800000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-95/ghe-cth-g95-g-3.vn-3.jpg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-95",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 235,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T04:00:19.433511+00:00",
+      "updated_at": "2025-05-16T04:00:19.433511",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Ghế công thái học G-26",
+      "slug": "ghe-cth-g-26",
+      "description": "Ghế công thái học G-26",
+      "price": 1450000,
+      "original_price": 1700000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-26/ghe-cth-g-26-g-3.vn-8.jpeg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-26",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 323,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T03:57:04.310493+00:00",
+      "updated_at": "2025-05-16T03:57:04.310493",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Ghế công thái học G-25",
+      "slug": "ghe-cth-g-25",
+      "description": "Ghế công thái học G-25",
+      "price": 1350000,
+      "original_price": 1500000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-25/ghe-cong-thai-hoc-g-25-g-3.vn-1.jpg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-25",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 454,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T03:54:00.218583+00:00",
+      "updated_at": "2025-05-16T03:54:00.218583",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Ghế công thái học G-24",
+      "slug": "ghe-cth-g-24",
+      "description": "Ghế công thái học G-24",
+      "price": 950000,
+      "original_price": 1200000,
+      "image_url": "https://jjraznkvgfsgqrqvlcwo.supabase.co/storage/v1/object/public/g3tech/products/g3/g-24/ghe-cong-thai-hoc-g-24-g-3.vn-5.jpg",
+      "cover_image_url": null,
+      "gallery_url": "products/g3/g-24",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 5,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 967,
+      "thong_so_ky_thuat": null,
+      "tinh_nang": null,
+      "loi_ich": null,
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-16T03:43:59.093854+00:00",
+      "updated_at": "2025-05-16T03:43:59.093854",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 5,
+        "title": "G3-Tech"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Kê chân Gami Enjoy",
+      "slug": "ke-chan-cong-thai-hoc-gami-enjoy",
+      "description": "Kê chân Gami Enjoy nằm trong hệ sinh thái công thái học của thương hiệu Gami. Được thiết kế có chiều cao phù hợp với thể trạng người Việt Nam",
+      "price": 420000,
+      "original_price": 450000,
+      "image_url": "https://product.hstatic.net/200000912647/product/6_721953c8d06f4e2eb263362b0d4c9c69_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ke-chan-cong-thai-hoc-gami-enjoy",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 1,
+      "pd_cat_id": 4,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 567,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Chất liệu",
+          "value": "Chất liệu HIPS (High Impact Polystyrene) là loại hạt nhựa không chứa chất độc hại, không mùi. Đặc biệt, không gian hạt nhựa không cho phép vi khuẩn sinh trưởng và phát triển. Được cải tiến với độ bền va đập cao so với các loại nhựa Polystyrene thông thường."
+        },
+        {
+          "title": "Cấu trúc khung",
+          "value": "2 mảnh bập bênh độc lập một cách dễ dàng một góc 17 độ giúp thư giãn cổ chân"
+        },
+        {
+          "title": "Thiết kế",
+          "value": "Với con lăn và hạt massage trên bề mặt giúp lưu thông máu"
+        },
+        {
+          "title": "Chiều cao",
+          "value": "Chiều cao kê chân thay đổi linh động tùy thể trạng từng người với 2 tấm lót dày dặn cho mỗi chân từ 125mm tới 150mm"
+        },
+        {
+          "title": "Tấm lót cao su",
+          "value": "Đệm chống trượt bằng cao su chất lượng cao, tiết diện lớn ngăn ngừa trầy xước và bám dính siêu chắc chắn trên các loại nền"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Kê chân chuẩn công thái học",
+        "Chất liệu nhựa HIPS cao cấp và bền bỉ mà chưa có kê chân nào trên thị trường có.",
+        "Chất liệu HIPS (High Impact Polystyrene) là loại hạt nhựa không chứa chất độc hại, không mùi. Đặc biệt, không gian hạt nhựa không cho phép vi khuẩn sinh trưởng và phát triển. Được cải tiến với độ bền va đập cao so với các loại nhựa Polystyrene thông thường.",
+        "Tải trọng tối đa 100kg",
+        "Tải trọng khuyến nghị: 30kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 18 tháng"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-12T01:53:24.794338+00:00",
+      "updated_at": "2025-05-12T01:53:24.794338",
+      "category": {
+        "id": 4,
+        "title": "Phụ kiện"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Ghế Gami Metic",
+      "slug": "gami-metic",
+      "description": "Ghế công thái học cao cấp G3-TECH là sự kết hợp hoàn hảo giữa thiết kế hiện đại và công nghệ tiên tiến, mang lại trải nghiệm ngồi vượt trội cho người dùng. Sản phẩm được nghiên cứu kỹ lưỡng nhằm hỗ trợ tối đa cho cột sống, giảm thiểu các vấn đề về sức khỏe thường gặp ở dân văn phòng như đau lưng, mỏi cổ, và căng thẳng cơ bắp.\n",
+      "price": 4490000,
+      "original_price": 4790000,
+      "image_url": "https://product.hstatic.net/200000912647/product/1_7c6dda169db045579b693faf7fb8e409_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-metic",
+      "video_url": "",
+      "rating": 5,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 232,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Bộ cơ khí",
+          "value": "FluidMotion System cao cấp"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 130 độ"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Lưới Krall + Roth (Đức) (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Trượt mâm",
+          "value": "Trượt tiến lùi biên độ 5cm"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "HeadFlex 8D thông minh"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Cấu trúc twin-back với công nghệ Multi-flex chỉnh 2 hướng, cụm lưng chỉnh lưng lên xuống và gập ra trước sau linh động"
+        },
+        {
+          "title": "Kê tay",
+          "value": "3D chỉnh lên xuống, trước sau, xoay trái phải"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 3 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": " <div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/5_ab9a8f1fc68c4e68a133480fd6203e41.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4  p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n            Thiết kế lưng kép<br />\n            Twin-back Multi-flex\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n            Cấu trúc lưng kép Twin-back với công nghệ Multi-flex, cụm lưng chỉnh lưng lên xuống nhiều nấc và gập trước sau linh động, độc lập 2 mảnh lưng giúp làm giảm áp lực lên cột sống\n          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Metic</h2>\n        <p class=\"text-base text-gray-600 mb-6\">Chiếc ghế của sự tỉ mỉ</p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_4071ed48b6114d03a74c9f0f027c1f8e.png\" alt=\"Chất liệu lưới Krall + Roth\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chất liệu lưới Krall + Roth</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Lưới ghế nhập khẩu từ Đức đạt chứng chỉ OEKO-TEX® STANDARD 100.</p>\n            <p class=\"text-gray-700 text-base\">Lưới đàn hồi tốt, thoáng khí thấm hút mồ hôi tạo cảm giác êm ái và thoáng mát, thân thiện với người dùng</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2_b19fe66044c549df893d702937b21f86.png\" alt=\"Tựa cổ HeadFlex 6D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ HeadFlex 6D</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế HeadFlex 8D rộng rãi và chỉnh được 8 hướng linh động</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/3_82e7009b785242f8b331cea505893c30.png\" alt=\"Kê tay 3D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Kê tay 3D</h3>\n            <p class=\"text-gray-700 text-base\">Kê tay chỉnh lên xuống, tiến lùi và xoay trái phải</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/4.png\" alt=\"Chân ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chân ghế</h3>\n            <p class=\"text-gray-700 text-base\">Chân ghế bằng kim loại bền chắc, không bị biến dạng.</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5_57654aeace924b268a00ed83fd8b3d87.png\" alt=\"Tựa lưng\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa lưng</h3>\n            <p class=\"text-gray-700 text-base\">Cấu trúc lưng kép, cụm lưng chỉnh linh hoạt, hỗ trợ cột sống tối ưu.</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/6_5d93d414bec3491986f647301035a55a.png\" alt=\"Trượt mâm\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Trượt mâm</h3>\n            <p class=\"text-gray-700 text-base\">Mâm ghế trượt tiến lùi 5cm.</p>\n          </div>\n        </div>\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/metic__2__54f71376c6e642888f437f4453214eef.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/metic_fbf9c3e57d4449579d3007a5803ed046.png\" alt=\"Sử dụng 2\" class=\"rounded-xl\" />\n      </div>\n      <h2 class=\"text-xl font-bold mb-4 text-center\">Thông số kích thước</h2>\n      <div class=\"bg-gray-100 rounded-xl flex flex-col items-center justify-center mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/thiet_ke_chua_co_ten__1__b7bbbe47f2dc4117ad642d828fccdd2a.png\" alt=\"Thông số kích thước\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-12T01:28:35.413253+00:00",
+      "updated_at": "2025-05-12T01:28:35.413253",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Ghế Gami Core",
+      "slug": "gami-core",
+      "description": "Ghế công thái học cao cấp G3-TECH là sự kết hợp hoàn hảo giữa thiết kế hiện đại và công nghệ tiên tiến, mang lại trải nghiệm ngồi vượt trội cho người dùng. Sản phẩm được nghiên cứu kỹ lưỡng nhằm hỗ trợ tối đa cho cột sống, giảm thiểu các vấn đề về sức khỏe thường gặp ở dân văn phòng như đau lưng, mỏi cổ, và căng thẳng cơ bắp.\n\nVới khung ghế chắc chắn, lưới thoáng khí đạt chuẩn quốc tế và các bộ phận điều chỉnh linh hoạt, ghế phù hợp cho nhiều đối tượng sử dụng, từ nhân viên văn phòng, game thủ đến học sinh, sinh viên. Thiết kế tối ưu giúp người dùng duy trì tư thế ngồi đúng, tăng hiệu quả làm việc và học tập trong thời gian dài.\n\nNgoài ra, sản phẩm còn được trang bị các tính năng thông minh như tựa đầu 8D, kê tay xoay 360 độ, trượt mâm linh hoạt và cơ chế ngả đa cấp, đáp ứng mọi nhu cầu cá nhân hóa trải nghiệm ngồi.",
+      "price": 2050000,
+      "original_price": 2250000,
+      "image_url": "https://product.hstatic.net/200000912647/product/1_e71646180bb44ce6bd7b4515caace2ee_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-core",
+      "video_url": null,
+      "rating": 4.5,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 487,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Bộ điều khiển thông minh",
+          "value": "Multi Button bằng nút"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 4 cấp, giữ khóa ngả ở mỗi cấp"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Trượt mâm",
+          "value": "Trượt tiến lùi biên độ 5cm"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực WITHUS Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "HeadFlex 8D thông minh"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Butterfit 2D cánh bướm + 4 lò xo chỉnh lên xuống nhiều nấc ôm trọn thắt lưng"
+        },
+        {
+          "title": "Kê tay",
+          "value": "Xoay360 độ giúp đỡ khuỷ tay tốt nhất"
+        }
+      ],
+      "tinh_nang": "Hệ thống điều chỉnh độ cao thông minh, phù hợp với nhiều chiều cao bàn làm việc.\nĐệm lưng và tựa đầu có thể điều chỉnh linh hoạt, hỗ trợ tối đa cho cột sống cổ và lưng.\nChất liệu lưới Solidmesh USA đạt chứng chỉ OEKO-TEX® STANDARD 100, đảm bảo an toàn và thoáng khí.\nKhung chân hợp kim nhôm bền bỉ, chống rỉ sét, chịu tải trọng lớn.\nTrượt mâm biên độ 5cm, dễ dàng điều chỉnh vị trí ngồi phù hợp với chiều dài chân.\nKê tay xoay 360 độ, hỗ trợ tối ưu cho khủy tay khi làm việc, học tập hoặc giải trí.\nCơ chế ngả lưng đa cấp, giữ khóa an toàn ở từng vị trí, giúp thư giãn hiệu quả.\nThiết kế hiện đại, màu sắc sang trọng, phù hợp với nhiều không gian nội thất.",
+      "loi_ich": [
+        "Sở hữu những tính năng cốt lõi nhất của 1 chiếc ghế công thái học",
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 2 năm"
+      ],
+      "huong_dan": "Điều chỉnh chiều cao ghế và tựa đầu phù hợp với vóc dáng trước khi sử dụng.\nVệ sinh bề mặt lưới và khung ghế định kỳ bằng khăn mềm, tránh hóa chất tẩy rửa mạnh.\nKiểm tra các khớp xoay, ốc vít định kỳ để đảm bảo an toàn khi sử dụng lâu dài.\nKhông để ghế tiếp xúc trực tiếp với ánh nắng mặt trời hoặc môi trường ẩm ướt kéo dài.",
+      "comment": null,
+      "content": " <div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/anh_sp_3__1__a8939337465042ed85f7bd5065f838bd.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4 p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n            Thiết kế lưng<br />\n            Twin-back <br />\n            FlexSupport\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n            Tựa lưng của Gami Core được thiết kế 2 mảnh thông minh giúp nâng đỡ thắt lưng giúp bạn ngồi lâu vẫn cảm thấy thoải mái, đây là một trong những tính năng hiếm có của những ghế trong phân khúc chỉ 2 triệu đồng\n          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Core</h2>\n        <p class=\"text-base text-gray-600 mb-6\">6 điểm nổi bật của Gami Core</p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2_f36df4da65e24575910188c455a9be9a.png\" alt=\"Chất liệu lưới và nệm\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chất liệu lưới và nệm Krall + Roth</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Lưng lưới nhập khẩu từ Đức đạt chứng chỉ OEKO-TEX® STANDARD 100.</p>\n            <p class=\"text-gray-700 text-base\">Mâm nệm đàn hồi tốt thoáng khí thấm hút mồ hôi tạo cảm giác êm ái và thoáng mát.</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_947192a5be9a4214a2e1ba3f0c35d7a8.png\" alt=\"Tựa cổ\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế 2D Comfort rộng rãi và trải dài về bề ngang giúp tạo cảm giác thoải mái cho phần cổ và vai gáy nhất khi ngồi</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/3_413fcdf9842d4debb836f8b980abbbc8.png\" alt=\"Cơ chế ngả\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Cơ chế ngả</h3>\n            <p class=\"text-gray-700 text-base\">Ngả lên tới 128 độ một cách chắc chắn và thoải mái</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/4.png\" alt=\"Chân ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chân ghế</h3>\n            <p class=\"text-gray-700 text-base\">Một trong những chiếc ghế hiếm hoi sở hữu chân ghế bằng hợp kim nhôm không rỉ trong phần khúc 2 triệu</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5.png\" alt=\"Tựa lưng\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa lưng</h3>\n            <p class=\"text-gray-700 text-base\">Tựa lưng Twin-back công nghệ Flexsupport</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/anh_tinh_nang_focus_v2__1_.png\" alt=\"Bộ cơ khí\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Bộ cơ khí</h3>\n            <p class=\"text-gray-700 text-base\">FluidMotion System cao cấp</p>\n          </div>\n        </div>\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/core__1_.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/core_1163c8e2969f423d8f6fa574a0856883.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Ghế Gami Crom (Bản All Black)",
+      "slug": "gami-crom-all-black",
+      "description": "Ghế công thái học Gami Crom phiên bản All Black, thiết kế sang trọng, đẳng cấp.",
+      "price": 5990000,
+      "original_price": 6390000,
+      "image_url": "https://product.hstatic.net/200000912647/product/1_5b197650a67f428b87eeed2ce712480f_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-crom-all-black",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 368,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Bộ điều khiển thông minh",
+          "value": "Multi Button bằng nút"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 4 cấp, giữ khóa ngả ở mỗi cấp"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Trượt mâm",
+          "value": "Trượt tiến lùi biên độ 5cm"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực WITHUS Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "HeadFlex 8D thông minh"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Butterfit 2D cánh bướm + 4 lò xo chỉnh lên xuống nhiều nấc ôm trọn thắt lưng"
+        },
+        {
+          "title": "Kê tay",
+          "value": "Xoay 360 độ giúp đỡ khủy tay tốt nhất"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Phiên bản đen toàn bộ",
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 12 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": null,
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Ghế Gami Crom (Phiên bản lưng Carbon)",
+      "slug": "gami-crom-carbon",
+      "description": "Ghế công thái học Gami Crom phiên bản lưng Carbon, nhẹ và chắc chắn, hỗ trợ lưng tối đa.",
+      "price": 6890000,
+      "original_price": 7290000,
+      "image_url": "https://product.hstatic.net/200000912647/product/6_7256181dc0e040518daaaf210464741f_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-crom-carbon",
+      "video_url": null,
+      "rating": 4.8,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 673,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Chất liệu Carbon",
+          "value": "Phiên bản màu Metal phần lưng được làm từ Carbon"
+        },
+        {
+          "title": "Bộ điều khiển thông minh",
+          "value": "Multi Button bằng nút"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 4 cấp, giữ khóa ngả ở mỗi cấp"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Trượt mâm",
+          "value": "Trượt tiến lùi biên độ 5cm"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực WITHUS Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "HeadFlex 8D thông minh"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Butterfit 2D cánh bướm + 4 lò xo chỉnh lên xuống nhiều nấc ôm trọn thắt lưng"
+        },
+        {
+          "title": "Kê tay",
+          "value": "Xoay 360 độ giúp đỡ khủy tay tốt nhất"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Phiên bản màu Metal",
+        "Lưng ghế sử dụng chất liệu Carbon",
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 12 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": " <div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/72.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4 p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n            Thiết kế lưng<br />\n            Butterfit 2D chất liệu Carbon\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n            Thiết kế 3 mảnh thông minh gồm mảnh trên có thể chỉnh lên xuống 5cm. Phần cụm đỡ lưng dưới thiết kế chia làm 2 mảnh cánh bướm Butterfit 2D kết hợp cụm 4 lò xo ôm trọn phần thắt lưng, đây là công nghệ cao cấp lần đầu tiên có ở 1 chiếc ghế giá tầm trung\n          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Crom</h2>\n        <p class=\"text-base text-gray-600 mb-6\">Chiếc ghế biểu tượng của Gami</p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/_anh_tinh_nang_gami_crom_metal.png\" alt=\"Tựa lưng Carbon\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa lưng Carbon</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Sử dụng chất liệu Carbon cao cấp</p>\n            <p class=\"text-gray-700 text-base\">Phần cụm đỡ lưng dưới thiết kế 2 mảnh cánh bướm Butterfit 2D + cụm 4 lò xo ôm trọn phần thắt lưng</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_8831e4364c83432ead793a012d06b8f5.png\" alt=\"Tựa cổ HeadFlex 8D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ HeadFlex 8D</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế HeadFlex 8D rộng rãi và chỉnh được 8 hướng linh động</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/4_fbe471df721346dc9f069529501eedae.png\" alt=\"Bộ điều khiển\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Bộ điều khiển</h3>\n            <p class=\"text-gray-700 text-base\">Multi Button điều khiển bằng nút</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/3_2d260e3cef35446385d3040557756370.png\" alt=\"Tay ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tay ghế</h3>\n            <p class=\"text-gray-700 text-base\">Tay ghế xoay 360 độ</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2_08e75e0e9b3040be889eb478fe43188f.png\" alt=\"Lưới ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Lưới ghế</h3>\n            <p class=\"text-gray-700 text-base\">Lưới solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100) bền bỉ và thân thiện với người dùng</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/6_0412d7a7233b4357be6f144e8bcb81d4.png\" alt=\"Trượt mâm\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Trượt mâm</h3>\n            <p class=\"text-gray-700 text-base\">Mâm ghế trượt tiến lùi 5cm</p>\n          </div>\n        </div>\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/crom__2__b0d7d6a354fe444a99215207a3a92cfd.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/crom_01a5f6dfc29d4756a408daf8946bf6a6.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n     \n      <h2 class=\"text-xl font-bold mb-4 text-center\">Thông số kích thước</h2>\n      <p class=\"text-center text-gray-700 text-base mb-1\">Bản vẽ kích thước của ghế cho bạn nếu cần, bao gồm cả kích thước hộp và trọng lượng của ghế.</p>\n\n      <div class=\"bg-gray-100 rounded-xl  flex flex-col items-center justify-center mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/thong_so_gm_crom.png\" alt=\"Thông số kích thước\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Ghế Gami Crom Pro",
+      "slug": "gami-crom-pro",
+      "description": "Ghế công thái học Gami Crom Pro, phiên bản cao cấp nhất, tích hợp nhiều tính năng hiện đại.",
+      "price": 12900000,
+      "original_price": 13500000,
+      "image_url": "https://product.hstatic.net/200000912647/product/crom_pro__1__d1e41a2442e84df1b2d7ae01cdcd883d_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-crom-pro",
+      "video_url": null,
+      "rating": 5,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 345,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Khung ghế",
+          "value": "Toàn bộ khung ghế được làm bằng hợp kim nhôm nguyên khối. Phần lưng được làm từ Carbon cao cấp"
+        },
+        {
+          "title": "Bộ điều khiển thông minh",
+          "value": "Mono Control tích hợp toàn bộ trên 1 cần gạt"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 9 cấp, giữ khóa ngả ở mỗi cấp"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Mâm ghế",
+          "value": "Tùy chỉnh 3 hướng Slideseat 3D Pro"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực WITHUS Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "HeadFlex 8D thông minh"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Butterfit 2D cánh bướm + 4 lò xo chỉnh lên xuống nhiều nấc ôm trọn thắt lưng"
+        },
+        {
+          "title": "Kê tay",
+          "value": "Xoay 360 độ giúp đỡ khủy tay tốt nhất"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Khung hợp kim nguyên khối",
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 12 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": "<div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/anh_sp_3__2_.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4 p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n            Thiết kế lưng<br />\n            Butterfit 2D\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n            Thiết kế 3 mảnh thông minh gồm mảnh trên có thể chỉnh lên xuống 5cm. Phần cụm đỡ lưng dưới thiết kế chia làm 2 mảnh cánh bướm Butterfit 2D kết hợp cụm 4 lò xo ôm trọn phần thắt lưng\n          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Crom Pro</h2>\n        <p class=\"text-base text-gray-600 mb-6\">Chiếc ghế cao cấp nhất của Gami</p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5_0ba8ccfd3a1c463c95133ddeff430b1f.png\" alt=\"Khung hợp kim nhôm nguyên khối\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Khung hợp kim nhôm nguyên khối + Tựa lưng Butterfit Carbon</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Sự dụng chất liệu Carbon cao cấp</p>\n            <p class=\"text-gray-700 text-base\">Phần cụm đỡ lưng dưới thiết kế 2 mảnh cánh bướm Butterfit 2D + cụm 4 lò xo ôm trọn phần thắt lưng</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_a2f62ce41da84f74bb85462977b2d18e.png\" alt=\"Tựa cổ HeadFlex 8D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ HeadFlex 8D</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế HeadFlex 8D rộng rãi và chỉnh được 8 hướng linh động</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/6_4afc7e7a20234391ab655f554b5c32d1.png\" alt=\"Bộ điều khiển\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Bộ điều khiển</h3>\n            <p class=\"text-gray-700 text-base\">Mono Control tích hợp trên 1 cần gạt</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/3_c1292da837844567aab653886f57312d.png\" alt=\"Tay ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tay ghế</h3>\n            <p class=\"text-gray-700 text-base\">Tay ghế hợp kim nhôm nguyên khối</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2_e1385df9876643cda3849b082061d931.png\" alt=\"Lưới ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Lưới ghế</h3>\n            <p class=\"text-gray-700 text-base\">Lưới solidmesh USA (chứng chỉ OEKO-TEX® STANDARD 100) bền bỉ và thân thiện với người dùng</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5_8e5a8cfd607f42ba8a2361c687a85a96.png\" alt=\"Trượt và lật mâm ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Trượt và lật mâm ghế</h3>\n            <p class=\"text-gray-700 text-base\">Mâm ghế trượt tiến lùi và lật nghiêng về trước giúp giảm áp lực thắt lưng</p>\n          </div>\n        </div>\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/crom_pro_a5a2b739d0ec4feca3bc339871337f66.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/crom_pro__2__abc05be792ff4768ab557cbe2a8dd453.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n     \n      <h2 class=\"text-xl font-bold mb-4 text-center\">Thông số kích thước</h2>\n      <p class=\"text-center text-gray-700 text-base mb-1\">Bản vẽ kích thước của ghế cho bạn nếu cần, bao gồm cả kích thước hộp và trọng lượng của ghế.</p>\n\n      <div class=\"bg-gray-100 rounded-xl  flex flex-col items-center justify-center mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/thong_so_gm_crom_pro.png\" alt=\"Thông số kích thước\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Ghế Gami Focus V1",
+      "slug": "gami-focus-v1",
+      "description": "Ghế công thái học Gami Focus V1, thiết kế tập trung vào sự thoải mái và hỗ trợ lưng.",
+      "price": 2690000,
+      "original_price": 2990000,
+      "image_url": "https://product.hstatic.net/200000912647/product/7_ef0717654a27469f993e2556267da3e1_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/gami-focus-v1",
+      "video_url": null,
+      "rating": 4.3,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 786,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Bộ cơ khí",
+          "value": "FluidMotion System cao cấp"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng lên tới 128 độ"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Lưới Krall + Roth (Đức) (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Chất liệu nệm",
+          "value": "Đệm AirFlow Foam cao cấp thoáng khí, đàn hồi tốt, thấm hút mồ hôi và dày tới gần 10cm (chứng chỉ OEKO-TEX Standard 100)"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "2DComfort thiết kế rộng rãi"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Twin-back với công nghệ FlexSupport"
+        },
+        {
+          "title": "Kê tay",
+          "value": "2D chỉnh lên xuống linh động"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 3 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": "  <div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/1_5d6143de9b07412086b11bcebbf3eeee.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4 p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n            Thiết kế lưng<br />\n            Twin-back <br />\n            FlexSupport\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n            Tựa lưng của Gami Focus được thiết kế 2 mảnh thông minh giúp nâng đỡ thắt lưng giúp bạn ngồi lâu vẫn cảm thấy thoải mái, đây là một trong những tính năng hiếm có của những ghế trong phân khúc 3 triệu đồng\n          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Focus V1</h2>\n        <p class=\"text-base text-gray-600 mb-6\">Phiên bản mâm nệm tháng khí cao cấp</p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2_f36df4da65e24575910188c455a9be9a.png\" alt=\"Chất liệu lưới Krall + Roth\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chất liệu lưới và nệm Krall + Roth</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Lưng lưới nhập khẩu từ Đức đạt chứng chỉ OEKO-TEX® STANDARD 100.</p>\n            <p class=\"text-gray-700 text-base\">Mâm nệm đàn hồi tốt thoáng khí thấm hút mồ hôi tạo cảm giác êm ái và thoáng mát.</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_1ee84807ab584436b170c93c28857c9d.png\" alt=\"Tựa cổ HeadFlex 6D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế 2D Comfort rộng rãi và trải dài về bề ngang giúp tạo cảm giác thoải mái cho phần cổ và vai gáy nhất khi ngồi</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/anh_tinh_nang_focus_v1.png\" alt=\"Kê tay 3D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Kê tay 2D</h3>\n            <p class=\"text-gray-700 text-base\">Kê tay chỉnh lên xuống linh động</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/4.png\" alt=\"Chân ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chân ghế</h3>\n            <p class=\"text-gray-700 text-base\">Một trong những chiếc ghế hiếm hoi sở hữu chân ghế bằng hợp kim nhôm không rỉ trong phần khúc 3 triệu</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5.png\" alt=\"Tựa lưng\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa lưng</h3>\n            <p class=\"text-gray-700 text-base\">Tựa lưng Twin-back công nghệ Flexsupport</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/anh_tinh_nang_focus_v2__1_.png\" alt=\"Bộ cơ khí\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Bộ cơ khí</h3>\n            <p class=\"text-gray-700 text-base\">FluidMotion System cao cấp</p>\n          </div>\n        </div>\n      </div>\n      <div class=\"w-full mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/focus_dem_820438db6c414a22bdfa192013742598.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n      <div class=\"w-full mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/focus_dem__2__86d9f40ff0214d909c19ec427cc3c0de.png\" alt=\"Sử dụng 2\" class=\"rounded-xl\" />\n      </div>\n     \n      <h2 class=\"text-xl font-bold mb-4 text-center\">Thông số kích thước</h2>\n      <p class=\"text-center text-gray-700 text-base mb-1\">Bản vẽ kích thước của ghế cho bạn nếu cần, bao gồm cả kích thước hộp và trọng lượng của ghế.</p>\n\n      <div class=\"bg-gray-100 rounded-xl  flex flex-col items-center justify-center mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/thiet_ke_chua_co_ten__12_.png\" alt=\"Thông số kích thước\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Ghế Gami Focus V2 Full lưới",
+      "slug": "gami-focus-v2",
+      "description": "Ghế công thái học Gami Focus V2 Full lưới, thoáng mát và hỗ trợ tối đa tư thế ngồi.",
+      "price": 3590000,
+      "original_price": 3890000,
+      "image_url": "https://product.hstatic.net/200000912647/product/1_7c74b7ffccb54152ad0ac3272f18d5ff_large.png",
+      "cover_image_url": null,
+      "gallery_url": "products/gami/ghe-gami-focus-v2",
+      "video_url": "c2F2An3YU04",
+      "rating": 4.6,
+      "brand_id": 1,
+      "pd_cat_id": 1,
+      "feature": true,
+      "bestseller": true,
+      "status": true,
+      "is_featured": false,
+      "is_new": false,
+      "sold_count": 365,
+      "thong_so_ky_thuat": [
+        {
+          "title": "Bộ cơ khí",
+          "value": "FluidMotion System cao cấp"
+        },
+        {
+          "title": "Cơ chế ngả",
+          "value": "Ngả lưng true title 3 cấp tối đa 128 độ có khóa ngả"
+        },
+        {
+          "title": "Chất liệu lưới",
+          "value": "Lưới Krall + Roth (Đức) (chứng chỉ OEKO-TEX® STANDARD 100)"
+        },
+        {
+          "title": "Chất liệu chân",
+          "value": "Chân hợp kim nhôm bền bỉ chống rỉ"
+        },
+        {
+          "title": "Điều chỉnh kháng lực + Trụ thủy lực",
+          "value": "Cơ chế kháng lực Tension Control linh hoạt + Trụ thủy lực Class 4"
+        },
+        {
+          "title": "Tựa đầu",
+          "value": "2DComfort thiết kế rộng rãi"
+        },
+        {
+          "title": "Tựa lưng",
+          "value": "Twin-back với công nghệ FlexSupport"
+        },
+        {
+          "title": "Kê tay",
+          "value": "3D chỉnh 3 hướng: lên xuống, xoay trái phải và trượt tiến lùi"
+        }
+      ],
+      "tinh_nang": null,
+      "loi_ich": [
+        "Phiên bản full lưới",
+        "Tải trọng tối đa 150kg",
+        "Lắp đặt đơn giản",
+        "Bảo hành 3 năm"
+      ],
+      "huong_dan": null,
+      "comment": null,
+      "content": " <div class=\"container px-4 mx-auto py-4 rounded-xl my-4\">\n      <h1 class=\"text-2xl md:text-3xl font-bold text-center mb-2\">VỮNG TƯ THẾ - VỮNG TƯƠNG LAI</h1>\n      <div class=\"relative rounded-xl mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/5_ab9a8f1fc68c4e68a133480fd6203e41.png\" alt=\"Banner\" class=\"w-full object-cover\" />\n        <div class=\"absolute top-4 left-4 p-6 rounded-xl max-w-md\">\n          <h2 class=\"text-4xl font-extrabold mb-4 leading-tight\">\n          Thiết kế lưng<br />\n            Twin-back <br />\n            FlexSupport\n          </h2>\n          <p class=\"mb-6 text-base text-gray-700\">\n          Tựa lưng của Gami Focus được thiết kế 2 mảnh thông minh giúp nâng đỡ thắt lưng giúp bạn ngồi lâu vẫn cảm thấy thoải mái, đây là một trong những tính năng hiếm có của những ghế trong phân khúc 3 triệu đồng          </p>\n          <button class=\"bg-black text-white px-6 py-3 rounded-full font-bold\">Xem thêm</button>\n        </div>\n      </div>\n      <div class=\"mb-8\">\n        <h2 class=\"text-3xl font-extrabold mb-2 border-b border-gray-200 pb-2\">Điểm nổi bật khác của Gami Focus V2\n        </h2>\n        <p class=\"text-base text-gray-600 mb-6\">Phiên bản full lưới </p>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/2.png\" alt=\"Chất liệu lưới Krall + Roth\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Lưới Chất liệu lưới Krall + Roth</h3>\n            <p class=\"text-gray-700 text-base mb-1\">Lưng và mâm ghế được sử dụng lưới nhập khẩu từ Đức đạt chứng chỉ OEKO-TEX® STANDARD 100.</p>\n            <p class=\"text-gray-700 text-base\">Lưới đàn hồi tốt và thoáng khí giúp người dùng cảm thấy êm ái và thoáng mát.</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/1_1ee84807ab584436b170c93c28857c9d.png\" alt=\"Tựa cổ HeadFlex 6D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa cổ</h3>\n            <p class=\"text-gray-700 text-base\">Thiết kế 2D Comfort rộng rãi và trải dài về bề ngang giúp tạo cảm giác thoải mái cho phần cổ và vai gáy nhất khi ngồi lâu</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/3.png\" alt=\"Kê tay 3D\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Kê tay 3D</h3>\n            <p class=\"text-gray-700 text-base\">Kê tay chỉnh 3 hướng gồm lên xuống, xoay trái phải và trượt tiến lùi đảm bảo nâng đỡ phần khủy tay và bả vai khi làm việc</p>\n          </div>\n        </div>\n        <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 mt-8\">\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/4.png\" alt=\"Chân ghế\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Chân ghế</h3>\n            <p class=\"text-gray-700 text-base\">Một trong những chiếc ghế hiếm hoi sở hữu chân ghế bằng hợp kim nhôm không rỉ trong phần khúc 3 triệu</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/5.png\" alt=\"Tựa lưng\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Tựa lưng</h3>\n            <p class=\"text-gray-700 text-base\">Tựa lưng Twin-back công nghệ Flexsupport</p>\n          </div>\n          <div class=\"flex flex-col h-full\">\n            <div class=\"overflow-hidden rounded-3xl mb-4 aspect-[3/2] bg-gray-100\">\n              <img src=\"https://file.hstatic.net/200000912647/file/anh_tinh_nang_focus_v2__1_.png\" alt=\"Bộ cơ khí\" class=\"w-full h-full object-cover\" />\n            </div>\n            <h3 class=\"font-extrabold text-xl mb-2\">Bộ cơ khí</h3>\n            <p class=\"text-gray-700 text-base\">FluidMotion System cao cấp</p>\n          </div>\n        </div>\n      </div>\n      <div class=\" w-full  mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/focus_v2__2__60a1967caa3d451cbd9dcd8155efd038.png\" alt=\"Sử dụng 1\" class=\"rounded-xl\" />\n      </div>\n     \n      <h2 class=\"text-xl font-bold mb-4 text-center\">Thông số kích thước</h2>\n      <p class=\"text-center text-gray-700 text-base mb-1\">Bản vẽ kích thước của ghế cho bạn nếu cần, bao gồm cả kích thước hộp và trọng lượng của ghế.</p>\n\n      <div class=\"bg-gray-100 rounded-xl  flex flex-col items-center justify-center mb-8\">\n        <img src=\"https://file.hstatic.net/200000912647/file/thiet_ke_chua_co_ten__12_.png\" alt=\"Thông số kích thước\" class=\"rounded-xl\" />\n      </div>\n    </div>",
+      "created_at": "2025-05-07T02:07:04.697609+00:00",
+      "updated_at": "2025-05-07T02:07:04.697609",
+      "category": {
+        "id": 1,
+        "title": "Ghế công thái học"
+      },
+      "brand": {
+        "id": 1,
+        "title": "Gami"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 30,
+    "total_pages": 1
+  }
+}

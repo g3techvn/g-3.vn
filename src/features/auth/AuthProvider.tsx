@@ -26,7 +26,11 @@ interface AuthContextType {
   checkAuth: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType & {
+  otpRequired: boolean;
+  otpVerified: boolean;
+  setOtpVerified: (v: boolean) => void;
+}>({
   user: null,
   loading: true,
   error: null,
@@ -34,7 +38,10 @@ export const AuthContext = createContext<AuthContextType>({
   signUp: async () => ({ error: null }),
   signOut: async () => ({ error: null }),
   resetPassword: async () => ({ error: null }),
-  checkAuth: async () => {}
+  checkAuth: async () => {},
+  otpRequired: false,
+  otpVerified: false,
+  setOtpVerified: () => {}
 });
 
 // Routes that require authentication
@@ -48,6 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const failedLoginAttempts = useRef<{ [key: string]: { count: number; lastAttempt: number; lockedUntil?: number } }>({});
+  const [otpRequired, setOtpRequired] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const cleanup = () => {
     if (abortControllerRef.current) {
@@ -346,41 +356,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Hàm đăng nhập với retry mechanism
   const signIn = async (email: string, password: string) => {
+    const ip = typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown';
+    const key = email + '_' + ip;
+    const now = Date.now();
+    // Kiểm tra lockout
+    const attempt = failedLoginAttempts.current[key];
+    if (attempt && attempt.lockedUntil && now < attempt.lockedUntil) {
+      setError('Tài khoản hoặc IP này đã bị tạm khóa do đăng nhập sai quá nhiều. Vui lòng thử lại sau 15 phút.');
+      return { error: new Error('Tài khoản bị khóa tạm thời do brute-force') };
+    }
     try {
       setLoading(true);
       setError(null);
-
       const supabase = createBrowserClient();
       if (!supabase) {
         throw new Error('Failed to initialize authentication client');
       }
-
       // Try sign in with timeout protection
       const signInPromise = supabase.auth.signInWithPassword({ email, password });
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Sign in timeout')), 8000)
       );
-
       const { data, error: signInError } = await Promise.race([
         signInPromise,
         timeoutPromise
       ]) as any;
-
       if (signInError) {
-        console.error('❌ Sign in error:', signInError);
+        // Log thất bại
+        const prev = failedLoginAttempts.current[key] || { count: 0, lastAttempt: 0 };
+        const newCount = prev.count + 1;
+        failedLoginAttempts.current[key] = {
+          count: newCount,
+          lastAttempt: now,
+          lockedUntil: newCount >= 5 ? now + 15 * 60 * 1000 : undefined
+        };
+        console.warn(`❌ Đăng nhập thất bại cho ${email} (${ip}) - Lần thứ ${newCount}`);
+        if (newCount >= 5) {
+          setError('Bạn đã nhập sai quá nhiều lần. Tài khoản hoặc IP này bị tạm khóa 15 phút.');
+          return { error: new Error('Tài khoản bị khóa tạm thời do brute-force') };
+        }
+        setError('Email hoặc mật khẩu không đúng.');
         return { error: new Error(signInError.message) };
       }
-      
+      // Đăng nhập thành công, reset số lần sai
+      if (failedLoginAttempts.current[key]) {
+        delete failedLoginAttempts.current[key];
+      }
       if (data?.user) {
-        const basicUser: User = {
+        const isAdmin = data.user.user_metadata?.role === 'admin' || data.user.id === process.env.ADMIN_USER_ID;
+        setUser({
           id: data.user.id,
           email: data.user.email || '',
-          role: data.user.id === process.env.ADMIN_USER_ID ? 'admin' : 'user'
-        };
-        setUser(basicUser);
-        await checkAuth(); // Fetch full profile after sign in
+          role: isAdmin ? 'admin' : 'user'
+        });
+        if (isAdmin) {
+          setOtpRequired(true);
+          setOtpVerified(false);
+        } else {
+          setOtpRequired(false);
+          setOtpVerified(true);
+        }
+        await checkAuth();
       }
-      
       return { error: null };
     } catch (err) {
       console.error('❌ Sign in failed:', err);
@@ -492,7 +529,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signUp,
         signOut,
         resetPassword,
-        checkAuth
+        checkAuth,
+        otpRequired,
+        otpVerified,
+        setOtpVerified
       }}
     >
       {children}

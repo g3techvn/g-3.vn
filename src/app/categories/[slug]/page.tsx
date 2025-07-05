@@ -14,6 +14,7 @@ import CategoryGrid from '@/components/pc/home/CategoryGrid';
 import { SidebarFilter } from '@/components/store/sidebarfilter';
 import { BreadcrumbJsonLd, generateBreadcrumbItems } from '@/components/SEO/BreadcrumbJsonLd';
 import { generateCategoryMeta } from '@/lib/utils/seo-utils';
+import { SocialMetaTags } from '@/components/SEO/SocialMetaTags';
 
 // Fix linter: declare YT types for YouTube Player API
 declare global {
@@ -203,13 +204,25 @@ export default function CategoryProductsPage() {
   // Generate breadcrumb items for SEO
   const breadcrumbItems = generateBreadcrumbItems(
     `/categories/${slug}`,
-    undefined,
-    categoryName
+    categoryName,
+    undefined // Không cần parent cho danh mục
   );
+
+  // SEO meta động cho danh mục
+  const categoryTitle = categoryName ? `${categoryName} | G3 - Công Thái Học` : 'Danh mục sản phẩm | G3 - Công Thái Học';
+  const categoryDescription = categoryName ? `Khám phá các sản phẩm thuộc danh mục ${categoryName} tại G3.vn. Nội thất công thái học, bảo hành 12 tháng, giao hàng toàn quốc.` : 'Khám phá các danh mục sản phẩm công thái học tại G3.vn.';
+  const categoryImage = categoryImageUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/images/header-img.jpg`;
+  const categoryUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/categories/${slug}`;
 
   return (
     <>
-      {/* SEO Components */}
+      <SocialMetaTags
+        title={categoryTitle}
+        description={categoryDescription}
+        image={categoryImage}
+        url={categoryUrl}
+        type="website"
+      />
       <BreadcrumbJsonLd items={breadcrumbItems} />
       
       {/* Mobile Shopee Header */}

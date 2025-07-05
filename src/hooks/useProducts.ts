@@ -24,31 +24,17 @@ export function useProducts(options: UseProductsOptions = {}) {
       setLoading(true);
       setError(null);
       
-      // Build URL with query parameters
-      const url = new URL('/api/products', window.location.origin);
+      // Build relative URL with query parameters
+      let url = '/api/products';
+      const params = new URLSearchParams();
+      if (options.categoryId) params.append('category_id', options.categoryId);
+      if (options.brandId) params.append('brand_id', options.brandId);
+      if (options.sort) params.append('sort', options.sort);
+      if (options.type) params.append('type', options.type);
+      if (options.limit) params.append('limit', options.limit.toString());
+      if ([...params].length > 0) url += `?${params.toString()}`;
       
-      // Add filter parameters
-      if (options.categoryId) {
-        url.searchParams.append('category_id', options.categoryId);
-      }
-      
-      if (options.brandId) {
-        url.searchParams.append('brand_id', options.brandId);
-      }
-      
-      if (options.sort) {
-        url.searchParams.append('sort', options.sort);
-      }
-
-      if (options.type) {
-        url.searchParams.append('type', options.type);
-      }
-
-      if (options.limit) {
-        url.searchParams.append('limit', options.limit.toString());
-      }
-      
-      const response = await fetch(url.toString());
+      const response = await fetch(url);
       
       if (!response.ok) {
         // If rate limited and we haven't exceeded max retries, try again

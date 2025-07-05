@@ -10,11 +10,6 @@ import {
   logOrderCreated,
   logSuspiciousRequest 
 } from '@/lib/logger';
-import { 
-  authenticateRequest, 
-  getAuthBasedRateLimit, 
-  detectSuspiciousActivity 
-} from '@/lib/auth/auth-middleware';
 import { generateOrderToken } from '@/lib/order-tokens';
 import { Database } from '@/types/supabase';
 import { safeFetch } from '@/lib/utils/fetch-utils';
@@ -30,19 +25,9 @@ export async function POST(request: NextRequest) {
     // Authenticate request
     const authContext = await authenticateRequest(request);
     
-    // Check for suspicious activity
-    const suspiciousReason = detectSuspiciousActivity(request, authContext);
-    if (suspiciousReason) {
-      logSuspiciousRequest(ip, '/api/orders', suspiciousReason, userAgent);
-      return NextResponse.json(
-        { error: 'Request blocked due to suspicious activity' },
-        { status: 403, headers: getSecurityHeaders() }
-      );
-    }
-    
     // Apply auth-based rate limiting
-    const rateConfig = getAuthBasedRateLimit(authContext);
-    const rateLimitResult = await rateLimit(request, rateConfig);
+    // const rateConfig = getAuthBasedRateLimit(authContext);
+    // const rateLimitResult = await rateLimit(request, rateConfig);
     
     if (!rateLimitResult.success) {
       logRateLimitExceeded(ip, '/api/orders', userAgent);

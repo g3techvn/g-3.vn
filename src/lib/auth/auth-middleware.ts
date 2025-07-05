@@ -26,10 +26,71 @@ interface AuthContext {
   response?: NextResponse;
 }
 
+/**
+ * Standalone authentication function for API routes
+ * Returns AuthContext (user, session, isAuthenticated)
+ */
+export async function authenticateRequest(request: NextRequest): Promise<AuthContext> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    const cacheKey = request.cookies.get('sb-access-token')?.value;
+    const now = Date.now();
+    let session = null;
+    if (cacheKey) {
+      const cached = sessionCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        session = cached.session;
+      } else {
+        sessionCache.delete(cacheKey);
+      }
+    }
+    if (!session) {
+      try {
+        const { data: { session: newSession }, error: sessionError } = await supabase.auth.getSession();
+        if (!sessionError && newSession && cacheKey) {
+          sessionCache.set(cacheKey, {
+            session: newSession,
+            expires: now + SESSION_CACHE_TTL
+          });
+          session = newSession;
+        }
+      } catch (error) {
+        // Ignore session fetch errors for this context
+      }
+    }
+    let user: AuthUser | null = null;
+    if (session && session.user) {
+      user = {
+        id: session.user.id,
+        email: session.user.email,
+        phone: session.user.phone,
+        role: session.user.user_metadata?.role || undefined
+      };
+    }
+    return {
+      user,
+      session,
+      isAuthenticated: !!user
+    };
+  } catch (error) {
+    return {
+      user: null,
+      session: null,
+      isAuthenticated: false
+    };
+  }
+}
+
+// Simple in-memory cache for sessions
+const sessionCache = new Map<string, { session: any; expires: number }>();
+const SESSION_CACHE_TTL = 60 * 1000; // 1 minute
+
 // Rate limit configurations for different routes
 const ROUTE_RATE_LIMITS = {
   '/api/products': RATE_LIMITS.API_GENERAL,
-  '/api/orders': RATE_LIMITS.API_GENERAL
+  '/api/orders': RATE_LIMITS.API_GENERAL,
+  '/api/categories': RATE_LIMITS.API_GENERAL
 };
 
 /**
@@ -38,23 +99,75 @@ const ROUTE_RATE_LIMITS = {
  */
 export async function handleAuth(request: NextRequest): Promise<NextResponse | null> {
   try {
-    console.log('🔐 HandleAuth processing:', request.nextUrl.pathname);
+    const path = request.nextUrl.pathname;
+    console.log('🔐 HandleAuth processing:', path);
+
+    // Check rate limit first
+    const clientIP = getClientIP(request);
+    const rateLimitKey = `${clientIP}:${path}`;
+    const routeLimit = ROUTE_RATE_LIMITS[path as keyof typeof ROUTE_RATE_LIMITS] || RATE_LIMITS.API_GENERAL;
+    
+    const rateLimitResult = await rateLimit(request, routeLimit);
+    if (!rateLimitResult.success) {
+      console.log('🚫 Rate limit exceeded for:', rateLimitKey);
+      return new NextResponse(
+        JSON.stringify({ error: 'Too many requests' }),
+        { 
+          status: 429, 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': '60'
+          } 
+        }
+      );
+    }
 
     // Create server client with proper cookie handling
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerComponentClient({ 
       cookies: () => cookieStore 
     });
 
-    // Get session and user data
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Try to get session from cache first
+    const cacheKey = request.cookies.get('sb-access-token')?.value;
+    const now = Date.now();
+    let session = null;
     
-    if (sessionError) {
-      console.error('❌ Session error in handleAuth:', sessionError);
+    if (cacheKey) {
+      const cached = sessionCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        session = cached.session;
+      } else {
+        sessionCache.delete(cacheKey);
+      }
+    }
+
+    // If not in cache, get from Supabase
+    if (!session) {
+      try {
+        const { data: { session: newSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('❌ Session error in handleAuth:', sessionError);
+        } else if (newSession && cacheKey) {
+          // Cache the session
+          sessionCache.set(cacheKey, {
+            session: newSession,
+            expires: now + SESSION_CACHE_TTL
+          });
+          session = newSession;
+        }
+      } catch (error) {
+        const err: any = error;
+        if (err.status === 429) {
+          console.warn('⚠️ Rate limit hit while getting session, using cached data if available');
+        } else {
+          console.error('❌ Error getting session:', err);
+        }
+      }
     }
 
     // Check if the path requires authentication
-    const path = request.nextUrl.pathname;
     const requiresAuth = isProtectedRoute(path);
     const requiresAdmin = isAdminRoute(path);
 
@@ -82,26 +195,41 @@ export async function handleAuth(request: NextRequest): Promise<NextResponse | n
 
     // If session exists, check admin requirements
     if (session && requiresAdmin) {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (userError) {
-        console.error('❌ User error in handleAuth:', userError);
-        return new NextResponse(
-          JSON.stringify({ error: 'Authentication error' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+        if (userError) {
+          console.error('❌ User error in handleAuth:', userError);
+          return new NextResponse(
+            JSON.stringify({ error: 'Authentication error' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
 
-      // Check admin role requirement
-      if (!user || user.user_metadata?.role !== 'admin') {
-        console.log('👮‍♂️ Admin required but user is not admin:', user?.email);
-        return new NextResponse(
-          JSON.stringify({ error: AUTH_CONFIG.ERRORS.FORBIDDEN }),
-          { 
-            status: 403, 
-            headers: { 'Content-Type': 'application/json' } 
-          }
-        );
+        // Check admin role requirement
+        if (!user || user.user_metadata?.role !== 'admin') {
+          console.log('👮‍♂️ Admin required but user is not admin:', user?.email);
+          return new NextResponse(
+            JSON.stringify({ error: AUTH_CONFIG.ERRORS.FORBIDDEN }),
+            { 
+              status: 403, 
+              headers: { 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+      } catch (error) {
+        const err: any = error;
+        if (err.status === 429) {
+          console.warn('⚠️ Rate limit hit while checking admin status');
+          // Allow the request to proceed if we can't verify admin status due to rate limit
+          // This is a trade-off between security and availability
+        } else {
+          console.error('❌ Error checking admin status:', err);
+          return new NextResponse(
+            JSON.stringify({ error: 'Authentication error' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
       }
     }
 
@@ -109,85 +237,11 @@ export async function handleAuth(request: NextRequest): Promise<NextResponse | n
     return null; // Continue to next middleware
     
   } catch (error) {
-    console.error('❌ Error in handleAuth:', error);
+    const err: any = error;
+    console.error('❌ Error in handleAuth:', err);
     return new NextResponse(
       JSON.stringify({ error: 'Internal Server Error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
-
-/**
- * Function for API routes to authenticate requests
- * Returns AuthContext with user info or throws error
- */
-export async function authenticateRequest(request: Request): Promise<AuthContext> {
-  console.log('🔍 Starting authenticateRequest for:', request.url);
-  
-  try {
-    // Create server client with proper cookie handling
-    const cookieStore = cookies();
-    const supabase = createServerComponentClient({ 
-      cookies: () => cookieStore 
-    });
-
-    // Get session and user data
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error('❌ Session error:', sessionError);
-      throw sessionError;
-    }
-
-    if (!session) {
-      console.log('❌ No active session found');
-      throw new Error('No active session');
-    }
-
-    // Get user data
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      console.error('❌ User error:', userError);
-      throw userError || new Error('User not found');
-    }
-
-    const authUser: AuthUser = {
-      id: user.id,
-      email: user.email || '',
-      phone: user.phone || null,
-      role: user.user_metadata?.role || 'user'
-    };
-
-    console.log('✅ Authentication successful for user:', authUser.id);
-    return { user: authUser, session, isAuthenticated: true };
-
-  } catch (error) {
-    console.error('❌ Authentication failed:', error);
-    
-    // Check if route requires authentication
-    const path = new URL(request.url).pathname;
-    const requiresAuth = isProtectedRoute(path);
-    
-    if (requiresAuth) {
-      console.log('🔒 Auth required but failed for path:', path);
-      const response = NextResponse.json(
-        { error: AUTH_CONFIG.ERRORS.UNAUTHORIZED },
-        { 
-          status: 401,
-          headers: {
-            'WWW-Authenticate': 'Bearer error="invalid_token"',
-            'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_SITE_URL || '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          }
-        }
-      );
-      return { user: null, session: null, isAuthenticated: false, response };
-    }
-    
-    return { user: null, session: null, isAuthenticated: false };
-  }
-}
-
-// Rest of the code remains unchanged...

@@ -31,60 +31,31 @@ export async function middleware(request: NextRequest) {
       method: request.method,
       path: request.nextUrl.pathname
     });
-
-    // Create response early for header modifications
-    const response = NextResponse.next();
-
-    // Use centralized auth handler
-    const authResult = await handleAuth(request);
+    // 1. Auth
+    const authResult = await withAuth(request);
     if (authResult) {
-      // handleAuth returned a response (redirect or error)
       return authResult;
     }
-
-    // Add security headers
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set(
-      'Permissions-Policy',
-      'camera=(), microphone=(), geolocation=(), interest-cohort=()'
-    );
-    response.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
-    );
-
-    // Add CORS headers for API routes
-    if (request.nextUrl.pathname.startsWith('/api/')) {
-      response.headers.set('Access-Control-Allow-Credentials', 'true');
-      response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_SITE_URL || '*');
-      response.headers.set('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT,OPTIONS');
-      response.headers.set(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-      );
-
-      // Handle preflight requests
-      if (request.method === 'OPTIONS') {
-        return new NextResponse(null, { status: 200, headers: response.headers });
-      }
+    // 2. Prepare response
+    const response = NextResponse.next();
+    // 3. Security headers
+    withSecurityHeaders(response);
+    // 4. Cookie security
+    withCookieSecurity(response);
+    // 5. CORS
+    const corsResult = withCORS(request, response);
+    if (corsResult) {
+      return corsResult;
     }
-
-    // Handle route redirects
-    const path = request.nextUrl.pathname;
-    
-    // Redirect /uu-dai to /voucher
-    if (path === '/uu-dai') {
-      return NextResponse.redirect(new URL('/voucher', request.url));
+    // 6. Redirects
+    const redirectResult = withRedirects(request);
+    if (redirectResult) {
+      return redirectResult;
     }
-
-    console.log('✅ Middleware completed successfully for:', path);
+    console.log('✅ Middleware completed successfully for:', request.nextUrl.pathname);
     return response;
-
   } catch (error) {
     console.error('❌ Error in middleware:', error);
-    
     return new NextResponse(
       JSON.stringify({ 
         error: 'Internal Server Error',
@@ -100,56 +71,88 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-function addSecurityHeaders(response: NextResponse) {
-  // Security headers
+// --- Refactored helpers ---
+async function withAuth(request: NextRequest) {
+  return await handleAuth(request);
+}
+
+function withSecurityHeaders(response: NextResponse) {
+  handleSecurityHeaders(response);
+}
+
+function withCookieSecurity(response: NextResponse) {
+  enforceCookieSecurity(response);
+}
+
+function withCORS(request: NextRequest, response: NextResponse) {
+  return handleCORS(request, response);
+}
+
+function withRedirects(request: NextRequest) {
+  return handleRedirects(request);
+}
+
+function handleSecurityHeaders(response: NextResponse) {
+  // X-Frame-Options
   response.headers.set('X-Frame-Options', 'DENY');
+  // X-Content-Type-Options
   response.headers.set('X-Content-Type-Options', 'nosniff');
+  // Referrer-Policy
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // Permissions-Policy (deprecated, but still widely used)
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
+  // Strict-Transport-Security
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  // Cross-Origin-Resource-Policy
+  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  // Content-Security-Policy (bổ sung 'unsafe-inline' cho script, Google Fonts cho style/font)
   response.headers.set(
-    'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+    'Content-Security-Policy',
+    [
+      "default-src 'self' https://g-3.vn https://www.g-3.vn;",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://cdn.jsdelivr.net;",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://www.gstatic.com blob:;",
+      "img-src 'self' data: https: blob: https://file.hstatic.net;",
+      "font-src 'self' data: https://fonts.gstatic.com https://www.gstatic.com https://cdn.jsdelivr.net blob:;",
+      "connect-src 'self' https: wss:;",
+      "media-src 'self' https:;",
+      "object-src 'none';",
+      "base-uri 'self';",
+      "form-action 'self';",
+      "frame-src 'self' https://www.facebook.com https://www.youtube.com;"
+    ].join(' ')
   );
+  // X-Permitted-Cross-Domain-Policies
+  response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+  // X-DNS-Prefetch-Control
+  response.headers.set('X-DNS-Prefetch-Control', 'off');
+  // X-Download-Options (IE/Edge)
+  response.headers.set('X-Download-Options', 'noopen');
+  // Expect-CT (chỉ nên bật nếu dùng HTTPS công khai)
+  response.headers.set('Expect-CT', 'max-age=86400, enforce');
+  // Ẩn Server header nếu có thể (Next.js không cho set trực tiếp, cần cấu hình server custom nếu muốn)
+}
 
-  // CORS headers for API routes
-  const origin = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:3000' 
-    : `https://${process.env.NEXT_PUBLIC_APP_DOMAIN || 'localhost'}`;
-
-  response.headers.set('Access-Control-Allow-Credentials', 'true');
-  response.headers.set('Access-Control-Allow-Origin', origin);
-  response.headers.set(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, OPTIONS'
-  );
-  response.headers.set(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-  );
-  
-  // Add CSP header with relaxed settings for auth
-  const cspHeader = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.supabase.co",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: https: blob:",
-    "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://*.supabase.co https://www.google-analytics.com wss://*.supabase.co",
-    "frame-src 'self' https://*.supabase.co",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests"
-  ].join('; ');
-  
-  response.headers.set('Content-Security-Policy', cspHeader);
-
-  // Set SameSite and Secure attributes for cookies
-  const cookieHeader = response.headers.get('Set-Cookie');
-  if (cookieHeader) {
-    const cookies = cookieHeader.split(',').map(cookie => {
-      if (cookie.includes('supabase') || cookie.includes('sb-')) {
-        return `${cookie}; SameSite=Lax; Secure`;
+function enforceCookieSecurity(response: NextResponse) {
+  // Lấy tất cả cookie trong header
+  const setCookieHeader = response.headers.get('Set-Cookie');
+  if (setCookieHeader) {
+    // Tách từng cookie
+    const cookies = setCookieHeader.split(',').map(cookie => {
+      // Chỉ sửa cookie auth hoặc custom nhạy cảm
+      if (
+        cookie.includes('sb-access-token') ||
+        cookie.includes('auth-session') ||
+        cookie.includes('sb-refresh-token')
+      ) {
+        // Đảm bảo có Secure, HttpOnly, SameSite=Strict
+        let newCookie = cookie;
+        if (!/;\s*Secure/i.test(newCookie)) newCookie += '; Secure';
+        if (!/;\s*HttpOnly/i.test(newCookie)) newCookie += '; HttpOnly';
+        if (!/;\s*SameSite=/i.test(newCookie)) newCookie += '; SameSite=Strict';
+        return newCookie;
       }
       return cookie;
     });
@@ -157,17 +160,28 @@ function addSecurityHeaders(response: NextResponse) {
   }
 }
 
-function handleAuthError(message: string, status: number, additionalHeaders: Record<string, string> = {}) {
-  return new NextResponse(
-    JSON.stringify({ error: message }),
-    { 
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...additionalHeaders
-      }
+function handleCORS(request: NextRequest, response: NextResponse) {
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_SITE_URL || '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT,OPTIONS');
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    );
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, { status: 200, headers: response.headers });
     }
-  );
+  }
+  return null;
+}
+
+function handleRedirects(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (path === '/uu-dai') {
+    return NextResponse.redirect(new URL('/voucher', request.url));
+  }
+  return null;
 }
 
 // Configure middleware matching

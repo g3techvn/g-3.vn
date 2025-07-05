@@ -37,42 +37,33 @@ export interface ProductSpecification {
 export interface Product {
   id: string;
   name: string;
-  slug?: string;
+  slug: string;
   description: string;
   price: number;
   original_price?: number;
-  images?: string[];
   image_url?: string;
+  image_square_url?: string;
+  cover_image_url?: string;
+  gallery_url?: string[];
   video_url?: string;
-  variants?: ProductVariant[];
-  category?: Category;
-  brand?: Brand;
+  rating?: number;
   brand_id?: string;
   pd_cat_id?: string;
   category_id?: string;
-  category_name?: string;
-  image_square_url?: string;
-  specifications?: ProductSpecification[];
-  features?: string[];
-  benefits?: string[];
-  instructions?: string[];
-  overview?: string;
-  is_available?: boolean;
-  status?: boolean;
-  stock_status?: 'in_stock' | 'out_of_stock' | 'low_stock';
-  rating?: number;
-  review_count?: number;
-  sold_count?: number;
-  created_at?: string;
-  updated_at?: string;
   feature?: boolean;
-  gallery_url?: string;
-  brand_slug?: string;
-  content?: string;
-  discount_percentage?: number;
+  bestseller?: boolean;
+  status?: boolean;
+  is_featured?: boolean;
+  is_new?: boolean;
+  sold_count?: number;
   thong_so_ky_thuat?: Record<string, { title?: string; value?: string }>;
   tinh_nang?: string[];
   loi_ich?: string[];
+  huong_dan?: string;
+  comment?: string[];
+  content?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type Category = {
@@ -165,3 +156,38 @@ export type BlogPost = {
 };
 
 // CartItem type has been moved to @/types/cart.ts 
+
+export interface ShippingAddress {
+  id: string;
+  user_id: string;
+  full_name: string;
+  phone: string;
+  province_code: string;
+  district_code: string;
+  ward_code: string;
+  address_detail: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShippingCarrier {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+} 

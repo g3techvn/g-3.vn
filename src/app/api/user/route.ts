@@ -8,7 +8,8 @@ export async function GET(request: Request) {
   
   try {
     // Create Supabase client
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
     // Get current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -84,7 +85,8 @@ export async function PUT(request: NextRequest) {
     console.log('🔍 PUT /api/user - Start');
     
     // Create Supabase client
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
     // Get current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -115,6 +117,11 @@ export async function PUT(request: NextRequest) {
       user_id: user.id,
       full_name: updateData.fullName,
       phone: updateData.phone,
+      address: updateData.address,
+      date_of_birth: updateData.date_of_birth,
+      gender: updateData.gender,
+      avatar_url: updateData.avatar_url,
+      role: updateData.role,
       updated_at: new Date().toISOString()
     };
 
@@ -140,6 +147,10 @@ export async function PUT(request: NextRequest) {
       email: user.email,
       fullName: profile.full_name,
       phone: profile.phone || user.phone,
+      address: profile.address,
+      date_of_birth: profile.date_of_birth,
+      gender: profile.gender,
+      avatar_url: profile.avatar_url,
       role: profile.role || 'user',
       created_at: profile.created_at,
       profile: profile

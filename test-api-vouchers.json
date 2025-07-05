@@ -1,0 +1,22 @@
+{
+  "vouchers": [
+    {
+      "id": 1,
+      "code": "g3tech200k",
+      "description": "Ưu đãi tháng 7",
+      "discount_type": "Voucher tháng 7",
+      "discount_value": 10,
+      "min_order_value": 1000000,
+      "max_discount": 200000,
+      "valid_from": "2025-07-01T03:59:30+00:00",
+      "valid_to": "2025-07-31T03:59:14+00:00",
+      "usage_limit": null,
+      "is_active": true,
+      "created_at": "2025-07-03T03:59:39.477237+00:00",
+      "updated_at": "2025-07-03T03:59:39.477237+00:00",
+      "is_freeship": false,
+      "is_installation": false,
+      "location_provinces": []
+    }
+  ]
+}

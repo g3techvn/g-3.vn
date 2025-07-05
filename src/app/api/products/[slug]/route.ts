@@ -14,7 +14,35 @@ export async function GET(
     // Query sản phẩm theo slug
     const { data: product, error } = await supabase
       .from('products')
-      .select('*')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        price,
+        original_price,
+        image_url,
+        cover_image_url,
+        gallery_url,
+        video_url,
+        rating,
+        brand_id,
+        pd_cat_id,
+        feature,
+        bestseller,
+        status,
+        is_featured,
+        is_new,
+        sold_count,
+        thong_so_ky_thuat,
+        tinh_nang,
+        loi_ich,
+        huong_dan,
+        comment,
+        content,
+        created_at,
+        updated_at
+      `)
       .eq('slug', slug)
       .single();
     

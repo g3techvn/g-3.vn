@@ -535,15 +535,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         brand={typeof product.brand === 'string' ? product.brand : product.brand?.title || 'G3'}
         category={product.category_name || 'Nội thất văn phòng'}
       />
-      {/* TODO: Fix ProductJsonLd brand type issue */}
-      {/* <LazyProductJsonLd 
+      <LazyProductJsonLd 
         product={product}
-        brand={product.brand ? { 
-          id: product.brand_id, 
-          title: product.brand,
+        brand={typeof product.brand === 'object' && product.brand ? product.brand : {
+          id: product.brand_id || '',
+          title: typeof product.brand === 'string' ? product.brand : '',
           slug: product.brand_slug || '',
           created_at: ''
-        } : undefined}
+        }}
         reviews={comments.map(comment => ({
           id: comment.id,
           author: comment.user.name,
@@ -551,7 +550,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           datePublished: comment.date,
           reviewBody: comment.content
         }))}
-      /> */}
+      />
       <LazyBreadcrumbJsonLd items={breadcrumbItems} />
       <LazyFAQJsonLd faqs={productFAQs} />
       
